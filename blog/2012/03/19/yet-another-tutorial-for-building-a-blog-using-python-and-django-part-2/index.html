@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Yet Another Tutorial for Building a Blog Using Python and Django – Part 2 - Matthew Daly's Blog</title>
+  <meta name="author" content="Matthew Daly">
+
+  
+  <meta name="description" content="In the first part of this tutorial, we got the core elements of our blogging application working - we set up our model for posts, and a view, &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2012/03/19/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-17043630-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Matthew Daly's Blog</a></h1>
+  
+    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Yet Another Tutorial for Building a Blog Using Python and Django – Part 2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-03-19T15:18:57+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>3:18 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In the first part of this tutorial, we got the core elements of our blogging application working - we set up our model for posts, and a view, template and URL configuration to view the index. Next we&rsquo;ll start extending this very basic functionality - we&rsquo;ll add a view for individual posts as well, and we&rsquo;ll allow for each post to have a separate URL.</p>
+
+<p>First, we need to set up some pagination for the home page. At this point, it&rsquo;s worth taking the time to look at how we want our URL to look. Here, we&rsquo;ll work on the basis that by default, the home page will show the first five blog posts, and if someone wants to see later posts, they need to append a number to the end. Here&rsquo;s the URL for the second page assuming it&rsquo;s at example.com:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>http://www.example.com/2/</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>So, we need two separate rules for the URLs. We need one for a URL with no number at the end, and one for a URL with a number at the end, and an optional forward slash. Open up urls.py and edit it so the Home page section looks like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Home page</span>
+</span><span class='line'><span class="n">url</span><span class="p">(</span><span class="s">r&#39;^$&#39;</span><span class="p">,</span> <span class="s">&#39;blogengine.views.getPosts&#39;</span><span class="p">),</span>
+</span><span class='line'><span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;selected_page&gt;\d+)/?$&#39;</span><span class="p">,</span> <span class="s">&#39;blogengine.views.getPosts&#39;</span><span class="p">),</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note that I&rsquo;ve edited the first rule to include ^$ as the regular expression. ^ denotes the start of a regex, and $ denotes the end, so this represents a URL with nothing added after the domain name, such as <a href="http://www.example.com.">http://www.example.com.</a> We&rsquo;ve also changed getRecentPosts to getPosts, as that&rsquo;s now a more descriptive name.</p>
+
+<p>The second line will match if there is a digit (denoted by the \d+ section) and will pass that digit through to the getPosts function as selected_page. With that done, we now need to make the necessary changes in the view, so move into the blogengine directory and amend views.py to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Create your views here.</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">getPosts</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">selected_page</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Get all blog posts</span>
+</span><span class='line'>    <span class="n">posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;-pub_date&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Add pagination</span>
+</span><span class='line'>    <span class="n">pages</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">returned_page</span> <span class="o">=</span> <span class="n">pages</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">selected_page</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Display all the posts</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">returned_page</span><span class="o">.</span><span class="n">object_list</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Again, note the change in function name from getRecentPosts to getPosts. Now, let&rsquo;s work through the rest of the code. You&rsquo;ll notice the following line near the top:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This imports the Paginator class, which is very useful for creating pagination. Then, you&rsquo;ll notice the following line:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">getPosts</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">selected_page</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you know much about Python, you&rsquo;ll know that you can specify a default value for a parameter passed to a function or method. Here, what we&rsquo;re doing is setting the default value of selected_page to 1, so if someone visits <a href="http://www.example.com,">http://www.example.com,</a> for which the URLconf doesn&rsquo;t specify a number, this defaults to 1. If they visit <a href="http://www.example.com/2">http://www.example.com/2</a> instead, the default value for selected_page will be overriden to 2.</p>
+
+<p>Then you&rsquo;ll note that we&rsquo;ve refactored the lines that fetched the posts and sorted them into one line, and called that posts. After that we define pages as a Paginator object, and passed it the values of posts and 5. The first parameter is what we want to divide between pages, and the second is how many instances of this we should allow on an individual page. Here we&rsquo;re passing through all of the posts, and allowing 5 posts per page. We then define returned_page as the page from pages that matches the number submitted in the selected_page variable. Finally we pass a list of all the objects that make up returned_page through to the template as posts.</p>
+
+<p>So, we now have basic pagination in place. Next, we&rsquo;ll add the capability to display individual posts.</p>
+
+<p>Now, we could just be lazy and have each post referred to by the numerical ID that&rsquo;s automatically added by Django to the database, but why would we want to do that? We want a nice, human and search engine friendly URL that gives some idea what the blog post is about. Django is structured in such a way that nice, friendly URLs without cruft are very easy to create, and it actually has a special type of field in the models called a slug field that&rsquo;s ideal for creating URLs.</p>
+
+<p>So first of all, go into blogengine/models.py and edit it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your models here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>The only change is the addition of the slug field. Like any other field, you&rsquo;ll be able to edit the slug field using the admin interface. But, why should you have to? Existing blogging solutions like WordPress will suggest a URL for a blog post, so that&rsquo;s what we want to do as well. Open blogengine/admin.py and edit it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/admin.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">models</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">PostAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;slug&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s">&quot;title&quot;</span><span class="p">,)}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Post</span><span class="p">,</span> <span class="n">PostAdmin</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you know a little about object-oriented programming in Python, you should be able to grasp what&rsquo;s going on here. We&rsquo;re creating PostAdmin, which inherits from ModelAdmin, and using the title to prepopulate the slug field. We then register this as before, but using PostAdmin rather than the default ModelAdmin.</p>
+
+<p>A fairly typical slug will be based on your title, but will strip out whitespace and other characters between the words and replace them with hyphens, and convert the result to lowercase, so a title like &ldquo;My new bike&rdquo; will become my-new-bike.</p>
+
+<p>Also, note that in models.py, we pass the parameter unique=True for the slug. This indicates that the slug must be unique, so we can&rsquo;t have the same URL applied to two different posts.</p>
+
+<p>With our model and admin amended, it&rsquo;s now time to create a view to deal with displaying an individual post. Add the following function to blogengine/views.py:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">getPost</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">postSlug</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Get specified post</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">postSlug</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Display specified post</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">post</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This function receives the request object and a slug for the post. It then gets the specific post with that slug, and returns it. For now we&rsquo;ll just use the existing posts.html template, but we&rsquo;ll want to add a new template for single posts at some point.</p>
+
+<p>With that done, the next step is to add a URLconf to handle blog posts. Open urls.py and add the following code after the lines for the home page:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Blog posts</span>
+</span><span class='line'><span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;postSlug&gt;[-a-zA-Z0-9]+)/?$&#39;</span><span class="p">,</span> <span class="s">&#39;blogengine.views.getPost&#39;</span><span class="p">),</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>So, now we have a dedicated URL for each post. But how do we get there? We need to create a link from the home page to each individual blog post. Open up your posts.html template and edit it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/posts.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;title&gt;</span>My Django Blog<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>        {% for post in posts %}
+</span><span class='line'>        <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ post.slug }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text }}
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, if you run python manage.py syncdb, the changes to your database schema will be made automatically. However, if you already have some test posts in the database, these won&rsquo;t have a slug and that could cause problems. So you can either add slugs to the existing posts manually using an UPDATE SQL command, or if you&rsquo;re using something like PHPMyAdmin you can use that to add slugs for these posts. Or if they&rsquo;re just test posts and you don&rsquo;t care about them in the slightest, just delete your database and start again from scratch.</p>
+
+<p>With that done, if you then run python manage.py runserver, and then visit <a href="http://127.0.0.1:8000,">http://127.0.0.1:8000,</a> you should see your home page. If you have at least one blog post set up, you should see those posts on the home page, and the title should be a hyperlink to that post. If you have more than 5 posts, you should be able to go to <a href="http://127.0.0.1:8000/2">http://127.0.0.1:8000/2</a> and see the next 5 posts.</p>
+
+<p>But wait! What if you don&rsquo;t have more posts? You want some code in place to handle what happens if you try to go to <a href="http://127.0.0.1:8000/2">http://127.0.0.1:8000/2</a> and it isn&rsquo;t there. You also want to dynamically generate links for older and newer posts so that users can click back as far as they need to.</p>
+
+<p>First of all, let&rsquo;s put something in place to catch nonexistent pages. Open blogengine/views.py and edit the getPosts function to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Create your views here.</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.core.paginator</span> <span class="kn">import</span> <span class="n">Paginator</span><span class="p">,</span> <span class="n">EmptyPage</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">getPosts</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">selected_page</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Get all blog posts</span>
+</span><span class='line'>    <span class="n">posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;-pub_date&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Add pagination</span>
+</span><span class='line'>    <span class="n">pages</span> <span class="o">=</span> <span class="n">Paginator</span><span class="p">(</span><span class="n">posts</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Get the specified page</span>
+</span><span class='line'>    <span class="k">try</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">returned_page</span> <span class="o">=</span> <span class="n">pages</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">selected_page</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">except</span> <span class="n">EmptyPage</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">returned_page</span> <span class="o">=</span> <span class="n">pages</span><span class="o">.</span><span class="n">page</span><span class="p">(</span><span class="n">pages</span><span class="o">.</span><span class="n">num_pages</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Display all the posts</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">returned_page</span><span class="o">.</span><span class="n">object_list</span><span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">getPost</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">postSlug</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Get specified post</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">postSlug</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Display specified post</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">post</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>The only differences here are that EmptyPage is imported, and we add error checking to returned_page so that if it throws an EmptyPage exception (meaning that the given page doesn&rsquo;t exist), then it defaults to returning the highest numbered page. The value of pages.num_pages is the number of pages in total, so you use this to get the last numbered page. If you prefer, you can change it to default to the first page by replacing pages.num_pages with 1.</p>
+
+<p>With this done, the next step is to create links for the next and previous pages. Fortunately Django makes this really easy. First, you have to pass through the returned_page object in views.py, like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Display all the posts</span>
+</span><span class='line'><span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">returned_page</span><span class="o">.</span><span class="n">object_list</span><span class="p">,</span> <span class="s">&#39;page&#39;</span><span class="p">:</span><span class="n">returned_page</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here in addition to the existing posts object, we now pass through returned_page as page. Now, amend your posts.html template as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/posts.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;title&gt;</span>My Django Blog<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>        {% for post in posts %}
+</span><span class='line'>        <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ post.slug }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text }}
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>        <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        {% if page.has_previous %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>        {% if page.has_next %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here, if the given page has a previous page, we display a link to it, and if it has a next page, we display a link to that too. page.has_previous and page.has_next return True or False, and page.previous_page_number and page.next_page_number display a number for the appropriate page, so it&rsquo;s easy to use them to link to the appropriate page.</p>
+
+<p>And that will do for now! We&rsquo;ve gotten quite a lot done this time, and we actually have something that, although it&rsquo;s still missing many of the more sophisticated features of blogging platforms such as WordPress, is fundamentally usable as a blog as long as you either don&rsquo;t want comment functionality or are prepared to use a third-party system such as Disqus. Feel free to congratulate yourself with a beverage of your choice, and we&rsquo;ll carry on later.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2012-03-19T15:18:57+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>3:18 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/web-development/'>web development</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2012/03/19/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-2/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2012/03/19/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-2/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/02/28/new-theme/" title="Previous Post: New theme">&laquo; New theme</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/03/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-3/" title="Next Post: Yet another tutorial for building a blog using Python and Django - Part 3">Yet another tutorial for building a blog using Python and Django - Part 3 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'matthewbdaly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Matthew Daly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'matthewdaly';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

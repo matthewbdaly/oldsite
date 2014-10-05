@@ -1,0 +1,1960 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Django Blog Tutorial - the Next Generation - Part 1 - Matthew Daly's Blog</title>
+  <meta name="author" content="Matthew Daly">
+
+  
+  <meta name="description" content="My series of Django tutorials for building a blogging engine are by far the most popular posts I&rsquo;ve ever written on here. I&rsquo;ve had a lot &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-17043630-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Matthew Daly's Blog</a></h1>
+  
+    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Django Blog Tutorial - the Next Generation - Part 1</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-12-28T15:00:32+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>3:00 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>My series of Django tutorials for building a blogging engine are by far the most popular posts I&rsquo;ve ever written on here. I&rsquo;ve had a lot of people contact me with questions or just to express their thanks, for which I&rsquo;m very grateful!</p>
+
+<p>However, these tutorials haven&rsquo;t really aged well. I&rsquo;ve since had the opportunity to use Django in a professional capacity, which has significantly improved my understanding of the framework and the whole Python ecosystem, and there&rsquo;s a lot of best practices that I didn&rsquo;t follow and now wish I had. There&rsquo;s also been a few gotchas that have hindered a few people in the past that I&rsquo;d like to have the opportunity to correct.</p>
+
+<p>So, I&rsquo;m therefore creating a brand new series of tutorials to remedy this situation. This series will cover exactly the same basic idea of using Django to build a blogging engine, but will expand on what the original series did in many ways. We will cover such additional topics as:</p>
+
+<ul>
+<li>Using Twitter Bootstrap to make your blog look good without too much hassle</li>
+<li>Using Virtualenv to sandbox your blog application</li>
+<li>Using South to effectively manage changes to your database structure</li>
+<li>Writing some simple unit tests</li>
+<li>Deploying the finished application to Heroku</li>
+</ul>
+
+
+<p>Ready? Let&rsquo;s get started!</p>
+
+<h2>Getting everything set up</h2>
+
+<p>Now, first of all, I&rsquo;m going to assume you&rsquo;re using some variant of Unix, such as Linux or Mac OS X. I&rsquo;m not saying you can&rsquo;t follow this tutorial with Windows, but you&rsquo;ll have a harder time, because Windows just isn&rsquo;t as developer-friendly as Unix in general. A modern Linux distro like Ubuntu is generally pretty easy to use, and you can easily run it in Virtualbox, so if you use Windows I would recommend you use that to make things easier.</p>
+
+<p>You should also have at least a basic grasp of the command line, such as how to create and navigate directories. You don&rsquo;t have to be a wizard with it, though.</p>
+
+<p>You also need a proper programmer&rsquo;s text editor. I use Vim, but I freely admit that Vim has a very steep learning curve and you may have trouble picking it up at the same time as following this tutorial. Emacs is also a very powerful text editor, and if you like it, feel free to use it. If you haven&rsquo;t yet found a programmer&rsquo;s text editor you like, I suggest you check out <a href="http://www.sublimetext.com/">Sublime Text</a>, which is easy to get started with, but also very powerful, and can be used without purchasing a license. Don&rsquo;t worry too much about your text editor - it&rsquo;s not vitally import that you use what I use, just find one that works for you. That said, I will say one thing - DON&rsquo;T use an IDE. IDE&rsquo;s hide too many details from new users and make it harder to figure out what&rsquo;s going on.</p>
+
+<p>You will also need to ensure you have the following installed:</p>
+
+<ul>
+<li>Python. I recommend installing Python 2.7, because you may have issues with Python 2.6, and Python 3 isn&rsquo;t universally supported yet so you might have some issues with that</li>
+<li>Virtualenv</li>
+<li>Pip</li>
+<li>Git</li>
+</ul>
+
+
+<p>On most Linux distros, you can find packages for all of these items easily enough using your package manager. On Mac OS X, I recommend using Homebrew to install them, though if you have another package manager installed you can use that too. If you have issues with installing any of these, a quick Google search should be sufficient to resolve the issue.</p>
+
+<h2>Beginning work</h2>
+
+<p>With all that done, we&rsquo;re ready to get started. Create a folder in a suitable place on your file system and switch into it. I generally keep a dedicated folder in my home directory called <code>Projects</code> to use for all of my projects, and give each project a folder within it - in this case the project is called <code>django_tutorial_blog_ng</code>.</p>
+
+<p>Now, we&rsquo;ll use Git to keep track of our source code. If you prefer Mercurial, feel free to use that, but this tutorial will assume use of Git, so you&rsquo;ll want to adapt the commands used accordingly. Start tracking your project with the following command from the shell, when you&rsquo;re in the project directory:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git init
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you haven&rsquo;t used Git before, you&rsquo;ll also want to <a href="http://git-scm.com/book/en/Getting-Started-First-Time-Git-Setup">configure it</a>.</p>
+
+<p>Next, we set up our virtualenv. Run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>virtualenv venv --distribute
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Followed by:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">source </span>venv/bin/activate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Every time you come back to work on this project, you&rsquo;ll need to run the previous command to make sure you&rsquo;re running the version of Python installed under venv/ rather than your system Python. You can tell it&rsquo;s using this because your shell prompt will be prefixed with <code>(venv)</code>.</p>
+
+<p>Why do this? Well, it means you can install whatever version of a Python module you like, without having root access, and means the Python install you&rsquo;re using will only have those modules you explicitly install, rather than all of those ones available with your operating system. For instance, you could have multiple projects using different versions of Django, rather than having to update a global installation of Django and potentially break existing applications.</p>
+
+<p>Now that our virtualenv is set up, we&rsquo;ll install Django, as well as several other useful Python modules. Run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install django-toolbelt South
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>A little explanation is called for here. The package <code>django-toolbelt</code> includes a number of packages we&rsquo;ll be using, including Django, as well as Gunicorn (a simple web server we&rsquo;ll use when the time comes to deploy the app to Heroku). South is a migration tool that is commonly used with Django - basically, if you make changes to existing models, Django doesn&rsquo;t natively have the capacity to apply those changes (yet - native migrations are planned at some point in the future), so South can be used to apply those changes for you without having to either manually change the database structure or dump the database and rebuild it.</p>
+
+<p>Please note that one of the packages, <code>psycopg2</code>, may fail if you don&rsquo;t have PostgreSQL installed, but don&rsquo;t worry about installing it. We&rsquo;ll be using SQLite for developing the application locally, and we&rsquo;ll be deploying the finished product to Heroku, which does have it installed.</p>
+
+<p>Once the installation is complete, run the following command to record the new modules installed:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>The file <code>requirements.txt</code> will be created, which stores the packages and versions you have installed so that they can be easily recreated. If you had issues installing <code>psycopg2</code>, then here&rsquo;s what your <code>requirements.txt</code> should look like - feel free to edit it manually to look like this, as when we deploy it to Heroku, it will need to be correct to ensure that our application can be deployed successfully:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>requirements.txt</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">Django</span><span class="o">==</span>1.6.1
+</span><span class='line'><span class="nv">South</span><span class="o">==</span>0.8.4
+</span><span class='line'>dj-database-url<span class="o">==</span>0.2.2
+</span><span class='line'>dj-static<span class="o">==</span>0.0.5
+</span><span class='line'>django-toolbelt<span class="o">==</span>0.0.1
+</span><span class='line'><span class="nv">gunicorn</span><span class="o">==</span>18.0
+</span><span class='line'><span class="nv">psycopg2</span><span class="o">==</span>2.5.1
+</span><span class='line'><span class="nv">static</span><span class="o">==</span>0.4
+</span><span class='line'><span class="nv">wsgiref</span><span class="o">==</span>0.1.2
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next, we&rsquo;ll commit these changes with Git:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add requirements.txt
+</span><span class='line'>git commit -m <span class="s1">&#39;Committed requirements&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next we&rsquo;ll add a <code>.gitignore</code> file to ignore our virtualenv - we want to keep this out of version control because it&rsquo;s something specific to that install. We have all we need to recreate it so we don&rsquo;t want to store it. In addition, we also want to ignore any compiled Python files (identifiable by the .pyc suffix):</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>venv/
+</span><span class='line'>*.pyc
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Let&rsquo;s commit that too:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore
+</span><span class='line'>git commit -m <span class="s1">&#39;Added a gitignore file&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, let&rsquo;s generate our project&rsquo;s basic skeleton:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>django-admin.py startproject django_tutorial_blog_ng .
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This application skeleton includes a basic configuration which will be sufficient for now, but you will also want to add the SQLite database file to your <code>.gitignore</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>env/
+</span><span class='line'>*.pyc
+</span><span class='line'>db.sqlite3
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Let&rsquo;s commit what we&rsquo;ve done:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore django_tutorial_blog_ng/ manage.py
+</span><span class='line'>git commit -m <span class="s1">&#39;Created project skeleton&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, before we create our database, we need to ensure we are using South. Go into <code>django_tutorial_blog_ng/settings.py</code> and find <code>INSTALLED_APPS</code>. Edit it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.messages&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.staticfiles&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;south&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, you can create your database. Run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py syncdb
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>You&rsquo;ll be prompted to create a superuser - go ahead and fill in the details. Now, run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py runserver
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This will run Django&rsquo;s built-in web server on port 8000, and if you click <a href="http://127.0.0.1:8000">here</a>, you should see a page congratulating you on your first Django-powered page. Once you&rsquo;re finished with it, you can stop the web server with Ctrl-C.</p>
+
+<p>Don&rsquo;t forget to commit your changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/settings.py
+</span><span class='line'>git commit -m <span class="s1">&#39;Added South to installed apps&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<h2>Your first app</h2>
+
+<p>Django distinguishes between the concepts of <strong>projects</strong> and <strong>apps</strong>. A project is a specific project that may consist of one or more apps, such as a web app, whereas an app is a set of functionality within a project. For instance, one website might include some flat pages, an admin interface, and a blogging engine, and these could easily be different apps. By encouraging you to separate different types of functionality into different apps, Django makes it easier for you to reuse existing content elsewhere.</p>
+
+<p>We&rsquo;re going to create our first app, which is the blogging engine. Run the following command to create a basic skeleton for this app:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py startapp blogengine
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next, we need to amend our settings to install this app:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.messages&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django.contrib.staticfiles&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;south&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;blogengine&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, before we can use this app, we want to let South know about it so that changes to your database structure will be managed right from the start by South. Run the following command to create your initial migration:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py schemamigration --initial blogengine
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>That creates the file for your first migration,but doesn&rsquo;t run it. To migrate your database structure to the latest version, run the following:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py migrate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This won&rsquo;t actually make any changes, but it will ensure that all future changes to your models for the <code>blogengine</code> app are handled by South. Let&rsquo;s commit our app skeleton:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/settings.py blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Added blogengine app skeleton&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>So, we now have our first app set up, but it doesn&rsquo;t do anything much.</p>
+
+<p>Remember that I mentioned how Django differentiates between projects and apps? Well, Django actually ships with a number of useful apps, and one of those is the admin interface. I consider the Django admin to be one of the framework&rsquo;s killer features because it&rsquo;s easy to use and customise, and saves you a lot of grief.</p>
+
+<p>In the past, the admin interface needed a little work to get it working, but in Django 1.6 it&rsquo;s configured to work out of the box, so if you click <a href="http://127.0.0.1:8000/admin/">here</a>, you should see the login screen for it. You should be able to sign in using the username and password you set when you ran <code>syncdb</code>.</p>
+
+<p>Next, we&rsquo;ll set up our first model.</p>
+
+<h2>An introduction to MVC</h2>
+
+<p>MVC is a common pattern used in web development. Many web development frameworks can be loosely described as MVC, including Django, Rails, CodeIgniter, Laravel and Symfony, as well as some client-side frameworks like Backbone.js. The basic concept is that a web app is divided into three basic components:</p>
+
+<ul>
+<li><strong>Models</strong> - the data managed with the application</li>
+<li><strong>Views</strong> - the presentation of the data</li>
+<li><strong>Controllers</strong> - an intermediary between the models and the views</li>
+</ul>
+
+
+<p>Now, Django&rsquo;s interpretation of MVC is slightly different to many other frameworks. While in most frameworks the views are HTML templates for rendering the data, in Django this role is taken by the templates, and the views are functions or objects that render data from the models using a template. Effectively, you can think of Django&rsquo;s views as being like controllers in other frameworks, and Django templates as being views.</p>
+
+<p>In Django, you create your models as Python classes that represent your data, and you use the Django ORM to query the database. As a result, it&rsquo;s rare to have to directly query your database using SQL, making it more portable between different databases.</p>
+
+<p>Now, our first model is going to be of a blog post. At least initially, each post will have the following attributes:</p>
+
+<ul>
+<li>A title</li>
+<li>A publication date and time</li>
+<li>Some text</li>
+</ul>
+
+
+<p>Now, we could just jump straight into creating our first model, but we&rsquo;re going to make a point of following the practices of test-driven development here. The basic concept of TDD is that you write a failing test before writing any code, then you write the code to pass that test afterwards. It does make things a bit slower, but it&rsquo;s all too easy to neglect writing tests at all if you leave it till later.</p>
+
+<p>If you take a look in the <code>blogengine</code> folder you&rsquo;ll notice there&rsquo;s a file called <code>tests.py</code>. Open it up and you should see the following:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your tests here.</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>It&rsquo;s worth taking a little time to plan out what we want to test from our post model. Each post object will have the attributes I mentioned above, and what we want to be able to do is test that we can:</p>
+
+<ul>
+<li>Set the title</li>
+<li>Set the publication date and time</li>
+<li>Set the text</li>
+<li>Save it successfully</li>
+<li>Retrieve it successfully</li>
+</ul>
+
+
+<p>So, let&rsquo;s create a test for our post model. We&rsquo;ll go through the relevant sections of the test bit by bit:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we&rsquo;re importing the required functionality. <code>TestCase</code> is provided by Django, and is an object all of your tests should inherit from. <code>timezone</code> is a utility for handling dates and times correctly. Finally, <code>Post</code> is our model, which we have yet to implement.</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Create your tests here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">PostTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we create the PostTest class, which represents a test for your <code>Post</code> model. So far it only has one method, but you can add additional ones if required.</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'>        <span class="c"># Set the attributes</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we set the post&rsquo;s attributes.</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'>        <span class="c"># Save it</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now we save it. At this point it has been added to the database, and the rest of the test involves us ensuring it has been saved correctly and can be retrieved.</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'>        <span class="c"># Check we can find it</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we use the Django database API to fetch all of the Post objects, assert that there is only 1 post object, retrieve that post object, and assert that it is the same object as the post object we just saved.</p>
+
+<p>If unit testing is new to you, assertions may be new to you. Essentially you&rsquo;re saying to the Python interpreter, &ldquo;I assert that X is true, so please raise an error if this is not true&rdquo;. Here we assert that the length of the variable <code>all_posts</code> is 1, and that that post is the same object as the previously saved object, so that the test will fail if that is not the case.</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'>        <span class="c"># Check attributes</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My first post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my first blog post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Finally, we assert that the values of each of the post&rsquo;s attributes as stored in the database match up with those in the post object we set. For the <code>title</code> and <code>text</code> fields, these are easy to validate as we can just check the values against those we set. For the <code>pub_date</code> field, things are a bit more complex, since this will be an object in its own right, so you need to check the day, month, year, hour, minute and second attributes separately.</p>
+
+<p>The whole thing should look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your tests here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">PostTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Set the attributes</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Save it</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check we can find it</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check attributes</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My first post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my first blog post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>With that in place, the time has come to run our test with the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py <span class="nb">test</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>You should see something like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">(</span>venv<span class="o">)</span>Smith:django_tutorial_blog_ng matthewdaly<span class="nv">$ </span>python manage.py <span class="nb">test</span>
+</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span><span class='line'><span class="nv">E</span>
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'>ERROR: blogengine.tests <span class="o">(</span>unittest.loader.ModuleImportFailure<span class="o">)</span>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>ImportError: Failed to import <span class="nb">test </span>module: blogengine.tests
+</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span><span class='line'>  File <span class="s2">&quot;/usr/local/Cellar/python/2.7.6/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py&quot;</span>, line 254, in _find_tests
+</span><span class='line'>    <span class="nv">module</span> <span class="o">=</span> self._get_module_from_name<span class="o">(</span>name<span class="o">)</span>
+</span><span class='line'>  File <span class="s2">&quot;/usr/local/Cellar/python/2.7.6/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py&quot;</span>, line 232, in _get_module_from_name
+</span><span class='line'>    __import__<span class="o">(</span>name<span class="o">)</span>
+</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 3, in &lt;module&gt;
+</span><span class='line'>    from blogengine.models import Post
+</span><span class='line'>ImportError: cannot import name Post
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Ran <span class="m">1</span> <span class="nb">test </span>in 0.000s
+</span><span class='line'>
+</span><span class='line'>FAILED <span class="o">(</span><span class="nv">errors</span><span class="o">=</span>1<span class="o">)</span>
+</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Don&rsquo;t worry about the error - this is exactly what we expect to see because we haven&rsquo;t implemented our Post model yet. Now that we have a failing test in place, we can implement our model to make the test pass. Open up <code>blogengine/models.py</code> and enter the following:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your models here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Save the file and run the test again:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">(</span><span class="n">venv</span><span class="p">)</span><span class="n">Smith</span><span class="p">:</span><span class="n">django_tutorial_blog_ng</span> <span class="n">matthewdaly</span><span class="err">$</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
+</span><span class='line'><span class="n">Creating</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s">&#39;default&#39;</span><span class="o">...</span>
+</span><span class='line'><span class="n">E</span>
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'><span class="n">ERROR</span><span class="p">:</span> <span class="n">test_create_post</span> <span class="p">(</span><span class="n">blogengine</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">PostTest</span><span class="p">)</span>
+</span><span class='line'><span class="o">----------------------------------------------------------------------</span>
+</span><span class='line'><span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">17</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_create_post</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/base.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">545</span><span class="p">,</span> <span class="ow">in</span> <span class="n">save</span>
+</span><span class='line'>    <span class="n">force_update</span><span class="o">=</span><span class="n">force_update</span><span class="p">,</span> <span class="n">update_fields</span><span class="o">=</span><span class="n">update_fields</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/base.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">573</span><span class="p">,</span> <span class="ow">in</span> <span class="n">save_base</span>
+</span><span class='line'>    <span class="n">updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_table</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">force_insert</span><span class="p">,</span> <span class="n">force_update</span><span class="p">,</span> <span class="n">using</span><span class="p">,</span> <span class="n">update_fields</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/base.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">654</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_save_table</span>
+</span><span class='line'>    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_insert</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_base_manager</span><span class="p">,</span> <span class="n">using</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">update_pk</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/base.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">687</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_do_insert</span>
+</span><span class='line'>    <span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/manager.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">232</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_insert</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">insert_query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/query.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1511</span><span class="p">,</span> <span class="ow">in</span> <span class="n">insert_query</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">query</span><span class="o">.</span><span class="n">get_compiler</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="n">using</span><span class="p">)</span><span class="o">.</span><span class="n">execute_sql</span><span class="p">(</span><span class="n">return_id</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/models/sql/compiler.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">898</span><span class="p">,</span> <span class="ow">in</span> <span class="n">execute_sql</span>
+</span><span class='line'>    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/backends/util.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">53</span><span class="p">,</span> <span class="ow">in</span> <span class="n">execute</span>
+</span><span class='line'>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/utils.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">99</span><span class="p">,</span> <span class="ow">in</span> <span class="n">__exit__</span>
+</span><span class='line'>    <span class="n">six</span><span class="o">.</span><span class="n">reraise</span><span class="p">(</span><span class="n">dj_exc_type</span><span class="p">,</span> <span class="n">dj_exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/backends/util.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">53</span><span class="p">,</span> <span class="ow">in</span> <span class="n">execute</span>
+</span><span class='line'>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">File</span> <span class="s">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/db/backends/sqlite3/base.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">450</span><span class="p">,</span> <span class="ow">in</span> <span class="n">execute</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">Database</span><span class="o">.</span><span class="n">Cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span><span class='line'><span class="n">OperationalError</span><span class="p">:</span> <span class="n">no</span> <span class="n">such</span> <span class="n">table</span><span class="p">:</span> <span class="n">blogengine_post</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">----------------------------------------------------------------------</span>
+</span><span class='line'><span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.059</span><span class="n">s</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">FAILED</span> <span class="p">(</span><span class="n">errors</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">Destroying</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s">&#39;default&#39;</span><span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Our test still fails, but if we take a look at this error message, we can see why - there is no database table for the posts (called <code>blogengine_post</code>). Using South, we can easily remedy that by creating a new migration to create this table:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py schemamigration --auto blogengine
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>That creates the new migration. Now let&rsquo;s run it:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py migrate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, let&rsquo;s run our tests to check it&rsquo;s working as expected:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">(</span>venv<span class="o">)</span>Smith:django_tutorial_blog_ng matthewdaly<span class="nv">$ </span>python manage.py <span class="nb">test</span>
+</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span><span class='line'>.
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Ran <span class="m">1</span> <span class="nb">test </span>in 0.001s
+</span><span class='line'>
+</span><span class='line'>OK
+</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Success! We now have a model in place that passes our test. Let&rsquo;s commit our changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Added post model with passing test&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, Django&rsquo;s ORM is basically a layer on top of SQL that abstracts away differences between different relational databases, but the underlying queries are still being run. You can view the SQL created to generate the table by using the <code>sqlall</code> command. Just run <code>python manage.py sqlall blogengine</code> and you should see something like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">BEGIN</span><span class="p">;</span>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="ss">&quot;blogengine_post&quot;</span> <span class="p">(</span>
+</span><span class='line'>    <span class="ss">&quot;id&quot;</span> <span class="nb">integer</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">&quot;title&quot;</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">&quot;pub_date&quot;</span> <span class="n">datetime</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">&quot;text&quot;</span> <span class="nb">text</span> <span class="k">NOT</span> <span class="k">NULL</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">COMMIT</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note the addition of the <code>id</code> field as the primary key. If you&rsquo;re at all familiar with relational databases, you&rsquo;ll know that every table must have one field, called a primary key, that is a unique reference to that row. This can be overridden, but here it&rsquo;s exactly the behaviour we want.</p>
+
+<h2>Creating blog posts via the admin</h2>
+
+<p>Now, we need a way to be able to create, edit and delete blog posts. Django&rsquo;s admin interface allows us to do so easily. However, before we do so, we want to create automated acceptance tests for this functionality, in order to test the ability to create posts from an end-user&rsquo;s perspective. While unit tests are for testing sections of an application&rsquo;s functionality from the perspective of other sections of the application, acceptance tests are testing from the user&rsquo;s perspective. In other words, they test what the application needs to do to be acceptable.</p>
+
+<p>First, we will test logging into the admin. Open up <code>blogengine/tests.py</code> and amend it as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">LiveServerTestCase</span><span class="p">,</span> <span class="n">Client</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your tests here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">PostTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Set the attributes</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Save it</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check we can find it</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check attributes</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My first post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my first blog post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>First of all, we import two new objects from <code>django.test</code>, <code>LiveServerTestCase</code> and <code>Client</code>. Then we create the first part of our first test for the admin, named <code>AdminTest</code>. Eventually, this will test that we can log successfully into the admin interface. For now, we&rsquo;re just doing the following:</p>
+
+<ul>
+<li>Creating a Client object</li>
+<li>Fetching the <code>/admin/</code> route</li>
+<li>Asserting that the status code for this HTTP request is 200, (in other words, that the page was fetched successfully).</li>
+</ul>
+
+
+<p>If you run <code>python manage.py test</code>, you should see that both tests pass successfully. Now we&rsquo;ll extend <code>AdminTest</code> - we&rsquo;ll verify that the response contains the string &lsquo;Log in&rsquo;, which in the Django admin interface, appears on the login page:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here <code>response.content</code> is a string containing the content of the HTTP response - we&rsquo;re asserting that the substring &lsquo;Log in&rsquo; appears in there. If you run <code>python manage.py test</code> again, it should pass.</p>
+
+<p>Now, we need to actually log in. This could be fiddly, but Django has a handy convenience method to log you in when testing:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log the user in</span>
+</span><span class='line'>        <span class="n">c</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here, we use the <code>login</code> method of the <code>Client</code> object to log into the admin interface, and then we fetch the <code>/admin/</code> route again. We assert that we get a 200 status code, and we assert that the response contains the string &lsquo;Log out&rsquo; - in other words, that we are logged in.</p>
+
+<p>Try running <code>python manage.py test</code> and we&rsquo;ll get an error., because the user details we&rsquo;ve used to log in don&rsquo;t exist. Let&rsquo;s resolve that.</p>
+
+<p>Now, you could put your own credentials in there, but that&rsquo;s not a good idea because it&rsquo;s a security risk. Instead, we&rsquo;ll create a fixture for the test user that will be loaded when the tests are run. Run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py createsuperuser
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Give the username as <code>bobsmith</code>, the email address as <code>bob@example.com</code>, and the password as <code>password</code>. Once that&rsquo;s done, run these commands to dump the existing users to a fixture:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir blogengine/fixtures
+</span><span class='line'>python manage.py dumpdata auth.User --indent<span class="o">=</span><span class="m">2</span> &gt; blogengine/fixtures/users.json
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This will dump all of the existing users to <code>blogengine/fixtures/users.json</code>. You may wish to edit this file to remove your own superuser account and leave only the newly created one in there.</p>
+
+<p>Next we need to amend our test to load this fixture:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">fixtures</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;users.json&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log the user in</span>
+</span><span class='line'>        <span class="n">c</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, if you run <code>python manage.py test</code>, you should find that the test passes. Next, we&rsquo;ll test that we can log out:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">fixtures</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;users.json&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log the user in</span>
+</span><span class='line'>        <span class="n">c</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_logout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create client</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="n">c</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log out</span>
+</span><span class='line'>        <span class="n">c</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This test works along very similar lines. We log in, verify that &lsquo;Log out&rsquo; is in the response, then we log out, and verify that &lsquo;Log in&rsquo; is in the response. Run the tests again, and they should pass. Assuming they do, let&rsquo;s commit our changes again:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Added tests for admin auth&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This code is a little repetitive. We create the client twice, when we could do so only once. Amend the AdminTest class as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">fixtures</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;users.json&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log the user in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_logout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log out</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>The <code>setUp()</code> method is automatically run when the test runs, and ensures we only need to start up the client once. Run your tests to make sure they pass, then commit your changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Refactored admin test&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, we&rsquo;ll implement a test for creating a new post. The admin interface implements URLs for creating new instances of a model in a consistent format of <code>/admin/app_name/model_name/add/</code>, so the URL for adding a new post will be <code>/admin/blogengine/post/add/</code>.</p>
+
+<p>Add this method to the AdminTest class:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Log in</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check response code</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Try running it and this will fail, because we haven&rsquo;t registered the Post model in the Django admin. So we need to do that. To do so, open a new file at <code>blogengine/admin.py</code> and add the following code:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/admin.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">models</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Post</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, run <code>python manage.py test</code> and the test should pass. If you want to confirm that the post model appears in the admin, run <code>python manage.py runserver</code> and click <a href="http://127.0.0.1:8000/admin/">here</a>.</p>
+
+<p>So now we can reach the page for adding a post, but we haven&rsquo;t yet tested that we can submit one. Let&rsquo;s remedy that:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Log in</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check response code</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Create the new post</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My first post&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my first post&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check added successfully</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check new post now in database</span>
+</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we submit the new post via HTTP POST, with all the data passed through. This mirrors the form created by the Django admin interface - if you take a look at the HTML generated by the admin, you&rsquo;ll see that the inputs are given names that match these. Note that the <code>pub_date</code> field, because it represents a datetime object, is split up into a separate date and time field. Also note the parameter <code>follow=True</code> - this denotes that the test client should follow any HTTP redirect.</p>
+
+<p>We confirm that the POST request responded with a 200 code, denoting success. We also confirm that the response included the phrase &lsquo;added successfully&rsquo;. Finally we confirm that there is now a single Post object in the database. Don&rsquo;t worry about any existing content - Django creates a dedicated test database and destroys it after the tests are done, so you can be sure that no posts are present unless you explicitly load them from a fixture.</p>
+
+<p>We can now test creating a post, but we also need to ensure we can test editing and deleting them. First we&rsquo;ll add a test for editing posts:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_edit_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Create the post</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Log in</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Edit the post</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/1/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My second post&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check changed successfully</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;changed successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check post amended</span>
+</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My second post&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we create a new blog post, then verify we can edit it by resubmitting it with different values, and checking that we get the expected response, and that the data in the database has been updated. Run <code>python manage.py test</code>, and this should pass.</p>
+
+<p>Finally, we&rsquo;ll set up a test for deleting posts:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_delete_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Create the post</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check new post saved</span>
+</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Log in</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Delete the post</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/1/delete/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;post&#39;</span><span class="p">:</span> <span class="s">&#39;yes&#39;</span>
+</span><span class='line'>    <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check deleted successfully</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;deleted successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check post amended</span>
+</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Again, this is pretty similar to what we did before. We create a new post, verify that it is the sole post in the database, and log into the admin. Then we delete the post via the admin, and confirm that the admin interface confirmed it has been deleted, and the post is gone from the database.</p>
+
+<p>I think it&rsquo;s now time to commit again:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Post admin tests in place&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>So we now know that we can create, edit and delete posts, and we have tests in place to confirm this. So our next task is to be able to display our posts.</p>
+
+<p>For now, to keep things simple, we&rsquo;re only going to implement the index view - in other words, all the posts in reverse chronological order. We&rsquo;ll use Django&rsquo;s generic views to keep things really easy.</p>
+
+<p>Django&rsquo;s generic views are another really handy feature. As mentioned earlier, a view is a function or class that describes how a specific route should render an object. Now, there are many tasks that recur in web development. For instance, many web pages you may have seen may be a list of objects - in this case, the index page for a blog is a list of blog posts. For that reason, Django has the ListView generic view, which makes it easy to render a list of objects.</p>
+
+<p>Now, like before, we want to have a test in place. Open up <code>blogengine/tests.py</code> and add the following class at the end of the file:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">PostViewTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post saved</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Fetch the index</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post title is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post text is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post date is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%b&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we create the post, and assert that it is the sole post object. We then fetch the index page, and assert that the HTTP status code is 200 (ie. the page exists and is returned). We then verify that the response contains the post title, text and publication date.</p>
+
+<p>Note that for the month, we need to do a bit of jiggery-pokery to get the month name. By default Django will return short month names (eg Jan, Feb etc), but Python stores months as numbers, so we need to format it as a short month name using <code>%b</code>.</p>
+
+<p>If you run this, you will get an error because the index route isn&rsquo;t implemented. So let&rsquo;s fix that. Open up the existing <code>django_tutorial_blog_ng/urls.py</code> file and amend it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>django_tutorial_blog_ng/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">url</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">autodiscover</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Examples:</span>
+</span><span class='line'>    <span class="c"># url(r&#39;^$&#39;, &#39;django_tutorial_blog_ng.views.home&#39;, name=&#39;home&#39;),</span>
+</span><span class='line'>    <span class="c"># url(r&#39;^blog/&#39;, include(&#39;blog.urls&#39;)),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^admin/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">urls</span><span class="p">)),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Blog URLs</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^.*$&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;blogengine.urls&#39;</span><span class="p">)),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Then, create a new file at <code>blogengine/urls.py</code> and edit it as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">url</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">ListView</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Index</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">&#39;^$&#39;</span><span class="p">,</span> <span class="n">ListView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">model</span><span class="o">=</span><span class="n">Post</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">)),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>A little explanation is called for. The project has its own <code>urls.py</code> file that handles routing throughout the project. However, because Django encourages you to make your apps reusable, we want to keep the routes in the individual apps as far as possible. So, in the project file, we include the <code>blogengine/urls.py</code> file.</p>
+
+<p>In the app-specific <code>urls.py</code>, we import the Post model and the ListView generic view. We then define a route for the index page - the regular expression <code>^$</code> will match only an empty string, so that page will be the index. For this route, we then call the <code>as_view()</code> method of the ListView object, and set the model as Post.</p>
+
+<p>Now, if you either run the tests, or run the development server and visit <a href="http://127.0.0.1:8000">the index page</a>, you&rsquo;ll see that it isn&rsquo;t working yet - you should see the error <code>TemplateDoesNotExist: blogengine/post_list.html</code>. This tells us that we need to create a template called <code>blogengine/post_list.html</code>, so let&rsquo;s do that. First of all, add the following at the end of <code>django_tutorial_blog_ng/settings.py</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Template directory</span>
+</span><span class='line'><span class="n">TEMPLATE_DIRS</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s">&#39;templates&#39;</span><span class="p">)]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next, create the folders for the templates, and a blank <code>post_list.html</code> file:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir templates
+</span><span class='line'>mkdir templates/blogengine
+</span><span class='line'>touch templates/blogengine/post_list.html
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, run your tests again, and you&rsquo;ll see that the template now exists, but a new error is showing up:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span><span class='line'>......F
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'>FAIL: test_index <span class="o">(</span>blogengine.tests.PostViewTest<span class="o">)</span>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 189, in test_index
+</span><span class='line'>    self.assertTrue<span class="o">(</span>post.title in response.content<span class="o">)</span>
+</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
+</span><span class='line'>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Ran <span class="m">7</span> tests in 2.162s
+</span><span class='line'>
+</span><span class='line'>FAILED <span class="o">(</span><span class="nv">failures</span><span class="o">=</span>1<span class="o">)</span>
+</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>To fix this, we make sure the template shows the data we want. Open up <code>templates/blogengine/post_list.html</code> and enter the following:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;title&gt;</span>My Django Blog<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text }}
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This is only a very basic template, and we&rsquo;ll expand upon it in future.</p>
+
+<p>With that done, you can run <code>python manage.py test</code>, and it should pass. Well done! Don&rsquo;t forget to commit your changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/ templates/ blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Implemented list view for posts&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>And that&rsquo;s all for this lesson! We&rsquo;ve done a hell of a lot in this lesson - set up our project, created a comprehensive test suite for it, and implemented the basic functionality. Next time we&rsquo;ll make it a bit prettier using Twitter Bootstrap, as well as implementing more of the basic functionality for the blog.</p>
+
+<p>You can find the source code <a href="https://github.com/matthewbdaly/django_tutorial_blog_ng">on Github</a>. For your convenience, I&rsquo;ve tagged this lesson as <code>lesson-1</code>, so you can just clone the repository and switch to the end of this lesson with the following commands:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git clone https://github.com/matthewbdaly/django_tutorial_blog_ng.git
+</span><span class='line'><span class="nb">cd </span>django_tutorial_blog_ng
+</span><span class='line'>git checkout lesson-1
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>That way, you can easily check that what you&rsquo;ve done matches up with the repository. Future lessons will be similarly tagged to make them easy to navigate.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-12-28T15:00:32+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>3:00 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/tdd/'>tdd</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/08/16/a-starting-boilerplate-for-php-development-with-vagrant/" title="Previous Post: A starting boilerplate for PHP development with Vagrant">&laquo; A starting boilerplate for PHP development with Vagrant</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/" title="Next Post: Django blog tutorial - the next generation - part 2">Django blog tutorial - the next generation - part 2 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'matthewbdaly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Matthew Daly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'matthewdaly';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/';
+        var disqus_url = 'http://matthewdaly.co.uk/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

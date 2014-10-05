@@ -1,0 +1,952 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: php | Matthew Daly's Blog]]></title>
+  <link href="http://matthewdaly.co.uk/blog/categories/php/atom.xml" rel="self"/>
+  <link href="http://matthewdaly.co.uk/"/>
+  <updated>2014-10-05T21:50:29+01:00</updated>
+  <id>http://matthewdaly.co.uk/</id>
+  <author>
+    <name><![CDATA[Matthew Daly]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Running the PHP development server with Laravel]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2012/12/15/running-the-php-development-server-with-laravel/"/>
+    <updated>2012-12-15T00:26:00+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2012/12/15/running-the-php-development-server-with-laravel</id>
+    <content type="html"><![CDATA[<p>One thing that I&rsquo;ve really never liked about PHP is the requirement to install a full-blown web server, so I was pleased when PHP 5.4 shipped with a built-in development server. However, it seems like no PHP framework has yet embraced this to the extent that their counterparts for languages like Python have.</p>
+
+<p>I&rsquo;ve recently decided that CodeIgniter is no longer fulfilling what I need from my main go-to PHP framework, and I&rsquo;ve been looking at Laravel as a likely replacement. It occurred to me that I could create an Artisan task to run the development server quite easily, and after a little tinkering, I put this together, which worked well:</p>
+
+<pre><code class="php application/tasks/runserver.php">&lt;?php
+
+class Runserver_Task {
+
+    public function run($arguments)
+    {   
+        $port = !isset($arguments[0]) ? 8000: $arguments[0];
+        echo 'Running PHP development server on port '.$port.'...';
+        passthru('php -S localhost:'.$port.' -t '.getcwd().'/public');
+    }   
+}
+?&gt;
+</code></pre>
+
+<p>Once this is in place, you can just run <code>php artisan runserver</code> to run the development server, and hit Ctrl-C to stop it, giving you an experience much like that with Django. Note this requires PHP 5.4 or greater. You also have the option of specifying a different port eg <code>php artisan runserver 7000</code> for port 7000.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Testing PHP web applications with Cucumber]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2012/11/03/testing-php-web-applications-with-cucumber/"/>
+    <updated>2012-11-03T16:43:00+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2012/11/03/testing-php-web-applications-with-cucumber</id>
+    <content type="html"><![CDATA[<p>Ever since I first heard of <a href="http://cukes.info/">Cucumber</a>, it&rsquo;s seemed like something I would find really useful. Like many developers, especially those who use PHP regularly, I know full well that I should make a point of writing proper automated tests for my web apps, but invariably wind up just thinking &ldquo;I haven&rsquo;t got time to get my head around a testing framework and it&rsquo;ll take ages to set up, so I&rsquo;ll just click around and look for bugs&rdquo;. This does get very, very tedious quite quickly, however.</p>
+
+<p>At work I&rsquo;ve reached a point with  a web app I&rsquo;m building where I needed to test it extensively to make sure it worked OK. I soon began to get very, very fed up of the repetitive clicking around necessary to test the application, so I began looking around for a solution. I gave Selenium IDE a try, but I found that to be annoyingly unreliable when recording tests. I&rsquo;d heard of Cucumber, so I did some googling, found some resources, and began tinkering with that. Quite quickly, I had a few basic acceptance tests up and running that were much more reliable than Selenium IDE, and much less tedious to use than manual testing. Within a very short space of time, I realised that Cucumber was one of those tools that was going to dramatically improve my coding experience, much like when I switched from Subversion to Git.</p>
+
+<p>What&rsquo;s so great about Cucumber compared to other acceptance testing solutions?</p>
+
+<ul>
+<li>Cucumber scenarios are written using Gherkin, a simple syntax that makes it easy for customers to set out exactly what behaviour they want to see. Far from being tedious requirement documents, these set out in a simple and intuitive way what should happen once the application is complete. By requiring customers to think carefully about what they want and get it down in writing, you can ensure the customer has a good idea what they want before you write any code, making it much less likely they&rsquo;ll turn around afterwards and say &ldquo;No, that&rsquo;s not what we want&rdquo;. This, more than anything, is for me the true power of Cucumber - it allows customers and developers to easily collaborate to set out what the web app will do, and gets you automated tests into the bargain as well.</li>
+<li>Because Cucumber is packaged as a Ruby gem, it&rsquo;s easy to install it and any other Ruby modules it may require.</li>
+<li>You can use Capybara to test your web app. Capybara is a very handy Ruby gem that allows you to easily interact with your web app, and it allows several different drivers to be used. If you don&rsquo;t need JavaScript, for instance, you can use Mechanize for faster tests. If you do, you can use selenium-webdriver to automate the browser instead, and it will load an instance of Firefox and use that for testing.</li>
+<li>It can also be used for testing RESTful web services. HTTParty is another handy Ruby gem that can be used for testing an API.</li>
+</ul>
+
+
+<p>One question you may ask is &lsquo;Why use a Ruby tool to test PHP apps?&rsquo;. Well, there is <a href="http://behat.org/">Behat</a>, a very similar tool for PHP, so you can use that if you&rsquo;d prefer. However, I personally have found that it&rsquo;s not too much of a problem switching context between writing Ruby code for the acceptance tests and PHP code for the application itself. Ruby also has some advantages here - <a href="https://rvm.io/">RVM</a> is a very handy tool for running multiple instances of Ruby, and RubyGems makes it easy to install any additional modules you may need. You don&rsquo;t really need to know much Ruby to use it - this is essentially my first encounter with Ruby barring a few small tutorials, but I haven&rsquo;t had any significant issues with it. Finally, the Cucumber community seems to be very active, which is always a plus.</p>
+
+<p>When searching for a tutorial on getting Cucumber working with PHP, I only found <a href="http://jamieonsoftware.com/journal/2011/1/2/high-level-testing-php-applications-with-cucumber.html">one good one</a>, and that didn&rsquo;t cover a lot of the issues I&rsquo;d have liked to cover, not did it cover actually using Cucumber as part of the development process, so I had to puzzle out much of it myself. So hopefully, by covering more of the ground that your average PHP developer is likely to need, I can show you just how useful Cucumber can be when added to your PHP development toolkit.</p>
+
+<p>In this tutorial, we&rsquo;ll build a very simple todo-list application using the Slim framework, but we&rsquo;ll use Cucumber to test it throughout to ensure that it works the way we want it to. Hopefully, by doing this, we&rsquo;ll get a rock-solid web app that meets our requirements exactly.</p>
+
+<p>First of all, you&rsquo;ll want to install RVM to make it easier to manage multiple Ruby installs. You may be able to use your system&rsquo;s Ruby install, but RVM is usually a safer bet:</p>
+
+<pre><code class="bash">\curl -L https://get.rvm.io | bash -s stable --ruby
+</code></pre>
+
+<p>This was sufficient to install RVM on Mac OS X. On Ubuntu, I also had to install the openssl and zlib packages. Before installing RVM, use apt-get to install the required packages:</p>
+
+<pre><code class="bash">sudo apt-get install curl git git-core zlib1g-dev zlibc libxml2-dev libxslt1-dev libyaml-dev build-essential checkinstall openssl libreadline6 libreadline6-dev zlib1g libssl-dev libsqlite3-dev sqlite3 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config
+</code></pre>
+
+<p>Once RVM is installed, then close and reopen your terminal so that RVM is loaded. Then, install the correct packages:</p>
+
+<pre><code class="bash">rvm pkg install openssl zlib
+</code></pre>
+
+<p>Now we can install our new copy of Ruby. On Ubuntu, I had to install Ruby 1.8.7 first:</p>
+
+<pre><code class="bash">rvm install 1.8.7
+rvm use 1.8.7
+</code></pre>
+
+<p>Then I installed Ruby 1.9.3:</p>
+
+<pre><code class="bash">rvm install 1.9.3 --with-openssl-dir=$HOME/.rvm/usr
+</code></pre>
+
+<p>Whereas on OS X, this is all that was required:</p>
+
+<pre><code class="bash">rvm install 1.9.3
+</code></pre>
+
+<p>Once that&rsquo;s done, run the following to set the version of Ruby being used</p>
+
+<pre><code class="bash">rvm use 1.9.3
+</code></pre>
+
+<p>With that done, you should be able to install the required Ruby gems. Now, you could install these manually, like this:</p>
+
+<pre><code class="bash">gem install cucumber
+gem install rspec
+gem install mechanize
+gem install capybara
+gem install selenium-webdriver
+gem install capybara-mechanize
+</code></pre>
+
+<p>However, there&rsquo;s a more convenient way. First, create a file in the project&rsquo;s root directory called Gemfile and put the following content into it:</p>
+
+<pre><code class="ruby Gemfile">source "http://rubygems.org"
+gem "cucumber"
+gem "rspec"
+gem "mechanize"
+gem "capybara"
+gem "selenium-webdriver"
+gem "capybara-mechanize"
+</code></pre>
+
+<p>Then install the Bundler gem:</p>
+
+<pre><code class="bash">gem install bundler
+</code></pre>
+
+<p>Then use Bundler to install the required gems:</p>
+
+<pre><code class="bash">bundle install
+</code></pre>
+
+<p>This makes it easier to get your project set up somewhere else because you can put the Gemfile under version control, making it easier to duplicate this setup elsewhere.</p>
+
+<p>With that out of the way, let&rsquo;s start work on our app. To save time, we&rsquo;ll use the Slim framework to do some of the heavy lifting for our application. Download <a href="http://www.slimframework.com/">Slim</a> and put it in a folder on your local web server.</p>
+
+<p>Now, before we actually write any code, we&rsquo;ll set out our first Cucumber scenario. Create a folder inside the folder you put Slim inside and call it <code>features</code>. Inside it, create a new file called <code>todo.feature</code> and put the following content into it:</p>
+
+<pre><code class="cucumber features/todo.feature">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+    Scenario: New item
+        Given I am on the home page
+        When I click on New Item
+        And I fill in the item
+        And I click the button Submit
+        Then I should see the new item added to the list
+</code></pre>
+
+<p>Notice how simple this is? Everything is written as an example of how an end user would interact with the site. There&rsquo;s nothing hard about this - it just describes what the site needs to do.</p>
+
+<p>The first line is just the name of this feature. The following three lines are just a comment. Then the Scenario line gives a name to this particular scenario - a Scenario is just a series of steps that describes an action.</p>
+
+<p>Then, we see the Given line. This sets out the starting conditions. Note that you can easily set out multiple starting conditions using the And keyword on subsequent lines, as we do later in the file. Here, we&rsquo;re just making sure we&rsquo;re on the home page.</p>
+
+<p>Next, we see the When line. This, and the subsequent And lines, set out what actions we want to take when going through this step. In this example, we&rsquo;re clicking on a link marked &lsquo;New Item&rsquo;, filling in a text input, and clicking the Submit button. So we&rsquo;re already thinking about how our application is going to work, before we&rsquo;ve written a line of code.</p>
+
+<p>Finally, we see the Then line. This sets out what should have happened once we&rsquo;ve finished going through this step. Here we want to make sure the new item has been added to the list.</p>
+
+<p>Now, go to the folder you unpacked Slim into and run <code>cucumber</code> from the shell. You should see something like this:
+&#8220;` sh
+Feature: Todo</p>
+
+<pre><code>In order to use the site
+As a user
+I want to be able to submit, view and delete to-do list items
+</code></pre>
+
+<p>  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/todo.feature:8
+    When I click on New Item                         # features/todo.feature:9
+    And I fill in the item                           # features/todo.feature:10
+    And I click the button Submit                    # features/todo.feature:11
+    Then I should see the new item added to the list # features/todo.feature:12</p>
+
+<p>1 scenario (1 undefined)
+5 steps (5 undefined)
+0m0.004s</p>
+
+<p>You can implement step definitions for undefined steps with these snippets:</p>
+
+<p>Given /^I am on the home page$/ do
+  pending # express the regexp above with the code you wish you had
+end</p>
+
+<p>When /^I click on New Item$/ do
+  pending # express the regexp above with the code you wish you had
+end</p>
+
+<p>When /^I fill in the item$/ do
+  pending # express the regexp above with the code you wish you had
+end</p>
+
+<p>When /^I click the button Submit$/ do
+  pending # express the regexp above with the code you wish you had
+end</p>
+
+<p>Then /^I should see the new item added to the list$/ do
+  pending # express the regexp above with the code you wish you had
+end</p>
+
+<p>If you want snippets in a different programming language,
+just make sure a file with the appropriate file extension
+exists where cucumber looks for step definitions.
+&#8220;`</p>
+
+<p>At this stage, Cucumber isn&rsquo;t doing anything much, it&rsquo;s just telling you that these steps haven&rsquo;t been defined as yet. To define a step, you simply write some Ruby code that expresses that step.</p>
+
+<p>Let&rsquo;s do that. Under <code>features</code>, create a new directory called <code>step_definitions</code>. Inside that, create a file called <code>todo_steps.rb</code> and paste the code snippets returned by Cucumber into it. Once that has been saved, run <code>cucumber</code> again and you should see something like this:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+      TODO (Cucumber::Pending)
+      ./features/step_definitions/todo_steps.rb:2:in `/^I am on the home page$/'
+      features/todo.feature:8:in `Given I am on the home page'
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+1 scenario (1 pending)
+5 steps (4 skipped, 1 pending)
+0m0.004s
+</code></pre>
+
+<p>So far, the steps we&rsquo;ve written don&rsquo;t actually do anything - each step contains nothing but the pending statement. We need to replace the code inside each of those steps with some Ruby code that implements that step. As the first step in this scenario is still pending, Cucumber skips all the remaining steps.</p>
+
+<p>Let&rsquo;s implement these steps. First of all, we need to set some configuration options. In the <code>features</code> folder, create a new folder called <code>support</code>, and under that create a new file called <code>env.rb</code>. In there, place the following code:</p>
+
+<pre><code class="ruby features/support/env.rb">require 'rspec/expectations'
+require 'capybara'
+require 'capybara/mechanize'
+require 'capybara/cucumber'
+require 'test/unit/assertions'
+require 'mechanize'
+
+World(Test::Unit::Assertions)
+
+Capybara.default_driver = :mechanize
+Capybara.app_host = "http://localhost"
+World(Capybara)
+</code></pre>
+
+<p>This includes all of the Ruby gems required for our purposes, and sets Capybara to use the Mechanize driver for testing web apps. If you&rsquo;ve not heard of it before, Capybara can be thought of as a way of scripting a web browser that supports numerous drivers, some of which are headless and some of which aren&rsquo;t. Here we&rsquo;re using Mechanize, which is headless, but later on we&rsquo;ll use Selenium to show you how it would work with a non-headless web browser.</p>
+
+<p>With that done, the next job is to actually implement the steps. Head back to <code>features/step_definitions/todo_steps.rb</code> and edit it as follows:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">Given /^I am on the home page$/ do
+    visit "http://localhost/~matthewdaly/todo/index.php"
+end
+
+When /^I click on New Item$/ do
+      pending # express the regexp above with the code you wish you had
+end
+
+When /^I fill in the item$/ do
+      pending # express the regexp above with the code you wish you had
+end
+
+When /^I click the button Submit$/ do
+      pending # express the regexp above with the code you wish you had
+end
+
+Then /^I should see the new item added to the list$/ do
+      pending # express the regexp above with the code you wish you had
+end
+</code></pre>
+
+<p>Don&rsquo;t forget to replace the URL in that first step with the one pointing at your index.php for your local copy of Slim. At this point we&rsquo;re only implementing the first step, so that&rsquo;s all we need to do for now. Once that&rsquo;s done, go back to the root of the web app and run <code>cucumber</code> again. You should see something like this:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+      TODO (Cucumber::Pending)
+      ./features/step_definitions/todo_steps.rb:6:in `/^I click on New Item$/'
+      features/todo.feature:9:in `When I click on New Item'
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+1 scenario (1 pending)
+5 steps (3 skipped, 1 pending, 1 passed)
+0m0.036s
+</code></pre>
+
+<p>Our first step has passed! Now, we move onto the next step. Open features/step_definitions/todo_steps.rb again, and amend the second step definition as follows:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">When /^I click on New Item$/ do
+   click_link ('New Item')
+end
+</code></pre>
+
+<p>Now, hang on a minute here. This Ruby code is pretty easy to understand - it just clicks on a link with the title, ID or text &lsquo;New Item&rsquo;. But we don&rsquo;t want to have to rewrite this step for every single link in the application. Wouldn&rsquo;t it be great if we could have this step definition accept any text and click on the appropriate link, so we could reuse it elsewhere? Well, we can. Change the second step to look like this:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">When /^I click on (.*)$/ do |link|
+    click_link (link)
+end
+</code></pre>
+
+<p>What&rsquo;s happening here is that we capture the text after the word &lsquo;on&rsquo; using a regular expression and pass it through to the step definition as the variable <code>link</code>. Then, we have Capybara click on that link. Pretty simple, and it saves us on some work in future.</p>
+
+<p>Now run <code>cucumber</code> again, and you should see something like this:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+      no link with title, id or text 'New Item' found (Capybara::ElementNotFound)
+      (eval):2:in `send'
+      (eval):2:in `click_link'
+      ./features/step_definitions/todo_steps.rb:6:in `/^I click on (.*)$/'
+      features/todo.feature:9:in `When I click on New Item'
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+Failing Scenarios:
+cucumber features/todo.feature:7 # Scenario: New item
+
+1 scenario (1 failed)
+5 steps (1 failed, 3 skipped, 1 passed)
+0m0.042s
+</code></pre>
+
+<p>We&rsquo;ve got our second step in place, but it&rsquo;s failing because there is no link with the text &lsquo;New Item&rsquo;. Let&rsquo;s remedy that. Head back to the folder you put Slim in, and open index.php.</p>
+
+<pre><code class="php index.php">&lt;?php
+require 'Slim/Slim.php';
+
+\Slim\Slim::registerAutoloader();
+
+$app = new \Slim\Slim();
+
+// GET route
+$app-&gt;get('/', function () {
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;a href="index.php/newitem"&gt;New Item&lt;/a&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;run();
+?&gt;
+</code></pre>
+
+<p>Here I&rsquo;ve stripped out most of the default code and comments so we can see more easily what&rsquo;s happening. If you haven&rsquo;t used Slim before, it works by letting you define routes that are accessed via HTTP GET, POST, PUT or DELETE methods, and define what the response will be to each one. Here, we&rsquo;ve defined a simple controller for GET requests to &lsquo;/&rsquo;, and we return a template that includes a link with the text &lsquo;New Item&rsquo;.</p>
+
+<p>Now, run <code>cucumber</code> again and you should see the following:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+      Received the following error for a GET request to http://localhost/~matthewdaly/todo/newitem: '404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/newitem -- unhandled response' (RuntimeError)
+      (eval):2:in `send'
+      (eval):2:in `click_link'
+      ./features/step_definitions/todo_steps.rb:6:in `/^I click on (.*)$/'
+      features/todo.feature:9:in `When I click on New Item'
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+Failing Scenarios:
+cucumber features/todo.feature:7 # Scenario: New item
+
+1 scenario (1 failed)
+5 steps (1 failed, 3 skipped, 1 passed)
+0m0.153s
+</code></pre>
+
+<p>Our second step is still failing, but only because we haven&rsquo;t yet defined a route for the destination when we click on the link, so let&rsquo;s fix that. Open up index.php again and change it to look like this:</p>
+
+<pre><code class="php index.php">&lt;?php
+require 'Slim/Slim.php';
+
+\Slim\Slim::registerAutoloader();
+
+$app = new \Slim\Slim();
+
+// GET route
+$app-&gt;get('/', function () {
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;a href="index.php/newitem"&gt;New Item&lt;/a&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;get('/newitem', function () {
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;form action="index.php/submitnewitem" method="POST"&gt;
+            &lt;label&gt;New todo item text&lt;input type="text" name="item" /&gt;&lt;/label&gt;
+            &lt;input type="submit" value="Submit" /&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;run();
+?&gt;
+</code></pre>
+
+<p>We&rsquo;re just adding a new route to handle what happens when we click the link here. The new page also has a form for submitting the new item.</p>
+
+<p>With that done, the second step should be in place. Run <code>cucumber</code> again and you should see something like this:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+      TODO (Cucumber::Pending)
+      ./features/step_definitions/todo_steps.rb:10:in `/^I fill in the item$/'
+      features/todo.feature:10:in `And I fill in the item'
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+1 scenario (1 pending)
+5 steps (2 skipped, 1 pending, 2 passed)
+0m0.048s
+</code></pre>
+
+<p>So onto the third step. We&rsquo;ve already created the input for filling in the item, so all we need to do to make this step pass is write an appropriate step definition:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">When /^I fill in the item$/ do
+    fill_in 'item', :with =&gt; 'Feed cat'
+end
+</code></pre>
+
+<p>With that done, run <code>cucumber</code> again and this step should pass:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+      TODO (Cucumber::Pending)
+      ./features/step_definitions/todo_steps.rb:14:in `/^I click the button Submit$/'
+      features/todo.feature:11:in `And I click the button Submit'
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+1 scenario (1 pending)
+5 steps (1 skipped, 1 pending, 3 passed)
+0m0.117s
+</code></pre>
+
+<p>Now we need to implement the step for clicking the Submit button. As with clicking on the New Item link, we can make this step generic to save us time later:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">When /^I click the button (.*)$/ do |button|
+    click_button (button)
+end
+</code></pre>
+
+<p>With that done, run <code>cucumber</code> again and you should see something like this:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+      Received the following error for a POST request to http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem: '404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem -- unhandled response' (RuntimeError)
+      (eval):2:in `send'
+      (eval):2:in `click_button'
+      ./features/step_definitions/todo_steps.rb:14:in `/^I click the button (.*)$/'
+      features/todo.feature:11:in `And I click the button Submit'
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+Failing Scenarios:
+cucumber features/todo.feature:7 # Scenario: New item
+
+1 scenario (1 failed)
+5 steps (1 failed, 1 skipped, 3 passed)
+0m0.210s
+</code></pre>
+
+<p>The step is failing here because submitting the new item generates a 404 error. We need to handle the POST. Open up index.php again and edit it to look like this:</p>
+
+<pre><code class="php index.php">&lt;?php
+require 'Slim/Slim.php';
+
+\Slim\Slim::registerAutoloader();
+
+$app = new \Slim\Slim();
+
+// GET route
+$app-&gt;get('/', function () {
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;a href="index.php/newitem"&gt;New Item&lt;/a&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;get('/newitem', function () {
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;form action="index.php/submitnewitem" method="POST"&gt;
+            &lt;label&gt;New todo item text&lt;input type="text" name="item" /&gt;&lt;/label&gt;
+            &lt;input type="submit" value="Submit" /&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;post('/submitnewitem', function () {
+    $item = $_POST['item'];
+    $template = &lt;&lt;&lt;EOT
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Todo list&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;p&gt;$item&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+EOT;
+    echo $template;
+});
+
+$app-&gt;run();
+?&gt;
+</code></pre>
+
+<p>Here we&rsquo;re cheating a little bit. In a working application we&rsquo;d want to store the to-do list items in a database, but to keep this tutorial simple we&rsquo;ll just output the result of the POST request and leave implementing a database to store the items as an exercise for the reader.</p>
+
+<p>Now, run <code>cucumber</code> again and you should see that this step now passes:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+      TODO (Cucumber::Pending)
+      ./features/step_definitions/todo_steps.rb:18:in `/^I should see the new item added to the list$/'
+      features/todo.feature:12:in `Then I should see the new item added to the list'
+
+1 scenario (1 pending)
+5 steps (1 pending, 4 passed)
+0m0.067s
+</code></pre>
+
+<p>On to our final step. We want to make sure the page contains the text we submitted, which is very easy to do with Capybara. Change the final step to look like this:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">Then /^I should see the new item added to the list$/ do
+    page.should have_content('Feed cat')
+end
+</code></pre>
+
+<p>Now run <code>cucumber</code> again and you should see that the scenario has now passed:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  Scenario: New item                                 # features/todo.feature:7
+    Given I am on the home page                      # features/step_definitions/todo_steps.rb:1
+    When I click on New Item                         # features/step_definitions/todo_steps.rb:5
+    And I fill in the item                           # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit                    # features/step_definitions/todo_steps.rb:13
+    Then I should see the new item added to the list # features/step_definitions/todo_steps.rb:17
+
+1 scenario (1 passed)
+5 steps (5 passed)
+0m0.068s
+</code></pre>
+
+<p>We&rsquo;re nearly done here, but first there&rsquo;s a couple of other handy things you can do with Cucumber that I&rsquo;d like to show you. We&rsquo;ve been using the Mechanize driver for Capybara, which is very fast and efficient. However, it&rsquo;s effectively a text-mode browser like Lynx, so it can&rsquo;t be used to test any functionality that relies on JavaScript. However, Mechanize isn&rsquo;t the only driver available for Capybara, and you can switch to the JavaScript driver when necessary so you can test. The default JavaScript driver is Selenium, which will launch an instance of Firefox and use that for the test.</p>
+
+<p>It&rsquo;s easy to switch to the JavaScript driver when you need it. Just tag the scenario with @javascript, as in this example:</p>
+
+<pre><code class="cucumber features/todo.feature">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+    @javascript
+    Scenario: New item
+        Given I am on the home page
+        When I click on New Item
+        And I fill in the item
+        And I click the button Submit
+        Then I should see the new item added to the list
+</code></pre>
+
+<p>Now run <code>cucumber</code> again and this time it will fire up an instance of Firefox and use that to run the tests. This can also be handy for debugging purposes since, unlike with Mechanize, you can see the pages.</p>
+
+<p>Finally, what about if you want to test the same functionality multiple times with different input? You don&rsquo;t want to have to write out multiple scenarios that are virtually identical, even if you have refactored them to make them more useful. What you need is a way to repeat the same test, only with different input each time.</p>
+
+<p>Handily, Cucumber can do this too. First, let&rsquo;s refactor the code for our step definitions so the final step can handle any text:</p>
+
+<pre><code class="ruby features/step_definitions/todo_steps.rb">Given /^I am on the home page$/ do
+    visit "http://localhost/~matthewdaly/todo/index.php"
+end
+
+When /^I click on (.*)$/ do |link|
+    click_link (link)
+end
+
+When /^I fill in the item with (.*)$/ do |item|
+    fill_in 'item', :with =&gt; item
+end
+
+When /^I click the button (.*)$/ do |button|
+    click_button (button)
+end
+
+Then /^I should see the text (.*)$/ do |text|
+    page.should have_content(text)
+end
+</code></pre>
+
+<p>Here we&rsquo;ve changed the third and fifth items so we can pass any value we want through to them. As I mentioned earlier, this is good practice since it means we don&rsquo;t have to write more code for our tests than we need to.</p>
+
+<p>With that done, open up the feature file and amend it to look like this:</p>
+
+<pre><code class="cucumber features/todo.feature">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+    @javascript
+    Scenario Outline: New item
+        Given I am on the home page
+        When I click on New Item
+        And I fill in the item with &lt;item&gt;
+        And I click the button Submit
+        Then I should see the text &lt;item&gt;
+    Examples:
+        | item                      |   
+        | Feed cat                  |   
+        | Stop milk                 |   
+        | Take over world           |
+</code></pre>
+
+<p>If you then run <code>cucumber</code> again, the scenario should run three times, each time entering different text:</p>
+
+<pre><code class="bash">Feature: Todo
+
+    In order to use the site
+    As a user
+    I want to be able to submit, view and delete to-do list items
+
+  @javascript
+  Scenario Outline: New item           # features/todo.feature:8
+    Given I am on the home page        # features/step_definitions/todo_steps.rb:1
+    When I click on New Item           # features/step_definitions/todo_steps.rb:5
+    And I fill in the item with &lt;item&gt; # features/step_definitions/todo_steps.rb:9
+    And I click the button Submit      # features/step_definitions/todo_steps.rb:13
+    Then I should see the text &lt;item&gt;  # features/step_definitions/todo_steps.rb:17
+
+    Examples: 
+      | item            |
+      | Feed cat        |
+      | Stop milk       |
+      | Take over world |
+
+3 scenarios (3 passed)
+15 steps (15 passed)
+0m25.936s
+</code></pre>
+
+<p>With only a few changes, we&rsquo;re now running the same scenario over and over again with different input, and testing the output is correct for each one. This makes it very easy to test repetitive content. For instance, if you had an e-commerce site with lots of products and you wanted to test the pages for some of the products, you could put them in a table like this. You can have more than one column if necessary, so you could write a scenario like this:</p>
+
+<pre><code class="cucumber features/todo.feature">    Scenario Outline: Test products
+        Given I am on the home page
+        When I search for &lt;product&gt;
+        And I click on the first result
+        Then I should not see any errors
+        And I should see the text &lt;productname&gt;
+
+    Examples:
+        | product           | productname                           |
+        | supersprocket     | Super Sprocket 3000                   |
+</code></pre>
+
+<p>As you can see, Cucumber is a really simple way to start testing your web apps, and can really improve the quality of your code. Even if you&rsquo;ve never used Ruby before, <a href="https://github.com/jnicklas/capybara#readme">Capybara&rsquo;s API</a> is very simple and intuitive, and should adequately cover most of what you need to do when testing a web app.</p>
+
+<p>As I mentioned, the PHP community in general has been a bit slack in terms of getting proper automated tests working. But Cucumber makes it so simple, and offers so many other benefits, such as human-readable tests and getting stakeholders more involved in the development process, that there&rsquo;s really no excuse not to use it. Hope you&rsquo;ve enjoyed this tutorial, and that it&rsquo;s encouraged you to start using Cucumber to test your own web apps.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[New theme]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2012/02/28/new-theme/"/>
+    <updated>2012-02-28T18:25:30+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2012/02/28/new-theme</id>
+    <content type="html"><![CDATA[<p>For a long time now, I&rsquo;ve kept meaning to write my own WordPress theme from scratch for this site, but just haven&rsquo;t been able to find the time to do so. Now, I&rsquo;ve finally found the time to do so, and here it is!</p>
+
+<p>Please let me know what you think, but be gentle (this is my first solo WordPress theme, and also the only one I&rsquo;ve built completely from scratch), and if you find any issues with it please let me know. Don&rsquo;t expect it to look great in IE6 or IE7 however - I&rsquo;ve given it a very cursory review in those browsers, and that&rsquo;s all. It&rsquo;s still perfectly readable, but it uses a fair amount of CSS3 so it&rsquo;s inevitably not going to look as pretty in those browsers.</p>
+
+<p>The code is <a href="https://github.com/matthewbdaly/Steel-Age">on GitHub</a> if you want to take a look.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[So you REALLY don't know regular expressions?]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2012/01/29/so-you-really-dont-know-regular-expressions/"/>
+    <updated>2012-01-29T19:52:53+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2012/01/29/so-you-really-dont-know-regular-expressions</id>
+    <content type="html"><![CDATA[<p>Ever since I started my new job, I&rsquo;ve noticed a curious phenomenon. I work with two wonderfully gifted programmers who both know PHP much better than I do, and I learn something new from them all the time. However, neither one of them really knows or uses regular expressions.</p>
+
+<p>Now, as I learned Perl before I learned PHP, naturally I learned regular expressions quite early on in that process. In Perl, regular expressions are a huge part of the language - you simply cannot get away without learning them to some extent as they are used extensively in so many parts of the language.</p>
+
+<p>Apparently I&rsquo;m not the only one to notice this. Here&rsquo;s a quote I found on Stack Exchange:</p>
+
+<blockquote><p>In earlier phases of my career (ie. pre-PHP), I was a Perl guru, and one major aspect of Perl gurudom is mastery of regular expressions.</p>
+
+<p>On my current team, I&rsquo;m literally the only one of us who reaches for regex before other (usually nastier) tools. Seems like to the rest of the team they&rsquo;re pure magic. They&rsquo;ll wheel over to my desk and ask for a regex that takes me literally ten seconds to put together, and then be blown away when it works. I don&rsquo;t know&ndash;I&rsquo;ve worked with them so long, it&rsquo;s just natural at this point.</p>
+
+<p>In the absence of regex-fluency, you&rsquo;re left with combinations of flow-control statements wrapping strstr and strpos statements, which gets ugly and hard to run in your head. I&rsquo;d much rather craft one elegant regex than thirty lines of plodding string searching.</p></blockquote>
+
+<p>While I would hesitate to call myself a Perl guru (at best I would call myself intermediate with Perl), I would say I know enough about regular expressions that I can generally get useful work done with them.</p>
+
+<p>Take the following example in Perl (edited somewhat as it didn&rsquo;t play nice with TinyMCE):</p>
+
+<pre><code class="perl">$fruit = "apple,banana,cherry";
+print $fruit;
+@fruit = split(/,/,$fruit);
+foreach(@fruit)
+{
+    print $_."\n";
+}
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+
+<p>Now, this code should be fairly easy to understand, even if you don&rsquo;t really know Perl. $fruit is a string containing &ldquo;apple,banana,cherry&rdquo;. The split() function takes two arguments, a regular expression defining the character(s) that are used to separate the parts of the string you want to put into an array, and the string you want to split. This returns the array @fruit, which consists of three strings, &ldquo;apple&#8217;, &#8220;banana&rdquo;, and &ldquo;cherry&rdquo;.</p>
+
+<p>In PHP, you can do pretty much the same thing, using the explode() function:</p>
+
+<pre><code class="php">&lt;?php
+$fruit = "apple,banana,cherry";
+echo $fruit."\n";
+$fruitArray = explode(",",$fruit);
+foreach($fruitArray as $fruitArrayItem)
+{
+    echo $fruitArrayItem."\n";
+}
+?&gt;
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+
+<p>As you can see, they work in pretty much the same way here. Both return basically the same output, and the syntax for using the appropriate functions for splitting the strings is virtually identical.</p>
+
+<p>However, it&rsquo;s once things get a bit more difficult that it becomes obvious how much more powerful regular expressions are. Say you&rsquo;re dealing with a string that&rsquo;s similar to that above, but may use different characters to separate the elements. For instance, say you&rsquo;ve obtained the data that you want to pass through into an array from a text file and it&rsquo;s somewhat inconsistent - perhaps the information you want is separated by differing amounts and types of whitespace, or different characters. The explode() function simply won&rsquo;t handle that (at least, not without a lot of pain). But with Perl&rsquo;s split() function, that&rsquo;s no problem. Here&rsquo;s how you might deal with input that had different types and quantities of whitespace as a separator:</p>
+
+<pre><code class="perl">@fruit = split(/\s+/,$fruit);
+</code></pre>
+
+<p>Yes, it&rsquo;s that simple! The \s metacharacter matches any type of whitespace, and the + modifier means that it will match one or more times. Now you can very easily convert the contents of that string into an array.</p>
+
+<p>Or say you want to convert an entire string of text, with all kinds of punctuation and whitespace, into an array, but only keep the actual words. This wouldn&rsquo;t be practical with explode(), but with split() it&rsquo;s easy:</p>
+
+<pre><code class="perl">@fruit = split(/\W+/,$fruit);
+</code></pre>
+
+<p>The \W metacharacter matches any non-word character (ie anything other than a-z, A-Z or 0-9), and again the + modifier means that it will match one or more times.</p>
+
+<p>And of course, regular expressions are useful for many more tasks than this that, while possible with most language&rsquo;s existing string functions, can get very nasty quite quickly. Say you want to match a UK postcode to check that it&rsquo;s valid (note that for the sake of simplicity, I&rsquo;m going to ignore BFPO and GIR postcodes). These use a format of one or two letters, followed by one digit, then may have an additional digit or letter, then a space, then a digit, then two letters. This would be a nightmare to check using most language&rsquo;s native string functions, but with a regex in Perl, it&rsquo;s relatively simple:</p>
+
+<pre><code class="perl">my $postcode = "NR1 1NP";
+if($postcode =~ m/^[a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1})(|\s+)\d{1}\w{2}$/)
+{
+    print "It matched!\n";
+}
+</code></pre>
+
+<p>And if you wanted to return the first part of the postcode if it matched as well, that&rsquo;s simple too:</p>
+
+<pre><code class="perl">my $postcode = "NR1 1NP";
+if($postcode =~ s/^([a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1}))(|\s+)\d{1}\w{2}$/$1/)
+{
+    print "It matched! $postcode\n";
+}
+</code></pre>
+
+<p>Now, you may say &ldquo;But that&rsquo;s in Perl! I&rsquo;m using PHP!&lsquo;. Well, regular expressions are an extremely powerful part of PHP that are very useful, they&rsquo;re just not as central to the language as they are in Perl. PHP actually has two distinct types of regular expressions - POSIX-extended regular expressions, and Perl-compatible regular expressions (or PCRE). However, POSIX-extended regular expressions were deprecated from PHP 5.3 onwards, so it&rsquo;s not really worth taking the time to learn them when PCRE will do exactly the same thing and is going to be around for the future. Furthermore, most other programming languages also support Perl-compatible regular expressions, so they&rsquo;re fairly portable between languages, and once you&rsquo;ve learned them in one language, you can easily use them in another. In other words, if you learn how to work with regular expressions in Perl, you can very easily transfer that knowledge to most other programming languages that support regular expressions.</p>
+
+<p>In the first example given above, we can replace explode() with preg_split, and the syntax is virtually identical to split() in Perl, with the only difference being the name of the function and that the pattern to match is wrapped in double quotes:</p>
+
+<pre><code class="php">&lt;?php
+$fruit = "apple,banana,cherry";
+echo $fruit."\n";
+$fruitArray = preg_split("/,/",$fruit);
+foreach($fruitArray as $fruitArrayItem)
+{
+    echo $fruitArrayItem."\n";
+}
+?&gt;
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+
+<p>Along similar lines, if we want to check if a string matches a pattern, we can use preg_match(), and if we want to search and replace, we can use preg_replace(). PHP&rsquo;s regular expression support is not appreciably poorer than Perl&rsquo;s, even if it&rsquo;s less central to the language as a whole.</p>
+
+<blockquote><p>But regular expressions are slower than PHP&rsquo;s string functions!</p></blockquote>
+
+<p>Yes, that&rsquo;s true. So it&rsquo;s a mistake to use regular expressions for something that can be handled quickly and easily using string functions. For instance, if in the following string you wanted to replace the word &ldquo;cow&rdquo; with &ldquo;sheep&rdquo;:</p>
+
+<blockquote><p>The cow jumped over the moon</p></blockquote>
+
+<p>You could use something like this:</p>
+
+<pre><code class="php">&lt;?php
+$text = "The cow jumped over the moon";
+$text = preg_replace("/cow/","sheep",$text);
+?&gt;
+</code></pre>
+
+<p>However, because here you are only looking to match literal characters, you don&rsquo;t need to use a regular expression. Just use the following:</p>
+
+<pre><code class="php">&lt;?php
+$text = str_replace("cow","sheep",$text);
+?&gt;
+</code></pre>
+
+<p>But, if you have to do some more complex pattern matching, you have to start using strpos to get the location of specific characters and returning substrings between those characters, and it gets very messy, very quickly indeed. In those cases, while I haven&rsquo;t done any kind of benchmarking on it, it stands to reason that quite quickly you&rsquo;ll reach a point where a regex would be faster.</p>
+
+<p>However, for a number of common tasks, such as validating email addresses and URLs, there&rsquo;s another way and you don&rsquo;t need to resort to regular expressions, or faffing about with loads of string functions. The filter_var() function can be used for validating or sanitising email addresses and URLs, among other things, so this is worth using instead of writing a regex. If you&rsquo;re using a framework such as CodeIgniter, you may have access to its native functions for validating this kind of thing, so you should use those instead.</p>
+
+<blockquote><p>But regular expressions are ugly and make for less readable code!</p></blockquote>
+
+<p>Not really. They seem intimidating to the newcomer, and very few people can just glance at a regex and instantly know what it does. But with regexes, you can often do complex things in far fewer lines of code than would be needed to accomplish the same thing using just PHP&rsquo;s string functions. If you can do something in a line or two using string functions, it&rsquo;s probably best to do that. But after that, things go downhill very quickly.</p>
+
+<p>Once you learn them, regular expressions really are not that hard, and you&rsquo;ll probably find enough things to use them for that you&rsquo;ll get plenty of practice at them. They&rsquo;re certainly more readable to anyone with even a modicum of experience using them than line after line of flow-control statements.</p>
+
+<blockquote><p>But you shouldn&rsquo;t be using regular expressions for parsing HTML or XML!</p></blockquote>
+
+<p>Quite true. Regular expressions are the wrong tool for that. You should probably use an existing library of some kind for that.</p>
+
+<blockquote><p>Some people, when confronted with a problem, think &ldquo;I know, I&rsquo;ll use regular expressions.&rdquo; Now they have two problems.</p></blockquote>
+
+<p>Ah, yes, surely one of the most misused quotes on the web! Again, regular expressions are not the right tool for every job, and there&rsquo;s a lot of tasks they get used for, and quite frankly, shouldn&rsquo;t be. Most of us who know regular expressions have been known to use them for things we probably shouldn&rsquo;t (I actually only just stumbled across filter_var, so I&rsquo;ve done my share of validating email addresses using regexes, and I&rsquo;m as guilty as anyone else of overusing them). But there&rsquo;s still plenty of stuff you should use it for when what you need to do can&rsquo;t be accomplished quickly and easily using string functions.</p>
+
+<p>Regular expressions are not inherently evil. They&rsquo;re a tool like any other. What is bad is using them for things where a simple alternative exists. However, they are still extremely useful, and there&rsquo;s plenty of valid use cases for them.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[First steps with PHP]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2010/06/08/first-steps-with-php/"/>
+    <updated>2010-06-08T22:24:59+01:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2010/06/08/first-steps-with-php</id>
+    <content type="html"><![CDATA[<p>I&rsquo;m currently working on my very first website for anyone other than myself. It&rsquo;s a simple brochure-style website advertising a friend&rsquo;s chalet at a seaside resort, which she wants to be able to rent out, and includes a simple contact form so that people can get in touch to ask questions or make a booking enquiry. Now, at present Python is the only programming language I know at all well that&rsquo;s useful for server-side scripting, but I decided to have a bash at building it using PHP, since that&rsquo;s pretty well supported and there&rsquo;s loads of tutorials and resources for teaching PHP to newbies, as well as innumerable third-party scripts and libraries. Also, PHP&rsquo;s such a popular language that you can&rsquo;t really get away from it if you want to get into web development - I see loads of PHP jobs advertised but very few Python ones. So I figured it&rsquo;ll be useful to have picked up a little PHP.</p>
+
+<p>I got the form working, and I&rsquo;ve added reCAPTCHA support to it to help prevent spam. All in all the form is working well, and it didn&rsquo;t take a great deal of PHP knowledge to write the script. I&rsquo;m already pretty confident that it&rsquo;s a language I can work with in future, possibly even on a professional basis. That said, I can already tell that I will never like working with PHP as much as I like working with Python - the syntax is far less elegant than that of Python, and the object-orientation looks and feels much more clumsy to me.</p>
+
+<p>There&rsquo;s plenty of things I&rsquo;d like to be able to do that require PHP, so I will be learning it thoroughly at some point, although I have no plans to do so immediately - I&rsquo;m about to do my JavaScript Fundamentals exam later this month, and after that I&rsquo;ve got to learn Perl, so it&rsquo;s not till I get that done that I&rsquo;ll be learning PHP properly. In particular, I&rsquo;m really interested in Wordpress theme development - I want to build a theme of my own for this blog since that&rsquo;ll say more about my abilities than an off-the-shelf theme, and it also happens to be an increasingly marketable skill.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Deleting Unwanted Vim Swap Files Using Perl - Matthew Daly's Blog</title>
+  <meta name="author" content="Matthew Daly">
+
+  
+  <meta name="description" content="Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I& &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-17043630-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Matthew Daly's Blog</a></h1>
+  
+    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Deleting Unwanted Vim Swap Files Using Perl</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2010-10-29T20:49:49+01:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>8:49 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I&rsquo;d written between several computers, and it would be a good idea to clear them up. I didn&rsquo;t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p>
+
+<p>I came up with the following:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="c1">#!/usr/bin/perl -w</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="n">strict</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="n">Cwd</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">sub </span><span class="nf">searchDir</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="c1"># Subroutine to scan a directory looking for Vim swap files</span>
+</span><span class='line'>    <span class="c1"># Get directory to read and current directory</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$readdir</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$startdir</span> <span class="o">=</span> <span class="n">cwd</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Change directory to the target one</span>
+</span><span class='line'>    <span class="nb">chdir</span><span class="p">(</span><span class="nv">$readdir</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span> <span class="s">&quot;Unable to open $readdir! $!\n&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;Scanning contents of directory $startdir\n&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Open the directory and grab the names of all the files and folders in it</span>
+</span><span class='line'>    <span class="nb">opendir</span><span class="p">(</span><span class="n">DIR</span><span class="p">,</span> <span class="s">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span> <span class="s">&quot;Unable to open current directory! $!\n&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">@entries</span> <span class="o">=</span> <span class="nb">readdir</span><span class="p">(</span><span class="n">DIR</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span> <span class="s">&quot;Unable to read directory! $!\n&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="nb">closedir</span><span class="p">(</span><span class="n">DIR</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Loop through the files and folders in the directory</span>
+</span><span class='line'>    <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$entry</span> <span class="p">(</span><span class="nv">@entries</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="c1"># Skip this one and the one above it in the filesystem hierarchy</span>
+</span><span class='line'>        <span class="k">next</span> <span class="k">if</span><span class="p">(</span><span class="nv">$entry</span> <span class="ow">eq</span> <span class="s">&quot;.&quot;</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">next</span> <span class="k">if</span><span class="p">(</span><span class="nv">$entry</span> <span class="ow">eq</span> <span class="s">&quot;..&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1"># If a file is a directory, call the searchDir subroutine recursively in order to scan it</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="o">-</span><span class="n">d</span> <span class="nv">$entry</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="n">searchDir</span><span class="p">(</span><span class="nv">$entry</span><span class="p">);</span>
+</span><span class='line'>            <span class="k">next</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1"># Use a regular expression to check to see if the current file starts with a period, and ends with .swp - if it does, it&#39;s a Vim swap file</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="nv">$entry</span> <span class="o">=~</span> <span class="sr">m/^\..*\.swp$/</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>            <span class="c1"># Inform the user that a Vim swap file has been found and print out the path to it</span>
+</span><span class='line'>            <span class="k">print</span> <span class="s">&quot;Found a Vim swap file!\n&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">my</span> <span class="nv">$swppath</span> <span class="o">=</span> <span class="n">cwd</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">print</span> <span class="s">&quot;It&#39;s the file $entry in $swppath.\n&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">my</span> <span class="nv">$fullpath</span> <span class="o">=</span> <span class="nv">$swppath</span> <span class="o">.</span> <span class="s">&quot;/&quot;</span> <span class="o">.</span> <span class="nv">$entry</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">print</span> <span class="s">&quot;The full path is $fullpath.\n&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1"># Prompt the user to delete the file</span>
+</span><span class='line'>            <span class="k">print</span> <span class="s">&quot;Do you wish to delete this file? (Y/N)\t&quot;</span><span class="p">;</span>
+</span><span class='line'>            <span class="nb">chomp</span><span class="p">(</span><span class="k">my</span> <span class="nv">$reply</span> <span class="o">=</span> <span class="p">);</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="nv">$reply</span> <span class="o">=~</span> <span class="sr">m/y/i</span><span class="p">)</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="k">print</span> <span class="s">&quot;Deleting $fullpath...\n&quot;</span><span class="p">;</span>
+</span><span class='line'>                <span class="nb">unlink</span><span class="p">(</span><span class="nv">$fullpath</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">chdir</span><span class="p">(</span><span class="nv">$startdir</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get directory to begin the search</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Enter directory to start search: &quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nb">chomp</span><span class="p">(</span><span class="k">my</span> <span class="nv">$beginSearch</span> <span class="o">=</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># call searchDir to start the search</span>
+</span><span class='line'><span class="n">searchDir</span><span class="p">(</span><span class="nv">$beginSearch</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Thankfully, I&rsquo;ve now discovered the <a href="https://wordpress.org/extend/plugins/preserve-code-formatting/">Preserve Code Formatting plugin</a> for WordPress, which seems to do a good job at making the code look presentable!</p>
+
+<p>This isn&rsquo;t perfect - it uses recursion to examine subdirectories, and when I ran it on my /home folder it somehow wound up in /sys on my Ubuntu machine and I ended up getting a deep recursion warning (a little research suggests this happens when it goes over 100 directories in). However, it seems to work fine for scanning individual folders in my /home directory, and that&rsquo;s all I really wanted anyway.</p>
+
+<p>I love how Perl makes writing this kind of simple script so easy. It&rsquo;s a great language for that kind of systems administration task.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2010-10-29T20:49:49+01:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>8:49 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/perl/'>perl</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/10/27/a-couple-of-things-i-love-about-perl/" title="Previous Post: A couple of things I love about Perl">&laquo; A couple of things I love about Perl</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/11/13/a-slight-change/" title="Next Post: A slight change...">A slight change... &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'matthewbdaly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Matthew Daly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'matthewdaly';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

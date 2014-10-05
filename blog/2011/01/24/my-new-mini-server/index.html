@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>My New Mini Server - Matthew Daly's Blog</title>
+  <meta name="author" content="Matthew Daly">
+
+  
+  <meta name="description" content="For a while now I&rsquo;ve wanted a home server of some description, the idea being that it was something I could use to run a web server for &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2011/01/24/my-new-mini-server">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-17043630-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Matthew Daly's Blog</a></h1>
+  
+    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">My New Mini Server</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2011-01-24T00:30:20+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:30 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>For a while now I&rsquo;ve wanted a home server of some description, the idea being that it was something I could use to run a web server for development purposes, and a mail server so I could have an offline backup for my Gmail account (considering how much I rely on it, it&rsquo;s only prudent to plan for what might happen if Gmail went down), and whatever else I need. Also, I only have laptops at present so I liked the idea of having something I could leave on all the time and connect to remotely via SSH.</p>
+
+<p>Around Christmas, I read a forum post by someone who&rsquo;d bought a PogoPlug cheap from PC World and had hacked it into a web server using Plugbox Linux, an Arch-based Linux distro. Shortly afterwards, I went into a branch of Currys in Norwich, and they had one on sale (£20 off the RRP of £70), so I shelled out for it. I already had a load of USB flash drives lying around, and an 8GB one is big enough for what I had in mind. After all, I wasn&rsquo;t going to be serving anything that demanding over it, so something small and low-powered should be fine.</p>
+
+<p>This weekend I finally got round to getting it set up. The PogoPlug service is actually pretty good - if you&rsquo;re unfamiliar with it, it&rsquo;s basically a self-hosted version of Dropbox, where you buy the device, connect it to your router, attach up to 4 flash drives or hard drives via USB, then share the files stored on them easily across your home network or over the Internet. However, this wasn&rsquo;t really what I wanted.</p>
+
+<p>Installing Plugbox Linux wasn&rsquo;t hard - I merely had to activate SSH from the PogoPlug&rsquo;s control panel, connect and kill the hbwd process, then install a new bootloader to enable it to boot the new OS. Once that was done, it was a case of attaching a flash drive, ensuring it was correctly mounted and the filesystem was set up properly, then downloading the Plugbox Linux tarball and unpacking it on the flash drive, before rebooting into the new OS.</p>
+
+<p>Once it was installed, it wasn&rsquo;t too hard to get the hang of pacman. I&rsquo;d prefer it to have been Debian-based as that&rsquo;s what I&rsquo;m most familiar with, but that&rsquo;s just personal preference. After a little tinkering I now have Postfix and Dovecot working on there, as well as Apache (although it might make sense to switch to something lighter, such as lighttpd or Cherokee). I&rsquo;ve given it a fully qualified domain name via a free subdomain at dyndns.org, and I can now access emails on there via IMAP. Outgoing email works fine too, so I can always set up a Perl script or two to notify me if anything goes wrong by sending an email to my Gmail account. I&rsquo;ve set up fetchmail to pull emails from my Gmail account via POP3, so all my email is in the process of being backed up on there, and I can use my phone to access it via IMAP, or SSH in and read it with Mutt. Going forwards, I may install Squirrelmail as well to give me more options.</p>
+
+<p>One thing I&rsquo;m not too sure about - I couldn&rsquo;t get incoming mails to work, and I&rsquo;m unsure whether this is because it&rsquo;s using a subdomain (the email address is basically <a href="&#109;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#x6d;&#x61;&#x74;&#x74;&#104;&#101;&#x77;&#64;&#x6d;&#x79;&#x64;&#111;&#x6d;&#x61;&#x69;&#110;&#x6e;&#x61;&#x6d;&#101;&#46;&#100;&#121;&#x6e;&#100;&#110;&#x73;&#46;&#111;&#114;&#103;">&#x6d;&#x61;&#x74;&#x74;&#x68;&#101;&#119;&#x40;&#x6d;&#x79;&#x64;&#x6f;&#109;&#97;&#105;&#110;&#x6e;&#x61;&#109;&#x65;&#x2e;&#100;&#x79;&#110;&#x64;&#x6e;&#x73;&#x2e;&#x6f;&#x72;&#x67;</a>) or Postfix is merely misconfigured. Is it possible to receive emails to a subdomain in this fashion?</p>
+
+<p>Anyway, this is a really great little machine and it&rsquo;s been lots of fun getting it set up. I have to say, though, I&rsquo;m really disappointed with the range of home server and NAS products currently on the market. Most of the NAS systems offer very little in the way of functionality or customisability, and most of the home servers are a bit too big, powerful and expensive, and usually run Windows Home Server, which isn&rsquo;t really my cup of tea.</p>
+
+<p>What I&rsquo;d like to see is a small home server with a couple of hard drive bays at most, and a Debian or Ubuntu-based OS with access to apt-get and tasksel, so it&rsquo;s easy to install whatever you want from the repositories. Also, give it a web interface that&rsquo;s simpler than Webmin and makes it quick and easy to set up common software, but offer an advanced option for those that want it. That would be a fantastic device for end users - if it made it easy to set up a UPnP server, a Firefly server, or a BitTorrent client, that would be really useful.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2011-01-24T00:30:20+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>12:30 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hacking/'>hacking</a>, <a class='category' href='/blog/categories/hardware/'>hardware</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2011/01/24/my-new-mini-server/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2011/01/24/my-new-mini-server/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/11/13/a-slight-change/" title="Previous Post: A slight change...">&laquo; A slight change...</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/02/21/more-on-my-mini-server/" title="Next Post: More on my mini server">More on my mini server &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'matthewbdaly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Matthew Daly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'matthewdaly';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

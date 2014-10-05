@@ -1,0 +1,1759 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Django Blog Tutorial - the Next Generation - Part 2 - Matthew Daly's Blog</title>
+  <meta name="author" content="Matthew Daly">
+
+  
+  <meta name="description" content="Welcome back! In this lesson, we&rsquo;ll use Twitter Bootstrap to make our blog look nicer, and we&rsquo;ll implement individual pages for each post &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-17043630-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Matthew Daly's Blog</a></h1>
+  
+    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Django Blog Tutorial - the Next Generation - Part 2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-01-02T11:28:48+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2014</span></span> <span class='time'>11:28 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Welcome back! In this lesson, we&rsquo;ll use Twitter Bootstrap to make our blog look nicer, and we&rsquo;ll implement individual pages for each post.</p>
+
+<p>Now, before we get started, don&rsquo;t forget to switch into your virtualenv. From within the directory for the project, run the following command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">source </span>venv/bin/activate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you haven&rsquo;t used Bootstrap before, you&rsquo;re in for a treat. With Bootstrap, it&rsquo;s easy to make a good-looking website quickly that&rsquo;s responsive and mobile-friendly. We&rsquo;ll also use HTML5 Boilerplate to get a basic HTML template in place.</p>
+
+<p>Now, to install these easily, we&rsquo;ll use Bower, which requires <a href="http://nodejs.org/">Node.js</a>. Install Node.js first. On most Linux distros, you&rsquo;ll also need to set <code>NODE_PATH</code>, which can be done by pasting the following into your <code>.bashrc</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.bashrc</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">NODE_PATH</span><span class="o">=</span><span class="s2">&quot;/usr/local/lib/node_modules&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>With that done, run the following command to install Bower:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo npm install -g bower
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next we need to create a Bower config. First, create the folder <code>blogengine/static</code>. Then create a new file called <code>.bowerrc</code> and paste in the following content:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.bowerrc</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;blogengine/static/bower_components&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>This tells Bower where it should put downloaded libraries. Next, run the following command to gener Bower:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>bower init
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Answer all the questions it asks you - for those with defaults, these should be fine, and everything else should be easy enough. Next, run the following command to install Bootstrap and HTML5 Boilerplate:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>bower install bootstrap html5-boilerplate --save
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note that as jQuery is a dependency of Bootstrap, it will also be installed automatically. Now, we need to keep our Bower-installed files out of version control - the <code>bower.json</code> file keeps track of them for us. So add the following to your .gitignore file:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>blogengine/static/bower_components/
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>All done? Let&rsquo;s commit our changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore .bowerrc bower.json
+</span><span class='line'>git commit -m <span class="s1">&#39;Added Bower config&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, let&rsquo;s make our template nicer. Django&rsquo;s templating system is very powerful and lets one template inherit from another. We&rsquo;re going to create a base template, using HTML5 Boilerplate as a starting point, that all of our web-facing pages will use. First, create a directory to hold the base template:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir templates/blogengine/includes
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Then copy the <code>index.html</code> file from HTML5 Boilerplate to this directory as <code>base.html</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cp blogengine/static/bower_components/html5-boilerplate/index.html templates/blogengine/includes/base.html
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now amend this file to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/includes/base.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span><span class='line'><span class="c">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="c">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="c">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="c">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;no-js&quot;</span><span class="nt">&gt;</span> <span class="c">&lt;!--&lt;![endif]--&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;title&gt;</span>{% block title %}My Django Blog{% endblock %}<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        {% load staticfiles %}
+</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/normalize.css&#39; %}&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/main.css&#39; %}&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap-theme.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>        <span class="c">&lt;!--[if lt IE 7]&gt;</span>
+</span><span class='line'><span class="c">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
+</span><span class='line'><span class="c">        &lt;![endif]--&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c">&lt;!-- Add your site or application content here --&gt;</span>
+</span><span class='line'>        {% block content %}{% endblock %}
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script&gt;</span><span class="nb">window</span><span class="p">.</span><span class="nx">jQuery</span> <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;&lt;script src=&quot;{% static &#39;</span><span class="nx">bower_components</span><span class="o">/</span><span class="nx">html5</span><span class="o">-</span><span class="nx">boilerplate</span><span class="o">/</span><span class="nx">js</span><span class="o">/</span><span class="nx">vendor</span><span class="o">/</span><span class="nx">jquery</span><span class="o">-</span><span class="mf">1.10</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="nx">min</span><span class="p">.</span><span class="nx">js</span><span class="s1">&#39; %}&quot;&gt;&lt;\/script&gt;&#39;</span><span class="p">)</span><span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/plugins.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/js/bootstrap.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c">&lt;!-- Google Analytics: change UA-XXXXX-X to be your site&#39;s ID. --&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;script&gt;</span>
+</span><span class='line'>            <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span><span class="nx">o</span><span class="p">,</span><span class="nx">i</span><span class="p">,</span><span class="nx">l</span><span class="p">,</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">){</span><span class="nx">b</span><span class="p">.</span><span class="nx">GoogleAnalyticsObject</span><span class="o">=</span><span class="nx">l</span><span class="p">;</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">||</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">=</span>
+</span><span class='line'>            <span class="kd">function</span><span class="p">(){(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">=</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">||</span><span class="p">[]).</span><span class="nx">push</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)});</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">l</span><span class="o">=+</span><span class="k">new</span> <span class="nb">Date</span><span class="p">;</span>
+</span><span class='line'>            <span class="nx">e</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span><span class="nx">r</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'>            <span class="nx">e</span><span class="p">.</span><span class="nx">src</span><span class="o">=</span><span class="s1">&#39;//www.google-analytics.com/analytics.js&#39;</span><span class="p">;</span>
+</span><span class='line'>            <span class="nx">r</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">)}(</span><span class="nb">window</span><span class="p">,</span><span class="nb">document</span><span class="p">,</span><span class="s1">&#39;script&#39;</span><span class="p">,</span><span class="s1">&#39;ga&#39;</span><span class="p">));</span>
+</span><span class='line'>            <span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">,</span><span class="s1">&#39;UA-XXXXX-X&#39;</span><span class="p">);</span><span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span><span class="s1">&#39;pageview&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note the following:</p>
+
+<ul>
+<li>We need to use <code>{% load staticfiles %}</code> to be able to load any static files.</li>
+<li>We use the <code>{% static %}</code> template tag to load static files such as CSS and HTML</li>
+<li>We define blocks called <code>title</code> and <code>content</code>. Any template that extends this one can override whatever is inside this template.</li>
+</ul>
+
+
+<p>Please note that HTML5 Boilerplate may conceivable change in future, so bear in mind that all you really need to do is load the staticfiles app, use the <code>static</code> tag for any static files that need to be loaded, and define the blocks in the appropriate places.</p>
+
+<p>Next, let&rsquo;s amend our existing template to inherit from this one:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text }}
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now fire up the server with <code>python manage.py runserver</code> and check everything is working OK. You should see that your new base template is now in use and the CSS and JS files are being loaded correctly. Let&rsquo;s commit again:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/
+</span><span class='line'>git commit -m <span class="s1">&#39;Now use Bootstrap and HTML5 Boilerplate for templates&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, let&rsquo;s use Bootstrap to style our blog a little. First we&rsquo;ll add a navigation bar at the top of our blog. Edit the base template as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/includes/base.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar navbar-static-top navbar-inverse&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar-inner&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;btn btn-navbar&quot;</span> <span class="na">data-toggle=</span><span class="s">&quot;collapse&quot;</span> <span class="na">data-target=</span><span class="s">&quot;.nav-collapse&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;brand&quot;</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>My Django Blog<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;nav-collapse collapse&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        {% block header %}
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;page-header&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;h1&gt;</span>My Django Blog<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        {% endblock %}
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            {% block content %}{% endblock %}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container footer&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span12&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;p&gt;</span>Copyright <span class="ni">&amp;copy;</span> {% now &quot;Y&quot; %}<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note the footer copyright section. Here we output the current year using <code>now</code>. Also note the addition of the header block. This will let us override the page header if necessary.</p>
+
+<p>We&rsquo;ll also wrap the posts in a div:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text }}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Let&rsquo;s commit our changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/
+</span><span class='line'>git commit -m <span class="s1">&#39;Amended templates&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<h2>Formatting our content</h2>
+
+<p>As it stands right now, we can&rsquo;t do much to format our posts. It is possible to include HTML in our posts with Django, but by default it will strip it out. Also, we don&rsquo;t want users to have to write HTML manually - we want to make our blog user friendly!</p>
+
+<p>There are two possible approaches. One is to embed a rich text editor like TinyMCE in the admin and use that for editing the files, but I&rsquo;ve found things like that to be cumbersome. The alternative is to use some other form of lightweight markup, and that&rsquo;s the approach we&rsquo;ll take here. We&rsquo;re going to use Markdown for editing our posts.</p>
+
+<p>Django has actually dropped support for Markdown, but it&rsquo;s not hard to implement your own version. First, install Markdown and add it to your <code>requirements.txt</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install markdown
+</span><span class='line'>pip freeze &gt; requirements.txt
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, we shouldn&rsquo;t write any production code before writing a test, so let&rsquo;s amend our existing post test to check to see that Markdown is working as expected:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">PostViewTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is [my first blog post](http://127.0.0.1:8000/)&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post saved</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Fetch the index</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post title is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post text is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post date is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%b&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the link is marked up properly</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;&lt;a href=&quot;http://127.0.0.1:8000/&quot;&gt;my first blog post&lt;/a&gt;&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>You&rsquo;ll also need to add the following at the top:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">markdown</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>What we do here is we convert our post text to include a link using Markdown. We also need to render that post in markdown within the test so that what we have in the test matches what will be produced - otherwise our test will be broken. We also check that the link is marked up correctly.</p>
+
+<p>Save the file and run the tests - they should fail. Now, create the following directory and file:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir blogengine/templatetags
+</span><span class='line'>touch blogengine/templatetags/__init__.py
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Note that the <code>__init__.py</code> file is meant to be blank.</p>
+
+<p>Then create the following file and edit it to look like this:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/templatetags/custom_markdown.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">markdown</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">template</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="kn">import</span> <span class="n">stringfilter</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@register.filter</span><span class="p">(</span><span class="n">is_safe</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'><span class="nd">@stringfilter</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">custom_markdown</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;nl2br&quot;</span><span class="p">,</span> <span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+</span><span class='line'>                                       <span class="n">extensions</span><span class="p">,</span>
+</span><span class='line'>                                       <span class="n">safe_mode</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+</span><span class='line'>                                       <span class="n">enable_attributes</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Then just amend the post list template to use it:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% load custom_markdown %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text|custom_markdown }}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>It&rsquo;s that easy to use a custom markup system with your blog!</p>
+
+<p>Let&rsquo;s commit the changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add requirements.txt templates/ blogengine/
+</span><span class='line'>git commit -m <span class="s1">&#39;Added Markdown support&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<h2>Pagination</h2>
+
+<p>As at right now, all of our posts are displayed on the index page. We want to fix that by implementing pagination. Fortunately, that&rsquo;s very easy for us because we&rsquo;re using Django&rsquo;s generic views. Go into <code>blogengine/urls.py</code> and amend it as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">url</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">ListView</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Index</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;page&gt;\d+)?/?$&#39;</span><span class="p">,</span> <span class="n">ListView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">model</span><span class="o">=</span><span class="n">Post</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">paginate_by</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">)),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>That will automatically paginate our posts by 5 - feel free to change the value of <code>paginate_by</code> if you wish. However, we need to place the links in our template as well:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% load custom_markdown %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text|custom_markdown }}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>
+</span><span class='line'>        {% if page_obj.has_previous %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>        {% if page_obj.has_next %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Try adding a few more blog posts, and you&rsquo;ll see the pagination links. But give them a try, and they won&rsquo;t work. Why not? Well, as it turns out there was a bug in the project-wide <code>urls.py</code> file (my bad!). Let&rsquo;s fix that:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>django_tutorial_blog_ng/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.conf.urls</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">url</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">autodiscover</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Examples:</span>
+</span><span class='line'>    <span class="c"># url(r&#39;^$&#39;, &#39;django_tutorial_blog_ng.views.home&#39;, name=&#39;home&#39;),</span>
+</span><span class='line'>    <span class="c"># url(r&#39;^blog/&#39;, include(&#39;blog.urls&#39;)),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^admin/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">urls</span><span class="p">)),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Blog URLs</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;blogengine.urls&#39;</span><span class="p">)),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you try again, you&rsquo;ll see that the <code>blogengine</code> app now happily deals with the paginated posts. Let&rsquo;s commit our changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/ django_tutorial_blog_ng/ templates/
+</span><span class='line'>git commit -m <span class="s1">&#39;Implemented pagination&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<h2>Viewing individual posts</h2>
+
+<p>As our last task for today, we&rsquo;ll implement individual pages for each post. We want each post to have a nice, friendly URL that is as human-readable as possible, and also includes the date the post was created.</p>
+
+<p>First of all, we&rsquo;ll implement our test for it, however:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_post_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Create the post</span>
+</span><span class='line'>    <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is [my first blog post](http://127.0.0.1:8000/)&#39;</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check new post saved</span>
+</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Get the post URL</span>
+</span><span class='line'>    <span class="n">post_url</span> <span class="o">=</span> <span class="n">only_post</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Fetch the post</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_url</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check the post title is in the response</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check the post text is in the response</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check the post date is in the response</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%b&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check the link is marked up properly</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;&lt;a href=&quot;http://127.0.0.1:8000/&quot;&gt;my first blog post&lt;/a&gt;&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Add this method to the <code>PostViewTest</code> class, after <code>test_index</code>. It&rsquo;s very similar to <code>test_index</code>, since it&rsquo;s testing much the same content. However, not that we fetch the post-specific URL using the method <code>get_absolute_url</code>, and we then fetch that page.</p>
+
+<p>Now, if you run the test, it will fail because <code>get_absolute_url</code> isn&rsquo;t implemented. It&rsquo;s often a good idea to have a <code>get_absolute_url</code> method for your models, which defines a single URL scheme for that type of object. So let&rsquo;s create one. However, to implement our URL scheme we need to make some changes. Right now we have the date, but we don&rsquo;t have a text string we can use, known in Django as a <em>slug</em>. So we&rsquo;ll add a slug field, which will be prepopulated based on the post title. Edit your model as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Create your models here.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">get_absolute_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slug</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;-pub_date&quot;</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Here we&rsquo;ve added a slug field to the model, as well as implementing our <code>get_absolute_url</code> method. Note we&rsquo;ve limited the date to year and month, but you can include days if you wish.</p>
+
+<p>While we&rsquo;re in here, we&rsquo;ve also implemented the <code>__unicode__</code> method. Essentially, this sets how Django describes the object in the admin - in this case, the post title is a logical way of describing that <code>Post</code> object, so it returns the post title.</p>
+
+<p>We&rsquo;ve also added the class Meta, with the ordering field. This tells Django that by default any list of posts should return them ordered by <code>pub_date</code> in reverse - in other words, latest first.</p>
+
+<p>To have the slug filled in automatically, we need to customise the admin interface a little as well:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/admin.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">models</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">PostAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">prepopulated_fields</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;slug&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s">&quot;title&quot;</span><span class="p">,)}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Post</span><span class="p">,</span> <span class="n">PostAdmin</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Now, I recommend at this stage going into the admin and deleting all of your posts, because otherwise you&rsquo;ll have problems in migrating them. The issue is that each slug is compulsory and must be unique, and it&rsquo;s not practical to use South to automatically generate new slugs from the title on the fly, so by deleting them at this stage you&rsquo;ll avoid problems. Once that&rsquo;s done, run this command:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py schemamigration --auto blogengine
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>You&rsquo;ll be prompted to specify a one-off default value - enter any string you like, such as &ldquo;blah&rdquo;. Then run the migration:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py migrate
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Let&rsquo;s run our tests now:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">(</span>venv<span class="o">)</span>Smith:django_tutorial_blog_ng matthewdaly<span class="nv">$ </span>python manage.py <span class="nb">test</span>
+</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span><span class='line'>.F.F...F
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'>FAIL: test_create_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 103, in test_create_post
+</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;added successfully&#39;</span> in response.content<span class="o">)</span>
+</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'>FAIL: test_edit_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 132, in test_edit_post
+</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;changed successfully&#39;</span> in response.content<span class="o">)</span>
+</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">======================================================================</span>
+</span><span class='line'>FAIL: test_post_page <span class="o">(</span>blogengine.tests.PostViewTest<span class="o">)</span>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 222, in test_post_page
+</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
+</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> 200
+</span><span class='line'>
+</span><span class='line'>----------------------------------------------------------------------
+</span><span class='line'>Ran <span class="m">8</span> tests in 2.180s
+</span><span class='line'>
+</span><span class='line'>FAILED <span class="o">(</span><span class="nv">failures</span><span class="o">=</span>3<span class="o">)</span>
+</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Whoops! Our tests are broken, because the slug field isn&rsquo;t being filled in. If you take a look at the page for adding a post, you&rsquo;ll notice that the slug is filled in using JavaScript, so our test fails because the test client doesn&rsquo;t interpret JavaScript. So in the tests we have to fill in the slug field manually.</p>
+
+<p>Also, for the unit tests, the slug attribute isn&rsquo;t being created at all, so it can&rsquo;t be saved. Let&rsquo;s remedy that. First, edit the <code>test_create_post</code> method of <code>PostTest</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">PostTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Set the attributes</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Save it</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check we can find it</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check attributes</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My first post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my first blog post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="s">&#39;my-first-post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">minute</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Next, let&rsquo;s amend <code>AdminTest</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">fixtures</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;users.json&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Get login page</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log the user in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_logout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log out</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check response code</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Create the new post</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My first post&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my first post&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check added successfully</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post now in database</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_edit_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Edit the post</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/1/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My second post&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-second-post&#39;</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check changed successfully</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;changed successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check post amended</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My second post&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_delete_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is my first blog post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post saved</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Log in</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Delete the post</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/1/delete/&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&#39;post&#39;</span><span class="p">:</span> <span class="s">&#39;yes&#39;</span>
+</span><span class='line'>        <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check deleted successfully</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;deleted successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check post amended</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>And <code>PostViewTest</code>:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">PostViewTest</span><span class="p">(</span><span class="n">LiveServerTestCase</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is [my first blog post](http://127.0.0.1:8000/)&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post saved</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Fetch the index</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post title is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post text is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post date is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%b&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the link is marked up properly</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;&lt;a href=&quot;http://127.0.0.1:8000/&quot;&gt;my first blog post&lt;/a&gt;&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">test_post_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>        <span class="c"># Create the post</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">Post</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;My first post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;This is [my first blog post](http://127.0.0.1:8000/)&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;my-first-post&#39;</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check new post saved</span>
+</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Get the post URL</span>
+</span><span class='line'>        <span class="n">post_url</span> <span class="o">=</span> <span class="n">only_post</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Fetch the post</span>
+</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">post_url</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post title is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post text is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the post date is in the response</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%b&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pub_date</span><span class="o">.</span><span class="n">day</span><span class="p">)</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c"># Check the link is marked up properly</span>
+</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;&lt;a href=&quot;http://127.0.0.1:8000/&quot;&gt;my first blog post&lt;/a&gt;&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>What we&rsquo;re doing here is that every time we create a Post object programmatically, we add the <code>post.slug</code> atttribute to it. Also, when submitting a post via the admin, we pass the <code>slug</code> parameter via HTTP POST, thus emulating how a form would submit this data.</p>
+
+<p>If you run the tests again, you&rsquo;ll see that <code>test_post_page</code> still fails. This is because we haven&rsquo;t yet up the URLs, templates and views to do so. Let&rsquo;s fix that. We&rsquo;ll use another generic view, called a DetailView, to display the posts. Amend <code>blogengine/urls.py</code> as follows:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">rom</span> <span class="n">django</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">urls</span> <span class="kn">import</span> <span class="nn">patterns</span><span class="o">,</span> <span class="nn">url</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">ListView</span><span class="p">,</span> <span class="n">DetailView</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c"># Index</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;page&gt;\d+)?/?$&#39;</span><span class="p">,</span> <span class="n">ListView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">model</span><span class="o">=</span><span class="n">Post</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">paginate_by</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">)),</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Individual posts</span>
+</span><span class='line'>    <span class="n">url</span><span class="p">(</span><span class="s">r&#39;^(?P&lt;pub_date__year&gt;\d{4})/(?P&lt;pub_date__month&gt;\d{1,2})/(?P&lt;slug&gt;[a-zA-Z0-9-]+)/?$&#39;</span><span class="p">,</span> <span class="n">DetailView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">model</span><span class="o">=</span><span class="n">Post</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">)),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>Running our tests again will still fail, but now because the template <code>post_detail.html</code> has not been found. So let&rsquo;s create it:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_detail.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% load custom_markdown %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ object.title }}<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ object.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ object.text|custom_markdown }}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>{% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>If you run your tests again, they should now pass. However, we still need to provide a hyperlink from each post in the index to the post page, so let&rsquo;s do that:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% load custom_markdown %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% for post in object_list %}
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>        {{ post.text|custom_markdown }}
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        {% endfor %}
+</span><span class='line'>
+</span><span class='line'>        {% if page_obj.has_previous %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>        {% if page_obj.has_next %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>And that&rsquo;s all for today! We now have individual post pages, we&rsquo;ve styled our blog a bit, and we&rsquo;ve implemented Markdown support. All that remains is to commit our changes:</p>
+
+<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/ templates/
+</span><span class='line'>git commit -m <span class="s1">&#39;Implemented post pages&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+
+<p>As before, I&rsquo;ve tagged the final commit with &lsquo;lesson-2&rsquo;, so if you&rsquo;re following along, you can switch to this point with <code>git checkout lesson-2</code>.</p>
+
+<p>Next time we&rsquo;ll add support for flat pages and multiple authors, as well as adding support for comments via a third-party commenting system.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-01-02T11:28:48+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2014</span></span> <span class='time'>11:28 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/tdd/'>tdd</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/" title="Previous Post: Django blog tutorial - the next generation - part 1">&laquo; Django blog tutorial - the next generation - part 1</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/03/django-blog-tutorial-the-next-generation-part-3/" title="Next Post: Django Blog Tutorial - the Next Generation - Part 3">Django Blog Tutorial - the Next Generation - Part 3 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'matthewbdaly',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Matthew Daly -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'matthewdaly';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/';
+        var disqus_url = 'http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
