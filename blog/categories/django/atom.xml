@@ -4,7 +4,7 @@
   <title><![CDATA[Category: django | Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/blog/categories/django/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-10-05T21:50:29+01:00</updated>
+  <updated>2014-10-19T22:19:47+01:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -12,6 +12,125 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My Django web server setup]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2014/10/19/my-django-web-server-setup/"/>
+    <updated>2014-10-19T19:52:28+01:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2014/10/19/my-django-web-server-setup</id>
+    <content type="html"><![CDATA[<p>This isn&rsquo;t really part of my Django tutorial series (that has now definitely concluded!), but I thought I&rsquo;d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don&rsquo;t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p>
+
+<h2>Operating system</h2>
+
+<p>This isn&rsquo;t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it&rsquo;s fanatically stable.</p>
+
+<h2>Database server</h2>
+
+<p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn&rsquo;t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I&rsquo;m currently in the process of deploying at work. So far I haven&rsquo;t had any problems with it.</p>
+
+<h2>Web server</h2>
+
+<p>It&rsquo;s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p>
+
+<p>For serving the static files, I use Nginx - it&rsquo;s generally considered to be faster than Apache for this use case. Here&rsquo;s a typical Nginx config file:</p>
+
+<pre><code class="json /etc/nginx/sites-available/default">server {
+    listen 80;
+    server_name example.com;
+    client_max_body_size 50M;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    location /static {
+        root /var/www/mysite;
+    }
+
+    location /media {
+        root /var/www/mysite;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+    }
+}
+</code></pre>
+
+<p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project:</p>
+
+<pre><code class="python gunicorn.conf.py">bind = "127.0.0.1:8000"
+logfile = "/var/log/gunicorn.log"
+loglevel = "debug"
+workers = 3
+</code></pre>
+
+<p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p>
+
+<p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won&rsquo;t give details here - your package manager of choice should have a suitable package available. Here&rsquo;s a typical Supervisor config file I might use for running Gunicorn for a Django app:</p>
+
+<pre><code class="bash /etc/supervisor/conf.d/mysite-supervisor.conf">[program:mysite]
+command=/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=3
+directory=/var/www/mysite/
+user=nobody
+autostart=true
+autorestart=true
+</code></pre>
+
+<p>Once that&rsquo;s in place, you can easily add the new app:</p>
+
+<pre><code class="bash">sudo supervisorctl reread
+sudo supervisorctl update
+</code></pre>
+
+<p>Then to start it:</p>
+
+<pre><code class="bash">sudo supervisorctl start mysite
+</code></pre>
+
+<p>Or stop it with:</p>
+
+<pre><code class="bash">sudo supervisorctl stop mysite
+</code></pre>
+
+<p>Or restart it:</p>
+
+<pre><code class="bash">sudo supervisorctl restart mysite
+</code></pre>
+
+<h2>Celery</h2>
+
+<p>So far, both of the web apps I&rsquo;ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p>
+
+<ul>
+<li>The user doesn&rsquo;t need to wait for the task to be completed before getting a response, improving performance</li>
+<li>It&rsquo;s more robust, since if the task fails, it can be automatically retried</li>
+<li>The task queue can be moved to another server if desired, making it easier to scale</li>
+<li>Scheduling tasks</li>
+</ul>
+
+
+<p>I&rsquo;ve used it in cases where I needed to send an email or a push notification, since these don&rsquo;t have to be done within the context of the same HTTP request, but need to be reliable.</p>
+
+<p>I generally use RabbitMQ as my message queue. I&rsquo;ll leave setting this up as an exercise for the reader since it&rsquo;s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here&rsquo;s a typical config file:</p>
+
+<pre><code class="bash /etc/supervisor/conf.d/celery-supervisor.conf">[program:celeryd]
+command=/var/www/mysite/venv/bin/python manage.py celery worker
+directory=/var/www/mysite/
+user=nobody
+autostart=true
+autorestart=true
+</code></pre>
+
+<p>Then start it up:</p>
+
+<pre><code class="bash">sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start celeryd
+</code></pre>
+
+<p>I make no claims about how good this setup is, but it works well for me. I haven&rsquo;t yet had the occasion to deploy a Django app to anywhere other than Heroku that really benefited from caching, so I haven&rsquo;t got any tips to share about that, but if I were building a content-driven web app, I would use Memcached since it&rsquo;s well-supported.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Django Blog Tutorial - the Next Generation - Part 9]]></title>
@@ -4065,406 +4184,6 @@ git push heroku master
 <p>And we&rsquo;re done! Don&rsquo;t forget, you can grab this lesson with <code>git checkout lesson-6</code>.</p>
 
 <p>Next time, we&rsquo;ll cover search (I promise!).</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Django blog tutorial - the next generation - part 5]]></title>
-    <link href="http://matthewdaly.co.uk/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/"/>
-    <updated>2014-05-24T20:15:54+01:00</updated>
-    <id>http://matthewdaly.co.uk/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5</id>
-    <content type="html"><![CDATA[<p>Hello again! I was originally planning to cover implementing a search system, adding more feeds, and tidying up the front end in this instalment. However, I felt it was time for a change of pace, so instead, we&rsquo;re going to look at:</p>
-
-<ul>
-<li>Checking code coverage and getting it to 100%</li>
-<li>Using continuous integration</li>
-<li>Deploying to Heroku</li>
-</ul>
-
-
-<p>Don&rsquo;t worry, the original lesson isn&rsquo;t going anywhere. We&rsquo;ll still be implementing all of that later on, but today is the day we get your Django blog up and running on the web. That way, you can get a better idea of how Django works in the wild, and you have something concrete to show for your efforts.</p>
-
-<h1>Continuous integration</h1>
-
-<p>If you&rsquo;re not familiar with continuous integration, it&rsquo;s basically a process that carries out some tasks automatically when you push a new commit to the repository. These tasks may include running unit tests, linting your code, and checking it to see what percentage of the code base is covered by the tests (after all, if your tests don&rsquo;t actually cover every scenario, then there&rsquo;s more of a chance that something might slip through the net. It&rsquo;s also possible to implement hooks to automatically deploy your application only if the tests pass.</p>
-
-<p>Typically, you will have a continuous integration server running somewhere that regularly polls your Git repository for changes, and when it finds a new commit, will check it out and run the tests (or whatever other task you configure it to). One of the most popular continuous integration servers around is <a href="http://jenkins-ci.org/">Jenkins</a> - I use it at work and can highly recommend it. However, we aren&rsquo;t going to cover using Jenkins here because setting it up is quite a big deal and it really is best kept on a server of its own (although feel free to use it if you prefer). Instead, we&rsquo;re going to use <a href="https://travis-ci.org/">Travis CI</a>, which integrates nicely with GitHub and is free for open source projects. If you don&rsquo;t mind your code being publicly available on GitHub, then Travis is a really great way to dip your toe into continuous integration.</p>
-
-<p>NB: You don&rsquo;t have to use continuous integration at all if you don&rsquo;t want to - this isn&rsquo;t a big project so you don&rsquo;t really need it. If you don&rsquo;t want to put your code on GitHub, then feel free to just follow along and not bother pushing your code to GitHub and configuring Travis.</p>
-
-<h1>Code coverage</h1>
-
-<p>As mentioned above, code coverage is a measure of the percentage of the code that is covered by tests. While not infallible, it&rsquo;s a fairly good guide to how comprehensive your tests are. If you have 100% code coverage, you can be fairly confident that your tests are comprehensive enough to catch most errors, so it&rsquo;s a good rule of thumb to aim for 100% test coverage on a project.</p>
-
-<p>So how do we check our test coverage? The <code>coverage</code> Python module is the most common tool for this. There&rsquo;s also a handy Django module called <code>django-jenkins</code>, which is designed to work with Jenkins, but can be used with any continuous integration server, that can not only run your tests, but also check code coverage at the same time. So, make sure your virtualenv is up and running:</p>
-
-<pre><code class="bash">source venv/bin/activate
-</code></pre>
-
-<p>Then, run the following command:</p>
-
-<pre><code class="bash">pip install coverage django-jenkins
-</code></pre>
-
-<p>Once that&rsquo;s done, add these to our requirements file:</p>
-
-<pre><code class="bash">pip freeze &gt; requirements.txt
-</code></pre>
-
-<p>We now need to configure our Django project to use <code>django-jenkins</code>. Add the following to the bottom of the settings file:</p>
-
-<pre><code class="python django_tutorial_blog_ng/settings.py">INSTALLED_APPS += ('django_jenkins',)
-JENKINS_TASKS = (
-    'django_jenkins.tasks.run_pylint',
-    'django_jenkins.tasks.with_coverage',
-)
-PROJECT_APPS = ['blogengine']
-</code></pre>
-
-<p>This adds <code>django-jenkins</code> to our installed apps and tells it to include two additional tasks, besides running the tests. The first task runs Pylint to check our code quality (but we aren&rsquo;t really concerned about that at this point). The second checks the coverage. Finally, we tell <code>django-jenkins</code> that the <code>blogengine</code> app is the only one to be tested.</p>
-
-<p>You&rsquo;ll also want to add the following lines to your <code>.gitignore</code>:</p>
-
-<pre><code class="bash .gitignore">reports/
-htmlcov/
-</code></pre>
-
-<p>These are the reports generated by <code>django-jenkins</code>, and should not be kept under version control. With that done, it&rsquo;s time to commit:</p>
-
-<pre><code class="bash">git add .gitignore django_tutorial_blog_ng/ requirements.txt
-git commit -m 'Added coverage checking using django-jenkins'
-</code></pre>
-
-<p>Now, let&rsquo;s run our tests. From now on, you&rsquo;ll use the following command to run your tests:</p>
-
-<pre><code class="bash">python manage.py jenkins
-</code></pre>
-
-<p>This ensures we check the coverage at the same time. Now, you&rsquo;ll notice that the <code>reports</code> folder has been created, and it will contain three files, including one called <code>coverage.xml</code>. However, XML isn&rsquo;t a very friendly format. Happily, we can easily generate reports in HTML instead:</p>
-
-<pre><code class="bash">python manage.py jenkins --coverage-html-report=htmlcov
-</code></pre>
-
-<p>Running this command will create another folder called <code>htmlcov/</code>, and in here you will find your report, nicely formatted as HTML. Open up <code>index.html</code> in your web browser and you should see a file-by-file breakdown of your code coverage. Nice, huh?</p>
-
-<p>Now, if your code so far is largely identical to mine, you&rsquo;ll notice that the model and view files don&rsquo;t have 100% coverage yet. If you click on each one, you&rsquo;ll see a handy line-by-line breakdown of the test coverage for each file. You&rsquo;ll notice that in the views file, the areas of the code for when tags and categories don&rsquo;t exist are highlighted in pink - this tells you that these lines of code are never executed during the tests. So let&rsquo;s fix that.</p>
-
-<p>First, our template needs to be able to handle empty lists.</p>
-
-<pre><code class="html templates/blogengine/post_list.html">{% extends "blogengine/includes/base.html" %}
-
-    {% load custom_markdown %}
-
-    {% block content %}
-        {% if object_list %}
-            {% for post in object_list %}
-            &lt;div class="post"&gt;
-            &lt;h1&gt;&lt;a href="{{ post.get_absolute_url }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
-            &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
-            {{ post.text|custom_markdown }}
-            &lt;/div&gt;
-            &lt;a href="{{ post.category.get_absolute_url }}"&gt;{{ post.category.name }}&lt;/a&gt;
-            {% for tag in post.tags.all %}
-            &lt;a href="{{ tag.get_absolute_url }}"&gt;{{ tag.name }}&lt;/a&gt;
-            {% endfor %}
-            {% endfor %}
-        {% else %}
-            &lt;p&gt;No posts found&lt;/p&gt;
-        {% endif %}
-
-        {% if page_obj.has_previous %}
-        &lt;a href="http://matthewdaly.co.uk/{{ page_obj.previous_page_number }}/"&gt;Previous Page&lt;/a&gt;
-        {% endif %}
-        {% if page_obj.has_next %}
-        &lt;a href="http://matthewdaly.co.uk/{{ page_obj.next_page_number }}/"&gt;Next Page&lt;/a&gt;
-        {% endif %}
-
-    {% endblock %}
-</code></pre>
-
-<p>Let&rsquo;s commit the changes:</p>
-
-<pre><code class="bash">git add templates/blogengine/post_list.html
-git commit -m 'Added a "No posts found" message to post list template'
-</code></pre>
-
-<p>Next, we need to write tests to check that we get a &ldquo;No posts found&rdquo; message when we view a tag or category that does not exist. Add the following methods to the class <code>PostViewTest()</code>:</p>
-
-<pre><code class="python blogengine/tests.py">    def test_nonexistent_category_page(self):
-        category_url = '/category/blah/'
-        response = self.client.get(category_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue('No posts found' in response.content)
-
-    def test_nonexistent_tag_page(self):
-        tag_url = '/tag/blah/'
-        response = self.client.get(tag_url)
-        self.assertEquals(response.status_code, 200)
-        self.assertTrue('No posts found' in response.content)
-</code></pre>
-
-<p>Now, let&rsquo;s run our tests again:</p>
-
-<pre><code class="bash">python manage.py jenkins --coverage-html-report=htmlcov
-</code></pre>
-
-<p>Assuming they all pass as expected, then your coverage reports will be regenerated. If you reload the coverage report, you should see that your views now have 100% test coverage. Let&rsquo;s commit again:</p>
-
-<pre><code class="bash">git add blogengine/tests.py
-git commit -m 'Views file now has 100% coverage'
-</code></pre>
-
-<p>Now, our models still don&rsquo;t have 100% coverage yet. If you look at the breakdown for <code>models.py</code>, you&rsquo;ll see that the line <code>if not self.slug:</code> has only partial coverage, because we missed out setting a slug for the categories and tags in our test. So, let&rsquo;s fix that. In <code>PostTest()</code>, amend the <code>test_create_category()</code> and <code>test_create_tag()</code> methods as follows:</p>
-
-<pre><code class="python blogengine/tests.py">    def test_create_category(self):
-        # Create the category
-        category = Category()
-
-        # Add attributes
-        category.name = 'python'
-        category.description = 'The Python programming language'
-        category.slug = 'python'
-
-        # Save it
-        category.save()
-
-        # Check we can find it
-        all_categories = Category.objects.all()
-        self.assertEquals(len(all_categories), 1)
-        only_category = all_categories[0]
-        self.assertEquals(only_category, category)
-
-        # Check attributes
-        self.assertEquals(only_category.name, 'python')
-        self.assertEquals(only_category.description, 'The Python programming language')
-        self.assertEquals(only_category.slug, 'python')
-
-    def test_create_tag(self):
-        # Create the tag
-        tag = Tag()
-
-        # Add attributes
-        tag.name = 'python'
-        tag.description = 'The Python programming language'
-        tag.slug = 'python'
-
-        # Save it
-        tag.save()
-
-        # Check we can find it
-        all_tags = Tag.objects.all()
-        self.assertEquals(len(all_tags), 1)
-        only_tag = all_tags[0]
-        self.assertEquals(only_tag, tag)
-
-        # Check attributes
-        self.assertEquals(only_tag.name, 'python')
-        self.assertEquals(only_tag.description, 'The Python programming language')
-        self.assertEquals(only_tag.slug, 'python')
-</code></pre>
-
-<p>Run the tests again:</p>
-
-<pre><code class="bash">python manage.py jenkins --coverage-html-report=htmlcov
-</code></pre>
-
-<p>Then refresh your coverage page, and we should have hit 100% coverage. Excellent news! This means that we can be confident that if any problems get introduced in future, we can pick them up easily. To demonstrate this, let&rsquo;s upgrade our Django install to the latest version and check everything still works as expected:</p>
-
-<pre><code class="bash">pip install Django --upgrade
-</code></pre>
-
-<p>This will upgrade the copy of Django in our virtualenv to the latest version. Then we can run our tests again:</p>
-
-<pre><code class="bash">python manage.py jenkins --coverage-html-report=htmlcov
-</code></pre>
-
-<p>Our tests should still pass, indicating that the upgrade to our Django version does not appear to have broken any functionality. Let&rsquo;s update our <code>requirements.txt</code>:</p>
-
-<pre><code class="bash">pip freeze &gt; requirements.txt
-git add requirements.txt
-git commit -m 'Upgraded Django version'
-</code></pre>
-
-<h1>Preparing our web app for deployment to Heroku</h1>
-
-<p>As mentioned previously, I&rsquo;m going to assume you plan to deploy your site on <a href="https://www.heroku.com/">Heroku</a>. It has good Django support, and you can quite happily host a blog there using their free tariff. If you&rsquo;d prefer to use another hosting provider, then you should be able to adapt these instructions accordingly.</p>
-
-<p>Now, so far we&rsquo;ve used SQLite as our database for development purposes. However, SQLite isn&rsquo;t really suitable for production purposes. Heroku provide a Postgresql database for each web app, so we will use that. To configure it, open up <code>settings.py</code> and amend the database configuration section to look like this:</p>
-
-<pre><code class="python django_tutorial_blog_ng/settings.py">DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.',
-        'NAME': '',
-    }
-}
-</code></pre>
-
-<p>Then, add the following at the end of the file:</p>
-
-<pre><code class="python django_tutorial_blog_ng/settings.py">
-# Heroku config
-# Parse database configuration from $DATABASE_URL
-import dj_database_url
-DATABASES['default'] =  dj_database_url.config(default="sqlite:///db.sqlite3")
-
-# Honor the 'X-Forwarded-Proto' header for request.is_secure()
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Allow all host headers
-ALLOWED_HOSTS = ['*']
-
-# Static asset configuration
-STATIC_ROOT = 'staticfiles'
-
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-)
-</code></pre>
-
-<p>A little explanation is called for. Remember when we first started out, we installed the <code>django-toolbelt</code> package, which included <code>dj-database-url</code>? Well, here we use the <code>dj_database_url</code> module to get the database from an environment variable set on Heroku. We set a default value so as to fall back to SQLite when that variable is not set. The other settings are required by Heroku.</p>
-
-<p>You may want to run your tests again to ensure everything is still working before committing:</p>
-
-<pre><code class="bash">git add django_tutorial_blog_ng/settings.py
-git commit -m 'Amended settings to work on desktop and Heroku'
-</code></pre>
-
-<h1>Setting up Continuous Integration and coverage</h1>
-
-<p>Now, as mentioned previously, I&rsquo;ll be demonstrating how to set up Travis CI for our project. Travis CI is only free for open-source projects, so if you don&rsquo;t want to make your code publicly accessible, you may want to use Jenkins instead. I&rsquo;ll leave setting that up and running it as an exercise for the reader, but I recommend a plugin called Cobertura which allows you to publish details of your code&rsquo;s test coverage.</p>
-
-<p>Unfortunately, Travis CI doesn&rsquo;t have the capability to publish your coverage results. Fortunately, you can use <a href="https://coveralls.io/">Coveralls.io</a> to pick up the slack. Like Travis, it&rsquo;s free for open-source projects, and if you host your code on GitHub, it&rsquo;s pretty easy to use.</p>
-
-<p>You can find instructions on setting up a project on Travis CI <a href="http://docs.travis-ci.com/user/getting-started/">here</a>. Once you&rsquo;ve configured it, you&rsquo;ll need to set up your <code>.travis.yml</code> file. This is a simple text file that tells Travis CI how to run your tests. Put the following content in the file:</p>
-
-<pre><code class="yml .travis.yml">language: python
-python:
-- "2.7"
-# command to install dependencies
-install: "pip install -r requirements.txt"
-# command to run tests
-script: coverage run --include="blogengine/*" --omit="blogengine/migrations/*" manage.py test blogengine
-after_success:
-    coveralls
-</code></pre>
-
-<p>Now, this tells Travis that this is a Python application, and we should be using Python 2.7. Please note you can test against multiple versions of Python if you wish - just add another line with the Python version you want to test against.</p>
-
-<p>Then, we see that we use Pip to install our requirements. Finally we run our tests with Coverage, in order to generate coverage data, and afterwards call <code>coveralls</code> to pass the coverage data to Coveralls.io.</p>
-
-<p>We also need to install the <code>coveralls</code> module:</p>
-
-<pre><code class="bash">pip install coveralls
-pip freeze &gt; requirements.txt
-</code></pre>
-
-<p>And we need to keep our coverage data out of version control:</p>
-
-<pre><code class="bash .gitignore">env/
-*.pyc
-db.sqlite3
-blogengine/static/bower_components/
-reports/
-htmlcov/
-.coverage
-</code></pre>
-
-<p>You&rsquo;ll also want to set up your project on Coveralls, as described <a href="https://coveralls.io/docs">here</a> - please note that this requires your project be in a public GitHub repository.</p>
-
-<p>With that done, let&rsquo;s commit our changes:</p>
-
-<pre><code class="bash">git add .gitignore .travis.yml requirements.txt
-git commit -m 'Added Travis config file and Coveralls support'
-</code></pre>
-
-<p>With that done, assuming you have Travis CI and Coveralls configured, and your code is already hosted on GitHub, then you should be able to just push your code up to trigger the build:</p>
-
-<pre><code class="bash">git push origin master
-</code></pre>
-
-<p>If you keep an eye on Travis in your browser, you can watch what happens as your tests are run. If for any reason the build fails, then it shouldn&rsquo;t be too hard to figure out what has gone wrong using the documentation for Travis and Coveralls - both services are pretty easy to use.</p>
-
-<p>Congratulations - you&rsquo;re now using Continuous Integration! That wasn&rsquo;t so hard, was it? Now, every time you push to GitHub, Travis will run your tests, and you&rsquo;ll get an email if they fail, giving you early warning of any problems, and you can check your coverage at the same time. Both Travis and Coveralls offer that you can place in your README file on GitHub to show off your coverage and build status - feel free to add these to your repo.</p>
-
-<p>You may want to try making a change that breaks your tests and committing it, then pushing it up, so that you can see what happens when the build breaks.</p>
-
-<h1>Deploying to Heroku</h1>
-
-<p>Our final task today is deploying our blog to Heroku so we can see it in action. First of all, if you don&rsquo;t already have an account with Heroku, you&rsquo;ll need to sign up <a href="https://www.heroku.com/">here</a>. You should also be prompted to install the Heroku toolbelt. Once that&rsquo;s done, run the following command:</p>
-
-<pre><code class="bash">heroku login
-</code></pre>
-
-<p>You&rsquo;ll be prompted for your credentials - enter these and you should be able to log in successfully.</p>
-
-<p>Now, in order to run our Django app on Heroku, we&rsquo;ll need to add a <code>Procfile</code> to tell Heroku what command to run in order to start your app. In this case, we will be using Gunicorn as our web server. Assuming our project is called <code>django_tutorial_blog_ng</code>, this is what you need to put in this file:</p>
-
-<pre><code class="bash Procfile">web: gunicorn django_tutorial_blog_ng.wsgi
-</code></pre>
-
-<p>That tells Heroku that the file we need to run for this application is <code>django_tutorial_blog_ng/wsgi.py</code>. To test it, run the following command:</p>
-
-<pre><code class="bash">foreman start
-</code></pre>
-
-<p>That will start our web server on port 5000, using Gunicorn rather than the Django development server. You should be able to see it in action <a href="http://127.0.0.1:5000/">here</a>, but you&rsquo;ll notice a very serious issue - namely that the static files aren&rsquo;t being served. Now, Django has a command called <code>collectstatic</code> that collects all the static files and drops them into one convenient folder. Heroku will run this command automatically, so we need to ensure our static files are available. Amend your <code>.gitignore</code> file so it no longer excludes our static files:</p>
-
-<pre><code class="bash .gitignore">venv/
-*.pyc
-db.sqlite3
-reports/
-htmlcov/
-.coverage
-</code></pre>
-
-<p>We also need to amend our wsgi.py to serve static files:</p>
-
-<pre><code class="python django_tutorial_blog_ng/wsgi.py">import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_tutorial_blog_ng.settings")
-
-from django.core.wsgi import get_wsgi_application
-from dj_static import Cling
-
-application = Cling(get_wsgi_application())
-</code></pre>
-
-<p>This should solve our problem. Let&rsquo;s commit our changes:</p>
-
-<pre><code class="bash">git add django_tutorial_blog_ng/wsgi.py Procfile blogengine/static/ .gitignore
-git commit -m 'Configured app for deployment on Heroku'
-</code></pre>
-
-<p>Now we&rsquo;re ready to deploy our app!</p>
-
-<h1>Deployment</h1>
-
-<p>Every Heroku app needs a unique name. If you don&rsquo;t specify one, then Heroku will generate one for you. Your app will have the domain name <code>appname.herokuapp.com</code> - however, if you already have a domain name lined up for your blog, you can point that domain name at the Heroku app if you wish. I&rsquo;m going to deploy mine with the name <code>blog-shellshocked-info</code>.</p>
-
-<p>You also need to consider where you want to deploy it. Heroku has two regions - North America and EU. By default it will deploy to North America, but as I&rsquo;m in the EU, that&rsquo;s where I want to deploy my app to - obviously if you&rsquo;re in the Americas, you may be better off sticking with North America.</p>
-
-<p>So, let&rsquo;s create our app. Here&rsquo;s the command you need to run:</p>
-
-<pre><code class="bash">heroku apps:create blog-shellshocked-info --region eu
-</code></pre>
-
-<p>You will want to change the app name, or remove it entirely if you&rsquo;re happy for Heroku to generate one for you. If you want to host it in North America, drop the <code>--region eu</code> section.</p>
-
-<p>Once completed, this will have created your new app, and added a Git remote for it, but will not have deployed it. To deploy your app, run this command:</p>
-
-<pre><code class="bash">git push heroku master
-</code></pre>
-
-<p>That will push your code up to Heroku. Please note that building the app may take a little while. Once it&rsquo;s done, you can run <code>heroku open</code> to open it in your web browser. You should see an error message stating that the relation <code>blogengine_post</code> does not exist. That&rsquo;s because we need to create our database structure. Heroku allows you to easily run commands on your app with <code>heroku run</code>, so let&rsquo;s create our database and run our migrations:</p>
-
-<pre><code class="bash">heroku run python manage.py syncdb
-heroku run python manage.py migrate
-</code></pre>
-
-<p>These are exactly the same commands you would run locally to create your database, but prefaced with <code>heroku run</code> so that they get run by Heroku. As usual, you will be prompted to create a superuser - you&rsquo;ll want to do this so you can log into the admin.</p>
-
-<p>That&rsquo;s all for today! We&rsquo;ve finally got our site up and running on Heroku, and set up continuous integration so our tests will get run for us. You can see an example of the site working <a href="http://blog.shellshocked.info/">here</a>. As usual, you can check out the latest version of the code with <code>git checkout lesson-5</code>. If you&rsquo;d like a homework assignment, then take a look at <a href="http://docs.travis-ci.com/user/deployment/heroku/">automating deployment to Heroku on successful builds</a> and see if you can get it set up successfully.</p>
-
-<p>Next time around, we&rsquo;ll get back to implementing our search and tidying up the front end. See you then!</p>
 ]]></content>
   </entry>
   

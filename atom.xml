@@ -4,7 +4,7 @@
   <title><![CDATA[Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-10-05T21:50:29+01:00</updated>
+  <updated>2014-10-19T22:19:47+01:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -12,6 +12,178 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My Django Web Server Setup]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2014/10/19/my-django-web-server-setup/"/>
+    <updated>2014-10-19T19:52:28+01:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2014/10/19/my-django-web-server-setup</id>
+    <content type="html"><![CDATA[<p>This isn&rsquo;t really part of my Django tutorial series (that has now definitely concluded!), but I thought I&rsquo;d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don&rsquo;t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p>
+
+<h2>Operating system</h2>
+
+<p>This isn&rsquo;t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it&rsquo;s fanatically stable.</p>
+
+<h2>Database server</h2>
+
+<p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn&rsquo;t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I&rsquo;m currently in the process of deploying at work. So far I haven&rsquo;t had any problems with it.</p>
+
+<h2>Web server</h2>
+
+<p>It&rsquo;s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p>
+
+<p>For serving the static files, I use Nginx - it&rsquo;s generally considered to be faster than Apache for this use case. Here&rsquo;s a typical Nginx config file:</p>
+
+<figure class='code'><figcaption><span>/etc/nginx/sites-available/default</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="err">server</span> <span class="p">{</span>
+</span><span class='line'>    <span class="err">listen</span> <span class="err">80;</span>
+</span><span class='line'>    <span class="err">server_name</span> <span class="err">example.com;</span>
+</span><span class='line'>    <span class="err">client_max_body_size</span> <span class="err">50M;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="err">access_log</span> <span class="err">/var/log/nginx/access.log;</span>
+</span><span class='line'>    <span class="err">error_log</span> <span class="err">/var/log/nginx/error.log;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="err">location</span> <span class="err">/static</span> <span class="err">{</span>
+</span><span class='line'>        <span class="err">root</span> <span class="err">/var/www/mysite;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="err">location</span> <span class="err">/media</span> <span class="p">{</span>
+</span><span class='line'>        <span class="err">root</span> <span class="err">/var/www/mysite;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="err">location</span> <span class="err">/</span> <span class="p">{</span>
+</span><span class='line'>        <span class="err">proxy_pass</span> <span class="err">http://127.0.0.1:8000;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project:</p>
+
+<figure class='code'><figcaption><span>gunicorn.conf.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">bind</span> <span class="o">=</span> <span class="s">&quot;127.0.0.1:8000&quot;</span>
+</span><span class='line'><span class="n">logfile</span> <span class="o">=</span> <span class="s">&quot;/var/log/gunicorn.log&quot;</span>
+</span><span class='line'><span class="n">loglevel</span> <span class="o">=</span> <span class="s">&quot;debug&quot;</span>
+</span><span class='line'><span class="n">workers</span> <span class="o">=</span> <span class="mi">3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p>
+
+<p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won&rsquo;t give details here - your package manager of choice should have a suitable package available. Here&rsquo;s a typical Supervisor config file I might use for running Gunicorn for a Django app:</p>
+
+<figure class='code'><figcaption><span>/etc/supervisor/conf.d/mysite-supervisor.conf</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>program:mysite<span class="o">]</span>
+</span><span class='line'><span class="nb">command</span><span class="o">=</span>/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers<span class="o">=</span>3
+</span><span class='line'><span class="nv">directory</span><span class="o">=</span>/var/www/mysite/
+</span><span class='line'><span class="nv">user</span><span class="o">=</span>nobody
+</span><span class='line'><span class="nv">autostart</span><span class="o">=</span><span class="nb">true</span>
+</span><span class='line'><span class="nv">autorestart</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Once that&rsquo;s in place, you can easily add the new app:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo supervisorctl reread
+</span><span class='line'>sudo supervisorctl update
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then to start it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo supervisorctl start mysite
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or stop it with:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo supervisorctl stop mysite
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or restart it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo supervisorctl restart mysite
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Celery</h2>
+
+<p>So far, both of the web apps I&rsquo;ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p>
+
+<ul>
+<li>The user doesn&rsquo;t need to wait for the task to be completed before getting a response, improving performance</li>
+<li>It&rsquo;s more robust, since if the task fails, it can be automatically retried</li>
+<li>The task queue can be moved to another server if desired, making it easier to scale</li>
+<li>Scheduling tasks</li>
+</ul>
+
+
+<p>I&rsquo;ve used it in cases where I needed to send an email or a push notification, since these don&rsquo;t have to be done within the context of the same HTTP request, but need to be reliable.</p>
+
+<p>I generally use RabbitMQ as my message queue. I&rsquo;ll leave setting this up as an exercise for the reader since it&rsquo;s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here&rsquo;s a typical config file:</p>
+
+<figure class='code'><figcaption><span>/etc/supervisor/conf.d/celery-supervisor.conf</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">[</span>program:celeryd<span class="o">]</span>
+</span><span class='line'><span class="nb">command</span><span class="o">=</span>/var/www/mysite/venv/bin/python manage.py celery worker
+</span><span class='line'><span class="nv">directory</span><span class="o">=</span>/var/www/mysite/
+</span><span class='line'><span class="nv">user</span><span class="o">=</span>nobody
+</span><span class='line'><span class="nv">autostart</span><span class="o">=</span><span class="nb">true</span>
+</span><span class='line'><span class="nv">autorestart</span><span class="o">=</span><span class="nb">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then start it up:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo supervisorctl reread
+</span><span class='line'>sudo supervisorctl update
+</span><span class='line'>sudo supervisorctl start celeryd
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I make no claims about how good this setup is, but it works well for me. I haven&rsquo;t yet had the occasion to deploy a Django app to anywhere other than Heroku that really benefited from caching, so I haven&rsquo;t got any tips to share about that, but if I were building a content-driven web app, I would use Memcached since it&rsquo;s well-supported.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Introducing Generator-simple-static-blog]]></title>
@@ -19734,23 +19906,6 @@
 
 
 <p>If you download copies of the appropriate files and set the paths to them correctly, you should now be able to enjoy all the advantages of using a CDN for hosting jQuery and jQuery Mobile while also having the security of knowing that if the CDN goes down, your application will still work fine. Exactly the same approach will work with jQuery UI as well.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Dumping WordPress for Octopress]]></title>
-    <link href="http://matthewdaly.co.uk/blog/2012/05/31/dumping-wordpress-for-octopress/"/>
-    <updated>2012-05-31T21:25:00+01:00</updated>
-    <id>http://matthewdaly.co.uk/blog/2012/05/31/dumping-wordpress-for-octopress</id>
-    <content type="html"><![CDATA[<p>Lately I&rsquo;ve gotten more and more fed up with WordPress as a blogging platform. It&rsquo;s certainly a great content management system, and for non-technical bloggers it&rsquo;s absolutely perfect, but I&rsquo;ve been increasingly finding myself hitting barriers that make it harder than it should be to get stuff done. It&rsquo;s just not the best platform for blogging about web development.</p>
-
-<p>Take my recent series of Django tutorials, for example. You wouldn&rsquo;t believe the amount of time I spent trying to format some of the code properly in TinyMCE for those. Furthermore, the end result, even though the theme was a custom one I&rsquo;d built myself that was somewhat optimised for showing off code, wasn&rsquo;t exactly great.</p>
-
-<p>In my opinion, Markdown is a far better option for writing blog posts in than using a rich text editor like TinyMCE. You normally have a pretty good idea what the end results will look like, and it&rsquo;s generally well-formatted HTML. Also, it means I can easily write my blog posts in Vim.</p>
-
-<p>Octopress was therefore an obvious choice. It&rsquo;s absolutely brilliant for sharing code - compared to WordPress, code samples look <em>stunning</em>. Also, because it generates static HTML, it loads an awful lot faster than WordPress does, and the default theme is extremely nice. So that&rsquo;s what I&rsquo;ve gone for.</p>
-
-<p>The only issue is that my web host are a bit funny about offering SSH access, so I&rsquo;ve resorted to FTP-ing the files across, which isn&rsquo;t ideal. Still, it&rsquo;s not that big an issue, and I&rsquo;ll have to see how it goes with Octopress. I do have a low-end VPS I could point this domain name at instead and run it from there if necessary, so I can always resort to that if this is too cumbersome.</p>
 ]]></content>
   </entry>
   
