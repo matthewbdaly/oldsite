@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="Lately I&rsquo;ve gotten more and more fed up with WordPress as a blogging platform. It&rsquo;s certainly a great content management system, and for &hellip;">
+  <meta name="description" content="I use jQuery Mobile a lot at work, and it&rsquo;s brilliant. For quickly knocking together a high-quality user interface that works well on mobile &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,95 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/08/13/falling-back-to-local-copies-of-jquery-and-jquery-mobile/">Falling Back to Local Copies of jQuery and jQuery Mobile</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-08-13T19:54:00+01:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>7:54 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I use jQuery Mobile a lot at work, and it&rsquo;s brilliant. For quickly knocking together a high-quality user interface that works well on mobile devices, it&rsquo;s unbeatable.</p>
+
+<p>Like many web developers, I favour using a CDN-hosted version of both jQuery and jQuery Mobile, because it makes it more likely that the user won&rsquo;t have to download the appropriate files as their web browser has already cached them. However, by doing this you run the risk of your site being negatively affected if the CDN provider goes down for any length of time. So, I think it&rsquo;s a good idea to have a fallback for both jQuery and jQuery Mobile.</p>
+
+<p>I spent a while looking and finally managed to come up with a solution that works well, and borrows heavily from <a href="http://timjames.me/jquery-and-jquery-ui-fallbacks">a similar solution for jQuery UI by Tim James</a>. First of all, load the stylesheets and JavaScript files as usual:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;http://code.jquery.com/mobile/1.1.1/jquery.mobile.structure-1.1.1.min.css&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;http://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Below this, place the following inside another set of script tags:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">jQuery</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">unescape</span><span class="p">(</span><span class="s2">&quot;%3Cscript src=&#39;http://path-to-jquery.min.js&#39; type=&#39;text/javascript&#39;%3E%3C/script%3E&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> If jQuery is not defined, this will write another set of script tags that will load the local copy of jQuery. Now, inside a second set of script tags, place the following code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">$</span><span class="p">.</span><span class="nx">mobile</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">unescape</span><span class="p">(</span><span class="s2">&quot;%3Cscript src=&#39;http://path-to-jquery-mobile.min.js&#39; type=&#39;text/javascript&#39;%3E%3C/script%3E&quot;</span><span class="p">));</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">$</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.ui-helper-hidden:first&#39;</span><span class="p">).</span><span class="nx">is</span><span class="p">(</span><span class="s1">&#39;:visible&#39;</span><span class="p">)</span> <span class="o">===</span> <span class="kc">true</span><span class="p">){</span>
+</span><span class='line'>        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;http://path-to-jquery-mobile-structure.min.css&quot; /&gt;&#39;</span><span class="p">).</span><span class="nx">appendTo</span><span class="p">(</span><span class="s1">&#39;head&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This won&rsquo;t work if it&rsquo;s placed in the same set of script tags as the code above, because it requires that jQuery be working already. The first part works similarly to the jQuery fallback - if jQuery Mobile is not defined, it writes a new script tag. The second relies on an element in the DOM with a class of ui-helper-hidden, which jQuery Mobile would hide by default if it were loaded. If it is visible, the jQuery Mobile structure CSS file has not been loaded and so a link to the local copy of the stylesheet is created.  Of course, this means you have to create this element, so add the following code to the very top of the body, directly under the opening body tag:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;ui-helper-hidden&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you download copies of the appropriate files and set the paths to them correctly, you should now be able to enjoy all the advantages of using a CDN for hosting jQuery and jQuery Mobile while also having the security of knowing that if the CDN goes down, your application will still work fine. Exactly the same approach will work with jQuery UI as well.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2772,47 +2861,6 @@ Now fire up python manage.py shell again:</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2011/10/24/linux-in-the-workplace/">Linux in the Workplace</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2011-10-24T22:18:12+01:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2011</span></span> <span class='time'>10:18 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>At the start of September I left my customer services role and started a new position as a web developer. I won&rsquo;t give the name of either my old or new employer, but I will say that the new role is with a much smaller company, and the part I work for now is an e-commerce store that enjoys a significant degree of independence from the parent company. There are only two developers including myself, and we are solely responsible for the company&rsquo;s IT infrastructure, and we don&rsquo;t have the hassle of dealing with legacy applications or infrastructure. We therefore have considerable freedom in terms of what we choose to use to get our work done.</p>
-
-<p>When I first started, I used Windows XP Professional since that was what my work laptop came with, but it soon became obvious that there wasn&rsquo;t actually anything I specifically needed to be using Windows for. I mostly work on the company&rsquo;s intranet, which doesn&rsquo;t really need to be tested in Internet Explorer as we use Firefox internally. For email and calendar, we use Google Apps, which works fine with virtually any email client that supports IMAP, so I was using Thunderbird with the Lightning plugin. When coding I used Netbeans with the jVi plugin for most of my work, with occasional usage of Vim for writing shorter scripts. I used AppServ to provide local versions of Apache, MySQL and PHP, and I used PHPMyAdmin to interact with the database. For version control, I used Subversion. From time to time I need to remote into another machine using VNC, SSH or RDP, for which I used mRemote, but I was confident I could find an equivalent application. Also, we use Ubuntu on most of our servers, so it made a lot of sense from a compatibility point of view to also use it on my own desktop. From time to time, I also found myself writing bash or Perl scripts for systems administration purposes, and since it wasn&rsquo;t really very practical to do that in Windows when it was going to be running in Ubuntu, I&rsquo;d used an Ubuntu Server install in Virtualbox to write it, but it was obvious that running Ubuntu as my desktop OS would make more sense.</p>
-
-<p>As Ubuntu 11.10 was due a little over a month after I first started, I decided to hold off making the switch until then so I could start with the most recent version and not have the hassle of upgrading an existing install. I had already downloaded the 64-bit version of Ubuntu 11.10 for my home machines and burned them to a CD, so I brought the CD into work and set up a dual boot so I could revert back to XP if anything went wrong, and also so I could easily copy across any files I needed from the Windows partition.</p>
-
-<p>It took a fair while to get everything I wanted installed, but a lot less time than it would have taken if I&rsquo;d set up Windows XP from scratch. The hardware all worked fine out of the box, and most of the software I needed was in the repositories. The only thing that I really needed that wasn&rsquo;t there was Netbeans (which has apparently now been removed from the repositories), but the version in the Ubuntu repositories has never been very up-to-date anyway. Instead I installed the version of Netbeans available on the website, and that has worked fine for me. While there wasn&rsquo;t a version of mRemote available, I did discover Remmina, which has proven to be an excellent client for SSH, RDP and VNC, to the point that I&rsquo;ve now stopped using the terminal to connect via SSH in favour of using Remmina instead. Thunderbird does just as good a job with my email and calendar as it does on Windows, and I also have Mutt available. Naturally, it couldn&rsquo;t be simpler to install a full LAMP stack and PHPMyAdmin either. In fact, the only application that I use much that I couldn&rsquo;t get a decent version of was MySQL Workbench, and that was only because Oracle haven&rsquo;t yet released a version for Ubuntu 11.10 (tried the version for 11.04, but it doesn&rsquo;t seem to work), but I can live without that.</p>
-
-<p>What&rsquo;s interesting is that despite all the scaremongering I&rsquo;ve heard over the years about how Linux isn&rsquo;t ready for the workplace, I&rsquo;ve as yet had no problems whatsoever. For everything I used in Windows, it was either available on Ubuntu, or there was a viable equivalent, or I could get by fine without it. Granted, the nature of my work means I have little need for the small amount of functionality that Microsoft Office has and LibreOffice doesn&rsquo;t, and I don&rsquo;t need to use the kind of ghastly legacy apps written in Visual Basic that most large enterprises commonly use, but I haven&rsquo;t noticed any significant barriers to my productivity.</p>
-
-<p>In fact, if anything I&rsquo;m considerably more productive. I know people like to rag on Unity, and I wasn&rsquo;t happy with it in the netbook edition of Ubuntu 10.10 myself, but in 11.10 it&rsquo;s really starting to show its promise, and I haven&rsquo;t had any problems with it. The fact that I know Ubuntu a lot more thoroughly than I do Windows, purely from my own experience at home, means that I can get things done a lot quicker, but also the whole package management system means I&rsquo;m largely free from the annoyances of opening an application in the morning to be confronted with an update dialogue, quite apart from the fact that very few updates require a restart. I&rsquo;d go so far as to say that I&rsquo;ve been more productive using Ubuntu at work than I would have been with either Windows 7 or OS X (and over the last few years I&rsquo;ve used Windows Vista, Windows 7 and OS X fairly extensively).</p>
-
-<p>I really don&rsquo;t want this to turn into Yet Another Year of the Linux Desktop blog post, because that&rsquo;s rather a tired old cliche, but I have absolutely no problems whatsoever getting my work done on Ubuntu. I&rsquo;ll concede that as a developer I have significant freedom that isn&rsquo;t often afforded to other people, and running some flavour of Unix makes a lot of sense if you&rsquo;re a developer working with one of the open-source server-side languages such as PHP or Python (if I were a .NET developer, it would make rather less sense). I&rsquo;m also lucky to be in a position where I don&rsquo;t have to worry about legacy apps or IE compatibility too much. Nonetheless, it&rsquo;s still remarkable how smoothly my migration across to Ubuntu on my work desktop has gone, and the extent to which I find it&rsquo;s improved my workflow.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -2830,6 +2878,10 @@ Now fire up python manage.py shell again:</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
       </li>
     
@@ -2843,10 +2895,6 @@ Now fire up python manage.py shell again:</p>
     
       <li class="post">
         <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
       </li>
     
   </ul>

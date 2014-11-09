@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="I own a lot of programming textbooks. I went through a long phase of buying ones about virtually any technology I was even remotely interested in, &hellip;">
+  <meta name="description" content="After my initial struggles with Perl, I now think I&rsquo;m really starting to get to grips with the language. I generally find it a pain when you &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,156 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/10/15/getting-work-done-with-perl/">Getting Work Done With Perl</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2010-10-15T20:39:10+01:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>8:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After my initial struggles with Perl, I now think I&rsquo;m really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.</p>
+
+<p>As one of the exercises for my studies I had to open a database connection to a Microsoft Access database, but I wanted to do the exercise in Ubuntu (I&rsquo;ve always preferred using Unix-like operating systems for programming, and thanks to apt-get it&rsquo;s a lot less grief installing additional libraries and modules as you need them) and couldn&rsquo;t get Perl to connect to the database properly, so I resolved to export it to either MySQL or SQLite.</p>
+
+<p>I was able to export it to MySQL in the end using mdbtools, but I wasn&rsquo;t entirely happy with the end result. I resorted to re-exporting the data as a CSV file, then resolved to write a small Perl script to read the file, parse it using a regular expression to obtain the necessary information, then insert it into a new SQLite database.</p>
+
+<p>Here&rsquo;s what I came up with:</p>
+
+<figure class='code'><figcaption><span>exporttool.pl</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="c1">#!/usr/bin/perl -w</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">use</span> <span class="n">strict</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="n">DBI</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">my</span> <span class="nv">$db</span> <span class="o">=</span> <span class="s">&quot;dbi:SQLite:backend.db&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="o">-</span><span class="n">e</span> <span class="s">&quot;backend.db&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="k">print</span> <span class="s">&quot;Database does not exist. Creating it...&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1"># Create the database</span>
+</span><span class='line'>   <span class="k">my</span> <span class="nv">$dbh</span> <span class="o">=</span> <span class="n">DBI</span><span class="o">-&gt;</span><span class="nb">connect</span><span class="p">(</span><span class="nv">$db</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span> <span class="s">&quot;Error in connecting to database! $DBI::errstr&quot;</span><span class="p">;</span>
+</span><span class='line'>   <span class="k">my</span> <span class="nv">$createdb</span> <span class="o">=</span> <span class="nv">$dbh</span><span class="o">-&gt;</span><span class="k">do</span><span class="p">(</span><span class="s">&quot;CREATE TABLE CARS( ID INTEGER PRIMARY KEY, YEAR INTEGER, MAKE VARCHAR(30), MODEL VARCHAR(30), COLOR VARCHAR(30), PRICE INTEGER);&quot;</span><span class="p">);</span>
+</span><span class='line'>   <span class="nv">$dbh</span><span class="o">-&gt;</span><span class="n">disconnect</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">open</span><span class="p">(</span><span class="n">READFILE</span><span class="p">,</span> <span class="s">&quot;cartable.csv&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">while</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="k">unless</span><span class="p">(</span><span class="nv">$_</span> <span class="o">=~</span> <span class="sr">m/id,/</span><span class="p">)</span>
+</span><span class='line'>   <span class="p">{</span>
+</span><span class='line'>      <span class="sr">m/\d+\,(\d{4})\,\&quot;(\w+)\&quot;\,\&quot;(\w+)\&quot;\,\&quot;(\w+)\&quot;\,\&quot;(\d+)\&quot;/</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$year</span> <span class="o">=</span> <span class="nv">$1</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$make</span> <span class="o">=</span> <span class="nv">$2</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$model</span> <span class="o">=</span> <span class="nv">$3</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$color</span> <span class="o">=</span> <span class="nv">$4</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$price</span> <span class="o">=</span> <span class="nv">$5</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$dbh2</span> <span class="o">=</span> <span class="n">DBI</span><span class="o">-&gt;</span><span class="nb">connect</span><span class="p">(</span><span class="nv">$db</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span> <span class="s">&quot;Error in connecting to database! $DBI::errstr&quot;</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">my</span> <span class="nv">$insertdb</span> <span class="o">=</span> <span class="nv">$dbh2</span><span class="o">-&gt;</span><span class="k">do</span><span class="p">(</span><span class="s">&quot;INSERT INTO CARS (YEAR, MAKE, MODEL, COLOR, PRICE) VALUES (\&quot;$year\&quot;, \&quot;$make\&quot;, \&quot;$model\&quot;, \&quot;$color\&quot;, \&quot;$price\&quot;);&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nv">$dbh2</span><span class="o">-&gt;</span><span class="n">disconnect</span><span class="p">;</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nb">close</span><span class="p">(</span><span class="n">READFILE</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Write completed!\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;To demonstrate it works, we&#39;ll run a SELECT query against the database...\n&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Read the database</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$readdb</span> <span class="o">=</span> <span class="n">DBI</span><span class="o">-&gt;</span><span class="nb">connect</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$dbselect</span> <span class="o">=</span> <span class="nv">$readdb</span><span class="o">-&gt;</span><span class="n">prepare</span><span class="p">(</span><span class="s">&quot;SELECT * FROM CARS;&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="nv">$dbselect</span><span class="o">-&gt;</span><span class="n">execute</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Print the results</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;ID\tYear\tMake\tModel\tColor\tPrice\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">while</span><span class="p">(</span><span class="k">my</span> <span class="nv">@row</span> <span class="o">=</span> <span class="nv">$dbselect</span><span class="o">-&gt;</span><span class="n">fetchrow_array</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="k">print</span> <span class="s">&quot;$row[0]\t$row[1]\t$row[2]\t$row[3]\t$row[4]\t$row[5]\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Close the connection</span>
+</span><span class='line'><span class="nv">$readdb</span><span class="o">-&gt;</span><span class="n">disconnect</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Apologies for the fact that the indentation doesn&rsquo;t seem to have copied across from Vim very well (can anyone recommend a good WordPress plugin for displaying code, none of the ones I&rsquo;ve tried seem to be any good?). It works well, and it&rsquo;s also helped me grasp Perl&rsquo;s database API better.</p>
+
+<p>I think I&rsquo;ve got a better idea now of what Python and Perl are best at and when to use each. Perl is a great language, but the fact that a lot of it is implicit makes it a little harder to pick up at first than Python - for instance, the default variable, which is quite a good idea, but takes a little getting used to. Its regex support is great, and I like the database API, but I would find it a lot harder to do any object-oriented programming in Perl than in Python (which I guess is why <a href="http://www.iinteractive.com/moose/">Moose</a> exists). I&rsquo;ve found Perl very useful for quick and dirty scripts and as a glue language, but for longer scripts Python seems the better choice.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -408,39 +558,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/06/08/first-steps-with-php/">First Steps With PHP</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2010-06-08T22:24:59+01:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>10:24 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;m currently working on my very first website for anyone other than myself. It&rsquo;s a simple brochure-style website advertising a friend&rsquo;s chalet at a seaside resort, which she wants to be able to rent out, and includes a simple contact form so that people can get in touch to ask questions or make a booking enquiry. Now, at present Python is the only programming language I know at all well that&rsquo;s useful for server-side scripting, but I decided to have a bash at building it using PHP, since that&rsquo;s pretty well supported and there&rsquo;s loads of tutorials and resources for teaching PHP to newbies, as well as innumerable third-party scripts and libraries. Also, PHP&rsquo;s such a popular language that you can&rsquo;t really get away from it if you want to get into web development - I see loads of PHP jobs advertised but very few Python ones. So I figured it&rsquo;ll be useful to have picked up a little PHP.</p>
-
-<p>I got the form working, and I&rsquo;ve added reCAPTCHA support to it to help prevent spam. All in all the form is working well, and it didn&rsquo;t take a great deal of PHP knowledge to write the script. I&rsquo;m already pretty confident that it&rsquo;s a language I can work with in future, possibly even on a professional basis. That said, I can already tell that I will never like working with PHP as much as I like working with Python - the syntax is far less elegant than that of Python, and the object-orientation looks and feels much more clumsy to me.</p>
-
-<p>There&rsquo;s plenty of things I&rsquo;d like to be able to do that require PHP, so I will be learning it thoroughly at some point, although I have no plans to do so immediately - I&rsquo;m about to do my JavaScript Fundamentals exam later this month, and after that I&rsquo;ve got to learn Perl, so it&rsquo;s not till I get that done that I&rsquo;ll be learning PHP properly. In particular, I&rsquo;m really interested in Wordpress theme development - I want to build a theme of my own for this blog since that&rsquo;ll say more about my abilities than an off-the-shelf theme, and it also happens to be an increasingly marketable skill.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/6">&larr; Older</a>
@@ -458,6 +575,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
       </li>
     
@@ -471,10 +592,6 @@
     
       <li class="post">
         <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a>
       </li>
     
   </ul>
