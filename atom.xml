@@ -4,7 +4,7 @@
   <title><![CDATA[Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-11-20T13:06:24+00:00</updated>
+  <updated>2014-12-28T17:23:09+00:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -12,6 +12,31 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My First Grunt Plugin]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/"/>
+    <updated>2014-12-28T17:04:41+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin</id>
+    <content type="html"><![CDATA[<p>A while back, I mentioned that I&rsquo;d written a Yeoman generator for creating a flat HTML blog, called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>. For this, I&rsquo;d used the first Grunt plugin I could find for the purpose, which was <a href="https://github.com/testdouble/grunt-markdown-blog">grunt-markdown-blog</a>. This worked, but I wasn&rsquo;t really very happy with it.</p>
+
+<p>The ideal Grunt plugin I had in mind was as follows:</p>
+
+<ul>
+<li>Used Handlebars for templating</li>
+<li>Generated posts from Markdown files</li>
+<li>Saved files in named folders with a single <code>index.html</code> file in each one (like Octopress does) so that no file extension is visible on a page</li>
+<li>Generated index pages, rather than just showing the latest post as the first page</li>
+</ul>
+
+
+<p>Unfortunately, <code>grunt-markdown-blog</code> only fulfilled the second criteria, so it was never going to be something I stuck with long-term. However, I couldn&rsquo;t find anything else that would do the trick, so it looked like my only option was to write a suitable plugin myself.</p>
+
+<p>I started a new Git repository a while back, but didn&rsquo;t make much progress. Then, on Christmas Eve, I suddenly got the urge to start working on this again, and in a matter of a few hours I&rsquo;d gotten a working Grunt plugin that ticked all of these boxes. I had to delay getting it integrated into the generator due to Christmas day, and then an unfortunate bout of flu, but I&rsquo;ve now published it as <a href="https://github.com/matthewbdaly/grunt-blogbuilder">grunt-blogbuilder</a> and amended the Yeoman generator to use it instead.</p>
+
+<p>I&rsquo;m really pleased with the outcome, and while I&rsquo;m still not yet ready to migrate over to it from Octopress, it&rsquo;s a massive step forward, and building a Grunt plugin has been an interesting experience.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Building a URL Shortener With Node.js and Redis]]></title>
@@ -21063,28 +21088,6 @@
 <p>As you can see, Cucumber is a really simple way to start testing your web apps, and can really improve the quality of your code. Even if you&rsquo;ve never used Ruby before, <a href="https://github.com/jnicklas/capybara#readme">Capybara&rsquo;s API</a> is very simple and intuitive, and should adequately cover most of what you need to do when testing a web app.</p>
 
 <p>As I mentioned, the PHP community in general has been a bit slack in terms of getting proper automated tests working. But Cucumber makes it so simple, and offers so many other benefits, such as human-readable tests and getting stakeholders more involved in the development process, that there&rsquo;s really no excuse not to use it. Hope you&rsquo;ve enjoyed this tutorial, and that it&rsquo;s encouraged you to start using Cucumber to test your own web apps.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Counting Commits in Git]]></title>
-    <link href="http://matthewdaly.co.uk/blog/2012/09/05/counting-commits-in-git/"/>
-    <updated>2012-09-05T00:13:00+01:00</updated>
-    <id>http://matthewdaly.co.uk/blog/2012/09/05/counting-commits-in-git</id>
-    <content type="html"><![CDATA[<p>The other day I got to wondering about how I could quickly and easily count how many commits I was making to a specific Git repository every day.</p>
-
-<p>Now, with the default log output, Git shows the date and time at the top of each entry. So in order to determine how many commits have been made to a given repository, all you need to do is determine today’s date, and see how many times that date appears in the log.</p>
-
-<p>So, first task is to get the log. Then, we need to get today’s date, format it appropriately, and use grep to filter for just the lines containing that date. So, we use the date command to fetch the date, then pipe it into awk, which we use to format it the same way as Git does. We then use grep to filter out the lines that have the resulting date. Finally, we use wc to count the number of lines returned by grep.</p>
-
-<p>Here’s what I came up with:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git log <span class="p">|</span> grep <span class="s2">&quot;`date | awk &#39;{print $1, $2, $3}&#39;`&quot;</span> <span class="p">|</span> wc -l
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>I’m not that great with tools like awk, so I’m quite proud of managing to do this. It’s quite handy to have around.</p>
 ]]></content>
   </entry>
   

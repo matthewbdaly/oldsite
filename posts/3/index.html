@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="I use jQuery Mobile a lot at work, and it&rsquo;s brilliant. For quickly knocking together a high-quality user interface that works well on mobile &hellip;">
+  <meta name="description" content="The other day I got to wondering about how I could quickly and easily count how many commits I was making to a specific Git repository every day. Now &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/05/counting-commits-in-git/">Counting Commits in Git</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-09-05T00:13:00+01:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>12:13 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The other day I got to wondering about how I could quickly and easily count how many commits I was making to a specific Git repository every day.</p>
+
+<p>Now, with the default log output, Git shows the date and time at the top of each entry. So in order to determine how many commits have been made to a given repository, all you need to do is determine today’s date, and see how many times that date appears in the log.</p>
+
+<p>So, first task is to get the log. Then, we need to get today’s date, format it appropriately, and use grep to filter for just the lines containing that date. So, we use the date command to fetch the date, then pipe it into awk, which we use to format it the same way as Git does. We then use grep to filter out the lines that have the resulting date. Finally, we use wc to count the number of lines returned by grep.</p>
+
+<p>Here’s what I came up with:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git log <span class="p">|</span> grep <span class="s2">&quot;`date | awk &#39;{print $1, $2, $3}&#39;`&quot;</span> <span class="p">|</span> wc -l
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I’m not that great with tools like awk, so I’m quite proud of managing to do this. It’s quite handy to have around.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2828,39 +2870,6 @@ Now fire up python manage.py shell again:</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/01/13/github/">Github</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2012-01-13T19:25:20+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>7:25 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>To date, Subversion is the single versioning system I have the most experience with. I use it at work, and I was already somewhat familiar with it beforehand. However, with all the buzz over Git over the last few years, it&rsquo;s always been tempting to explore that as an alternative.</p>
-
-<p>I&rsquo;ve had a Github account for over a year, but had as yet not added anything to it. However, today that changed. I&rsquo;ve had a rather haphazard approch towards my .vimrc and other Vim configuration files for a while, with the result that they tend to be less than consistent across different machines. I&rsquo;ve seen that a fair number of people put their Vim configuration files under version control, and that seemed like an effective solution, so I&rsquo;ve gotten my .vimrc and .vim into a respectable state and added them to <a href="https://github.com/matthewbdaly/My-vim-configuration">a new repository</a>. Now I should have no excuse for letting them get out of sync.</p>
-
-<p>I have to say, Github is a truly wonderful service. The tutorials for getting started with Git are really good, and make it easy to get started. It&rsquo;s probably one of the main reasons why Git is becoming more and more popular- there isn&rsquo;t really anything comparable for Subversion.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -2878,6 +2887,10 @@ Now fire up python manage.py shell again:</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
       </li>
     
@@ -2891,10 +2904,6 @@ Now fire up python manage.py shell again:</p>
     
       <li class="post">
         <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format From DD/MM/YYYY to YYYY-MM-DD in Vim</a>
       </li>
     
   </ul>
