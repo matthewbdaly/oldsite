@@ -4,7 +4,7 @@
   <title><![CDATA[Category: web development | Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/blog/categories/web-development/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-12-28T17:25:04+00:00</updated>
+  <updated>2014-12-31T14:05:21+00:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -66,13 +66,13 @@ ul#pageList li {
             &lt;h1&gt;My Django Blog&lt;/h1&gt;
             &lt;a href="http://matthewdaly.co.uk/feeds/posts/"&gt;&lt;img src="http://matthewdaly.co.uk/static/rss.png" width="50px" height="50px"&gt;&lt;/a&gt;
             &lt;ul id="pageList"&gt;
-                &lt;li&gt;&lt;a href="http://matthewdaly.co.uk/"&gt;Home&lt;/a&gt;&lt;/li&gt;{% raw %}
+                &lt;li&gt;&lt;a href="http://matthewdaly.co.uk/"&gt;Home&lt;/a&gt;&lt;/li&gt;
                 {% load flatpages %}
                 {% get_flatpages as flatpages %}
                 {% for flatpage in flatpages %}
                 &lt;li&gt;&lt;a href="{{ flatpage.url }}"&gt;{{ flatpage.title }}&lt;/a&gt;&lt;/li&gt;
                 {% endfor %}
-            &lt;/ul&gt;{% endraw %}
+            &lt;/ul&gt;
 </code></pre>
 
 <p>Next, here&rsquo;s footer.html:</p>
@@ -84,7 +84,7 @@ ul#pageList li {
 
 <p>Now here&rsquo;s category.html:</p>
 
-<pre><code class="html templates/category.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/category.html">{% include 'header.html' %}
         {% load comments %}
         &lt;h1&gt;Posts for {{ category.title }}&lt;/h1&gt;
         {% if posts %}
@@ -108,12 +108,12 @@ ul#pageList li {
         &lt;p&gt;No posts matched&lt;/p&gt;
         &lt;/div&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>Then, posts.html:</p>
 
-<pre><code class="html templates/posts.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/posts.html">{% include 'header.html' %}
         {% load comments %}
         {% if posts %}
         {% for post in posts %}
@@ -136,12 +136,12 @@ ul#pageList li {
         &lt;p&gt;No posts matched&lt;/p&gt;
         &lt;/div&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>Here&rsquo;s single.html:</p>
 
-<pre><code class="html templates/single.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/single.html">{% include 'header.html' %}
         {% load comments %}
         {% for post in posts %}
         &lt;div class="post"&gt;
@@ -168,17 +168,17 @@ ul#pageList li {
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>And finally, flatpages/default.html:
 <code>html templates/flatpages/default.html
-{% raw %}{% include 'header.html' %}
+{% include 'header.html' %}
         &lt;div class="page"&gt;
         &lt;h1&gt;{{ flatpage.title }}&lt;/h1&gt;
         {{ flatpage.content }}
         &lt;/div&gt;
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></p>
 
 <p>Phew! There&rsquo;s quite a lot there, so you may wish to grab these files from the GitHub repository rather than enter them yourself.</p>
@@ -197,11 +197,11 @@ ul#pageList li {
 
 <p>One other point worth noting is that we&rsquo;ve added some code to the header to display links to all of the flat pages. This particular snippet of code in header.html is noteworthy:</p>
 
-<pre><code class="html header.html">{% raw %}{% load flatpages %}
+<pre><code class="html header.html">{% load flatpages %}
                 {% get_flatpages as flatpages %}
                 {% for flatpage in flatpages %}
                 &lt;li&gt;&lt;a href="{{ flatpage.url }}"&gt;{{ flatpage.title }}&lt;/a&gt;&lt;/li&gt;
-                {% endfor %}{% endraw %}
+                {% endfor %}
 </code></pre>
 
 <p>Here, we first of all load the flat pages. Then we retrieve them, and loop through each of them. For each page, we create a new list item containing a link to the flat page, with the text being the flat page&rsquo;s title. Note that we&rsquo;re just referring to each flatpage object&rsquo;s attributes here. Then we end the for loop.</p>
@@ -232,12 +232,12 @@ from blogengine.models import Category
 
 <p>Then, go into your templates folder and create a new folder in there called blogengine (or whatever you&rsquo;re calling your blog application). In there, create a new file called category_list.html and enter the following code in it:</p>
 
-<pre><code class="html templates/blogengine/category_list.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/blogengine/category_list.html">{% include 'header.html' %}
         {% for category in object_list %}
             &lt;h3&gt;{{ category.title }}&lt;/h3&gt;
             &lt;p&gt;{{ category.description }}&lt;/p&gt;
         {% endfor %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>Now, ensure the development server is running, and go to <a href="http://127.0.0.1:8000/categories/,">http://127.0.0.1:8000/categories/,</a> and you should see a list of your categories.</p>
@@ -263,7 +263,7 @@ from blogengine.models import Category
 
 <p>Then move posts.html into your templates/blogengine folder and rename it post_list.html, then amend it to look like the following:</p>
 
-<pre><code class="html templates/blogengine/post_list.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/blogengine/post_list.html">{% include 'header.html' %}
         {% load comments %}
         {% if object_list %}
         {% for post in object_list %}
@@ -286,7 +286,7 @@ from blogengine.models import Category
         &lt;p&gt;No posts matched&lt;/p&gt;
         &lt;/div&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>The changes here are minimal, just adjusting the names of objects to what the generic view uses. Now, if you refresh the browser, you should be able to see your blog posts, only now they&rsquo;re being handled by Django&rsquo;s ListView generic view. But they&rsquo;re in the wrong order, so go into blogengine/models.py and add this code to the Post model:</p>
@@ -447,7 +447,7 @@ def getCategory(request, categorySlug, selected_page=1):
 
 <p>The next change we need to make is adding category.html. Go into your template directory and save the code below as category.html:</p>
 
-<pre><code class="html templates/category.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/category.html">{% include 'header.html' %}
         &lt;h1&gt;Posts for {{ category.title }}&lt;/h1&gt;
         {% if posts %}
         {% for post in posts %}
@@ -464,7 +464,7 @@ def getCategory(request, categorySlug, selected_page=1):
         {% else %}
         &lt;p&gt;No posts matched&lt;/p&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>With our template in place, the last step is to add an appropriate URLconf. Edit urls.py to look like this:</p>
@@ -519,7 +519,7 @@ urlpatterns = patterns('',
 
 <p>Comments can be attached to any type of content, but we only want to attach them to blog posts, and they should only be visible in the single post template. But first of all, let&rsquo;s add a comment count to posts in posts.html and category.html. Replace posts.html with this:</p>
 
-<pre><code class="html templates/posts.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/posts.html">{% include 'header.html' %}
         {% load comments %}
         {% if posts %}
         {% for post in posts %}
@@ -538,12 +538,12 @@ urlpatterns = patterns('',
         {% else %}
         &lt;p&gt;No posts matched&lt;/p&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>And replace category.html with this:</p>
 
-<pre><code class="html templates/category.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/category.html">{% include 'header.html' %}
         {% load comments %}
         &lt;h1&gt;Posts for {{ category.title }}&lt;/h1&gt;
         {% if posts %}
@@ -563,14 +563,14 @@ urlpatterns = patterns('',
         {% else %}
         &lt;p&gt;No posts matched&lt;/p&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>The only significant changes here are that at the top we load comments, and underneath the post text we get the comment count for each post as the variable comment_count, then we display it underneath.</p>
 
 <p>Now, we want to go further with our single post template. As well as a comment count, we want to add the actual comments themselves. Finally, we need a form for adding comments - in theory you can use the admin interface for doing this, but it&rsquo;s very unlikely you&rsquo;d want to do so. Open up single.html and edit it to look like this:</p>
 
-<pre><code class="html templates/single.html">{% raw %}{% include 'header.html' %}
+<pre><code class="html templates/single.html">{% include 'header.html' %}
         {% load comments %}
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="{{ post.get_absolute_url }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
@@ -595,7 +595,7 @@ urlpatterns = patterns('',
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>This includes the same changes as the other two templates, so we load comments and display the comment count. Afterwards, we get the comment list for this post as comments, and then loop through the comments, showing them in an ordered list. Afterwards, we then use render_comment_form to show the default comment form for this post. If you&rsquo;d prefer to create your own comment form, you can use get_comment_form instead to get a form object you can use in the template.</p>
@@ -610,7 +610,7 @@ urlpatterns = patterns('',
 <pre><code class="python blogengine/views.py">    return render_to_response('single.html', { 'posts':post}, context_instance=RequestContext(request))
 </code></pre>
 
-<p>The reason this needs to be changed is that the comment form includes the {% raw %}{% csrf_token %}{% endraw %} tag, which requires information from the request object, and in order to do so rather than the default context, you need to pass through a RequestContext object instead, but don&rsquo;t worry too much about the details.</p>
+<p>The reason this needs to be changed is that the comment form includes the {% csrf_token %} tag, which requires information from the request object, and in order to do so rather than the default context, you need to pass through a RequestContext object instead, but don&rsquo;t worry too much about the details.</p>
 
 <p>If you now ensure the development server is running and visit a blog post, you should now see that you can post comments. If you want to enhance this very basic comment form, take a look at the excellent documentation on the Django website. Alternatively, there are a number of third-party comment services, such as Disqus and IntenseDebate that can handle comments for you and just require you to paste a snippet of code into whatever template you want to enable comments on, and these may be more convenient.</p>
 
@@ -652,7 +652,7 @@ urlpatterns = patterns('',
         return item.text
 </code></pre>
 
-<p>This is pretty simple. We import the Feed class from thew views provided by the syndication framework, then we base PostsFeed on Feed. We set the title, the link for the feed, and a description for the feed. Then we get the last 5 Post objects in reverse chronological order, and we define each item&rsquo;s title as the post title. and each item&rsquo;s description as the text of the post. From here' it&rsquo;s pretty easy to see how you could create feeds based on comments, or pretty much any other object that might exist in the database.</p>
+<p>This is pretty simple. We import the Feed class from thew views provided by the syndication framework, then we base PostsFeed on Feed. We set the title, the link for the feed, and a description for the feed. Then we get the last 5 Post objects in reverse chronological order, and we define each item&rsquo;s title as the post title. and each item&rsquo;s description as the text of the post. From here&#8217; it&rsquo;s pretty easy to see how you could create feeds based on comments, or pretty much any other object that might exist in the database.</p>
 
 <p>And with that done, our blogging engine is pretty-much feature-complete. We have blog posts with comments, categories, an RSS feed, and flat pages, but the look and feel of the site definitely needs some attention. Next time, we&rsquo;ll make our blogging engine look a little nicer. Once again, the code is available on GitHub in case you find that more convenient.</p>
 ]]></content>
@@ -742,7 +742,7 @@ datetime.datetime(2012, 3, 19, 12, 11, 10)
     &lt;head&gt;
         &lt;title&gt;My Django Blog&lt;/title&gt;
     &lt;/head&gt;
-    &lt;body&gt;{% raw %}
+    &lt;body&gt;
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="{{ post.get_absolute_url }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
         &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
@@ -754,7 +754,7 @@ datetime.datetime(2012, 3, 19, 12, 11, 10)
         {% endif %}
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
-        {% endif %}{% endraw %}
+        {% endif %}
     &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
@@ -836,7 +836,7 @@ admin.site.register(models.Post, PostAdmin)
 <p>Save the user details once you’re done, then go into your superuser account and add a first and last name so we have some data to work with for that as well. Note that just as with a root account on a Unix box, it’s not a great idea to use a superuser account for everyday work (you should create an account that has the minimum privileges you need and use that), but we’ll stick with it for now just for learning purposes – don’t forget if you should roll out a public facing Django-powered site in future, though!</p>
 
 <p>With that done, we now have some data to work with to identify the author of a given post. Let’s fire up the interactive shell again with python manage.py shell:
-``` python</p>
+&#8220;` python</p>
 
 <blockquote><blockquote><blockquote><p>from blogengine.models import Post
 Post.objects.all()
@@ -847,16 +847,16 @@ p
 p.author
 &lt;User: root>
 p.author.first_name
-u'Matthew'
+u&#8217;Matthew&#8217;
 p.author.last_name
-u'Daly
-```</p></blockquote></blockquote></blockquote>
+u&#8217;Daly
+&#8220;`</p></blockquote></blockquote></blockquote>
 
 <p>Here, we can see that it’s easy to get the author’s details from the post. We define p as a reference to the single Post object,then we get the author, which in this case is called root. As I’ve defined a first and last name, we can get those too with p.author.first_name and p.author.last_name, which are strings containing the first and last name respectively. Note the ‘u’ before the string – this just indicates that the string is Unicode.</p>
 
 <p>So from here, it’s pretty easy to display the author’s name in each post. Go into templates/posts.html and add the following line where you want your author details to appear:</p>
 
-<pre><code class="html templates/posts.html{% raw %}">        &lt;h3&gt;By {{ post.author.first_name }} {{ post.author.last_name }}&lt;/h3&gt;{% endraw %}
+<pre><code class="html templates/posts.html">        &lt;h3&gt;By {{ post.author.first_name }} {{ post.author.last_name }}&lt;/h3&gt;
 </code></pre>
 
 <p>Now, as long as you’ve added a first name and last name to that author’s details, if you visit <a href="http://127.0.0.1:8000,">http://127.0.0.1:8000,</a> you should see the appropriate details.</p>
@@ -922,9 +922,9 @@ u'This is my about page.'
     &lt;head&gt;
         &lt;title&gt;My Django Blog&lt;/title&gt;
     &lt;/head&gt;
-    &lt;body&gt;{% raw %}
+    &lt;body&gt;
         &lt;h1&gt;{{ flatpage.title }}&lt;/h1&gt;
-        {{ flatpage.content }}{% endraw %}
+        {{ flatpage.content }}
     &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
@@ -933,7 +933,7 @@ u'This is my about page.'
 
 <p>One final task for this lesson – we’re going to refactor our templates a little so that as little code as possible is duplicated and if we want to change anything we need to only do so in one place. Go to your template directory and edit posts.html to look like this:</p>
 
-<pre><code class="html templates/posts.html {% raw %}">{% include 'header.html' %}
+<pre><code class="html templates/posts.html ">{% include 'header.html' %}
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="{{ post.get_absolute_url }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
         &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
@@ -947,7 +947,7 @@ u'This is my about page.'
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>Here we’re taking the header and footer of the page out and replacing them with code that includes another file there instead. Next, we need to create those files in the same directory. Here’s header.html:</p>
@@ -967,7 +967,7 @@ u'This is my about page.'
 
 <p>None of this is terribly complex – we’re just moving the code into another file so that other templates can use the same files. Now save a copy of posts.html as single.html – we’re going to create a template for a single blog post. Edit the original posts.html to look like this:</p>
 
-<pre><code class="html templates/posts.html {% raw %}">{% include 'header.html' %}
+<pre><code class="html templates/posts.html ">{% include 'header.html' %}
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="{{ post.get_absolute_url }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
         {{ post.text }}
@@ -979,17 +979,17 @@ u'This is my about page.'
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
         {% endif %}
-{% include 'footer.html' %}{% endraw %}
+{% include 'footer.html' %}
 </code></pre>
 
 <p>We’re just removing the date and author details from the template that shows multiple posts. Our existing single.html file can remain as it is for now, since that still has all the additional information we want to include in an individual post.</p>
 
 <p>While we’re here, let’s update our flat pages to use the same header and footer. Go into the flatpages directory and change default.html to look like this:</p>
 
-<pre><code class="html templates/flatpages/default.html {% raw %}">{% include 'header.html' %}
+<pre><code class="html templates/flatpages/default.html ">{% include 'header.html' %}
         &lt;h1&gt;{{ flatpage.title }}&lt;/h1&gt;
         {{ flatpage.content }}
-{% include 'footer.html' %} {% endraw %}
+{% include 'footer.html' %} 
 </code></pre>
 
 <p>Note that the path to the template files is not relative to flatpages/default.html, but relative to the root of the template directory.</p>
@@ -1120,12 +1120,12 @@ admin.site.register(models.Post, PostAdmin)
     &lt;head&gt;
         &lt;title&gt;My Django Blog&lt;/title&gt;
     &lt;/head&gt;
-    &lt;body&gt;{% raw %}
+    &lt;body&gt;
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="http://matthewdaly.co.uk/{{ post.slug }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
         &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
         {{ post.text }}
-        {% endfor %}{% endraw %}
+        {% endfor %}
     &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
@@ -1181,7 +1181,7 @@ def getPost(request, postSlug):
     &lt;head&gt;
         &lt;title&gt;My Django Blog&lt;/title&gt;
     &lt;/head&gt;
-    &lt;body&gt;{% raw %}
+    &lt;body&gt;
         {% for post in posts %}
         &lt;h1&gt;&lt;a href="http://matthewdaly.co.uk/{{ post.slug }}"&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
         &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
@@ -1193,7 +1193,7 @@ def getPost(request, postSlug):
         {% endif %}
         {% if page.has_next %}
         &lt;a href="http://matthewdaly.co.uk/{{ page.next_page_number }}/"&gt;Next Page&lt;/a&gt;
-        {% endif %}{% endraw %}
+        {% endif %}
     &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
