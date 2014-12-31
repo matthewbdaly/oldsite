@@ -4,7 +4,7 @@
   <title><![CDATA[Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-12-31T14:05:21+00:00</updated>
+  <updated>2014-12-31T17:39:11+00:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -12,6 +12,1147 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Building a Chat Server With Node.js and Redis]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/"/>
+    <updated>2014-12-31T14:10:57+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis</id>
+    <content type="html"><![CDATA[<p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we&rsquo;ll build a very simple web-based chat system that demonstrates Redis&rsquo;s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it&rsquo;s widely considered the &ldquo;Hello, World!&rdquo; of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p>
+
+<h2>Installing Node.js</h2>
+
+<p>Since the last tutorial, I&rsquo;ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you&rsquo;re using any flavour of Unix, I highly recommend using it. It&rsquo;s not an option if you&rsquo;re using Windows, however Redis doesn&rsquo;t officially support Windows anyway, so if you want to follow along on a Windows machine I&rsquo;d recommend using a VM.</p>
+
+<p>If you followed the URL shortener tutorial, you should already have everything you need, though I&rsquo;d still recommend switching to NVM as it&rsquo;s very convenient. We&rsquo;ll be using Grunt again, so you&rsquo;ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install -g grunt-cli
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This assumes you used NVM to install Node - if it&rsquo;s installed globally, you may need to use <code>sudo</code>.</p>
+
+<h2>Installing dependencies</h2>
+
+<p>As usual with a Node.js project, our first step is to create our <code>package.json</code> file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Answer the questions so you end up with something like this (or just paste this into <code>package.json</code> and amend it as you see fit):</p>
+
+<figure class='code'><figcaption><span>package.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Chat client&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;grunt test --verbose&quot;</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now let&rsquo;s install our dependencies:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install express hbs redis hiredis socket.io socket.io-client --save
+</span><span class='line'>npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>These two commands will install our dependencies.</p>
+
+<p>Now, if you followed on with the URL shortener tutorial, you&rsquo;ll notice that we aren&rsquo;t using Jade - instead we&rsquo;re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We&rsquo;ll also use Socket.IO extensively on this project.</p>
+
+<h2>Support files</h2>
+
+<p>As before, we&rsquo;ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We&rsquo;ll need a Grunt configuration for that, so here it is:</p>
+
+<figure class='code'><figcaption><span>Gruntfile.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">grunt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">initConfig</span><span class="p">({</span>
+</span><span class='line'>        <span class="nx">jshint</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">all</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>                <span class="s1">&#39;test/*.js&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;index.js&#39;</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">mocha_istanbul</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">coverage</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="c1">// the folder, not the files,</span>
+</span><span class='line'>                <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">mask</span><span class="o">:</span> <span class="s1">&#39;*.js&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">reportFormats</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;cobertura&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;lcovonly&#39;</span><span class="p">]</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">coveralls</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nx">force</span><span class="o">:</span> <span class="kc">false</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="nx">app</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Load tasks</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-contrib-jshint&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-coveralls&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-mocha-istanbul&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Register tasks</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">registerTask</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;jshint&#39;</span><span class="p">,</span> <span class="s1">&#39;mocha_istanbul:coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;coveralls&#39;</span><span class="p">]);</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also need a <code>.bowerrc</code>:</p>
+
+<figure class='code'><figcaption><span>.bowerrc</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;static/bower_components&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And a <code>bower.json</code>:</p>
+
+<figure class='code'><figcaption><span>bower.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;authors&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;Matthew Daly &lt;matthewbdaly@gmail.com&gt;&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A simple chat server&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;moduleType&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;node&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;homepage&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.matthewdaly.co.uk&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;private&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;ignore&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;**/.*&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;node_modules&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;bower_components&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;tests&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;html5-boilerplate&quot;</span><span class="p">:</span> <span class="s2">&quot;~4.3.0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;jquery&quot;</span><span class="p">:</span> <span class="s2">&quot;~2.1.1&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;bootstrap&quot;</span><span class="p">:</span> <span class="s2">&quot;~3.3.1&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then install the Bower dependencies:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>bower install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also need a <code>Procfile</code> so we can run it on Heroku:</p>
+
+<figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: node index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s create the main file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And our test file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir <span class="nb">test</span>
+</span><span class='line'>touch <span class="nb">test</span>/test.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Implementing the chat server</h2>
+
+<p>Next, let&rsquo;s implement our first test. First of all, we&rsquo;ll verify that the index route works:</p>
+
+<figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
+</span><span class='line'><span class="cm">/*global describe: false, before: false, after: false, it: false */</span>
+</span><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Declare the variables used</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;chai&#39;</span><span class="p">).</span><span class="nx">expect</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">redis</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io-client&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">;</span>
+</span><span class='line'><span class="nx">client</span> <span class="o">=</span> <span class="nx">redis</span><span class="p">.</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Server tasks</span>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Beforehand, start the server</span>
+</span><span class='line'>    <span class="nx">before</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Starting the server&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Afterwards, stop the server and empty the database</span>
+</span><span class='line'>    <span class="nx">after</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Stopping the server&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">flushdb</span><span class="p">();</span>
+</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Test the index route</span>
+</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test the index route&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return a page with the title Babblr&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000/&#39;</span> <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Babblr&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-type&#39;</span><span class="p">]).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;text/html; charset=utf-8&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that this is very similar to the first test for the URL shortener, because it&rsquo;s doing basically the same thing.</p>
+
+<p>Now, run the test and make sure it fails:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> a page with the title Babblr
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">0</span> passing <span class="o">(</span>873ms<span class="o">)</span>
+</span><span class='line'>  <span class="m">1</span> failing
+</span><span class='line'>
+</span><span class='line'>  1<span class="o">)</span> server Test the index route should <span class="k">return</span> a page with the title Babblr:
+</span><span class='line'>     Uncaught AssertionError: expected undefined to include <span class="s1">&#39;Babblr&#39;</span>
+</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/test/test.js:34:33<span class="o">)</span>
+</span><span class='line'>      at self.callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22<span class="o">)</span>
+</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at Request.onRequestError <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:971:8<span class="o">)</span>
+</span><span class='line'>      at ClientRequest.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at Socket.socketErrorListener <span class="o">(</span>http.js:1552:9<span class="o">)</span>
+</span><span class='line'>      at Socket.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at net.js:441:14
+</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:442:13<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt;
+</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With that confirmed, we can start writing code to make the test pass:</p>
+
+<figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
+</span><span class='line'><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Declare variables used</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">app</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">,</span> <span class="nx">client</span><span class="p">,</span> <span class="nx">express</span><span class="p">,</span> <span class="nx">hbs</span><span class="p">,</span> <span class="nx">io</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">,</span> <span class="nx">subscribe</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Define values</span>
+</span><span class='line'><span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+</span><span class='line'><span class="nx">port</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PORT</span> <span class="o">||</span> <span class="mi">5000</span><span class="p">;</span>
+</span><span class='line'><span class="nx">base_url</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BASE_URL</span> <span class="o">||</span> <span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="nx">hbs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up connection to Redis</span>
+</span><span class='line'><span class="cm">/* istanbul ignore if */</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">rtg</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">).</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up templating</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;view engine&#39;</span><span class="p">,</span> <span class="s2">&quot;hbs&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">,</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">).</span><span class="nx">__express</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Register partials</span>
+</span><span class='line'><span class="nx">hbs</span><span class="p">.</span><span class="nx">registerPartials</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views/partials&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set URL</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;base_url&#39;</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Define index route</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Serve static files</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/static&#39;</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Listen</span>
+</span><span class='line'><span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io&#39;</span><span class="p">)({</span>
+</span><span class='line'><span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Listening on port &quot;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you compare this to the code for the URL shortener, you&rsquo;ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that&rsquo;s because we need to do so when using Pub/Sub with Redis. You&rsquo;ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we&rsquo;ll be using Socket.IO.</p>
+
+<p>Now, you can run your tests again at this point, but they won&rsquo;t pass because we haven&rsquo;t created our views. So let&rsquo;s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/index.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="cp"></span><span class="x"></span>
+</span><span class='line'><span class="x">        &lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="x">            &lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;col-md-8&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;div class=&quot;conversation&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;col-md-4&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;form&gt;</span>
+</span><span class='line'><span class="x">                        &lt;div class=&quot;form-group&quot;&gt;</span>
+</span><span class='line'><span class="x">                            &lt;label for=&quot;message&quot;&gt;Message&lt;/label&gt;</span>
+</span><span class='line'><span class="x">                            &lt;textarea class=&quot;form-control&quot; id=&quot;message&quot; rows=&quot;20&quot;&gt;&lt;/textarea&gt;</span>
+</span><span class='line'><span class="x">                            &lt;a id=&quot;submitbutton&quot; class=&quot;btn btn-primary form-control&quot;&gt;Submit&lt;/a&gt;</span>
+</span><span class='line'><span class="x">                        &lt;div&gt;</span>
+</span><span class='line'><span class="x">                    &lt;/form&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">            &lt;/div&gt;</span>
+</span><span class='line'><span class="x">        &lt;/div&gt;</span>
+</span><span class='line'><span class="cp"></span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Add this to <code>views/partials/header.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/partials/header.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class=&quot;no-js&quot;&gt; &lt;!--&lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">    &lt;head&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta charset=&quot;utf-8&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;title&gt;Babblr&lt;/title&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta name=&quot;description&quot; content=&quot;&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">        &lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/bower_components/bootstrap/dist/css/bootstrap.min.css&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/bower_components/bootstrap/dist/css/bootstrap-theme.min.css&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/style.css&quot;&gt;</span>
+</span><span class='line'><span class="x">    &lt;/head&gt;</span>
+</span><span class='line'><span class="x">    &lt;body&gt;</span>
+</span><span class='line'><span class="x">        &lt;!--[if lt IE 7]&gt;</span>
+</span><span class='line'><span class="x">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
+</span><span class='line'><span class="x">        &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">        &lt;nav class=&quot;navbar navbar-inverse navbar-static-top&quot; role=&quot;navigation&quot;&gt;</span>
+</span><span class='line'><span class="x">            &lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;navbar-header&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;a class=&quot;navbar-brand&quot; href=&quot;#&quot;&gt;Babblr&lt;/a&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">            &lt;/div&gt;</span>
+</span><span class='line'><span class="x">        &lt;/nav&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And add this to <code>views/partials/footer.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/partials/footer.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="x">        &lt;script src=&quot;/bower_components/jquery/dist/jquery.min.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/bower_components/bootstrap/dist/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/js/main.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">    &lt;/body&gt;</span>
+</span><span class='line'><span class="x">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll also want to create placeholder CSS and JavaScript files:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir static/js
+</span><span class='line'>mkdir static/css
+</span><span class='line'>touch static/js/main.js
+</span><span class='line'>touch static/css/style.css
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The test should now pass:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>41ms<span class="o">)</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>54ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt; Done. Check coverage folder.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
+</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
+</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Don&rsquo;t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p>
+
+<p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p>
+
+<figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="c1">// Test sending a message</span>
+</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test sending a message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s2">&quot;should return &#39;Message received&#39;&quot;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="c1">// Connect to server</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;reconnection delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;reopen delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;force new connection&#39;</span> <span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Handle the message being received</span>
+</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Message received&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">socket</span><span class="p">.</span><span class="nx">disconnect</span><span class="p">();</span>
+</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Send the message</span>
+</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="s1">&#39;Message received&#39;</span> <span class="p">});</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let&rsquo;s run the tests to make sure we get the expected result:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>337ms<span class="o">)</span>
+</span><span class='line'>    Test sending a message
+</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>2s<span class="o">)</span>
+</span><span class='line'>  <span class="m">1</span> failing
+</span><span class='line'>
+</span><span class='line'>  1<span class="o">)</span> server Test sending a message should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>:
+</span><span class='line'>     Error: timeout of 2000ms exceeded
+</span><span class='line'>      at null.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:159:19<span class="o">)</span>
+</span><span class='line'>      at Timer.listOnTimeout <span class="o">[</span>as ontimeout<span class="o">]</span> <span class="o">(</span>timers.js:112:15<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt;
+</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s implement this functionality. Add this at the end of <code>index.js</code>:</p>
+
+<figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Handle new messages</span>
+</span><span class='line'><span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connection&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">socket</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Subscribe to the Redis channel</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Publish it</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">publish</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle receiving messages</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">channel</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle disconnect</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;disconnect&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">subscribe</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We&rsquo;ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p>
+
+<p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p>
+
+<p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p>
+
+<p>We&rsquo;ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p>
+
+<figure class='code'><figcaption><span>static/js/main.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Set up the connection</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">field</span><span class="p">,</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">output</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get a reference to the input</span>
+</span><span class='line'>    <span class="nx">field</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;textarea#message&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get a reference to the output</span>
+</span><span class='line'>    <span class="nx">output</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;div.conversation&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle message submit</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a#submitbutton&#39;</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Create the message</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">msg</span><span class="p">;</span>
+</span><span class='line'>        <span class="nx">msg</span> <span class="o">=</span> <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">();</span>
+</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">msg</span> <span class="p">});</span>
+</span><span class='line'>        <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Insert the message</span>
+</span><span class='line'>        <span class="nx">output</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;&lt;p&gt;Anonymous Coward : &#39;</span> <span class="o">+</span> <span class="nx">data</span> <span class="o">+</span> <span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won&rsquo;t implement user names at this point (though I plan it for a future instalment).</p>
+
+<p>We&rsquo;ll also add a little bit of additional styling:</p>
+
+<figure class='code'><figcaption><span>static/css/style.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.conversation</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">height</span><span class="o">:</span> <span class="m">500px</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">overflow-y</span><span class="o">:</span> <span class="k">scroll</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">border</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#000</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">padding</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, if you run your tests, they should pass:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>40ms<span class="o">)</span>
+</span><span class='line'>    Test sending a message
+</span><span class='line'>      ✓ should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span> <span class="o">(</span>45ms<span class="o">)</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">2</span> passing <span class="o">(</span>101ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 33/33 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 5/5 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 33/33 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt; Done. Check coverage folder.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
+</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
+</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you now run the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>node index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>This illustrates just how straightforward it is to use Redis&rsquo;s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we&rsquo;ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[My First Grunt Plugin]]></title>
@@ -19804,1290 +20945,6 @@
 
 
 <p>Once this is in place, you can just run <code>php artisan runserver</code> to run the development server, and hit Ctrl-C to stop it, giving you an experience much like that with Django. Note this requires PHP 5.4 or greater. You also have the option of specifying a different port eg <code>php artisan runserver 7000</code> for port 7000.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Testing PHP Web Applications With Cucumber]]></title>
-    <link href="http://matthewdaly.co.uk/blog/2012/11/03/testing-php-web-applications-with-cucumber/"/>
-    <updated>2012-11-03T16:43:00+00:00</updated>
-    <id>http://matthewdaly.co.uk/blog/2012/11/03/testing-php-web-applications-with-cucumber</id>
-    <content type="html"><![CDATA[<p>Ever since I first heard of <a href="http://cukes.info/">Cucumber</a>, it&rsquo;s seemed like something I would find really useful. Like many developers, especially those who use PHP regularly, I know full well that I should make a point of writing proper automated tests for my web apps, but invariably wind up just thinking &ldquo;I haven&rsquo;t got time to get my head around a testing framework and it&rsquo;ll take ages to set up, so I&rsquo;ll just click around and look for bugs&rdquo;. This does get very, very tedious quite quickly, however.</p>
-
-<p>At work I&rsquo;ve reached a point with  a web app I&rsquo;m building where I needed to test it extensively to make sure it worked OK. I soon began to get very, very fed up of the repetitive clicking around necessary to test the application, so I began looking around for a solution. I gave Selenium IDE a try, but I found that to be annoyingly unreliable when recording tests. I&rsquo;d heard of Cucumber, so I did some googling, found some resources, and began tinkering with that. Quite quickly, I had a few basic acceptance tests up and running that were much more reliable than Selenium IDE, and much less tedious to use than manual testing. Within a very short space of time, I realised that Cucumber was one of those tools that was going to dramatically improve my coding experience, much like when I switched from Subversion to Git.</p>
-
-<p>What&rsquo;s so great about Cucumber compared to other acceptance testing solutions?</p>
-
-<ul>
-<li>Cucumber scenarios are written using Gherkin, a simple syntax that makes it easy for customers to set out exactly what behaviour they want to see. Far from being tedious requirement documents, these set out in a simple and intuitive way what should happen once the application is complete. By requiring customers to think carefully about what they want and get it down in writing, you can ensure the customer has a good idea what they want before you write any code, making it much less likely they&rsquo;ll turn around afterwards and say &ldquo;No, that&rsquo;s not what we want&rdquo;. This, more than anything, is for me the true power of Cucumber - it allows customers and developers to easily collaborate to set out what the web app will do, and gets you automated tests into the bargain as well.</li>
-<li>Because Cucumber is packaged as a Ruby gem, it&rsquo;s easy to install it and any other Ruby modules it may require.</li>
-<li>You can use Capybara to test your web app. Capybara is a very handy Ruby gem that allows you to easily interact with your web app, and it allows several different drivers to be used. If you don&rsquo;t need JavaScript, for instance, you can use Mechanize for faster tests. If you do, you can use selenium-webdriver to automate the browser instead, and it will load an instance of Firefox and use that for testing.</li>
-<li>It can also be used for testing RESTful web services. HTTParty is another handy Ruby gem that can be used for testing an API.</li>
-</ul>
-
-
-<p>One question you may ask is &lsquo;Why use a Ruby tool to test PHP apps?&rsquo;. Well, there is <a href="http://behat.org/">Behat</a>, a very similar tool for PHP, so you can use that if you&rsquo;d prefer. However, I personally have found that it&rsquo;s not too much of a problem switching context between writing Ruby code for the acceptance tests and PHP code for the application itself. Ruby also has some advantages here - <a href="https://rvm.io/">RVM</a> is a very handy tool for running multiple instances of Ruby, and RubyGems makes it easy to install any additional modules you may need. You don&rsquo;t really need to know much Ruby to use it - this is essentially my first encounter with Ruby barring a few small tutorials, but I haven&rsquo;t had any significant issues with it. Finally, the Cucumber community seems to be very active, which is always a plus.</p>
-
-<p>When searching for a tutorial on getting Cucumber working with PHP, I only found <a href="http://jamieonsoftware.com/journal/2011/1/2/high-level-testing-php-applications-with-cucumber.html">one good one</a>, and that didn&rsquo;t cover a lot of the issues I&rsquo;d have liked to cover, not did it cover actually using Cucumber as part of the development process, so I had to puzzle out much of it myself. So hopefully, by covering more of the ground that your average PHP developer is likely to need, I can show you just how useful Cucumber can be when added to your PHP development toolkit.</p>
-
-<p>In this tutorial, we&rsquo;ll build a very simple todo-list application using the Slim framework, but we&rsquo;ll use Cucumber to test it throughout to ensure that it works the way we want it to. Hopefully, by doing this, we&rsquo;ll get a rock-solid web app that meets our requirements exactly.</p>
-
-<p>First of all, you&rsquo;ll want to install RVM to make it easier to manage multiple Ruby installs. You may be able to use your system&rsquo;s Ruby install, but RVM is usually a safer bet:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="se">\c</span>url -L https://get.rvm.io <span class="p">|</span> bash -s stable --ruby
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This was sufficient to install RVM on Mac OS X. On Ubuntu, I also had to install the openssl and zlib packages. Before installing RVM, use apt-get to install the required packages:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get install curl git git-core zlib1g-dev zlibc libxml2-dev libxslt1-dev libyaml-dev build-essential checkinstall openssl libreadline6 libreadline6-dev zlib1g libssl-dev libsqlite3-dev sqlite3 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Once RVM is installed, then close and reopen your terminal so that RVM is loaded. Then, install the correct packages:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm pkg install openssl zlib
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we can install our new copy of Ruby. On Ubuntu, I had to install Ruby 1.8.7 first:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.8.7
-</span><span class='line'>rvm use 1.8.7
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then I installed Ruby 1.9.3:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.9.3 --with-openssl-dir<span class="o">=</span><span class="nv">$HOME</span>/.rvm/usr
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Whereas on OS X, this is all that was required:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.9.3
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Once that&rsquo;s done, run the following to set the version of Ruby being used</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm use 1.9.3
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, you should be able to install the required Ruby gems. Now, you could install these manually, like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install cucumber
-</span><span class='line'>gem install rspec
-</span><span class='line'>gem install mechanize
-</span><span class='line'>gem install capybara
-</span><span class='line'>gem install selenium-webdriver
-</span><span class='line'>gem install capybara-mechanize
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>However, there&rsquo;s a more convenient way. First, create a file in the project&rsquo;s root directory called Gemfile and put the following content into it:</p>
-
-<figure class='code'><figcaption><span>Gemfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;http://rubygems.org&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;cucumber&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rspec&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;mechanize&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;capybara&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;capybara-mechanize&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then install the Bundler gem:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install bundler
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then use Bundler to install the required gems:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>bundle install
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This makes it easier to get your project set up somewhere else because you can put the Gemfile under version control, making it easier to duplicate this setup elsewhere.</p>
-
-<p>With that out of the way, let&rsquo;s start work on our app. To save time, we&rsquo;ll use the Slim framework to do some of the heavy lifting for our application. Download <a href="http://www.slimframework.com/">Slim</a> and put it in a folder on your local web server.</p>
-
-<p>Now, before we actually write any code, we&rsquo;ll set out our first Cucumber scenario. Create a folder inside the folder you put Slim inside and call it <code>features</code>. Inside it, create a new file called <code>todo.feature</code> and put the following content into it:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the new item added to the list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Notice how simple this is? Everything is written as an example of how an end user would interact with the site. There&rsquo;s nothing hard about this - it just describes what the site needs to do.</p>
-
-<p>The first line is just the name of this feature. The following three lines are just a comment. Then the Scenario line gives a name to this particular scenario - a Scenario is just a series of steps that describes an action.</p>
-
-<p>Then, we see the Given line. This sets out the starting conditions. Note that you can easily set out multiple starting conditions using the And keyword on subsequent lines, as we do later in the file. Here, we&rsquo;re just making sure we&rsquo;re on the home page.</p>
-
-<p>Next, we see the When line. This, and the subsequent And lines, set out what actions we want to take when going through this step. In this example, we&rsquo;re clicking on a link marked &lsquo;New Item&rsquo;, filling in a text input, and clicking the Submit button. So we&rsquo;re already thinking about how our application is going to work, before we&rsquo;ve written a line of code.</p>
-
-<p>Finally, we see the Then line. This sets out what should have happened once we&rsquo;ve finished going through this step. Here we want to make sure the new item has been added to the list.</p>
-
-<p>Now, go to the folder you unpacked Slim into and run <code>cucumber</code> from the shell. You should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/todo.feature:8</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/todo.feature:9</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/todo.feature:10</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/todo.feature:11</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/todo.feature:12</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> undefined<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">5</span> undefined<span class="o">)</span>
-</span><span class='line'>0m0.004s
-</span><span class='line'>
-</span><span class='line'>You can implement step definitions <span class="k">for</span> undefined steps with these snippets:
-</span><span class='line'>
-</span><span class='line'>Given /^I am on the home page<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I click on New Item<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I fill in the item<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I click the button Submit<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>Then /^I should see the new item added to the list<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>If you want snippets in a different programming language,
-</span><span class='line'>just make sure a file with the appropriate file extension
-</span><span class='line'>exists where cucumber looks <span class="k">for</span> step definitions.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>At this stage, Cucumber isn&rsquo;t doing anything much, it&rsquo;s just telling you that these steps haven&rsquo;t been defined as yet. To define a step, you simply write some Ruby code that expresses that step.</p>
-
-<p>Let&rsquo;s do that. Under <code>features</code>, create a new directory called <code>step_definitions</code>. Inside that, create a file called <code>todo_steps.rb</code> and paste the code snippets returned by Cucumber into it. Once that has been saved, run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:2:in <span class="sb">`</span>/^I am on the home page<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:8:in `Given I am on the home page&#39;</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">4</span> skipped, <span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'>0m0.004s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So far, the steps we&rsquo;ve written don&rsquo;t actually do anything - each step contains nothing but the pending statement. We need to replace the code inside each of those steps with some Ruby code that implements that step. As the first step in this scenario is still pending, Cucumber skips all the remaining steps.</p>
-
-<p>Let&rsquo;s implement these steps. First of all, we need to set some configuration options. In the <code>features</code> folder, create a new folder called <code>support</code>, and under that create a new file called <code>env.rb</code>. In there, place the following code:</p>
-
-<figure class='code'><figcaption><span>features/support/env.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rspec/expectations&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/mechanize&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/cucumber&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;test/unit/assertions&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mechanize&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">World</span><span class="p">(</span><span class="no">Test</span><span class="o">::</span><span class="no">Unit</span><span class="o">::</span><span class="no">Assertions</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Capybara</span><span class="o">.</span><span class="n">default_driver</span> <span class="o">=</span> <span class="ss">:mechanize</span>
-</span><span class='line'><span class="no">Capybara</span><span class="o">.</span><span class="n">app_host</span> <span class="o">=</span> <span class="s2">&quot;http://localhost&quot;</span>
-</span><span class='line'><span class="no">World</span><span class="p">(</span><span class="no">Capybara</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This includes all of the Ruby gems required for our purposes, and sets Capybara to use the Mechanize driver for testing web apps. If you&rsquo;ve not heard of it before, Capybara can be thought of as a way of scripting a web browser that supports numerous drivers, some of which are headless and some of which aren&rsquo;t. Here we&rsquo;re using Mechanize, which is headless, but later on we&rsquo;ll use Selenium to show you how it would work with a non-headless web browser.</p>
-
-<p>With that done, the next job is to actually implement the steps. Head back to <code>features/step_definitions/todo_steps.rb</code> and edit it as follows:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Given</span> <span class="sr">/^I am on the home page$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">visit</span> <span class="s2">&quot;http://localhost/~matthewdaly/todo/index.php&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click on New Item$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click the button Submit$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the new item added to the list$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Don&rsquo;t forget to replace the URL in that first step with the one pointing at your index.php for your local copy of Slim. At this point we&rsquo;re only implementing the first step, so that&rsquo;s all we need to do for now. Once that&rsquo;s done, go back to the root of the web app and run <code>cucumber</code> again. You should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on New Item<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">3</span> skipped, <span class="m">1</span> pending, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.036s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Our first step has passed! Now, we move onto the next step. Open features/step_definitions/todo_steps.rb again, and amend the second step definition as follows:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click on New Item$/</span> <span class="k">do</span>
-</span><span class='line'>   <span class="n">click_link</span> <span class="p">(</span><span class="s1">&#39;New Item&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, hang on a minute here. This Ruby code is pretty easy to understand - it just clicks on a link with the title, ID or text &lsquo;New Item&rsquo;. But we don&rsquo;t want to have to rewrite this step for every single link in the application. Wouldn&rsquo;t it be great if we could have this step definition accept any text and click on the appropriate link, so we could reuse it elsewhere? Well, we can. Change the second step to look like this:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click on (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">link</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_link</span> <span class="p">(</span><span class="n">link</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What&rsquo;s happening here is that we capture the text after the word &lsquo;on&rsquo; using a regular expression and pass it through to the step definition as the variable <code>link</code>. Then, we have Capybara click on that link. Pretty simple, and it saves us on some work in future.</p>
-
-<p>Now run <code>cucumber</code> again, and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      no link with title, id or text <span class="s1">&#39;New Item&#39;</span> found <span class="o">(</span>Capybara::ElementNotFound<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_link&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">3</span> skipped, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.042s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;ve got our second step in place, but it&rsquo;s failing because there is no link with the text &lsquo;New Item&rsquo;. Let&rsquo;s remedy that. Head back to the folder you put Slim in, and open index.php.</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here I&rsquo;ve stripped out most of the default code and comments so we can see more easily what&rsquo;s happening. If you haven&rsquo;t used Slim before, it works by letting you define routes that are accessed via HTTP GET, POST, PUT or DELETE methods, and define what the response will be to each one. Here, we&rsquo;ve defined a simple controller for GET requests to &lsquo;/&rsquo;, and we return a template that includes a link with the text &lsquo;New Item&rsquo;.</p>
-
-<p>Now, run <code>cucumber</code> again and you should see the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      Received the following error <span class="k">for</span> a GET request to http://localhost/~matthewdaly/todo/newitem: <span class="s1">&#39;404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/newitem -- unhandled response&#39;</span> <span class="o">(</span>RuntimeError<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_link&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">3</span> skipped, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.153s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Our second step is still failing, but only because we haven&rsquo;t yet defined a route for the destination when we click on the link, so let&rsquo;s fix that. Open up index.php again and change it to look like this:</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/newitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">action</span><span class="o">=</span><span class="s2">&quot;index.php/submitnewitem&quot;</span> <span class="nx">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">todo</span> <span class="nx">item</span> <span class="nx">text</span><span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;item&quot;</span> <span class="o">/&gt;&lt;/</span><span class="nx">label</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span> <span class="nx">value</span><span class="o">=</span><span class="s2">&quot;Submit&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;/</span><span class="nx">form</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;re just adding a new route to handle what happens when we click the link here. The new page also has a form for submitting the new item.</p>
-
-<p>With that done, the second step should be in place. Run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:10:in <span class="sb">`</span>/^I fill in the item<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:10:in `And I fill in the item&#39;</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">2</span> skipped, <span class="m">1</span> pending, <span class="m">2</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.048s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So onto the third step. We&rsquo;ve already created the input for filling in the item, so all we need to do to make this step pass is write an appropriate step definition:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="s1">&#39;Feed cat&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, run <code>cucumber</code> again and this step should pass:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:14:in <span class="sb">`</span>/^I click the button Submit<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:11:in `And I click the button Submit&#39;</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> skipped, <span class="m">1</span> pending, <span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.117s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we need to implement the step for clicking the Submit button. As with clicking on the New Item link, we can make this step generic to save us time later:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click the button (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">button</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_button</span> <span class="p">(</span><span class="n">button</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>      Received the following error <span class="k">for</span> a POST request to http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem: <span class="s1">&#39;404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem -- unhandled response&#39;</span> <span class="o">(</span>RuntimeError<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_button&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:14:in <span class="sb">`</span>/^I click the button <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:11:in `And I click the button Submit&#39;</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">1</span> skipped, <span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.210s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The step is failing here because submitting the new item generates a 404 error. We need to handle the POST. Open up index.php again and edit it to look like this:</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/newitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">action</span><span class="o">=</span><span class="s2">&quot;index.php/submitnewitem&quot;</span> <span class="nx">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">todo</span> <span class="nx">item</span> <span class="nx">text</span><span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;item&quot;</span> <span class="o">/&gt;&lt;/</span><span class="nx">label</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span> <span class="nx">value</span><span class="o">=</span><span class="s2">&quot;Submit&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;/</span><span class="nx">form</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s1">&#39;/submitnewitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$item</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;item&#39;</span><span class="p">];</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nv">$item</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here we&rsquo;re cheating a little bit. In a working application we&rsquo;d want to store the to-do list items in a database, but to keep this tutorial simple we&rsquo;ll just output the result of the POST request and leave implementing a database to store the items as an exercise for the reader.</p>
-
-<p>Now, run <code>cucumber</code> again and you should see that this step now passes:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:18:in <span class="sb">`</span>/^I should see the new item added to the list<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:12:in `Then I should see the new item added to the list&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> pending, <span class="m">4</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.067s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>On to our final step. We want to make sure the page contains the text we submitted, which is very easy to do with Capybara. Change the final step to look like this:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the new item added to the list$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">page</span><span class="o">.</span><span class="n">should</span> <span class="n">have_content</span><span class="p">(</span><span class="s1">&#39;Feed cat&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now run <code>cucumber</code> again and you should see that the scenario has now passed:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">5</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.068s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;re nearly done here, but first there&rsquo;s a couple of other handy things you can do with Cucumber that I&rsquo;d like to show you. We&rsquo;ve been using the Mechanize driver for Capybara, which is very fast and efficient. However, it&rsquo;s effectively a text-mode browser like Lynx, so it can&rsquo;t be used to test any functionality that relies on JavaScript. However, Mechanize isn&rsquo;t the only driver available for Capybara, and you can switch to the JavaScript driver when necessary so you can test. The default JavaScript driver is Selenium, which will launch an instance of Firefox and use that for the test.</p>
-
-<p>It&rsquo;s easy to switch to the JavaScript driver when you need it. Just tag the scenario with @javascript, as in this example:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    @javascript</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the new item added to the list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now run <code>cucumber</code> again and this time it will fire up an instance of Firefox and use that to run the tests. This can also be handy for debugging purposes since, unlike with Mechanize, you can see the pages.</p>
-
-<p>Finally, what about if you want to test the same functionality multiple times with different input? You don&rsquo;t want to have to write out multiple scenarios that are virtually identical, even if you have refactored them to make them more useful. What you need is a way to repeat the same test, only with different input each time.</p>
-
-<p>Handily, Cucumber can do this too. First, let&rsquo;s refactor the code for our step definitions so the final step can handle any text:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Given</span> <span class="sr">/^I am on the home page$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">visit</span> <span class="s2">&quot;http://localhost/~matthewdaly/todo/index.php&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click on (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">link</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_link</span> <span class="p">(</span><span class="n">link</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item with (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="n">item</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click the button (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">button</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_button</span> <span class="p">(</span><span class="n">button</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the text (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">text</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">page</span><span class="o">.</span><span class="n">should</span> <span class="n">have_content</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here we&rsquo;ve changed the third and fifth items so we can pass any value we want through to them. As I mentioned earlier, this is good practice since it means we don&rsquo;t have to write more code for our tests than we need to.</p>
-
-<p>With that done, open up the feature file and amend it to look like this:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    @javascript</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario Outline:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item with </span><span class="nv">&lt;item&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the text </span><span class="nv">&lt;item&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">    </span><span class="k">Examples:</span>
-</span><span class='line'><span class="k">        |</span><span class="nv"> item</span><span class="k">                      |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Feed cat</span><span class="k">                  |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Stop milk</span><span class="k">                 |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Take over world</span><span class="k">           |</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If you then run <code>cucumber</code> again, the scenario should run three times, each time entering different text:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  @javascript
-</span><span class='line'>  Scenario Outline: New item           <span class="c"># features/todo.feature:8</span>
-</span><span class='line'>    Given I am on the home page        <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item           <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item with &lt;item&gt; <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit      <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the text &lt;item&gt;  <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>    Examples:
-</span><span class='line'>      <span class="p">|</span> item            <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Feed cat        <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Stop milk       <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Take over world <span class="p">|</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">3</span> scenarios <span class="o">(</span><span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'><span class="m">15</span> steps <span class="o">(</span><span class="m">15</span> passed<span class="o">)</span>
-</span><span class='line'>0m25.936s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With only a few changes, we&rsquo;re now running the same scenario over and over again with different input, and testing the output is correct for each one. This makes it very easy to test repetitive content. For instance, if you had an e-commerce site with lots of products and you wanted to test the pages for some of the products, you could put them in a table like this. You can have more than one column if necessary, so you could write a scenario like this:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Scenario Outline:</span><span class="nf"> Test products</span>
-</span><span class='line'><span class="k">    Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">    </span><span class="k">When </span><span class="nf">I search for </span><span class="nv">&lt;product&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">    </span><span class="k">And </span><span class="nf">I click on the first result</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Then </span><span class="nf">I should not see any errors</span>
-</span><span class='line'><span class="nf">    </span><span class="k">And </span><span class="nf">I should see the text </span><span class="nv">&lt;productname&gt;</span><span class="nf"></span>
-</span><span class='line'>
-</span><span class='line'><span class="k">Examples:</span>
-</span><span class='line'><span class="k">    |</span><span class="nv"> product</span><span class="k">           |</span><span class="nv"> productname</span><span class="k">                           |</span><span class="nf"></span>
-</span><span class='line'><span class="k">    |</span><span class="s"> supersprocket</span><span class="k">     |</span><span class="s"> Super Sprocket 3000</span><span class="k">                   |</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>As you can see, Cucumber is a really simple way to start testing your web apps, and can really improve the quality of your code. Even if you&rsquo;ve never used Ruby before, <a href="https://github.com/jnicklas/capybara#readme">Capybara&rsquo;s API</a> is very simple and intuitive, and should adequately cover most of what you need to do when testing a web app.</p>
-
-<p>As I mentioned, the PHP community in general has been a bit slack in terms of getting proper automated tests working. But Cucumber makes it so simple, and offers so many other benefits, such as human-readable tests and getting stakeholders more involved in the development process, that there&rsquo;s really no excuse not to use it. Hope you&rsquo;ve enjoyed this tutorial, and that it&rsquo;s encouraged you to start using Cucumber to test your own web apps.</p>
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="A while back, I mentioned that I&rsquo;d written a Yeoman generator for creating a flat HTML blog, called generator-simple-static-blog. For this, I& &hellip;">
+  <meta name="description" content="One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,1167 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-12-31T14:10:57+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>31</span><span class='date-suffix'>st</span>, <span class='date-year'>2014</span></span> <span class='time'>2:10 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we&rsquo;ll build a very simple web-based chat system that demonstrates Redis&rsquo;s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it&rsquo;s widely considered the &ldquo;Hello, World!&rdquo; of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p>
+
+<h2>Installing Node.js</h2>
+
+<p>Since the last tutorial, I&rsquo;ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you&rsquo;re using any flavour of Unix, I highly recommend using it. It&rsquo;s not an option if you&rsquo;re using Windows, however Redis doesn&rsquo;t officially support Windows anyway, so if you want to follow along on a Windows machine I&rsquo;d recommend using a VM.</p>
+
+<p>If you followed the URL shortener tutorial, you should already have everything you need, though I&rsquo;d still recommend switching to NVM as it&rsquo;s very convenient. We&rsquo;ll be using Grunt again, so you&rsquo;ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install -g grunt-cli
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This assumes you used NVM to install Node - if it&rsquo;s installed globally, you may need to use <code>sudo</code>.</p>
+
+<h2>Installing dependencies</h2>
+
+<p>As usual with a Node.js project, our first step is to create our <code>package.json</code> file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Answer the questions so you end up with something like this (or just paste this into <code>package.json</code> and amend it as you see fit):</p>
+
+<figure class='code'><figcaption><span>package.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Chat client&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;grunt test --verbose&quot;</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now let&rsquo;s install our dependencies:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install express hbs redis hiredis socket.io socket.io-client --save
+</span><span class='line'>npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>These two commands will install our dependencies.</p>
+
+<p>Now, if you followed on with the URL shortener tutorial, you&rsquo;ll notice that we aren&rsquo;t using Jade - instead we&rsquo;re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We&rsquo;ll also use Socket.IO extensively on this project.</p>
+
+<h2>Support files</h2>
+
+<p>As before, we&rsquo;ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We&rsquo;ll need a Grunt configuration for that, so here it is:</p>
+
+<figure class='code'><figcaption><span>Gruntfile.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">grunt</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">initConfig</span><span class="p">({</span>
+</span><span class='line'>        <span class="nx">jshint</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">all</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>                <span class="s1">&#39;test/*.js&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;index.js&#39;</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">mocha_istanbul</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">coverage</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="c1">// the folder, not the files,</span>
+</span><span class='line'>                <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="nx">mask</span><span class="o">:</span> <span class="s1">&#39;*.js&#39;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="nx">reportFormats</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;cobertura&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;lcovonly&#39;</span><span class="p">]</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="nx">coveralls</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span><span class="p">,</span>
+</span><span class='line'>                <span class="nx">force</span><span class="o">:</span> <span class="kc">false</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="nx">app</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Load tasks</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-contrib-jshint&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-coveralls&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-mocha-istanbul&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Register tasks</span>
+</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">registerTask</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;jshint&#39;</span><span class="p">,</span> <span class="s1">&#39;mocha_istanbul:coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;coveralls&#39;</span><span class="p">]);</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also need a <code>.bowerrc</code>:</p>
+
+<figure class='code'><figcaption><span>.bowerrc</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;static/bower_components&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And a <code>bower.json</code>:</p>
+
+<figure class='code'><figcaption><span>bower.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;authors&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;Matthew Daly &lt;matthewbdaly@gmail.com&gt;&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A simple chat server&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;moduleType&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;node&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;homepage&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.matthewdaly.co.uk&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;private&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;ignore&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s2">&quot;**/.*&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;node_modules&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;bower_components&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;tests&quot;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;html5-boilerplate&quot;</span><span class="p">:</span> <span class="s2">&quot;~4.3.0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;jquery&quot;</span><span class="p">:</span> <span class="s2">&quot;~2.1.1&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;bootstrap&quot;</span><span class="p">:</span> <span class="s2">&quot;~3.3.1&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then install the Bower dependencies:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>bower install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also need a <code>Procfile</code> so we can run it on Heroku:</p>
+
+<figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: node index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s create the main file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And our test file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir <span class="nb">test</span>
+</span><span class='line'>touch <span class="nb">test</span>/test.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Implementing the chat server</h2>
+
+<p>Next, let&rsquo;s implement our first test. First of all, we&rsquo;ll verify that the index route works:</p>
+
+<figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
+</span><span class='line'><span class="cm">/*global describe: false, before: false, after: false, it: false */</span>
+</span><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Declare the variables used</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;chai&#39;</span><span class="p">).</span><span class="nx">expect</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">redis</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io-client&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">;</span>
+</span><span class='line'><span class="nx">client</span> <span class="o">=</span> <span class="nx">redis</span><span class="p">.</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Server tasks</span>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Beforehand, start the server</span>
+</span><span class='line'>    <span class="nx">before</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Starting the server&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Afterwards, stop the server and empty the database</span>
+</span><span class='line'>    <span class="nx">after</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Stopping the server&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">flushdb</span><span class="p">();</span>
+</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Test the index route</span>
+</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test the index route&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return a page with the title Babblr&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000/&#39;</span> <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Babblr&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-type&#39;</span><span class="p">]).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;text/html; charset=utf-8&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that this is very similar to the first test for the URL shortener, because it&rsquo;s doing basically the same thing.</p>
+
+<p>Now, run the test and make sure it fails:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> a page with the title Babblr
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">0</span> passing <span class="o">(</span>873ms<span class="o">)</span>
+</span><span class='line'>  <span class="m">1</span> failing
+</span><span class='line'>
+</span><span class='line'>  1<span class="o">)</span> server Test the index route should <span class="k">return</span> a page with the title Babblr:
+</span><span class='line'>     Uncaught AssertionError: expected undefined to include <span class="s1">&#39;Babblr&#39;</span>
+</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/test/test.js:34:33<span class="o">)</span>
+</span><span class='line'>      at self.callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22<span class="o">)</span>
+</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at Request.onRequestError <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:971:8<span class="o">)</span>
+</span><span class='line'>      at ClientRequest.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at Socket.socketErrorListener <span class="o">(</span>http.js:1552:9<span class="o">)</span>
+</span><span class='line'>      at Socket.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
+</span><span class='line'>      at net.js:441:14
+</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:442:13<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt;
+</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With that confirmed, we can start writing code to make the test pass:</p>
+
+<figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
+</span><span class='line'><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Declare variables used</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">app</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">,</span> <span class="nx">client</span><span class="p">,</span> <span class="nx">express</span><span class="p">,</span> <span class="nx">hbs</span><span class="p">,</span> <span class="nx">io</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">,</span> <span class="nx">subscribe</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Define values</span>
+</span><span class='line'><span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+</span><span class='line'><span class="nx">port</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PORT</span> <span class="o">||</span> <span class="mi">5000</span><span class="p">;</span>
+</span><span class='line'><span class="nx">base_url</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BASE_URL</span> <span class="o">||</span> <span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="nx">hbs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up connection to Redis</span>
+</span><span class='line'><span class="cm">/* istanbul ignore if */</span>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">rtg</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">).</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up templating</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;view engine&#39;</span><span class="p">,</span> <span class="s2">&quot;hbs&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">,</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">).</span><span class="nx">__express</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Register partials</span>
+</span><span class='line'><span class="nx">hbs</span><span class="p">.</span><span class="nx">registerPartials</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views/partials&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set URL</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;base_url&#39;</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Define index route</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Serve static files</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/static&#39;</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Listen</span>
+</span><span class='line'><span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io&#39;</span><span class="p">)({</span>
+</span><span class='line'><span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Listening on port &quot;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you compare this to the code for the URL shortener, you&rsquo;ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that&rsquo;s because we need to do so when using Pub/Sub with Redis. You&rsquo;ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we&rsquo;ll be using Socket.IO.</p>
+
+<p>Now, you can run your tests again at this point, but they won&rsquo;t pass because we haven&rsquo;t created our views. So let&rsquo;s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/index.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="cp"></span><span class="x"></span>
+</span><span class='line'><span class="x">        &lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="x">            &lt;div class=&quot;row&quot;&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;col-md-8&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;div class=&quot;conversation&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;col-md-4&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;form&gt;</span>
+</span><span class='line'><span class="x">                        &lt;div class=&quot;form-group&quot;&gt;</span>
+</span><span class='line'><span class="x">                            &lt;label for=&quot;message&quot;&gt;Message&lt;/label&gt;</span>
+</span><span class='line'><span class="x">                            &lt;textarea class=&quot;form-control&quot; id=&quot;message&quot; rows=&quot;20&quot;&gt;&lt;/textarea&gt;</span>
+</span><span class='line'><span class="x">                            &lt;a id=&quot;submitbutton&quot; class=&quot;btn btn-primary form-control&quot;&gt;Submit&lt;/a&gt;</span>
+</span><span class='line'><span class="x">                        &lt;div&gt;</span>
+</span><span class='line'><span class="x">                    &lt;/form&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">            &lt;/div&gt;</span>
+</span><span class='line'><span class="x">        &lt;/div&gt;</span>
+</span><span class='line'><span class="cp"></span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Add this to <code>views/partials/header.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/partials/header.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="x">&lt;!DOCTYPE html&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">&lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class=&quot;no-js&quot;&gt; &lt;!--&lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">    &lt;head&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta charset=&quot;utf-8&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;title&gt;Babblr&lt;/title&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta name=&quot;description&quot; content=&quot;&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">        &lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/bower_components/bootstrap/dist/css/bootstrap.min.css&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/bower_components/bootstrap/dist/css/bootstrap-theme.min.css&quot;&gt;</span>
+</span><span class='line'><span class="x">        &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/style.css&quot;&gt;</span>
+</span><span class='line'><span class="x">    &lt;/head&gt;</span>
+</span><span class='line'><span class="x">    &lt;body&gt;</span>
+</span><span class='line'><span class="x">        &lt;!--[if lt IE 7]&gt;</span>
+</span><span class='line'><span class="x">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
+</span><span class='line'><span class="x">        &lt;![endif]--&gt;</span>
+</span><span class='line'><span class="x">        &lt;nav class=&quot;navbar navbar-inverse navbar-static-top&quot; role=&quot;navigation&quot;&gt;</span>
+</span><span class='line'><span class="x">            &lt;div class=&quot;container&quot;&gt;</span>
+</span><span class='line'><span class="x">                &lt;div class=&quot;navbar-header&quot;&gt;</span>
+</span><span class='line'><span class="x">                    &lt;a class=&quot;navbar-brand&quot; href=&quot;#&quot;&gt;Babblr&lt;/a&gt;</span>
+</span><span class='line'><span class="x">                &lt;/div&gt;</span>
+</span><span class='line'><span class="x">            &lt;/div&gt;</span>
+</span><span class='line'><span class="x">        &lt;/nav&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And add this to <code>views/partials/footer.hbs</code>:</p>
+
+<figure class='code'><figcaption><span>views/partials/footer.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='handlebars'><span class='line'><span class="x">        &lt;script src=&quot;/bower_components/jquery/dist/jquery.min.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/bower_components/bootstrap/dist/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/socket.io/socket.io.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="x">        &lt;script src=&quot;/js/main.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="x">    &lt;/body&gt;</span>
+</span><span class='line'><span class="x">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll also want to create placeholder CSS and JavaScript files:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir static/js
+</span><span class='line'>mkdir static/css
+</span><span class='line'>touch static/js/main.js
+</span><span class='line'>touch static/css/style.css
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The test should now pass:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>41ms<span class="o">)</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>54ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt; Done. Check coverage folder.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
+</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
+</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Don&rsquo;t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p>
+
+<p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p>
+
+<figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="c1">// Test sending a message</span>
+</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test sending a message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s2">&quot;should return &#39;Message received&#39;&quot;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="c1">// Connect to server</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s1">&#39;reconnection delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;reopen delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>                <span class="s1">&#39;force new connection&#39;</span> <span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Handle the message being received</span>
+</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Message received&#39;</span><span class="p">);</span>
+</span><span class='line'>                <span class="nx">socket</span><span class="p">.</span><span class="nx">disconnect</span><span class="p">();</span>
+</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
+</span><span class='line'>            <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// Send the message</span>
+</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="s1">&#39;Message received&#39;</span> <span class="p">});</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let&rsquo;s run the tests to make sure we get the expected result:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>337ms<span class="o">)</span>
+</span><span class='line'>    Test sending a message
+</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>2s<span class="o">)</span>
+</span><span class='line'>  <span class="m">1</span> failing
+</span><span class='line'>
+</span><span class='line'>  1<span class="o">)</span> server Test sending a message should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>:
+</span><span class='line'>     Error: timeout of 2000ms exceeded
+</span><span class='line'>      at null.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:159:19<span class="o">)</span>
+</span><span class='line'>      at Timer.listOnTimeout <span class="o">[</span>as ontimeout<span class="o">]</span> <span class="o">(</span>timers.js:112:15<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt;
+</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s implement this functionality. Add this at the end of <code>index.js</code>:</p>
+
+<figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Handle new messages</span>
+</span><span class='line'><span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connection&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">socket</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Subscribe to the Redis channel</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Publish it</span>
+</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">publish</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle receiving messages</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">channel</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle disconnect</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;disconnect&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">subscribe</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We&rsquo;ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p>
+
+<p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p>
+
+<p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p>
+
+<p>We&rsquo;ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p>
+
+<figure class='code'><figcaption><span>static/js/main.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Set up the connection</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">field</span><span class="p">,</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">output</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get a reference to the input</span>
+</span><span class='line'>    <span class="nx">field</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;textarea#message&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get a reference to the output</span>
+</span><span class='line'>    <span class="nx">output</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;div.conversation&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle message submit</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a#submitbutton&#39;</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Create the message</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">msg</span><span class="p">;</span>
+</span><span class='line'>        <span class="nx">msg</span> <span class="o">=</span> <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">();</span>
+</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">msg</span> <span class="p">});</span>
+</span><span class='line'>        <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
+</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Insert the message</span>
+</span><span class='line'>        <span class="nx">output</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;&lt;p&gt;Anonymous Coward : &#39;</span> <span class="o">+</span> <span class="nx">data</span> <span class="o">+</span> <span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won&rsquo;t implement user names at this point (though I plan it for a future instalment).</p>
+
+<p>We&rsquo;ll also add a little bit of additional styling:</p>
+
+<figure class='code'><figcaption><span>static/css/style.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.conversation</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">height</span><span class="o">:</span> <span class="m">500px</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">overflow-y</span><span class="o">:</span> <span class="k">scroll</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">border</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#000</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">padding</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, if you run your tests, they should pass:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
+</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
+</span><span class='line'>Listening on port 5000
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  server
+</span><span class='line'>Starting the server
+</span><span class='line'>    Test the index route
+</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>40ms<span class="o">)</span>
+</span><span class='line'>    Test sending a message
+</span><span class='line'>      ✓ should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span> <span class="o">(</span>45ms<span class="o">)</span>
+</span><span class='line'>Stopping the server
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>  <span class="m">2</span> passing <span class="o">(</span>101ms<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
+</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
+</span><span class='line'><span class="o">=============================================================================</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
+</span><span class='line'>Statements   : 100% <span class="o">(</span> 33/33 <span class="o">)</span>, <span class="m">5</span> ignored
+</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
+</span><span class='line'>Functions    : 100% <span class="o">(</span> 5/5 <span class="o">)</span>
+</span><span class='line'>Lines        : 100% <span class="o">(</span> 33/33 <span class="o">)</span>
+</span><span class='line'><span class="o">================================================================================</span>
+</span><span class='line'>&gt;&gt; Done. Check coverage folder.
+</span><span class='line'>
+</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
+</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
+</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
+</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
+</span><span class='line'>
+</span><span class='line'>Aborted due to warnings.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you now run the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>node index.js
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>This illustrates just how straightforward it is to use Redis&rsquo;s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we&rsquo;ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -8876,639 +10037,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/">Django Blog Tutorial - the Next Generation - Part 5</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-05-24T20:15:54+01:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>8:15 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Hello again! I was originally planning to cover implementing a search system, adding more feeds, and tidying up the front end in this instalment. However, I felt it was time for a change of pace, so instead, we&rsquo;re going to look at:</p>
-
-<ul>
-<li>Checking code coverage and getting it to 100%</li>
-<li>Using continuous integration</li>
-<li>Deploying to Heroku</li>
-</ul>
-
-
-<p>Don&rsquo;t worry, the original lesson isn&rsquo;t going anywhere. We&rsquo;ll still be implementing all of that later on, but today is the day we get your Django blog up and running on the web. That way, you can get a better idea of how Django works in the wild, and you have something concrete to show for your efforts.</p>
-
-<h1>Continuous integration</h1>
-
-<p>If you&rsquo;re not familiar with continuous integration, it&rsquo;s basically a process that carries out some tasks automatically when you push a new commit to the repository. These tasks may include running unit tests, linting your code, and checking it to see what percentage of the code base is covered by the tests (after all, if your tests don&rsquo;t actually cover every scenario, then there&rsquo;s more of a chance that something might slip through the net. It&rsquo;s also possible to implement hooks to automatically deploy your application only if the tests pass.</p>
-
-<p>Typically, you will have a continuous integration server running somewhere that regularly polls your Git repository for changes, and when it finds a new commit, will check it out and run the tests (or whatever other task you configure it to). One of the most popular continuous integration servers around is <a href="http://jenkins-ci.org/">Jenkins</a> - I use it at work and can highly recommend it. However, we aren&rsquo;t going to cover using Jenkins here because setting it up is quite a big deal and it really is best kept on a server of its own (although feel free to use it if you prefer). Instead, we&rsquo;re going to use <a href="https://travis-ci.org/">Travis CI</a>, which integrates nicely with GitHub and is free for open source projects. If you don&rsquo;t mind your code being publicly available on GitHub, then Travis is a really great way to dip your toe into continuous integration.</p>
-
-<p>NB: You don&rsquo;t have to use continuous integration at all if you don&rsquo;t want to - this isn&rsquo;t a big project so you don&rsquo;t really need it. If you don&rsquo;t want to put your code on GitHub, then feel free to just follow along and not bother pushing your code to GitHub and configuring Travis.</p>
-
-<h1>Code coverage</h1>
-
-<p>As mentioned above, code coverage is a measure of the percentage of the code that is covered by tests. While not infallible, it&rsquo;s a fairly good guide to how comprehensive your tests are. If you have 100% code coverage, you can be fairly confident that your tests are comprehensive enough to catch most errors, so it&rsquo;s a good rule of thumb to aim for 100% test coverage on a project.</p>
-
-<p>So how do we check our test coverage? The <code>coverage</code> Python module is the most common tool for this. There&rsquo;s also a handy Django module called <code>django-jenkins</code>, which is designed to work with Jenkins, but can be used with any continuous integration server, that can not only run your tests, but also check code coverage at the same time. So, make sure your virtualenv is up and running:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">source </span>venv/bin/activate
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then, run the following command:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install coverage django-jenkins
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Once that&rsquo;s done, add these to our requirements file:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We now need to configure our Django project to use <code>django-jenkins</code>. Add the following to the bottom of the settings file:</p>
-
-<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">INSTALLED_APPS</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;django_jenkins&#39;</span><span class="p">,)</span>
-</span><span class='line'><span class="n">JENKINS_TASKS</span> <span class="o">=</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&#39;django_jenkins.tasks.run_pylint&#39;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&#39;django_jenkins.tasks.with_coverage&#39;</span><span class="p">,</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'><span class="n">PROJECT_APPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;blogengine&#39;</span><span class="p">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This adds <code>django-jenkins</code> to our installed apps and tells it to include two additional tasks, besides running the tests. The first task runs Pylint to check our code quality (but we aren&rsquo;t really concerned about that at this point). The second checks the coverage. Finally, we tell <code>django-jenkins</code> that the <code>blogengine</code> app is the only one to be tested.</p>
-
-<p>You&rsquo;ll also want to add the following lines to your <code>.gitignore</code>:</p>
-
-<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>reports/
-</span><span class='line'>htmlcov/
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>These are the reports generated by <code>django-jenkins</code>, and should not be kept under version control. With that done, it&rsquo;s time to commit:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore django_tutorial_blog_ng/ requirements.txt
-</span><span class='line'>git commit -m <span class="s1">&#39;Added coverage checking using django-jenkins&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, let&rsquo;s run our tests. From now on, you&rsquo;ll use the following command to run your tests:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This ensures we check the coverage at the same time. Now, you&rsquo;ll notice that the <code>reports</code> folder has been created, and it will contain three files, including one called <code>coverage.xml</code>. However, XML isn&rsquo;t a very friendly format. Happily, we can easily generate reports in HTML instead:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Running this command will create another folder called <code>htmlcov/</code>, and in here you will find your report, nicely formatted as HTML. Open up <code>index.html</code> in your web browser and you should see a file-by-file breakdown of your code coverage. Nice, huh?</p>
-
-<p>Now, if your code so far is largely identical to mine, you&rsquo;ll notice that the model and view files don&rsquo;t have 100% coverage yet. If you click on each one, you&rsquo;ll see a handy line-by-line breakdown of the test coverage for each file. You&rsquo;ll notice that in the views file, the areas of the code for when tags and categories don&rsquo;t exist are highlighted in pink - this tells you that these lines of code are never executed during the tests. So let&rsquo;s fix that.</p>
-
-<p>First, our template needs to be able to handle empty lists.</p>
-
-<figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
-</span><span class='line'>
-</span><span class='line'>    {% load custom_markdown %}
-</span><span class='line'>
-</span><span class='line'>    {% block content %}
-</span><span class='line'>        {% if object_list %}
-</span><span class='line'>            {% for post in object_list %}
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
-</span><span class='line'>            {{ post.text|custom_markdown }}
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.category.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.category.name }}<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>            {% for tag in post.tags.all %}
-</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ tag.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ tag.name }}<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>            {% endfor %}
-</span><span class='line'>            {% endfor %}
-</span><span class='line'>        {% else %}
-</span><span class='line'>            <span class="nt">&lt;p&gt;</span>No posts found<span class="nt">&lt;/p&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>
-</span><span class='line'>        {% if page_obj.has_previous %}
-</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        {% if page_obj.has_next %}
-</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>
-</span><span class='line'>    {% endblock %}
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Let&rsquo;s commit the changes:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/blogengine/post_list.html
-</span><span class='line'>git commit -m <span class="s1">&#39;Added a &quot;No posts found&quot; message to post list template&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Next, we need to write tests to check that we get a &ldquo;No posts found&rdquo; message when we view a tag or category that does not exist. Add the following methods to the class <code>PostViewTest()</code>:</p>
-
-<figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_nonexistent_category_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">category_url</span> <span class="o">=</span> <span class="s">&#39;/category/blah/&#39;</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category_url</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;No posts found&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">test_nonexistent_tag_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">tag_url</span> <span class="o">=</span> <span class="s">&#39;/tag/blah/&#39;</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag_url</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;No posts found&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, let&rsquo;s run our tests again:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Assuming they all pass as expected, then your coverage reports will be regenerated. If you reload the coverage report, you should see that your views now have 100% test coverage. Let&rsquo;s commit again:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/tests.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Views file now has 100% coverage&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, our models still don&rsquo;t have 100% coverage yet. If you look at the breakdown for <code>models.py</code>, you&rsquo;ll see that the line <code>if not self.slug:</code> has only partial coverage, because we missed out setting a slug for the categories and tags in our test. So, let&rsquo;s fix that. In <code>PostTest()</code>, amend the <code>test_create_category()</code> and <code>test_create_tag()</code> methods as follows:</p>
-
-<figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_create_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>    <span class="c"># Create the category</span>
-</span><span class='line'>    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Add attributes</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;The Python programming language&#39;</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Save it</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check we can find it</span>
-</span><span class='line'>    <span class="n">all_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_categories</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">only_category</span> <span class="o">=</span> <span class="n">all_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check attributes</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Python programming language&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">test_create_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>    <span class="c"># Create the tag</span>
-</span><span class='line'>    <span class="n">tag</span> <span class="o">=</span> <span class="n">Tag</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Add attributes</span>
-</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
-</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;The Python programming language&#39;</span>
-</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Save it</span>
-</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check we can find it</span>
-</span><span class='line'>    <span class="n">all_tags</span> <span class="o">=</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_tags</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">only_tag</span> <span class="o">=</span> <span class="n">all_tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check attributes</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Python programming language&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Run the tests again:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then refresh your coverage page, and we should have hit 100% coverage. Excellent news! This means that we can be confident that if any problems get introduced in future, we can pick them up easily. To demonstrate this, let&rsquo;s upgrade our Django install to the latest version and check everything still works as expected:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install Django --upgrade
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This will upgrade the copy of Django in our virtualenv to the latest version. Then we can run our tests again:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Our tests should still pass, indicating that the upgrade to our Django version does not appear to have broken any functionality. Let&rsquo;s update our <code>requirements.txt</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
-</span><span class='line'>git add requirements.txt
-</span><span class='line'>git commit -m <span class="s1">&#39;Upgraded Django version&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Preparing our web app for deployment to Heroku</h1>
-
-<p>As mentioned previously, I&rsquo;m going to assume you plan to deploy your site on <a href="https://www.heroku.com/">Heroku</a>. It has good Django support, and you can quite happily host a blog there using their free tariff. If you&rsquo;d prefer to use another hosting provider, then you should be able to adapt these instructions accordingly.</p>
-
-<p>Now, so far we&rsquo;ve used SQLite as our database for development purposes. However, SQLite isn&rsquo;t really suitable for production purposes. Heroku provide a Postgresql database for each web app, so we will use that. To configure it, open up <code>settings.py</code> and amend the database configuration section to look like this:</p>
-
-<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>        <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then, add the following at the end of the file:</p>
-
-<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Heroku config</span>
-</span><span class='line'><span class="c"># Parse database configuration from $DATABASE_URL</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">dj_database_url</span>
-</span><span class='line'><span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dj_database_url</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;sqlite:///db.sqlite3&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Honor the &#39;X-Forwarded-Proto&#39; header for request.is_secure()</span>
-</span><span class='line'><span class="n">SECURE_PROXY_SSL_HEADER</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;HTTP_X_FORWARDED_PROTO&#39;</span><span class="p">,</span> <span class="s">&#39;https&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Allow all host headers</span>
-</span><span class='line'><span class="n">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Static asset configuration</span>
-</span><span class='line'><span class="n">STATIC_ROOT</span> <span class="o">=</span> <span class="s">&#39;staticfiles&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">STATICFILES_DIRS</span> <span class="o">=</span> <span class="p">(</span>
-</span><span class='line'>    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s">&#39;static&#39;</span><span class="p">),</span>
-</span><span class='line'><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>A little explanation is called for. Remember when we first started out, we installed the <code>django-toolbelt</code> package, which included <code>dj-database-url</code>? Well, here we use the <code>dj_database_url</code> module to get the database from an environment variable set on Heroku. We set a default value so as to fall back to SQLite when that variable is not set. The other settings are required by Heroku.</p>
-
-<p>You may want to run your tests again to ensure everything is still working before committing:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/settings.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Amended settings to work on desktop and Heroku&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Setting up Continuous Integration and coverage</h1>
-
-<p>Now, as mentioned previously, I&rsquo;ll be demonstrating how to set up Travis CI for our project. Travis CI is only free for open-source projects, so if you don&rsquo;t want to make your code publicly accessible, you may want to use Jenkins instead. I&rsquo;ll leave setting that up and running it as an exercise for the reader, but I recommend a plugin called Cobertura which allows you to publish details of your code&rsquo;s test coverage.</p>
-
-<p>Unfortunately, Travis CI doesn&rsquo;t have the capability to publish your coverage results. Fortunately, you can use <a href="https://coveralls.io/">Coveralls.io</a> to pick up the slack. Like Travis, it&rsquo;s free for open-source projects, and if you host your code on GitHub, it&rsquo;s pretty easy to use.</p>
-
-<p>You can find instructions on setting up a project on Travis CI <a href="http://docs.travis-ci.com/user/getting-started/">here</a>. Once you&rsquo;ve configured it, you&rsquo;ll need to set up your <code>.travis.yml</code> file. This is a simple text file that tells Travis CI how to run your tests. Put the following content in the file:</p>
-
-<figure class='code'><figcaption><span>.travis.yml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">python</span>
-</span><span class='line'><span class="l-Scalar-Plain">python</span><span class="p-Indicator">:</span>
-</span><span class='line'><span class="p-Indicator">-</span> <span class="s">&quot;2.7&quot;</span>
-</span><span class='line'><span class="c1"># command to install dependencies</span>
-</span><span class='line'><span class="l-Scalar-Plain">install</span><span class="p-Indicator">:</span> <span class="s">&quot;pip</span><span class="nv"> </span><span class="s">install</span><span class="nv"> </span><span class="s">-r</span><span class="nv"> </span><span class="s">requirements.txt&quot;</span>
-</span><span class='line'><span class="c1"># command to run tests</span>
-</span><span class='line'><span class="l-Scalar-Plain">script</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">coverage run --include=&quot;blogengine/*&quot; --omit=&quot;blogengine/migrations/*&quot; manage.py test blogengine</span>
-</span><span class='line'><span class="l-Scalar-Plain">after_success</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">coveralls</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, this tells Travis that this is a Python application, and we should be using Python 2.7. Please note you can test against multiple versions of Python if you wish - just add another line with the Python version you want to test against.</p>
-
-<p>Then, we see that we use Pip to install our requirements. Finally we run our tests with Coverage, in order to generate coverage data, and afterwards call <code>coveralls</code> to pass the coverage data to Coveralls.io.</p>
-
-<p>We also need to install the <code>coveralls</code> module:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install coveralls
-</span><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And we need to keep our coverage data out of version control:</p>
-
-<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>env/
-</span><span class='line'>*.pyc
-</span><span class='line'>db.sqlite3
-</span><span class='line'>blogengine/static/bower_components/
-</span><span class='line'>reports/
-</span><span class='line'>htmlcov/
-</span><span class='line'>.coverage
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You&rsquo;ll also want to set up your project on Coveralls, as described <a href="https://coveralls.io/docs">here</a> - please note that this requires your project be in a public GitHub repository.</p>
-
-<p>With that done, let&rsquo;s commit our changes:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore .travis.yml requirements.txt
-</span><span class='line'>git commit -m <span class="s1">&#39;Added Travis config file and Coveralls support&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, assuming you have Travis CI and Coveralls configured, and your code is already hosted on GitHub, then you should be able to just push your code up to trigger the build:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git push origin master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If you keep an eye on Travis in your browser, you can watch what happens as your tests are run. If for any reason the build fails, then it shouldn&rsquo;t be too hard to figure out what has gone wrong using the documentation for Travis and Coveralls - both services are pretty easy to use.</p>
-
-<p>Congratulations - you&rsquo;re now using Continuous Integration! That wasn&rsquo;t so hard, was it? Now, every time you push to GitHub, Travis will run your tests, and you&rsquo;ll get an email if they fail, giving you early warning of any problems, and you can check your coverage at the same time. Both Travis and Coveralls offer badges that you can place in your README file on GitHub to show off your coverage and build status - feel free to add these to your repo.</p>
-
-<p>You may want to try making a change that breaks your tests and committing it, then pushing it up, so that you can see what happens when the build breaks.</p>
-
-<h1>Deploying to Heroku</h1>
-
-<p>Our final task today is deploying our blog to Heroku so we can see it in action. First of all, if you don&rsquo;t already have an account with Heroku, you&rsquo;ll need to sign up <a href="https://www.heroku.com/">here</a>. You should also be prompted to install the Heroku toolbelt. Once that&rsquo;s done, run the following command:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku login
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You&rsquo;ll be prompted for your credentials - enter these and you should be able to log in successfully.</p>
-
-<p>Now, in order to run our Django app on Heroku, we&rsquo;ll need to add a <code>Procfile</code> to tell Heroku what command to run in order to start your app. In this case, we will be using Gunicorn as our web server. Assuming our project is called <code>django_tutorial_blog_ng</code>, this is what you need to put in this file:</p>
-
-<figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: gunicorn django_tutorial_blog_ng.wsgi
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That tells Heroku that the file we need to run for this application is <code>django_tutorial_blog_ng/wsgi.py</code>. To test it, run the following command:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>foreman start
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That will start our web server on port 5000, using Gunicorn rather than the Django development server. You should be able to see it in action <a href="http://127.0.0.1:5000/">here</a>, but you&rsquo;ll notice a very serious issue - namely that the static files aren&rsquo;t being served. Now, Django has a command called <code>collectstatic</code> that collects all the static files and drops them into one convenient folder. Heroku will run this command automatically, so we need to ensure our static files are available. Amend your <code>.gitignore</code> file so it no longer excludes our static files:</p>
-
-<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>venv/
-</span><span class='line'>*.pyc
-</span><span class='line'>db.sqlite3
-</span><span class='line'>reports/
-</span><span class='line'>htmlcov/
-</span><span class='line'>.coverage
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We also need to amend our wsgi.py to serve static files:</p>
-
-<figure class='code'><figcaption><span>django_tutorial_blog_ng/wsgi.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">os</span>
-</span><span class='line'><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&quot;DJANGO_SETTINGS_MODULE&quot;</span><span class="p">,</span> <span class="s">&quot;django_tutorial_blog_ng.settings&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.core.wsgi</span> <span class="kn">import</span> <span class="n">get_wsgi_application</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">dj_static</span> <span class="kn">import</span> <span class="n">Cling</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">application</span> <span class="o">=</span> <span class="n">Cling</span><span class="p">(</span><span class="n">get_wsgi_application</span><span class="p">())</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This should solve our problem. Let&rsquo;s commit our changes:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/wsgi.py Procfile blogengine/static/ .gitignore
-</span><span class='line'>git commit -m <span class="s1">&#39;Configured app for deployment on Heroku&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we&rsquo;re ready to deploy our app!</p>
-
-<h1>Deployment</h1>
-
-<p>Every Heroku app needs a unique name. If you don&rsquo;t specify one, then Heroku will generate one for you. Your app will have the domain name <code>appname.herokuapp.com</code> - however, if you already have a domain name lined up for your blog, you can point that domain name at the Heroku app if you wish. I&rsquo;m going to deploy mine with the name <code>blog-shellshocked-info</code>.</p>
-
-<p>You also need to consider where you want to deploy it. Heroku has two regions - North America and EU. By default it will deploy to North America, but as I&rsquo;m in the EU, that&rsquo;s where I want to deploy my app to - obviously if you&rsquo;re in the Americas, you may be better off sticking with North America.</p>
-
-<p>So, let&rsquo;s create our app. Here&rsquo;s the command you need to run:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku apps:create blog-shellshocked-info --region eu
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You will want to change the app name, or remove it entirely if you&rsquo;re happy for Heroku to generate one for you. If you want to host it in North America, drop the <code>--region eu</code> section.</p>
-
-<p>Once completed, this will have created your new app, and added a Git remote for it, but will not have deployed it. To deploy your app, run this command:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git push heroku master
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That will push your code up to Heroku. Please note that building the app may take a little while. Once it&rsquo;s done, you can run <code>heroku open</code> to open it in your web browser. You should see an error message stating that the relation <code>blogengine_post</code> does not exist. That&rsquo;s because we need to create our database structure. Heroku allows you to easily run commands on your app with <code>heroku run</code>, so let&rsquo;s create our database and run our migrations:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku run python manage.py syncdb
-</span><span class='line'>heroku run python manage.py migrate
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>These are exactly the same commands you would run locally to create your database, but prefaced with <code>heroku run</code> so that they get run by Heroku. As usual, you will be prompted to create a superuser - you&rsquo;ll want to do this so you can log into the admin.</p>
-
-<p>That&rsquo;s all for today! We&rsquo;ve finally got our site up and running on Heroku, and set up continuous integration so our tests will get run for us. You can see an example of the site working <a href="http://blog.shellshocked.info/">here</a>. As usual, you can check out the latest version of the code with <code>git checkout lesson-5</code>. If you&rsquo;d like a homework assignment, then take a look at <a href="http://docs.travis-ci.com/user/deployment/heroku/">automating deployment to Heroku on successful builds</a> and see if you can get it set up successfully.</p>
-
-<p>Next time around, we&rsquo;ll get back to implementing our search and tidying up the front end. See you then!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -9524,6 +10052,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
       </li>
     
@@ -9537,10 +10069,6 @@
     
       <li class="post">
         <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
       </li>
     
   </ul>

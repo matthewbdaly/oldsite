@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="To date, Subversion is the single versioning system I have the most experience with. I use it at work, and I was already somewhat familiar with it &hellip;">
+  <meta name="description" content="Ever since I started my new job, I&rsquo;ve noticed a curious phenomenon. I work with two wonderfully gifted programmers who both know PHP much &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,242 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/29/so-you-really-dont-know-regular-expressions/">So You REALLY Don't Know Regular Expressions?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2012-01-29T19:52:53+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>7:52 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ever since I started my new job, I&rsquo;ve noticed a curious phenomenon. I work with two wonderfully gifted programmers who both know PHP much better than I do, and I learn something new from them all the time. However, neither one of them really knows or uses regular expressions.</p>
+
+<p>Now, as I learned Perl before I learned PHP, naturally I learned regular expressions quite early on in that process. In Perl, regular expressions are a huge part of the language - you simply cannot get away without learning them to some extent as they are used extensively in so many parts of the language.</p>
+
+<p>Apparently I&rsquo;m not the only one to notice this. Here&rsquo;s a quote I found on Stack Exchange:</p>
+
+<blockquote><p>In earlier phases of my career (ie. pre-PHP), I was a Perl guru, and one major aspect of Perl gurudom is mastery of regular expressions.</p>
+
+<p>On my current team, I&rsquo;m literally the only one of us who reaches for regex before other (usually nastier) tools. Seems like to the rest of the team they&rsquo;re pure magic. They&rsquo;ll wheel over to my desk and ask for a regex that takes me literally ten seconds to put together, and then be blown away when it works. I don&rsquo;t know&ndash;I&rsquo;ve worked with them so long, it&rsquo;s just natural at this point.</p>
+
+<p>In the absence of regex-fluency, you&rsquo;re left with combinations of flow-control statements wrapping strstr and strpos statements, which gets ugly and hard to run in your head. I&rsquo;d much rather craft one elegant regex than thirty lines of plodding string searching.</p></blockquote>
+
+<p>While I would hesitate to call myself a Perl guru (at best I would call myself intermediate with Perl), I would say I know enough about regular expressions that I can generally get useful work done with them.</p>
+
+<p>Take the following example in Perl (edited somewhat as it didn&rsquo;t play nice with TinyMCE):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="nv">$fruit</span> <span class="o">=</span> <span class="s">&quot;apple,banana,cherry&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">print</span> <span class="nv">$fruit</span><span class="p">;</span>
+</span><span class='line'><span class="nv">@fruit</span> <span class="o">=</span> <span class="nb">split</span><span class="p">(</span><span class="sr">/,/</span><span class="p">,</span><span class="nv">$fruit</span><span class="p">);</span>
+</span><span class='line'><span class="k">foreach</span><span class="p">(</span><span class="nv">@fruit</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">print</span> <span class="nv">$_</span><span class="o">.</span><span class="s">&quot;\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">apple</span><span class="p">,</span><span class="n">banana</span><span class="p">,</span><span class="n">cherry</span>
+</span><span class='line'><span class="n">apple</span>
+</span><span class='line'><span class="n">banana</span>
+</span><span class='line'><span class="n">cherry</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, this code should be fairly easy to understand, even if you don&rsquo;t really know Perl. $fruit is a string containing &ldquo;apple,banana,cherry&rdquo;. The split() function takes two arguments, a regular expression defining the character(s) that are used to separate the parts of the string you want to put into an array, and the string you want to split. This returns the array @fruit, which consists of three strings, &ldquo;apple&#8217;, &#8220;banana&rdquo;, and &ldquo;cherry&rdquo;.</p>
+
+<p>In PHP, you can do pretty much the same thing, using the explode() function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="nv">$fruit</span> <span class="o">=</span> <span class="s2">&quot;apple,banana,cherry&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">echo</span> <span class="nv">$fruit</span><span class="o">.</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nv">$fruitArray</span> <span class="o">=</span> <span class="nb">explode</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span><span class="nv">$fruit</span><span class="p">);</span>
+</span><span class='line'><span class="k">foreach</span><span class="p">(</span><span class="nv">$fruitArray</span> <span class="k">as</span> <span class="nv">$fruitArrayItem</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nv">$fruitArrayItem</span><span class="o">.</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">apple,banana,cherry</span>
+</span><span class='line'><span class="x">apple</span>
+</span><span class='line'><span class="x">banana</span>
+</span><span class='line'><span class="x">cherry</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see, they work in pretty much the same way here. Both return basically the same output, and the syntax for using the appropriate functions for splitting the strings is virtually identical.</p>
+
+<p>However, it&rsquo;s once things get a bit more difficult that it becomes obvious how much more powerful regular expressions are. Say you&rsquo;re dealing with a string that&rsquo;s similar to that above, but may use different characters to separate the elements. For instance, say you&rsquo;ve obtained the data that you want to pass through into an array from a text file and it&rsquo;s somewhat inconsistent - perhaps the information you want is separated by differing amounts and types of whitespace, or different characters. The explode() function simply won&rsquo;t handle that (at least, not without a lot of pain). But with Perl&rsquo;s split() function, that&rsquo;s no problem. Here&rsquo;s how you might deal with input that had different types and quantities of whitespace as a separator:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="nv">@fruit</span> <span class="o">=</span> <span class="nb">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">,</span><span class="nv">$fruit</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Yes, it&rsquo;s that simple! The \s metacharacter matches any type of whitespace, and the + modifier means that it will match one or more times. Now you can very easily convert the contents of that string into an array.</p>
+
+<p>Or say you want to convert an entire string of text, with all kinds of punctuation and whitespace, into an array, but only keep the actual words. This wouldn&rsquo;t be practical with explode(), but with split() it&rsquo;s easy:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="nv">@fruit</span> <span class="o">=</span> <span class="nb">split</span><span class="p">(</span><span class="sr">/\W+/</span><span class="p">,</span><span class="nv">$fruit</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The \W metacharacter matches any non-word character (ie anything other than a-z, A-Z or 0-9), and again the + modifier means that it will match one or more times.</p>
+
+<p>And of course, regular expressions are useful for many more tasks than this that, while possible with most language&rsquo;s existing string functions, can get very nasty quite quickly. Say you want to match a UK postcode to check that it&rsquo;s valid (note that for the sake of simplicity, I&rsquo;m going to ignore BFPO and GIR postcodes). These use a format of one or two letters, followed by one digit, then may have an additional digit or letter, then a space, then a digit, then two letters. This would be a nightmare to check using most language&rsquo;s native string functions, but with a regex in Perl, it&rsquo;s relatively simple:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="k">my</span> <span class="nv">$postcode</span> <span class="o">=</span> <span class="s">&quot;NR1 1NP&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nv">$postcode</span> <span class="o">=~</span> <span class="sr">m/^[a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1})(|\s+)\d{1}\w{2}$/</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;It matched!\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And if you wanted to return the first part of the postcode if it matched as well, that&rsquo;s simple too:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="k">my</span> <span class="nv">$postcode</span> <span class="o">=</span> <span class="s">&quot;NR1 1NP&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">if</span><span class="p">(</span><span class="nv">$postcode</span> <span class="o">=~</span> <span class="sr">s/^([a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1}))(|\s+)\d{1}\w{2}$/$1/</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;It matched! $postcode\n&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, you may say &ldquo;But that&rsquo;s in Perl! I&rsquo;m using PHP!&lsquo;. Well, regular expressions are an extremely powerful part of PHP that are very useful, they&rsquo;re just not as central to the language as they are in Perl. PHP actually has two distinct types of regular expressions - POSIX-extended regular expressions, and Perl-compatible regular expressions (or PCRE). However, POSIX-extended regular expressions were deprecated from PHP 5.3 onwards, so it&rsquo;s not really worth taking the time to learn them when PCRE will do exactly the same thing and is going to be around for the future. Furthermore, most other programming languages also support Perl-compatible regular expressions, so they&rsquo;re fairly portable between languages, and once you&rsquo;ve learned them in one language, you can easily use them in another. In other words, if you learn how to work with regular expressions in Perl, you can very easily transfer that knowledge to most other programming languages that support regular expressions.</p>
+
+<p>In the first example given above, we can replace explode() with preg_split, and the syntax is virtually identical to split() in Perl, with the only difference being the name of the function and that the pattern to match is wrapped in double quotes:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="nv">$fruit</span> <span class="o">=</span> <span class="s2">&quot;apple,banana,cherry&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="k">echo</span> <span class="nv">$fruit</span><span class="o">.</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nv">$fruitArray</span> <span class="o">=</span> <span class="nb">preg_split</span><span class="p">(</span><span class="s2">&quot;/,/&quot;</span><span class="p">,</span><span class="nv">$fruit</span><span class="p">);</span>
+</span><span class='line'><span class="k">foreach</span><span class="p">(</span><span class="nv">$fruitArray</span> <span class="k">as</span> <span class="nv">$fruitArrayItem</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">echo</span> <span class="nv">$fruitArrayItem</span><span class="o">.</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">apple,banana,cherry</span>
+</span><span class='line'><span class="x">apple</span>
+</span><span class='line'><span class="x">banana</span>
+</span><span class='line'><span class="x">cherry</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Along similar lines, if we want to check if a string matches a pattern, we can use preg_match(), and if we want to search and replace, we can use preg_replace(). PHP&rsquo;s regular expression support is not appreciably poorer than Perl&rsquo;s, even if it&rsquo;s less central to the language as a whole.</p>
+
+<blockquote><p>But regular expressions are slower than PHP&rsquo;s string functions!</p></blockquote>
+
+<p>Yes, that&rsquo;s true. So it&rsquo;s a mistake to use regular expressions for something that can be handled quickly and easily using string functions. For instance, if in the following string you wanted to replace the word &ldquo;cow&rdquo; with &ldquo;sheep&rdquo;:</p>
+
+<blockquote><p>The cow jumped over the moon</p></blockquote>
+
+<p>You could use something like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="nv">$text</span> <span class="o">=</span> <span class="s2">&quot;The cow jumped over the moon&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nv">$text</span> <span class="o">=</span> <span class="nb">preg_replace</span><span class="p">(</span><span class="s2">&quot;/cow/&quot;</span><span class="p">,</span><span class="s2">&quot;sheep&quot;</span><span class="p">,</span><span class="nv">$text</span><span class="p">);</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, because here you are only looking to match literal characters, you don&rsquo;t need to use a regular expression. Just use the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
+</span><span class='line'><span class="nv">$text</span> <span class="o">=</span> <span class="nb">str_replace</span><span class="p">(</span><span class="s2">&quot;cow&quot;</span><span class="p">,</span><span class="s2">&quot;sheep&quot;</span><span class="p">,</span><span class="nv">$text</span><span class="p">);</span>
+</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But, if you have to do some more complex pattern matching, you have to start using strpos to get the location of specific characters and returning substrings between those characters, and it gets very messy, very quickly indeed. In those cases, while I haven&rsquo;t done any kind of benchmarking on it, it stands to reason that quite quickly you&rsquo;ll reach a point where a regex would be faster.</p>
+
+<p>However, for a number of common tasks, such as validating email addresses and URLs, there&rsquo;s another way and you don&rsquo;t need to resort to regular expressions, or faffing about with loads of string functions. The filter_var() function can be used for validating or sanitising email addresses and URLs, among other things, so this is worth using instead of writing a regex. If you&rsquo;re using a framework such as CodeIgniter, you may have access to its native functions for validating this kind of thing, so you should use those instead.</p>
+
+<blockquote><p>But regular expressions are ugly and make for less readable code!</p></blockquote>
+
+<p>Not really. They seem intimidating to the newcomer, and very few people can just glance at a regex and instantly know what it does. But with regexes, you can often do complex things in far fewer lines of code than would be needed to accomplish the same thing using just PHP&rsquo;s string functions. If you can do something in a line or two using string functions, it&rsquo;s probably best to do that. But after that, things go downhill very quickly.</p>
+
+<p>Once you learn them, regular expressions really are not that hard, and you&rsquo;ll probably find enough things to use them for that you&rsquo;ll get plenty of practice at them. They&rsquo;re certainly more readable to anyone with even a modicum of experience using them than line after line of flow-control statements.</p>
+
+<blockquote><p>But you shouldn&rsquo;t be using regular expressions for parsing HTML or XML!</p></blockquote>
+
+<p>Quite true. Regular expressions are the wrong tool for that. You should probably use an existing library of some kind for that.</p>
+
+<blockquote><p>Some people, when confronted with a problem, think &ldquo;I know, I&rsquo;ll use regular expressions.&rdquo; Now they have two problems.</p></blockquote>
+
+<p>Ah, yes, surely one of the most misused quotes on the web! Again, regular expressions are not the right tool for every job, and there&rsquo;s a lot of tasks they get used for, and quite frankly, shouldn&rsquo;t be. Most of us who know regular expressions have been known to use them for things we probably shouldn&rsquo;t (I actually only just stumbled across filter_var, so I&rsquo;ve done my share of validating email addresses using regexes, and I&rsquo;m as guilty as anyone else of overusing them). But there&rsquo;s still plenty of stuff you should use it for when what you need to do can&rsquo;t be accomplished quickly and easily using string functions.</p>
+
+<p>Regular expressions are not inherently evil. They&rsquo;re a tool like any other. What is bad is using them for things where a simple alternative exists. However, they are still extremely useful, and there&rsquo;s plenty of valid use cases for them.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -291,7 +527,7 @@
 
 <p>Once it was installed, it wasn&rsquo;t too hard to get the hang of pacman. I&rsquo;d prefer it to have been Debian-based as that&rsquo;s what I&rsquo;m most familiar with, but that&rsquo;s just personal preference. After a little tinkering I now have Postfix and Dovecot working on there, as well as Apache (although it might make sense to switch to something lighter, such as lighttpd or Cherokee). I&rsquo;ve given it a fully qualified domain name via a free subdomain at dyndns.org, and I can now access emails on there via IMAP. Outgoing email works fine too, so I can always set up a Perl script or two to notify me if anything goes wrong by sending an email to my Gmail account. I&rsquo;ve set up fetchmail to pull emails from my Gmail account via POP3, so all my email is in the process of being backed up on there, and I can use my phone to access it via IMAP, or SSH in and read it with Mutt. Going forwards, I may install Squirrelmail as well to give me more options.</p>
 
-<p>One thing I&rsquo;m not too sure about - I couldn&rsquo;t get incoming mails to work, and I&rsquo;m unsure whether this is because it&rsquo;s using a subdomain (the email address is basically <a href="&#109;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#x6d;&#x61;&#x74;&#116;&#104;&#101;&#119;&#x40;&#109;&#x79;&#x64;&#x6f;&#x6d;&#97;&#x69;&#x6e;&#110;&#97;&#x6d;&#x65;&#x2e;&#100;&#121;&#110;&#100;&#110;&#x73;&#x2e;&#111;&#x72;&#103;">&#x6d;&#97;&#x74;&#x74;&#104;&#101;&#119;&#x40;&#109;&#x79;&#x64;&#x6f;&#109;&#x61;&#105;&#x6e;&#x6e;&#x61;&#x6d;&#101;&#46;&#x64;&#121;&#110;&#x64;&#110;&#x73;&#46;&#111;&#114;&#103;</a>) or Postfix is merely misconfigured. Is it possible to receive emails to a subdomain in this fashion?</p>
+<p>One thing I&rsquo;m not too sure about - I couldn&rsquo;t get incoming mails to work, and I&rsquo;m unsure whether this is because it&rsquo;s using a subdomain (the email address is basically <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#109;&#x61;&#x74;&#116;&#x68;&#101;&#x77;&#x40;&#x6d;&#121;&#x64;&#x6f;&#x6d;&#x61;&#x69;&#x6e;&#x6e;&#x61;&#109;&#x65;&#46;&#100;&#121;&#110;&#100;&#110;&#115;&#46;&#111;&#114;&#x67;">&#109;&#x61;&#116;&#116;&#x68;&#101;&#119;&#64;&#109;&#121;&#x64;&#x6f;&#x6d;&#97;&#105;&#110;&#x6e;&#x61;&#x6d;&#101;&#x2e;&#x64;&#121;&#x6e;&#x64;&#x6e;&#x73;&#46;&#x6f;&#x72;&#x67;</a>) or Postfix is merely misconfigured. Is it possible to receive emails to a subdomain in this fashion?</p>
 
 <p>Anyway, this is a really great little machine and it&rsquo;s been lots of fun getting it set up. I have to say, though, I&rsquo;m really disappointed with the range of home server and NAS products currently on the market. Most of the NAS systems offer very little in the way of functionality or customisability, and most of the home servers are a bit too big, powerful and expensive, and usually run Windows Home Server, which isn&rsquo;t really my cup of tea.</p>
 
@@ -702,35 +938,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/10/19/i-passed/">I Passed!</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2010-10-19T14:52:55+01:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2010</span></span> <span class='time'>2:52 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Just a short post to say that today I did my CIW Perl Fundamentals exam, and passed it. Glad that&rsquo;s out of the way!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -748,6 +955,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
       </li>
     
@@ -761,10 +972,6 @@
     
       <li class="post">
         <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
       </li>
     
   </ul>

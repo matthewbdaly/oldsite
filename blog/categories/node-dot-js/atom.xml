@@ -4,7 +4,7 @@
   <title><![CDATA[Category: node.js | Matthew Daly's Blog]]></title>
   <link href="http://matthewdaly.co.uk/blog/categories/node-dot-js/atom.xml" rel="self"/>
   <link href="http://matthewdaly.co.uk/"/>
-  <updated>2014-12-31T14:05:21+00:00</updated>
+  <updated>2014-12-31T17:39:11+00:00</updated>
   <id>http://matthewdaly.co.uk/</id>
   <author>
     <name><![CDATA[Matthew Daly]]></name>
@@ -12,6 +12,654 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Building a chat server with Node.js and Redis]]></title>
+    <link href="http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/"/>
+    <updated>2014-12-31T14:10:57+00:00</updated>
+    <id>http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis</id>
+    <content type="html"><![CDATA[<p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we&rsquo;ll build a very simple web-based chat system that demonstrates Redis&rsquo;s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it&rsquo;s widely considered the &ldquo;Hello, World!&rdquo; of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p>
+
+<h2>Installing Node.js</h2>
+
+<p>Since the last tutorial, I&rsquo;ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you&rsquo;re using any flavour of Unix, I highly recommend using it. It&rsquo;s not an option if you&rsquo;re using Windows, however Redis doesn&rsquo;t officially support Windows anyway, so if you want to follow along on a Windows machine I&rsquo;d recommend using a VM.</p>
+
+<p>If you followed the URL shortener tutorial, you should already have everything you need, though I&rsquo;d still recommend switching to NVM as it&rsquo;s very convenient. We&rsquo;ll be using Grunt again, so you&rsquo;ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p>
+
+<pre><code class="bash">npm install -g grunt-cli
+</code></pre>
+
+<p>This assumes you used NVM to install Node - if it&rsquo;s installed globally, you may need to use <code>sudo</code>.</p>
+
+<h2>Installing dependencies</h2>
+
+<p>As usual with a Node.js project, our first step is to create our <code>package.json</code> file:</p>
+
+<pre><code class="bash">npm init
+</code></pre>
+
+<p>Answer the questions so you end up with something like this (or just paste this into <code>package.json</code> and amend it as you see fit):</p>
+
+<pre><code class="json package.json">{
+  "name": "babblr",
+  "version": "1.0.0",
+  "description": "Chat client",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test --verbose"
+  },
+  "keywords": [
+    "chat"
+  ],
+  "author": "Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)",
+  "license": "GPLv2"
+}
+</code></pre>
+
+<p>Now let&rsquo;s install our dependencies:</p>
+
+<pre><code class="bash">npm install express hbs redis hiredis socket.io socket.io-client --save
+npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
+</code></pre>
+
+<p>These two commands will install our dependencies.</p>
+
+<p>Now, if you followed on with the URL shortener tutorial, you&rsquo;ll notice that we aren&rsquo;t using Jade - instead we&rsquo;re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We&rsquo;ll also use Socket.IO extensively on this project.</p>
+
+<h2>Support files</h2>
+
+<p>As before, we&rsquo;ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We&rsquo;ll need a Grunt configuration for that, so here it is:</p>
+
+<pre><code class="javascript Gruntfile.js">module.exports = function (grunt) {
+    'use strict';
+
+    grunt.initConfig({
+        jshint: {
+            all: [
+                'test/*.js',
+                'index.js'
+            ]
+        },
+        mocha_istanbul: {
+            coverage: {
+                src: 'test', // the folder, not the files,
+                options: {
+                    mask: '*.js',
+                    reportFormats: ['cobertura', 'html', 'lcovonly']
+                }
+            }
+        },
+        coveralls: {
+            options: {
+                src: 'coverage/lcov.info',
+                force: false
+            },
+            app: {
+                src: 'coverage/lcov.info'
+            }
+        }
+    });
+
+    // Load tasks
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-coveralls');
+    grunt.loadNpmTasks('grunt-mocha-istanbul');
+
+    // Register tasks
+    grunt.registerTask('test', ['jshint', 'mocha_istanbul:coverage', 'coveralls']);
+};
+</code></pre>
+
+<p>We also need a <code>.bowerrc</code>:</p>
+
+<pre><code class="json .bowerrc">{
+    "directory": "static/bower_components"
+}
+</code></pre>
+
+<p>And a <code>bower.json</code>:</p>
+
+<pre><code class="json bower.json">{
+  "name": "babblr",
+  "main": "index.js",
+  "version": "1.0.0",
+  "authors": [
+    "Matthew Daly &lt;matthewbdaly@gmail.com&gt;"
+  ],
+  "description": "A simple chat server",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "chat"
+  ],
+  "license": "GPLv2",
+  "homepage": "http://www.matthewdaly.co.uk",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "html5-boilerplate": "~4.3.0",
+    "jquery": "~2.1.1",
+    "bootstrap": "~3.3.1"
+  }
+}
+</code></pre>
+
+<p>Then install the Bower dependencies:</p>
+
+<pre><code class="bash">bower install
+</code></pre>
+
+<p>We also need a <code>Procfile</code> so we can run it on Heroku:</p>
+
+<pre><code class="bash Procfile">web: node index.js
+</code></pre>
+
+<p>Now, let&rsquo;s create the main file:</p>
+
+<pre><code class="bash">touch index.js
+</code></pre>
+
+<p>And our test file:</p>
+
+<pre><code class="bash">mkdir test
+touch test/test.js
+</code></pre>
+
+<h2>Implementing the chat server</h2>
+
+<p>Next, let&rsquo;s implement our first test. First of all, we&rsquo;ll verify that the index route works:</p>
+
+<pre><code class="javascript test/test.js">/*jslint node: true */
+/*global describe: false, before: false, after: false, it: false */
+"use strict";
+
+// Declare the variables used
+var expect = require('chai').expect,
+    request = require('request'),
+    server = require('../index'),
+    redis = require('redis'),
+    io = require('socket.io-client'),
+    client;
+client = redis.createClient();
+
+// Server tasks
+describe('server', function () {
+
+    // Beforehand, start the server
+    before(function (done) {
+        console.log('Starting the server');
+        done();
+    });
+
+    // Afterwards, stop the server and empty the database
+    after(function (done) {
+        console.log('Stopping the server');
+        client.flushdb();
+        done();
+    });
+
+    // Test the index route
+    describe('Test the index route', function () {
+        it('should return a page with the title Babblr', function (done) {
+            request.get({ url: 'http://localhost:5000/' }, function (error, response, body) {
+                expect(body).to.include('Babblr');
+                expect(response.statusCode).to.equal(200);
+                expect(response.headers['content-type']).to.equal('text/html; charset=utf-8');
+                done();
+            });
+        });
+    });
+});
+</code></pre>
+
+<p>Note that this is very similar to the first test for the URL shortener, because it&rsquo;s doing basically the same thing.</p>
+
+<p>Now, run the test and make sure it fails:</p>
+
+<pre><code class="bash">$ grunt test
+Running "jshint:all" (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running "mocha_istanbul:coverage" (mocha_istanbul) task
+
+
+  server
+Starting the server
+    Test the index route
+      1) should return a page with the title Babblr
+Stopping the server
+
+
+  0 passing (873ms)
+  1 failing
+
+  1) server Test the index route should return a page with the title Babblr:
+     Uncaught AssertionError: expected undefined to include 'Babblr'
+      at Request._callback (/Users/matthewdaly/Projects/babblr/test/test.js:34:33)
+      at self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22)
+      at Request.emit (events.js:95:17)
+      at Request.onRequestError (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:971:8)
+      at ClientRequest.emit (events.js:95:17)
+      at Socket.socketErrorListener (http.js:1552:9)
+      at Socket.emit (events.js:95:17)
+      at net.js:441:14
+      at process._tickCallback (node.js:442:13)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 0/0 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 0/0 )
+================================================================================
+&gt;&gt;
+Warning: Task "mocha_istanbul:coverage" failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+
+<p>With that confirmed, we can start writing code to make the test pass:</p>
+
+<pre><code class="javascript index.js">/*jslint node: true */
+'use strict';
+
+// Declare variables used
+var app, base_url, client, express, hbs, io, port, rtg, subscribe;
+
+// Define values
+express = require('express');
+app = express();
+port = process.env.PORT || 5000;
+base_url = process.env.BASE_URL || 'http://localhost:5000';
+hbs = require('hbs');
+
+// Set up connection to Redis
+/* istanbul ignore if */
+if (process.env.REDISTOGO_URL) {
+    rtg  = require("url").parse(process.env.REDISTOGO_URL);
+    client = require("redis").createClient(rtg.port, rtg.hostname);
+    subscribe = require("redis").createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(":")[1]);
+    subscribe.auth(rtg.auth.split(":")[1]);
+} else {
+    client = require('redis').createClient();
+    subscribe = require('redis').createClient();
+}
+
+// Set up templating
+app.set('views', __dirname + '/views');
+app.set('view engine', "hbs");
+app.engine('hbs', require('hbs').__express);
+
+// Register partials
+hbs.registerPartials(__dirname + '/views/partials');
+
+// Set URL
+app.set('base_url', base_url);
+
+// Define index route
+app.get('/', function (req, res) {
+    res.render('index');
+});
+
+// Serve static files
+app.use(express.static(__dirname + '/static'));
+
+// Listen
+io = require('socket.io')({
+}).listen(app.listen(port));
+console.log("Listening on port " + port);
+</code></pre>
+
+<p>If you compare this to the code for the URL shortener, you&rsquo;ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that&rsquo;s because we need to do so when using Pub/Sub with Redis. You&rsquo;ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we&rsquo;ll be using Socket.IO.</p>
+
+<p>Now, you can run your tests again at this point, but they won&rsquo;t pass because we haven&rsquo;t created our views. So let&rsquo;s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
+
+<pre><code class="handlebars views/index.hbs">
+        &lt;div class="container"&gt;
+            &lt;div class="row"&gt;
+                &lt;div class="col-md-8"&gt;
+                    &lt;div class="conversation"&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-4"&gt;
+                    &lt;form&gt;
+                        &lt;div class="form-group"&gt;
+                            &lt;label for="message"&gt;Message&lt;/label&gt;
+                            &lt;textarea class="form-control" id="message" rows="20"&gt;&lt;/textarea&gt;
+                            &lt;a id="submitbutton" class="btn btn-primary form-control"&gt;Submit&lt;/a&gt;
+                        &lt;div&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+</code></pre>
+
+<p>Add this to <code>views/partials/header.hbs</code>:</p>
+
+<p>&#8220;` handlebars views/partials/header.hbs
+&lt;!DOCTYPE html></p>
+
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+
+
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+
+
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+
+
+<!--[if gt IE 8]><!-->
+
+
+<p> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Babblr</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1"></p>
+
+<pre><code>    &lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;
+
+    &lt;link rel="stylesheet" href="http://matthewdaly.co.uk/bower_components/bootstrap/dist/css/bootstrap.min.css"&gt;
+    &lt;link rel="stylesheet" href="http://matthewdaly.co.uk/bower_components/bootstrap/dist/css/bootstrap-theme.min.css"&gt;
+    &lt;link rel="stylesheet" href="http://matthewdaly.co.uk/css/style.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!--[if lt IE 7]&gt;
+        &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+    &lt;![endif]--&gt;
+    &lt;nav class="navbar navbar-inverse navbar-static-top" role="navigation"&gt;
+        &lt;div class="container"&gt;
+            &lt;div class="navbar-header"&gt;
+                &lt;a class="navbar-brand" href="#"&gt;Babblr&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+</code></pre>
+
+<pre><code>
+And add this to `views/partials/footer.hbs`:
+</code></pre>
+
+<pre><code>    &lt;script src="http://matthewdaly.co.uk/bower_components/jquery/dist/jquery.min.js"&gt;&lt;/script&gt;
+    &lt;script src="http://matthewdaly.co.uk/bower_components/bootstrap/dist/js/bootstrap.min.js"&gt;&lt;/script&gt;
+    &lt;script src="http://matthewdaly.co.uk/socket.io/socket.io.js"&gt;&lt;/script&gt;
+    &lt;script src="http://matthewdaly.co.uk/js/main.js"&gt;&lt;/script&gt;
+
+&lt;/body&gt;
+</code></pre>
+
+<p></html>
+&#8220;`</p>
+
+<p>You&rsquo;ll also want to create placeholder CSS and JavaScript files:</p>
+
+<pre><code class="bash">mkdir static/js
+mkdir static/css
+touch static/js/main.js
+touch static/css/style.css
+</code></pre>
+
+<p>The test should now pass:</p>
+
+<pre><code class="bash"> grunt test
+Running "jshint:all" (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running "mocha_istanbul:coverage" (mocha_istanbul) task
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should return a page with the title Babblr (41ms)
+Stopping the server
+
+
+  1 passing (54ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 24/24 ), 5 ignored
+Branches     : 100% ( 6/6 ), 1 ignored
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 24/24 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running "coveralls:app" (coveralls) task
+&gt;&gt; Failed to submit 'coverage/lcov.info' to coveralls: Bad response: 422 {"message":"Couldn't find a repository matching this job.","error":true}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task "coveralls:app" failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+
+<p>Don&rsquo;t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p>
+
+<p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p>
+
+<pre><code class="javascript test/test.js">
+    // Test sending a message
+    describe('Test sending a message', function () {
+        it("should return 'Message received'", function (done) {
+            // Connect to server
+            var socket = io.connect('http://localhost:5000', {
+                'reconnection delay' : 0,
+                'reopen delay' : 0,
+                'force new connection' : true
+            });
+
+            // Handle the message being received
+            socket.on('message', function (data) {
+                expect(data).to.include('Message received');
+                socket.disconnect();
+                done();
+            });
+
+            // Send the message
+            socket.emit('send', { message: 'Message received' });
+        });
+    });
+</code></pre>
+
+<p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let&rsquo;s run the tests to make sure we get the expected result:</p>
+
+<pre><code class="bash">$ grunt test
+Running "jshint:all" (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running "mocha_istanbul:coverage" (mocha_istanbul) task
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should return a page with the title Babblr (337ms)
+    Test sending a message
+      1) should return 'Message received'
+Stopping the server
+
+
+  1 passing (2s)
+  1 failing
+
+  1) server Test sending a message should return 'Message received':
+     Error: timeout of 2000ms exceeded
+      at null.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:159:19)
+      at Timer.listOnTimeout [as ontimeout] (timers.js:112:15)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 24/24 ), 5 ignored
+Branches     : 100% ( 6/6 ), 1 ignored
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 24/24 )
+================================================================================
+&gt;&gt;
+Warning: Task "mocha_istanbul:coverage" failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+
+<p>Now, let&rsquo;s implement this functionality. Add this at the end of <code>index.js</code>:</p>
+
+<pre><code class="javascript index.js">// Handle new messages
+io.sockets.on('connection', function (socket) {
+    // Subscribe to the Redis channel
+    subscribe.subscribe('ChatChannel');
+
+    // Handle incoming messages
+    socket.on('send', function (data) {
+        // Publish it
+        client.publish('ChatChannel', data.message);
+    });
+
+    // Handle receiving messages
+    var callback = function (channel, data) {
+        socket.emit('message', data);
+    };
+    subscribe.on('message', callback);
+
+    // Handle disconnect
+    socket.on('disconnect', function () {
+        subscribe.removeListener('message', callback);
+    });
+});
+</code></pre>
+
+<p>We&rsquo;ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p>
+
+<p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p>
+
+<p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p>
+
+<p>We&rsquo;ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p>
+
+<pre><code class="javascript static/js/main.js">$(document).ready(function () {
+    'use strict';
+
+    // Set up the connection
+    var field, socket, output;
+    socket = io.connect(window.location.href);
+
+    // Get a reference to the input
+    field = $('textarea#message');
+
+    // Get a reference to the output
+    output = $('div.conversation');
+
+    // Handle message submit
+    $('a#submitbutton').on('click', function () {
+        // Create the message
+        var msg;
+        msg = field.val();
+        socket.emit('send', { message: msg });
+        field.val('');
+    });
+
+    // Handle incoming messages
+    socket.on('message', function (data) {
+        // Insert the message
+        output.append('&lt;p&gt;Anonymous Coward : ' + data + '&lt;/p&gt;');
+    });
+});
+</code></pre>
+
+<p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won&rsquo;t implement user names at this point (though I plan it for a future instalment).</p>
+
+<p>We&rsquo;ll also add a little bit of additional styling:</p>
+
+<pre><code class="css static/css/style.css">div.conversation {
+    height: 500px;
+    overflow-y: scroll;
+    border: 1px solid #000;
+    padding: 10px;
+}
+</code></pre>
+
+<p>Now, if you run your tests, they should pass:</p>
+
+<pre><code class="bash">$ grunt test
+Running "jshint:all" (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running "mocha_istanbul:coverage" (mocha_istanbul) task
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should return a page with the title Babblr (40ms)
+    Test sending a message
+      ✓ should return 'Message received' (45ms)
+Stopping the server
+
+
+  2 passing (101ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 33/33 ), 5 ignored
+Branches     : 100% ( 6/6 ), 1 ignored
+Functions    : 100% ( 5/5 )
+Lines        : 100% ( 33/33 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running "coveralls:app" (coveralls) task
+&gt;&gt; Failed to submit 'coverage/lcov.info' to coveralls: Bad response: 422 {"message":"Couldn't find a repository matching this job.","error":true}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task "coveralls:app" failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+
+<p>If you now run the following command:</p>
+
+<pre><code class="bash">node index.js
+</code></pre>
+
+<p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p>
+
+<h2>Wrapping up</h2>
+
+<p>This illustrates just how straightforward it is to use Redis&rsquo;s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we&rsquo;ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Building a URL shortener with Node.js and Redis]]></title>

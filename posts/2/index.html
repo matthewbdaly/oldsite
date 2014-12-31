@@ -9,7 +9,7 @@
   <meta name="author" content="Matthew Daly">
 
   
-  <meta name="description" content="Hello again! As promised, in this instalment we&rsquo;ll implement categories and tags, as well as an RSS feed. As usual, we need to switch into our &hellip;">
+  <meta name="description" content="Hello again! I was originally planning to cover implementing a search system, adding more feeds, and tidying up the front end in this instalment. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +78,639 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/">Django Blog Tutorial - the Next Generation - Part 5</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-05-24T20:15:54+01:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>8:15 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Hello again! I was originally planning to cover implementing a search system, adding more feeds, and tidying up the front end in this instalment. However, I felt it was time for a change of pace, so instead, we&rsquo;re going to look at:</p>
+
+<ul>
+<li>Checking code coverage and getting it to 100%</li>
+<li>Using continuous integration</li>
+<li>Deploying to Heroku</li>
+</ul>
+
+
+<p>Don&rsquo;t worry, the original lesson isn&rsquo;t going anywhere. We&rsquo;ll still be implementing all of that later on, but today is the day we get your Django blog up and running on the web. That way, you can get a better idea of how Django works in the wild, and you have something concrete to show for your efforts.</p>
+
+<h1>Continuous integration</h1>
+
+<p>If you&rsquo;re not familiar with continuous integration, it&rsquo;s basically a process that carries out some tasks automatically when you push a new commit to the repository. These tasks may include running unit tests, linting your code, and checking it to see what percentage of the code base is covered by the tests (after all, if your tests don&rsquo;t actually cover every scenario, then there&rsquo;s more of a chance that something might slip through the net. It&rsquo;s also possible to implement hooks to automatically deploy your application only if the tests pass.</p>
+
+<p>Typically, you will have a continuous integration server running somewhere that regularly polls your Git repository for changes, and when it finds a new commit, will check it out and run the tests (or whatever other task you configure it to). One of the most popular continuous integration servers around is <a href="http://jenkins-ci.org/">Jenkins</a> - I use it at work and can highly recommend it. However, we aren&rsquo;t going to cover using Jenkins here because setting it up is quite a big deal and it really is best kept on a server of its own (although feel free to use it if you prefer). Instead, we&rsquo;re going to use <a href="https://travis-ci.org/">Travis CI</a>, which integrates nicely with GitHub and is free for open source projects. If you don&rsquo;t mind your code being publicly available on GitHub, then Travis is a really great way to dip your toe into continuous integration.</p>
+
+<p>NB: You don&rsquo;t have to use continuous integration at all if you don&rsquo;t want to - this isn&rsquo;t a big project so you don&rsquo;t really need it. If you don&rsquo;t want to put your code on GitHub, then feel free to just follow along and not bother pushing your code to GitHub and configuring Travis.</p>
+
+<h1>Code coverage</h1>
+
+<p>As mentioned above, code coverage is a measure of the percentage of the code that is covered by tests. While not infallible, it&rsquo;s a fairly good guide to how comprehensive your tests are. If you have 100% code coverage, you can be fairly confident that your tests are comprehensive enough to catch most errors, so it&rsquo;s a good rule of thumb to aim for 100% test coverage on a project.</p>
+
+<p>So how do we check our test coverage? The <code>coverage</code> Python module is the most common tool for this. There&rsquo;s also a handy Django module called <code>django-jenkins</code>, which is designed to work with Jenkins, but can be used with any continuous integration server, that can not only run your tests, but also check code coverage at the same time. So, make sure your virtualenv is up and running:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">source </span>venv/bin/activate
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then, run the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install coverage django-jenkins
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Once that&rsquo;s done, add these to our requirements file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We now need to configure our Django project to use <code>django-jenkins</code>. Add the following to the bottom of the settings file:</p>
+
+<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">INSTALLED_APPS</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;django_jenkins&#39;</span><span class="p">,)</span>
+</span><span class='line'><span class="n">JENKINS_TASKS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;django_jenkins.tasks.run_pylint&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&#39;django_jenkins.tasks.with_coverage&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'><span class="n">PROJECT_APPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;blogengine&#39;</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This adds <code>django-jenkins</code> to our installed apps and tells it to include two additional tasks, besides running the tests. The first task runs Pylint to check our code quality (but we aren&rsquo;t really concerned about that at this point). The second checks the coverage. Finally, we tell <code>django-jenkins</code> that the <code>blogengine</code> app is the only one to be tested.</p>
+
+<p>You&rsquo;ll also want to add the following lines to your <code>.gitignore</code>:</p>
+
+<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>reports/
+</span><span class='line'>htmlcov/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>These are the reports generated by <code>django-jenkins</code>, and should not be kept under version control. With that done, it&rsquo;s time to commit:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore django_tutorial_blog_ng/ requirements.txt
+</span><span class='line'>git commit -m <span class="s1">&#39;Added coverage checking using django-jenkins&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s run our tests. From now on, you&rsquo;ll use the following command to run your tests:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This ensures we check the coverage at the same time. Now, you&rsquo;ll notice that the <code>reports</code> folder has been created, and it will contain three files, including one called <code>coverage.xml</code>. However, XML isn&rsquo;t a very friendly format. Happily, we can easily generate reports in HTML instead:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Running this command will create another folder called <code>htmlcov/</code>, and in here you will find your report, nicely formatted as HTML. Open up <code>index.html</code> in your web browser and you should see a file-by-file breakdown of your code coverage. Nice, huh?</p>
+
+<p>Now, if your code so far is largely identical to mine, you&rsquo;ll notice that the model and view files don&rsquo;t have 100% coverage yet. If you click on each one, you&rsquo;ll see a handy line-by-line breakdown of the test coverage for each file. You&rsquo;ll notice that in the views file, the areas of the code for when tags and categories don&rsquo;t exist are highlighted in pink - this tells you that these lines of code are never executed during the tests. So let&rsquo;s fix that.</p>
+
+<p>First, our template needs to be able to handle empty lists.</p>
+
+<figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
+</span><span class='line'>
+</span><span class='line'>    {% load custom_markdown %}
+</span><span class='line'>
+</span><span class='line'>    {% block content %}
+</span><span class='line'>        {% if object_list %}
+</span><span class='line'>            {% for post in object_list %}
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
+</span><span class='line'>            {{ post.text|custom_markdown }}
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.category.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.category.name }}<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>            {% for tag in post.tags.all %}
+</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ tag.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ tag.name }}<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>            {% endfor %}
+</span><span class='line'>            {% endfor %}
+</span><span class='line'>        {% else %}
+</span><span class='line'>            <span class="nt">&lt;p&gt;</span>No posts found<span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>
+</span><span class='line'>        {% if page_obj.has_previous %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>        {% if page_obj.has_next %}
+</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;</span>
+</span><span class='line'>        {% endif %}
+</span><span class='line'>
+</span><span class='line'>    {% endblock %}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s commit the changes:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/blogengine/post_list.html
+</span><span class='line'>git commit -m <span class="s1">&#39;Added a &quot;No posts found&quot; message to post list template&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next, we need to write tests to check that we get a &ldquo;No posts found&rdquo; message when we view a tag or category that does not exist. Add the following methods to the class <code>PostViewTest()</code>:</p>
+
+<figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_nonexistent_category_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">category_url</span> <span class="o">=</span> <span class="s">&#39;/category/blah/&#39;</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category_url</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;No posts found&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">test_nonexistent_tag_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">tag_url</span> <span class="o">=</span> <span class="s">&#39;/tag/blah/&#39;</span>
+</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag_url</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;No posts found&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s run our tests again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Assuming they all pass as expected, then your coverage reports will be regenerated. If you reload the coverage report, you should see that your views now have 100% test coverage. Let&rsquo;s commit again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/tests.py
+</span><span class='line'>git commit -m <span class="s1">&#39;Views file now has 100% coverage&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, our models still don&rsquo;t have 100% coverage yet. If you look at the breakdown for <code>models.py</code>, you&rsquo;ll see that the line <code>if not self.slug:</code> has only partial coverage, because we missed out setting a slug for the categories and tags in our test. So, let&rsquo;s fix that. In <code>PostTest()</code>, amend the <code>test_create_category()</code> and <code>test_create_tag()</code> methods as follows:</p>
+
+<figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_create_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Create the category</span>
+</span><span class='line'>    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Add attributes</span>
+</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
+</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;The Python programming language&#39;</span>
+</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Save it</span>
+</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check we can find it</span>
+</span><span class='line'>    <span class="n">all_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_categories</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">only_category</span> <span class="o">=</span> <span class="n">all_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check attributes</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Python programming language&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">test_create_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># Create the tag</span>
+</span><span class='line'>    <span class="n">tag</span> <span class="o">=</span> <span class="n">Tag</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Add attributes</span>
+</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
+</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;The Python programming language&#39;</span>
+</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Save it</span>
+</span><span class='line'>    <span class="n">tag</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check we can find it</span>
+</span><span class='line'>    <span class="n">all_tags</span> <span class="o">=</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_tags</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">only_tag</span> <span class="o">=</span> <span class="n">all_tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># Check attributes</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Python programming language&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">slug</span><span class="p">,</span> <span class="s">&#39;python&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Run the tests again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then refresh your coverage page, and we should have hit 100% coverage. Excellent news! This means that we can be confident that if any problems get introduced in future, we can pick them up easily. To demonstrate this, let&rsquo;s upgrade our Django install to the latest version and check everything still works as expected:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install Django --upgrade
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will upgrade the copy of Django in our virtualenv to the latest version. Then we can run our tests again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Our tests should still pass, indicating that the upgrade to our Django version does not appear to have broken any functionality. Let&rsquo;s update our <code>requirements.txt</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
+</span><span class='line'>git add requirements.txt
+</span><span class='line'>git commit -m <span class="s1">&#39;Upgraded Django version&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Preparing our web app for deployment to Heroku</h1>
+
+<p>As mentioned previously, I&rsquo;m going to assume you plan to deploy your site on <a href="https://www.heroku.com/">Heroku</a>. It has good Django support, and you can quite happily host a blog there using their free tariff. If you&rsquo;d prefer to use another hosting provider, then you should be able to adapt these instructions accordingly.</p>
+
+<p>Now, so far we&rsquo;ve used SQLite as our database for development purposes. However, SQLite isn&rsquo;t really suitable for production purposes. Heroku provide a Postgresql database for each web app, so we will use that. To configure it, open up <code>settings.py</code> and amend the database configuration section to look like this:</p>
+
+<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then, add the following at the end of the file:</p>
+
+<figure class='code'><figcaption><span>django_tutorial_blog_ng/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Heroku config</span>
+</span><span class='line'><span class="c"># Parse database configuration from $DATABASE_URL</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">dj_database_url</span>
+</span><span class='line'><span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dj_database_url</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s">&quot;sqlite:///db.sqlite3&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Honor the &#39;X-Forwarded-Proto&#39; header for request.is_secure()</span>
+</span><span class='line'><span class="n">SECURE_PROXY_SSL_HEADER</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;HTTP_X_FORWARDED_PROTO&#39;</span><span class="p">,</span> <span class="s">&#39;https&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Allow all host headers</span>
+</span><span class='line'><span class="n">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Static asset configuration</span>
+</span><span class='line'><span class="n">STATIC_ROOT</span> <span class="o">=</span> <span class="s">&#39;staticfiles&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">STATICFILES_DIRS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span class='line'>    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s">&#39;static&#39;</span><span class="p">),</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A little explanation is called for. Remember when we first started out, we installed the <code>django-toolbelt</code> package, which included <code>dj-database-url</code>? Well, here we use the <code>dj_database_url</code> module to get the database from an environment variable set on Heroku. We set a default value so as to fall back to SQLite when that variable is not set. The other settings are required by Heroku.</p>
+
+<p>You may want to run your tests again to ensure everything is still working before committing:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/settings.py
+</span><span class='line'>git commit -m <span class="s1">&#39;Amended settings to work on desktop and Heroku&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Setting up Continuous Integration and coverage</h1>
+
+<p>Now, as mentioned previously, I&rsquo;ll be demonstrating how to set up Travis CI for our project. Travis CI is only free for open-source projects, so if you don&rsquo;t want to make your code publicly accessible, you may want to use Jenkins instead. I&rsquo;ll leave setting that up and running it as an exercise for the reader, but I recommend a plugin called Cobertura which allows you to publish details of your code&rsquo;s test coverage.</p>
+
+<p>Unfortunately, Travis CI doesn&rsquo;t have the capability to publish your coverage results. Fortunately, you can use <a href="https://coveralls.io/">Coveralls.io</a> to pick up the slack. Like Travis, it&rsquo;s free for open-source projects, and if you host your code on GitHub, it&rsquo;s pretty easy to use.</p>
+
+<p>You can find instructions on setting up a project on Travis CI <a href="http://docs.travis-ci.com/user/getting-started/">here</a>. Once you&rsquo;ve configured it, you&rsquo;ll need to set up your <code>.travis.yml</code> file. This is a simple text file that tells Travis CI how to run your tests. Put the following content in the file:</p>
+
+<figure class='code'><figcaption><span>.travis.yml</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">python</span>
+</span><span class='line'><span class="l-Scalar-Plain">python</span><span class="p-Indicator">:</span>
+</span><span class='line'><span class="p-Indicator">-</span> <span class="s">&quot;2.7&quot;</span>
+</span><span class='line'><span class="c1"># command to install dependencies</span>
+</span><span class='line'><span class="l-Scalar-Plain">install</span><span class="p-Indicator">:</span> <span class="s">&quot;pip</span><span class="nv"> </span><span class="s">install</span><span class="nv"> </span><span class="s">-r</span><span class="nv"> </span><span class="s">requirements.txt&quot;</span>
+</span><span class='line'><span class="c1"># command to run tests</span>
+</span><span class='line'><span class="l-Scalar-Plain">script</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">coverage run --include=&quot;blogengine/*&quot; --omit=&quot;blogengine/migrations/*&quot; manage.py test blogengine</span>
+</span><span class='line'><span class="l-Scalar-Plain">after_success</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">coveralls</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, this tells Travis that this is a Python application, and we should be using Python 2.7. Please note you can test against multiple versions of Python if you wish - just add another line with the Python version you want to test against.</p>
+
+<p>Then, we see that we use Pip to install our requirements. Finally we run our tests with Coverage, in order to generate coverage data, and afterwards call <code>coveralls</code> to pass the coverage data to Coveralls.io.</p>
+
+<p>We also need to install the <code>coveralls</code> module:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install coveralls
+</span><span class='line'>pip freeze &gt; requirements.txt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And we need to keep our coverage data out of version control:</p>
+
+<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>env/
+</span><span class='line'>*.pyc
+</span><span class='line'>db.sqlite3
+</span><span class='line'>blogengine/static/bower_components/
+</span><span class='line'>reports/
+</span><span class='line'>htmlcov/
+</span><span class='line'>.coverage
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll also want to set up your project on Coveralls, as described <a href="https://coveralls.io/docs">here</a> - please note that this requires your project be in a public GitHub repository.</p>
+
+<p>With that done, let&rsquo;s commit our changes:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add .gitignore .travis.yml requirements.txt
+</span><span class='line'>git commit -m <span class="s1">&#39;Added Travis config file and Coveralls support&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With that done, assuming you have Travis CI and Coveralls configured, and your code is already hosted on GitHub, then you should be able to just push your code up to trigger the build:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git push origin master
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you keep an eye on Travis in your browser, you can watch what happens as your tests are run. If for any reason the build fails, then it shouldn&rsquo;t be too hard to figure out what has gone wrong using the documentation for Travis and Coveralls - both services are pretty easy to use.</p>
+
+<p>Congratulations - you&rsquo;re now using Continuous Integration! That wasn&rsquo;t so hard, was it? Now, every time you push to GitHub, Travis will run your tests, and you&rsquo;ll get an email if they fail, giving you early warning of any problems, and you can check your coverage at the same time. Both Travis and Coveralls offer badges that you can place in your README file on GitHub to show off your coverage and build status - feel free to add these to your repo.</p>
+
+<p>You may want to try making a change that breaks your tests and committing it, then pushing it up, so that you can see what happens when the build breaks.</p>
+
+<h1>Deploying to Heroku</h1>
+
+<p>Our final task today is deploying our blog to Heroku so we can see it in action. First of all, if you don&rsquo;t already have an account with Heroku, you&rsquo;ll need to sign up <a href="https://www.heroku.com/">here</a>. You should also be prompted to install the Heroku toolbelt. Once that&rsquo;s done, run the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku login
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll be prompted for your credentials - enter these and you should be able to log in successfully.</p>
+
+<p>Now, in order to run our Django app on Heroku, we&rsquo;ll need to add a <code>Procfile</code> to tell Heroku what command to run in order to start your app. In this case, we will be using Gunicorn as our web server. Assuming our project is called <code>django_tutorial_blog_ng</code>, this is what you need to put in this file:</p>
+
+<figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: gunicorn django_tutorial_blog_ng.wsgi
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That tells Heroku that the file we need to run for this application is <code>django_tutorial_blog_ng/wsgi.py</code>. To test it, run the following command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>foreman start
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That will start our web server on port 5000, using Gunicorn rather than the Django development server. You should be able to see it in action <a href="http://127.0.0.1:5000/">here</a>, but you&rsquo;ll notice a very serious issue - namely that the static files aren&rsquo;t being served. Now, Django has a command called <code>collectstatic</code> that collects all the static files and drops them into one convenient folder. Heroku will run this command automatically, so we need to ensure our static files are available. Amend your <code>.gitignore</code> file so it no longer excludes our static files:</p>
+
+<figure class='code'><figcaption><span>.gitignore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>venv/
+</span><span class='line'>*.pyc
+</span><span class='line'>db.sqlite3
+</span><span class='line'>reports/
+</span><span class='line'>htmlcov/
+</span><span class='line'>.coverage
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also need to amend our wsgi.py to serve static files:</p>
+
+<figure class='code'><figcaption><span>django_tutorial_blog_ng/wsgi.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">os</span>
+</span><span class='line'><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&quot;DJANGO_SETTINGS_MODULE&quot;</span><span class="p">,</span> <span class="s">&quot;django_tutorial_blog_ng.settings&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">django.core.wsgi</span> <span class="kn">import</span> <span class="n">get_wsgi_application</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">dj_static</span> <span class="kn">import</span> <span class="n">Cling</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">application</span> <span class="o">=</span> <span class="n">Cling</span><span class="p">(</span><span class="n">get_wsgi_application</span><span class="p">())</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This should solve our problem. Let&rsquo;s commit our changes:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/wsgi.py Procfile blogengine/static/ .gitignore
+</span><span class='line'>git commit -m <span class="s1">&#39;Configured app for deployment on Heroku&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we&rsquo;re ready to deploy our app!</p>
+
+<h1>Deployment</h1>
+
+<p>Every Heroku app needs a unique name. If you don&rsquo;t specify one, then Heroku will generate one for you. Your app will have the domain name <code>appname.herokuapp.com</code> - however, if you already have a domain name lined up for your blog, you can point that domain name at the Heroku app if you wish. I&rsquo;m going to deploy mine with the name <code>blog-shellshocked-info</code>.</p>
+
+<p>You also need to consider where you want to deploy it. Heroku has two regions - North America and EU. By default it will deploy to North America, but as I&rsquo;m in the EU, that&rsquo;s where I want to deploy my app to - obviously if you&rsquo;re in the Americas, you may be better off sticking with North America.</p>
+
+<p>So, let&rsquo;s create our app. Here&rsquo;s the command you need to run:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku apps:create blog-shellshocked-info --region eu
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You will want to change the app name, or remove it entirely if you&rsquo;re happy for Heroku to generate one for you. If you want to host it in North America, drop the <code>--region eu</code> section.</p>
+
+<p>Once completed, this will have created your new app, and added a Git remote for it, but will not have deployed it. To deploy your app, run this command:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>git push heroku master
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That will push your code up to Heroku. Please note that building the app may take a little while. Once it&rsquo;s done, you can run <code>heroku open</code> to open it in your web browser. You should see an error message stating that the relation <code>blogengine_post</code> does not exist. That&rsquo;s because we need to create our database structure. Heroku allows you to easily run commands on your app with <code>heroku run</code>, so let&rsquo;s create our database and run our migrations:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>heroku run python manage.py syncdb
+</span><span class='line'>heroku run python manage.py migrate
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>These are exactly the same commands you would run locally to create your database, but prefaced with <code>heroku run</code> so that they get run by Heroku. As usual, you will be prompted to create a superuser - you&rsquo;ll want to do this so you can log into the admin.</p>
+
+<p>That&rsquo;s all for today! We&rsquo;ve finally got our site up and running on Heroku, and set up continuous integration so our tests will get run for us. You can see an example of the site working <a href="http://blog.shellshocked.info/">here</a>. As usual, you can check out the latest version of the code with <code>git checkout lesson-5</code>. If you&rsquo;d like a homework assignment, then take a look at <a href="http://docs.travis-ci.com/user/deployment/heroku/">automating deployment to Heroku on successful builds</a> and see if you can get it set up successfully.</p>
+
+<p>Next time around, we&rsquo;ll get back to implementing our search and tidying up the front end. See you then!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -10823,1310 +11456,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/03/testing-php-web-applications-with-cucumber/">Testing PHP Web Applications With Cucumber</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2012-11-03T16:43:00+00:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2012</span></span> <span class='time'>4:43 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Ever since I first heard of <a href="http://cukes.info/">Cucumber</a>, it&rsquo;s seemed like something I would find really useful. Like many developers, especially those who use PHP regularly, I know full well that I should make a point of writing proper automated tests for my web apps, but invariably wind up just thinking &ldquo;I haven&rsquo;t got time to get my head around a testing framework and it&rsquo;ll take ages to set up, so I&rsquo;ll just click around and look for bugs&rdquo;. This does get very, very tedious quite quickly, however.</p>
-
-<p>At work I&rsquo;ve reached a point with  a web app I&rsquo;m building where I needed to test it extensively to make sure it worked OK. I soon began to get very, very fed up of the repetitive clicking around necessary to test the application, so I began looking around for a solution. I gave Selenium IDE a try, but I found that to be annoyingly unreliable when recording tests. I&rsquo;d heard of Cucumber, so I did some googling, found some resources, and began tinkering with that. Quite quickly, I had a few basic acceptance tests up and running that were much more reliable than Selenium IDE, and much less tedious to use than manual testing. Within a very short space of time, I realised that Cucumber was one of those tools that was going to dramatically improve my coding experience, much like when I switched from Subversion to Git.</p>
-
-<p>What&rsquo;s so great about Cucumber compared to other acceptance testing solutions?</p>
-
-<ul>
-<li>Cucumber scenarios are written using Gherkin, a simple syntax that makes it easy for customers to set out exactly what behaviour they want to see. Far from being tedious requirement documents, these set out in a simple and intuitive way what should happen once the application is complete. By requiring customers to think carefully about what they want and get it down in writing, you can ensure the customer has a good idea what they want before you write any code, making it much less likely they&rsquo;ll turn around afterwards and say &ldquo;No, that&rsquo;s not what we want&rdquo;. This, more than anything, is for me the true power of Cucumber - it allows customers and developers to easily collaborate to set out what the web app will do, and gets you automated tests into the bargain as well.</li>
-<li>Because Cucumber is packaged as a Ruby gem, it&rsquo;s easy to install it and any other Ruby modules it may require.</li>
-<li>You can use Capybara to test your web app. Capybara is a very handy Ruby gem that allows you to easily interact with your web app, and it allows several different drivers to be used. If you don&rsquo;t need JavaScript, for instance, you can use Mechanize for faster tests. If you do, you can use selenium-webdriver to automate the browser instead, and it will load an instance of Firefox and use that for testing.</li>
-<li>It can also be used for testing RESTful web services. HTTParty is another handy Ruby gem that can be used for testing an API.</li>
-</ul>
-
-
-<p>One question you may ask is &lsquo;Why use a Ruby tool to test PHP apps?&rsquo;. Well, there is <a href="http://behat.org/">Behat</a>, a very similar tool for PHP, so you can use that if you&rsquo;d prefer. However, I personally have found that it&rsquo;s not too much of a problem switching context between writing Ruby code for the acceptance tests and PHP code for the application itself. Ruby also has some advantages here - <a href="https://rvm.io/">RVM</a> is a very handy tool for running multiple instances of Ruby, and RubyGems makes it easy to install any additional modules you may need. You don&rsquo;t really need to know much Ruby to use it - this is essentially my first encounter with Ruby barring a few small tutorials, but I haven&rsquo;t had any significant issues with it. Finally, the Cucumber community seems to be very active, which is always a plus.</p>
-
-<p>When searching for a tutorial on getting Cucumber working with PHP, I only found <a href="http://jamieonsoftware.com/journal/2011/1/2/high-level-testing-php-applications-with-cucumber.html">one good one</a>, and that didn&rsquo;t cover a lot of the issues I&rsquo;d have liked to cover, not did it cover actually using Cucumber as part of the development process, so I had to puzzle out much of it myself. So hopefully, by covering more of the ground that your average PHP developer is likely to need, I can show you just how useful Cucumber can be when added to your PHP development toolkit.</p>
-
-<p>In this tutorial, we&rsquo;ll build a very simple todo-list application using the Slim framework, but we&rsquo;ll use Cucumber to test it throughout to ensure that it works the way we want it to. Hopefully, by doing this, we&rsquo;ll get a rock-solid web app that meets our requirements exactly.</p>
-
-<p>First of all, you&rsquo;ll want to install RVM to make it easier to manage multiple Ruby installs. You may be able to use your system&rsquo;s Ruby install, but RVM is usually a safer bet:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="se">\c</span>url -L https://get.rvm.io <span class="p">|</span> bash -s stable --ruby
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This was sufficient to install RVM on Mac OS X. On Ubuntu, I also had to install the openssl and zlib packages. Before installing RVM, use apt-get to install the required packages:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get install curl git git-core zlib1g-dev zlibc libxml2-dev libxslt1-dev libyaml-dev build-essential checkinstall openssl libreadline6 libreadline6-dev zlib1g libssl-dev libsqlite3-dev sqlite3 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Once RVM is installed, then close and reopen your terminal so that RVM is loaded. Then, install the correct packages:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm pkg install openssl zlib
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we can install our new copy of Ruby. On Ubuntu, I had to install Ruby 1.8.7 first:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.8.7
-</span><span class='line'>rvm use 1.8.7
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then I installed Ruby 1.9.3:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.9.3 --with-openssl-dir<span class="o">=</span><span class="nv">$HOME</span>/.rvm/usr
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Whereas on OS X, this is all that was required:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm install 1.9.3
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Once that&rsquo;s done, run the following to set the version of Ruby being used</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rvm use 1.9.3
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, you should be able to install the required Ruby gems. Now, you could install these manually, like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install cucumber
-</span><span class='line'>gem install rspec
-</span><span class='line'>gem install mechanize
-</span><span class='line'>gem install capybara
-</span><span class='line'>gem install selenium-webdriver
-</span><span class='line'>gem install capybara-mechanize
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>However, there&rsquo;s a more convenient way. First, create a file in the project&rsquo;s root directory called Gemfile and put the following content into it:</p>
-
-<figure class='code'><figcaption><span>Gemfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s2">&quot;http://rubygems.org&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;cucumber&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;rspec&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;mechanize&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;capybara&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;selenium-webdriver&quot;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;capybara-mechanize&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then install the Bundler gem:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>gem install bundler
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then use Bundler to install the required gems:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>bundle install
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This makes it easier to get your project set up somewhere else because you can put the Gemfile under version control, making it easier to duplicate this setup elsewhere.</p>
-
-<p>With that out of the way, let&rsquo;s start work on our app. To save time, we&rsquo;ll use the Slim framework to do some of the heavy lifting for our application. Download <a href="http://www.slimframework.com/">Slim</a> and put it in a folder on your local web server.</p>
-
-<p>Now, before we actually write any code, we&rsquo;ll set out our first Cucumber scenario. Create a folder inside the folder you put Slim inside and call it <code>features</code>. Inside it, create a new file called <code>todo.feature</code> and put the following content into it:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the new item added to the list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Notice how simple this is? Everything is written as an example of how an end user would interact with the site. There&rsquo;s nothing hard about this - it just describes what the site needs to do.</p>
-
-<p>The first line is just the name of this feature. The following three lines are just a comment. Then the Scenario line gives a name to this particular scenario - a Scenario is just a series of steps that describes an action.</p>
-
-<p>Then, we see the Given line. This sets out the starting conditions. Note that you can easily set out multiple starting conditions using the And keyword on subsequent lines, as we do later in the file. Here, we&rsquo;re just making sure we&rsquo;re on the home page.</p>
-
-<p>Next, we see the When line. This, and the subsequent And lines, set out what actions we want to take when going through this step. In this example, we&rsquo;re clicking on a link marked &lsquo;New Item&rsquo;, filling in a text input, and clicking the Submit button. So we&rsquo;re already thinking about how our application is going to work, before we&rsquo;ve written a line of code.</p>
-
-<p>Finally, we see the Then line. This sets out what should have happened once we&rsquo;ve finished going through this step. Here we want to make sure the new item has been added to the list.</p>
-
-<p>Now, go to the folder you unpacked Slim into and run <code>cucumber</code> from the shell. You should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/todo.feature:8</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/todo.feature:9</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/todo.feature:10</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/todo.feature:11</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/todo.feature:12</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> undefined<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">5</span> undefined<span class="o">)</span>
-</span><span class='line'>0m0.004s
-</span><span class='line'>
-</span><span class='line'>You can implement step definitions <span class="k">for</span> undefined steps with these snippets:
-</span><span class='line'>
-</span><span class='line'>Given /^I am on the home page<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I click on New Item<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I fill in the item<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>When /^I click the button Submit<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>Then /^I should see the new item added to the list<span class="nv">$/</span> <span class="k">do</span>
-</span><span class='line'>  pending <span class="c"># express the regexp above with the code you wish you had</span>
-</span><span class='line'>end
-</span><span class='line'>
-</span><span class='line'>If you want snippets in a different programming language,
-</span><span class='line'>just make sure a file with the appropriate file extension
-</span><span class='line'>exists where cucumber looks <span class="k">for</span> step definitions.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>At this stage, Cucumber isn&rsquo;t doing anything much, it&rsquo;s just telling you that these steps haven&rsquo;t been defined as yet. To define a step, you simply write some Ruby code that expresses that step.</p>
-
-<p>Let&rsquo;s do that. Under <code>features</code>, create a new directory called <code>step_definitions</code>. Inside that, create a file called <code>todo_steps.rb</code> and paste the code snippets returned by Cucumber into it. Once that has been saved, run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:2:in <span class="sb">`</span>/^I am on the home page<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:8:in `Given I am on the home page&#39;</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">4</span> skipped, <span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'>0m0.004s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So far, the steps we&rsquo;ve written don&rsquo;t actually do anything - each step contains nothing but the pending statement. We need to replace the code inside each of those steps with some Ruby code that implements that step. As the first step in this scenario is still pending, Cucumber skips all the remaining steps.</p>
-
-<p>Let&rsquo;s implement these steps. First of all, we need to set some configuration options. In the <code>features</code> folder, create a new folder called <code>support</code>, and under that create a new file called <code>env.rb</code>. In there, place the following code:</p>
-
-<figure class='code'><figcaption><span>features/support/env.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rspec/expectations&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/mechanize&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/cucumber&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;test/unit/assertions&#39;</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mechanize&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">World</span><span class="p">(</span><span class="no">Test</span><span class="o">::</span><span class="no">Unit</span><span class="o">::</span><span class="no">Assertions</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Capybara</span><span class="o">.</span><span class="n">default_driver</span> <span class="o">=</span> <span class="ss">:mechanize</span>
-</span><span class='line'><span class="no">Capybara</span><span class="o">.</span><span class="n">app_host</span> <span class="o">=</span> <span class="s2">&quot;http://localhost&quot;</span>
-</span><span class='line'><span class="no">World</span><span class="p">(</span><span class="no">Capybara</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This includes all of the Ruby gems required for our purposes, and sets Capybara to use the Mechanize driver for testing web apps. If you&rsquo;ve not heard of it before, Capybara can be thought of as a way of scripting a web browser that supports numerous drivers, some of which are headless and some of which aren&rsquo;t. Here we&rsquo;re using Mechanize, which is headless, but later on we&rsquo;ll use Selenium to show you how it would work with a non-headless web browser.</p>
-
-<p>With that done, the next job is to actually implement the steps. Head back to <code>features/step_definitions/todo_steps.rb</code> and edit it as follows:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Given</span> <span class="sr">/^I am on the home page$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">visit</span> <span class="s2">&quot;http://localhost/~matthewdaly/todo/index.php&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click on New Item$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click the button Submit$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the new item added to the list$/</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">pending</span> <span class="c1"># express the regexp above with the code you wish you had</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Don&rsquo;t forget to replace the URL in that first step with the one pointing at your index.php for your local copy of Slim. At this point we&rsquo;re only implementing the first step, so that&rsquo;s all we need to do for now. Once that&rsquo;s done, go back to the root of the web app and run <code>cucumber</code> again. You should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on New Item<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">3</span> skipped, <span class="m">1</span> pending, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.036s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Our first step has passed! Now, we move onto the next step. Open features/step_definitions/todo_steps.rb again, and amend the second step definition as follows:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click on New Item$/</span> <span class="k">do</span>
-</span><span class='line'>   <span class="n">click_link</span> <span class="p">(</span><span class="s1">&#39;New Item&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, hang on a minute here. This Ruby code is pretty easy to understand - it just clicks on a link with the title, ID or text &lsquo;New Item&rsquo;. But we don&rsquo;t want to have to rewrite this step for every single link in the application. Wouldn&rsquo;t it be great if we could have this step definition accept any text and click on the appropriate link, so we could reuse it elsewhere? Well, we can. Change the second step to look like this:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click on (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">link</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_link</span> <span class="p">(</span><span class="n">link</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What&rsquo;s happening here is that we capture the text after the word &lsquo;on&rsquo; using a regular expression and pass it through to the step definition as the variable <code>link</code>. Then, we have Capybara click on that link. Pretty simple, and it saves us on some work in future.</p>
-
-<p>Now run <code>cucumber</code> again, and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      no link with title, id or text <span class="s1">&#39;New Item&#39;</span> found <span class="o">(</span>Capybara::ElementNotFound<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_link&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">3</span> skipped, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.042s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;ve got our second step in place, but it&rsquo;s failing because there is no link with the text &lsquo;New Item&rsquo;. Let&rsquo;s remedy that. Head back to the folder you put Slim in, and open index.php.</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here I&rsquo;ve stripped out most of the default code and comments so we can see more easily what&rsquo;s happening. If you haven&rsquo;t used Slim before, it works by letting you define routes that are accessed via HTTP GET, POST, PUT or DELETE methods, and define what the response will be to each one. Here, we&rsquo;ve defined a simple controller for GET requests to &lsquo;/&rsquo;, and we return a template that includes a link with the text &lsquo;New Item&rsquo;.</p>
-
-<p>Now, run <code>cucumber</code> again and you should see the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>      Received the following error <span class="k">for</span> a GET request to http://localhost/~matthewdaly/todo/newitem: <span class="s1">&#39;404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/newitem -- unhandled response&#39;</span> <span class="o">(</span>RuntimeError<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_link&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:6:in <span class="sb">`</span>/^I click on <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:9:in `When I click on New Item&#39;</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">3</span> skipped, <span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.153s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Our second step is still failing, but only because we haven&rsquo;t yet defined a route for the destination when we click on the link, so let&rsquo;s fix that. Open up index.php again and change it to look like this:</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/newitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">action</span><span class="o">=</span><span class="s2">&quot;index.php/submitnewitem&quot;</span> <span class="nx">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">todo</span> <span class="nx">item</span> <span class="nx">text</span><span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;item&quot;</span> <span class="o">/&gt;&lt;/</span><span class="nx">label</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span> <span class="nx">value</span><span class="o">=</span><span class="s2">&quot;Submit&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;/</span><span class="nx">form</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;re just adding a new route to handle what happens when we click the link here. The new page also has a form for submitting the new item.</p>
-
-<p>With that done, the second step should be in place. Run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:10:in <span class="sb">`</span>/^I fill in the item<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:10:in `And I fill in the item&#39;</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">2</span> skipped, <span class="m">1</span> pending, <span class="m">2</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.048s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So onto the third step. We&rsquo;ve already created the input for filling in the item, so all we need to do to make this step pass is write an appropriate step definition:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="s1">&#39;Feed cat&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, run <code>cucumber</code> again and this step should pass:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:14:in <span class="sb">`</span>/^I click the button Submit<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:11:in `And I click the button Submit&#39;</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> skipped, <span class="m">1</span> pending, <span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.117s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we need to implement the step for clicking the Submit button. As with clicking on the New Item link, we can make this step generic to save us time later:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">When</span> <span class="sr">/^I click the button (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">button</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_button</span> <span class="p">(</span><span class="n">button</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With that done, run <code>cucumber</code> again and you should see something like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>      Received the following error <span class="k">for</span> a POST request to http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem: <span class="s1">&#39;404 =&gt; Net::HTTPNotFound for http://localhost/~matthewdaly/todo/index.php/index.php/submitnewitem -- unhandled response&#39;</span> <span class="o">(</span>RuntimeError<span class="o">)</span>
-</span><span class='line'>      <span class="o">(</span><span class="nb">eval</span><span class="o">)</span>:2:in <span class="sb">`</span>send<span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      (eval):2:in `click_button&#39;</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:14:in <span class="sb">`</span>/^I click the button <span class="o">(</span>.*<span class="o">)</span><span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:11:in `And I click the button Submit&#39;</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>Failing Scenarios:
-</span><span class='line'>cucumber features/todo.feature:7 <span class="c"># Scenario: New item</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> failed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> failed, <span class="m">1</span> skipped, <span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.210s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The step is failing here because submitting the new item generates a 404 error. We need to handle the POST. Open up index.php again and edit it to look like this:</p>
-
-<figure class='code'><figcaption><span>index.php</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-</pre></td><td class='code'><pre><code class='php'><span class='line'><span class="o">&lt;?</span><span class="nx">php</span>
-</span><span class='line'><span class="k">require</span> <span class="s1">&#39;Slim/Slim.php&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">\Slim\Slim</span><span class="o">::</span><span class="na">registerAutoloader</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">\Slim\Slim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// GET route</span>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;index.php/newitem&quot;</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">Item</span><span class="o">&lt;/</span><span class="nx">a</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">&#39;/newitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">action</span><span class="o">=</span><span class="s2">&quot;index.php/submitnewitem&quot;</span> <span class="nx">method</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">label</span><span class="o">&gt;</span><span class="k">New</span> <span class="nx">todo</span> <span class="nx">item</span> <span class="nx">text</span><span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="nx">name</span><span class="o">=</span><span class="s2">&quot;item&quot;</span> <span class="o">/&gt;&lt;/</span><span class="nx">label</span><span class="o">&gt;</span>
-</span><span class='line'>            <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;submit&quot;</span> <span class="nx">value</span><span class="o">=</span><span class="s2">&quot;Submit&quot;</span> <span class="o">/&gt;</span>
-</span><span class='line'>        <span class="o">&lt;/</span><span class="nx">form</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">post</span><span class="p">(</span><span class="s1">&#39;/submitnewitem&#39;</span><span class="p">,</span> <span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nv">$item</span> <span class="o">=</span> <span class="nv">$_POST</span><span class="p">[</span><span class="s1">&#39;item&#39;</span><span class="p">];</span>
-</span><span class='line'>    <span class="nv">$template</span> <span class="o">=</span> <span class="o">&lt;&lt;&lt;</span><span class="nx">EOT</span>
-</span><span class='line'><span class="o">&lt;!</span><span class="nx">DOCTYPE</span> <span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Todo</span> <span class="k">list</span><span class="o">&lt;/</span><span class="nx">title</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">head</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nv">$item</span><span class="o">&lt;/</span><span class="nx">p</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="nx">body</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="nx">html</span><span class="o">&gt;</span>
-</span><span class='line'><span class="nx">EOT</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">echo</span> <span class="nv">$template</span><span class="p">;</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$app</span><span class="o">-&gt;</span><span class="na">run</span><span class="p">();</span>
-</span><span class='line'><span class="cp">?&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here we&rsquo;re cheating a little bit. In a working application we&rsquo;d want to store the to-do list items in a database, but to keep this tutorial simple we&rsquo;ll just output the result of the POST request and leave implementing a database to store the items as an exercise for the reader.</p>
-
-<p>Now, run <code>cucumber</code> again and you should see that this step now passes:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>      TODO <span class="o">(</span>Cucumber::Pending<span class="o">)</span>
-</span><span class='line'>      ./features/step_definitions/todo_steps.rb:18:in <span class="sb">`</span>/^I should see the new item added to the list<span class="nv">$/</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">      features/todo.feature:12:in `Then I should see the new item added to the list&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> pending<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">1</span> pending, <span class="m">4</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.067s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>On to our final step. We want to make sure the page contains the text we submitted, which is very easy to do with Capybara. Change the final step to look like this:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the new item added to the list$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">page</span><span class="o">.</span><span class="n">should</span> <span class="n">have_content</span><span class="p">(</span><span class="s1">&#39;Feed cat&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now run <code>cucumber</code> again and you should see that the scenario has now passed:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  Scenario: New item                                 <span class="c"># features/todo.feature:7</span>
-</span><span class='line'>    Given I am on the home page                      <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item                         <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item                           <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit                    <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the new item added to the list <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">1</span> scenario <span class="o">(</span><span class="m">1</span> passed<span class="o">)</span>
-</span><span class='line'><span class="m">5</span> steps <span class="o">(</span><span class="m">5</span> passed<span class="o">)</span>
-</span><span class='line'>0m0.068s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;re nearly done here, but first there&rsquo;s a couple of other handy things you can do with Cucumber that I&rsquo;d like to show you. We&rsquo;ve been using the Mechanize driver for Capybara, which is very fast and efficient. However, it&rsquo;s effectively a text-mode browser like Lynx, so it can&rsquo;t be used to test any functionality that relies on JavaScript. However, Mechanize isn&rsquo;t the only driver available for Capybara, and you can switch to the JavaScript driver when necessary so you can test. The default JavaScript driver is Selenium, which will launch an instance of Firefox and use that for the test.</p>
-
-<p>It&rsquo;s easy to switch to the JavaScript driver when you need it. Just tag the scenario with @javascript, as in this example:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    @javascript</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the new item added to the list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now run <code>cucumber</code> again and this time it will fire up an instance of Firefox and use that to run the tests. This can also be handy for debugging purposes since, unlike with Mechanize, you can see the pages.</p>
-
-<p>Finally, what about if you want to test the same functionality multiple times with different input? You don&rsquo;t want to have to write out multiple scenarios that are virtually identical, even if you have refactored them to make them more useful. What you need is a way to repeat the same test, only with different input each time.</p>
-
-<p>Handily, Cucumber can do this too. First, let&rsquo;s refactor the code for our step definitions so the final step can handle any text:</p>
-
-<figure class='code'><figcaption><span>features/step_definitions/todo_steps.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Given</span> <span class="sr">/^I am on the home page$/</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">visit</span> <span class="s2">&quot;http://localhost/~matthewdaly/todo/index.php&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click on (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">link</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_link</span> <span class="p">(</span><span class="n">link</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I fill in the item with (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="n">item</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span> <span class="sr">/^I click the button (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">button</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">click_button</span> <span class="p">(</span><span class="n">button</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Then</span> <span class="sr">/^I should see the text (.*)$/</span> <span class="k">do</span> <span class="o">|</span><span class="n">text</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">page</span><span class="o">.</span><span class="n">should</span> <span class="n">have_content</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here we&rsquo;ve changed the third and fifth items so we can pass any value we want through to them. As I mentioned earlier, this is good practice since it means we don&rsquo;t have to write more code for our tests than we need to.</p>
-
-<p>With that done, open up the feature file and amend it to look like this:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Feature:</span><span class="nf"> Todo</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    In order to use the site</span>
-</span><span class='line'><span class="nf">    As a user</span>
-</span><span class='line'><span class="nf">    I want to be able to submit, view and delete to-do list items</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">    @javascript</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Scenario Outline:</span><span class="nf"> New item</span>
-</span><span class='line'><span class="k">        Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">        </span><span class="k">When </span><span class="nf">I click on New Item</span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I fill in the item with </span><span class="nv">&lt;item&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">        </span><span class="k">And </span><span class="nf">I click the button Submit</span>
-</span><span class='line'><span class="nf">        </span><span class="k">Then </span><span class="nf">I should see the text </span><span class="nv">&lt;item&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">    </span><span class="k">Examples:</span>
-</span><span class='line'><span class="k">        |</span><span class="nv"> item</span><span class="k">                      |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Feed cat</span><span class="k">                  |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Stop milk</span><span class="k">                 |   </span><span class="nf"></span>
-</span><span class='line'><span class="k">        |</span><span class="s"> Take over world</span><span class="k">           |</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If you then run <code>cucumber</code> again, the scenario should run three times, each time entering different text:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>Feature: Todo
-</span><span class='line'>
-</span><span class='line'>    In order to use the site
-</span><span class='line'>    As a user
-</span><span class='line'>    I want to be able to submit, view and delete to-do list items
-</span><span class='line'>
-</span><span class='line'>  @javascript
-</span><span class='line'>  Scenario Outline: New item           <span class="c"># features/todo.feature:8</span>
-</span><span class='line'>    Given I am on the home page        <span class="c"># features/step_definitions/todo_steps.rb:1</span>
-</span><span class='line'>    When I click on New Item           <span class="c"># features/step_definitions/todo_steps.rb:5</span>
-</span><span class='line'>    And I fill in the item with &lt;item&gt; <span class="c"># features/step_definitions/todo_steps.rb:9</span>
-</span><span class='line'>    And I click the button Submit      <span class="c"># features/step_definitions/todo_steps.rb:13</span>
-</span><span class='line'>    Then I should see the text &lt;item&gt;  <span class="c"># features/step_definitions/todo_steps.rb:17</span>
-</span><span class='line'>
-</span><span class='line'>    Examples:
-</span><span class='line'>      <span class="p">|</span> item            <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Feed cat        <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Stop milk       <span class="p">|</span>
-</span><span class='line'>      <span class="p">|</span> Take over world <span class="p">|</span>
-</span><span class='line'>
-</span><span class='line'><span class="m">3</span> scenarios <span class="o">(</span><span class="m">3</span> passed<span class="o">)</span>
-</span><span class='line'><span class="m">15</span> steps <span class="o">(</span><span class="m">15</span> passed<span class="o">)</span>
-</span><span class='line'>0m25.936s
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With only a few changes, we&rsquo;re now running the same scenario over and over again with different input, and testing the output is correct for each one. This makes it very easy to test repetitive content. For instance, if you had an e-commerce site with lots of products and you wanted to test the pages for some of the products, you could put them in a table like this. You can have more than one column if necessary, so you could write a scenario like this:</p>
-
-<figure class='code'><figcaption><span>features/todo.feature</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='cucumber'><span class='line'><span class="k">Scenario Outline:</span><span class="nf"> Test products</span>
-</span><span class='line'><span class="k">    Given </span><span class="nf">I am on the home page</span>
-</span><span class='line'><span class="nf">    </span><span class="k">When </span><span class="nf">I search for </span><span class="nv">&lt;product&gt;</span><span class="nf"></span>
-</span><span class='line'><span class="nf">    </span><span class="k">And </span><span class="nf">I click on the first result</span>
-</span><span class='line'><span class="nf">    </span><span class="k">Then </span><span class="nf">I should not see any errors</span>
-</span><span class='line'><span class="nf">    </span><span class="k">And </span><span class="nf">I should see the text </span><span class="nv">&lt;productname&gt;</span><span class="nf"></span>
-</span><span class='line'>
-</span><span class='line'><span class="k">Examples:</span>
-</span><span class='line'><span class="k">    |</span><span class="nv"> product</span><span class="k">           |</span><span class="nv"> productname</span><span class="k">                           |</span><span class="nf"></span>
-</span><span class='line'><span class="k">    |</span><span class="s"> supersprocket</span><span class="k">     |</span><span class="s"> Super Sprocket 3000</span><span class="k">                   |</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>As you can see, Cucumber is a really simple way to start testing your web apps, and can really improve the quality of your code. Even if you&rsquo;ve never used Ruby before, <a href="https://github.com/jnicklas/capybara#readme">Capybara&rsquo;s API</a> is very simple and intuitive, and should adequately cover most of what you need to do when testing a web app.</p>
-
-<p>As I mentioned, the PHP community in general has been a bit slack in terms of getting proper automated tests working. But Cucumber makes it so simple, and offers so many other benefits, such as human-readable tests and getting stakeholders more involved in the development process, that there&rsquo;s really no excuse not to use it. Hope you&rsquo;ve enjoyed this tutorial, and that it&rsquo;s encouraged you to start using Cucumber to test your own web apps.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -12144,6 +11473,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
       </li>
     
@@ -12157,10 +11490,6 @@
     
       <li class="post">
         <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a>
       </li>
     
   </ul>
