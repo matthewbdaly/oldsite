@@ -5,6 +5,8 @@ date: 2012-09-05 00:13
 comments: true
 categories: 
 - git
+- bash
+- awk
 ---
 
 The other day I got to wondering about how I could quickly and easily count how many commits I was making to a specific Git repository every day.
