@@ -26,10 +26,9 @@ module.exports = function (grunt) {
             options: {
               data: {
                 author: "Matthew Daly",
-                url: "http://www.matthewdaly.co.uk",
+                url: "http://matthewdaly.co.uk",
                 addthis: "MattBD",
                 googleanalytics: "UA-17043630-1",
-                
                 disqus: "matthewdaly",
                 github: "matthewbdaly",
                 title: "Matthew Daly's Blog",
@@ -217,7 +216,8 @@ module.exports = function (grunt) {
         },
         'gh-pages': {
             options: {
-                base: 'www'
+                base: 'www',
+                branch: 'master'
             },
             src: ['**']
         }
