@@ -129,7 +129,7 @@ For this application we'll be using the Express framework and the Jade templatin
 * Output form
 * 404 page
 
-Create the folder `views` under the application directory and add the following files:
+Create the folder `views` under the application directory and add the files `views/index.jade`:
 
 ```jade
 doctype html
@@ -148,6 +148,8 @@ html(lang="en")
                     input(type="submit", value="Submit")
 ```
 
+`views/output.jade`
+
 ```jade
 doctype html
 html(lang="en")
@@ -160,6 +162,7 @@ html(lang="en")
                 h1 Shortbread
                 p Your shortened URL is <a href='#{base_url}/#{id}'>#{base_url}/#{id}</a>
 ```
+and `views/error.jade`:
 
 ```jade
 doctype html

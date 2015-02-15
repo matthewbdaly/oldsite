@@ -11,7 +11,7 @@ I'm a web and mobile app developer based in East Anglia in the UK.
 I've worked extensively with the following technologies:
 
 * HTML5/XHTML
-* Building of responsive web pages, including use of Skeleton, Bootstrap and Ratchet
+* Building responsive web pages, including use of Skeleton, Bootstrap and Ratchet
 * CSS and Sass
 * JavaScript, including:
   * Extensive use of jQuery, jQuery UI and jQuery Mobile, including creating [a plugin for jQuery](http://plugins.jquery.com/listfilter/)
@@ -30,7 +30,7 @@ I've worked extensively with the following technologies:
 * Perl (primarily for systems administration purposes)
 * PHP, including:
   * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
-  * Authoring WordPress themes and plugins, and setting up and administering WordPress
+  * Building WordPress themes and plugins, and setting up and administering WordPress
   * Some unit testing with PHPUnit
   * Generating documentation with ApiGen
 * SQL (primarily MySQL and SQLite, but with some use of PostgreSQL), as well as some limited use of MongoDB and Redis for personal projects
