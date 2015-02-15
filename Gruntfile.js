@@ -64,7 +64,8 @@ module.exports = function (grunt) {
                 expand: true,
                 cwd: 'build/',
                 src: [
-                    '**/*.html'
+                    '**/*.html',
+                    '**/atom.xml'
                 ],
                 dest: 'www/'
             },
