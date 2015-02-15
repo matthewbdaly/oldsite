@@ -56,6 +56,15 @@
     <div class="row">
         <div class="col-md-8">
     <article class="post">
+        <p class="date">30th March 2011 8:34 pm</p>
+        <h1><a href="/blog/2011/03/30/new-phone/">New Phone</a></h1>
+        <p>On Friday of last week I unexpectedly got a text from Vodafone saying I was able to upgrade my phone early. I was pretty pleased about this as having been something of an Android early adopter, I was still using an early Android phone, namely my HTC Magic. While a fine phone when it was released, it was only the second Android phone to become available in the UK and was therefore a bit dated compared to newer devices. It has been upgraded to Froyo (albeit a cut-down custom build) but that did slow the phone down somewhat.</p>
+<p>So as soon as I had the opportunity I had a good look around for a new one to replace it. Right from the start I had my eye on the HTC Desire Z. Much as I love touchscreen phones, it’s very often extremely handy to have a physical keyboard, and as I’ve found myself using ConnectBot to connect to my home server via SSH a lot, the keyboard-toting Desire Z immediately had an advantage over the touchscreen-only models. Ideally I didn’t want to change my plan, so I checked out the deals for HTC phones on the same plan, and the Desire Z happened to be the only one on the same plan, so it was a no-brainer.</p>
+<p>I got the phone on Monday, and it is amazing. The keyboard is easy to use and works well, the phone is lightning fast, and the UI is spot-on - it has everything I love about Android on the Magic (like the great notification system) and more. In particular I love the RSS reader- it syncs with Google Reader, so if I have to wait for a train, I can at least read some feeds while I’m waiting.</p>
+<p>One thing I’m hoping to get more use out of is <a href="https://code.google.com/p/android-scripting/">SL4A</a>. I had this on my Magic, but coding on a touchscreen phone is not easy! I’m hoping that with the Desire Z’s keyboard, this will be a lot more useful.</p>
+
+    </article>
+    <article class="post">
         <p class="date">21st February 2011 10:26 pm</p>
         <h1><a href="/blog/2011/02/21/more-on-my-mini-server/">More on My Mini Server</a></h1>
         <p>While I was very pleased to get a proper Linux distro working on my Pogoplug, the Arch-based Plugbox Linux was never really my cup of tea. While it’s a fine distro, I always felt that Debian would have been a much better fit. Partly this is because Debian has established a strong history of being a solid, stable distro that would carry on working no matter what, whereas Arch is more bleeding-edge. Also, Debian has a colossal repository that included a lot of software I wanted that wasn’t in the Arch repositories and I couldn’t get to install or compile from source, such as procmail and Squirrelmail. Debian also has strong support for many different processor architectures, including armel. Finally, being an Ubuntu user on the desktop, Debian is a distro that feels much more familiar to me.</p>
@@ -159,105 +168,14 @@ searchDir(<span class="hljs-variable">$beginSearch</span>);
 <p>I love how Perl makes writing this kind of simple script so easy. It’s a great language for that kind of systems administration task.</p>
 
     </article>
-    <article class="post">
-        <p class="date">27th October 2010 12:15 am</p>
-        <h1><a href="/blog/2010/10/27/a-couple-of-things-i-love-about-perl/">A Couple of Things I Love About Perl</a></h1>
-        <p>In the time that I’ve been learning Perl, I’ve slowly grown to appreciate the strengths of the language more and more. There’s two things in particular that I like about Perl. Once that I really don’t think anyone is going to be surprised by is CPAN. It’s a fantastic resource - there are a huge quantity of Perl modules available for virtually any task under the sun, and they’re incredibly useful.</p>
-<p>The other is just how good the documentation is - I’ve never considered myself to be someone who learns terribly well from Unix man pages, but perldoc seems to have very good documentation indeed, including that for CPAN modules. Also, it helps that if you don’t do well with the man page format, you have the option of running podwebserver and getting the documentation formatted as web pages.</p>
-<p>To give an example, I’m particularly interested in all kinds of network programming, be it web development, IRC, Jabber or whatever, and I’d heard of the Net::IRC module so I decided to start using it to create a simple IRC bot (yes, I know I should really be using POE::Component::IRC instead!). Using the information gleaned from perldoc Net::IRC it was easy to get started writing a bot, and I’ve now come up with the following simple bot:</p>
-<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
-
-<span class="hljs-keyword">use</span> strict;
-<span class="hljs-keyword">use</span> Net::IRC;
-
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$irc</span> = new Net::IRC;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$nick</span> = <span class="hljs-string">"mattsbot"</span>;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$server</span> = <span class="hljs-string">"irc.freenode.net"</span>;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$channel</span> = <span class="hljs-string">"#botpark"</span>;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$port</span> = <span class="hljs-number">6667</span>;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$ircname</span> = <span class="hljs-string">"My wonderful bot"</span>;
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$owner</span> = <span class="hljs-string">"mattbd"</span>; 
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_connect
-{</span>
-   <span class="hljs-keyword">my</span> <span class="hljs-variable">$self</span> = <span class="hljs-keyword">shift</span>;
-
-   <span class="hljs-keyword">print</span> <span class="hljs-string">"Joining <span class="hljs-variable">$channel</span>\n"</span>;
-   <span class="hljs-variable">$self</span>-&gt;<span class="hljs-keyword">join</span>(<span class="hljs-variable">$channel</span>);
-   <span class="hljs-variable">$self</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>,<span class="hljs-string">"Ready to go!"</span>);
-}
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_disconnect
-{</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$self</span> = <span class="hljs-keyword">shift</span>;
-    <span class="hljs-variable">$self</span>-&gt;<span class="hljs-keyword">join</span>(<span class="hljs-variable">$channel</span>);
-    <span class="hljs-variable">$self</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Sorry about that - dropped out for a sec."</span>);
-} 
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_join
-{</span>
-    <span class="hljs-comment"># Get the connection and event objects</span>
-    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
-
-    <span class="hljs-comment"># Get the nick that just joined</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$newnick</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
-
-    <span class="hljs-comment"># Greet the new nick</span>
-    <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Hello, <span class="hljs-variable">$newnick</span>! I'm a greeting bot!"</span>);
-}
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_msg
-{</span>
-    <span class="hljs-comment"># Get the connection and event objects</span>
-    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
-
-    <span class="hljs-comment"># Get nick of messaging user</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$messager</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
-
-    <span class="hljs-comment"># Respond negatively</span>
-    <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$messager</span>, <span class="hljs-string">"Sorry, I'm just a bot. Please don't message me!"</span>);
-}
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_public
-{</span>
-    <span class="hljs-comment"># Get the connection and event objects</span>
-    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
-
-    <span class="hljs-comment"># Get nick of messaging user</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$messager</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
-
-    <span class="hljs-comment"># Get text of message</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$text</span> = <span class="hljs-variable">$event</span>-&gt;{args}[<span class="hljs-number">0</span>];
-
-    <span class="hljs-comment"># Check to see if text contains name of bot - if so message the user negatively</span>
-    <span class="hljs-keyword">if</span>(<span class="hljs-variable">$text</span> =~ <span class="hljs-regexp">m/$nick/</span>)
-    {
-        <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Sorry, <span class="hljs-variable">$messager</span>,I'm just a simple bot!"</span>);
-    }
-}
-
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$conn</span> = <span class="hljs-variable">$irc</span>-&gt;newconn(<span class="hljs-string">Nick =&gt;</span><span class="hljs-variable">$nick</span>,<span class="hljs-string">Server=&gt;</span><span class="hljs-variable">$server</span>,<span class="hljs-string">Port=&gt;</span><span class="hljs-variable">$port</span>,<span class="hljs-string">Ircname=&gt;</span><span class="hljs-variable">$ircname</span>);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'376'</span>, \&amp;on;_connect);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'disconnect'</span>, \&amp;on;_disconnect);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'msg'</span>, \&amp;on;_msg);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'join'</span>, \&amp;on;_join);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'msg'</span>, \&amp;on;_msg);
-<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'public'</span>, \&amp;on;_public);
-<span class="hljs-variable">$irc</span>-&gt;start();
-</code></pre>
-<p>Now, this bot isn’t exactly hugely capable - all it does is greet new joiners, and tell you to leave it alone if you try to talk to it, but it was pretty easy to code it, thanks to the documentation, and it’s a good base to build on. From here, it’s easy to extend the on_public and on_msg subroutines to deal with other messages - for instance, I could use a regular expression to look for “!respond” in the text of the message and if it’s found, respond with any appropriate text.</p>
-<p>I’ve hard-coded the appropriate details into the script in this case to make it quicker and easier to test it, but it would be trivial to change it to either accept settings passed as arguments from the command line, or have it grab these from a separate text file.</p>
-<p>My initial doubts about Perl are really wearing off. It’s a powerful language and one that, now I’ve picked up the basic syntax, I’m having little trouble getting work done with. </p>
-
-    </article>
         </div>
         <div class="col-md-4">
             <h1>Recent Posts</h1>
+            <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
             <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
             <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
             <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
             <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
-            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
             <section id="github-profile">
             </section>
             <h4>My GitHub repositories</h4>
