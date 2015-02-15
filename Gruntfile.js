@@ -211,7 +211,7 @@ module.exports = function (grunt) {
                     'build/**/*.html',
                     'build/**/atom.xml'
                 ],
-                homepage: 'http://www.matthewdaly.co.uk'
+                homepage: 'http://matthewdaly.co.uk/'
             }
         },
         'gh-pages': {
