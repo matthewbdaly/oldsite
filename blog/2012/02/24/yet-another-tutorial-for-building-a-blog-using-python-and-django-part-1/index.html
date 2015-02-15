@@ -1,546 +1,249 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Yet Another Tutorial for Building a Blog Using Python and Django - Part 1 - Matthew Daly's Blog</title>
-  <meta name="author" content="Matthew Daly">
-
-  
-  <meta name="description" content="While I&rsquo;m extremely fond of Perl for quick hacks and scripts, and have used PHP a fair amount for web development purposes (both on its own and &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2012/02/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-1">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-17043630-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Matthew Daly's Blog</a></h1>
-  
-    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">Yet Another Tutorial for Building a Blog Using Python and Django - Part 1</h1>
-    
-    
-      <p class="meta">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
         
+        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
+        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
+        <title>Yet Another Tutorial for Building a Blog Using Python and Django - Part 1 - Matthew Daly&#x27;s Blog</title>
+    </head>
+    <body>
+
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
+
+        <header>
+            <nav class="navbar navbar-inverse navbar-static-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="header-nav">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/blog/archives/">Archives</a></li>
+                                <li><a href="/about/">About</a></li>
+                                <li><a href="/atom.xml">RSS</a></li>
+                            </ul>
+                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
+                                <div class="form-group">
+                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></input>
+                                </div>
+                                <input id="site" name="q" type="hidden" value="site:www.matthewdaly.co.uk" />
+                                <input type="submit" class="btn btn-default"></input>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
+                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
+                </div>
+            </div>
+        </header>
+
+<div class="container">
 
 
-
-
-<time class='entry-date' datetime='2012-02-24T16:17:10+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>4:17 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>While I&rsquo;m extremely fond of Perl for quick hacks and scripts, and have used PHP a fair amount for web development purposes (both on its own and with the CodeIgniter framework), there is one language I love above all others, and that&rsquo;s Python. I&rsquo;ve found that, when compared to PHP or Perl, at least for me, it&rsquo;s a lot easier to &ldquo;get into the zone&rdquo; when programming in Python, the code I produce tends to be a lot more readable and easier to follow, and the interactive interpreter makes it really easy to figure out what&rsquo;s going on in a way that just isn&rsquo;t possible with PHP or Perl. Also, Python was always designed to be an object-oriented language, and IMHO has a better object model than either Perl or PHP.</p>
-
-<p>While it would be fair to say that Python doesn&rsquo;t have a single web development framework that monopolises developer&rsquo;s attention the way Rails does for Ruby programmers, Django is undoubtedly the best-known Python framework. It&rsquo;s solid, easy to use, and has the best documentation of any web development framework I&rsquo;ve ever seen (don&rsquo;t get me wrong, CodeIgniter in particular has very good documentation, but Django&rsquo;s is exceptional).</p>
-
-<p>In this tutorial, we&rsquo;re going to build a very simple blogging engine using Django. In its initial stages, it will be an extremely simple web app - we won&rsquo;t bother with comments, tags, categories or multiple users , or any of the other niceties of a fully-fledged blogging engine. Instead, we will build a very basic Tumblr-style blogging engine, capable of publishing blog posts and very little else. As time goes by, we can add further functionality to this and build it up into a more capable blogging solution.</p>
-
-<p>So, let&rsquo;s get started. Go to the <a href="https://www.djangoproject.com/">Django project website</a> and download the latest release (NOTE: as at time of writing this was 1.3.1, but we&rsquo;re now up to 1.4.3 as at 14 January 2013, and some changes have been made to Django&rsquo;s structure). Follow the installation instructions given there, and you should be ready to go. Note that from here on, I&rsquo;m assuming you&rsquo;re using a Unix-like operating system such as a Linux distro or Mac OS X - if you&rsquo;re using Windows, there&rsquo;s a few extra steps you&rsquo;ll have to take, such as installing Python, and some of the commands you use may be different.</p>
-
-<p>Once Django is installed, find a suitable folder in which to store your new Django project (perhaps a Projects folder in your home directory might be a good place). Note that Django includes its own development server, so you don&rsquo;t need to install a full LAMP stack like you would if you were developing in PHP. Then, from the folder you want to store your project in, run the following command:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>django-admin.py startproject DjangoBlog
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+    <div class="row">
+        <div class="col-md-8">
+            <article class="post">
+                <p class="date">24th February 2012 4:17 pm</p>
+                <h1>Yet Another Tutorial for Building a Blog Using Python and Django - Part 1</h1>
+                <p>While I’m extremely fond of Perl for quick hacks and scripts, and have used PHP a fair amount for web development purposes (both on its own and with the CodeIgniter framework), there is one language I love above all others, and that’s Python. I’ve found that, when compared to PHP or Perl, at least for me, it’s a lot easier to “get into the zone” when programming in Python, the code I produce tends to be a lot more readable and easier to follow, and the interactive interpreter makes it really easy to figure out what’s going on in a way that just isn’t possible with PHP or Perl. Also, Python was always designed to be an object-oriented language, and IMHO has a better object model than either Perl or PHP.</p>
+<p>While it would be fair to say that Python doesn’t have a single web development framework that monopolises developer’s attention the way Rails does for Ruby programmers, Django is undoubtedly the best-known Python framework. It’s solid, easy to use, and has the best documentation of any web development framework I’ve ever seen (don’t get me wrong, CodeIgniter in particular has very good documentation, but Django’s is exceptional).</p>
+<p>In this tutorial, we’re going to build a very simple blogging engine using Django. In its initial stages, it will be an extremely simple web app - we won’t bother with comments, tags, categories or multiple users , or any of the other niceties of a fully-fledged blogging engine. Instead, we will build a very basic Tumblr-style blogging engine, capable of publishing blog posts and very little else. As time goes by, we can add further functionality to this and build it up into a more capable blogging solution.</p>
+<p>So, let’s get started. Go to the <a href="https://www.djangoproject.com/">Django project website</a> and download the latest release (NOTE: as at time of writing this was 1.3.1, but we’re now up to 1.4.3 as at 14 January 2013, and some changes have been made to Django’s structure). Follow the installation instructions given there, and you should be ready to go. Note that from here on, I’m assuming you’re using a Unix-like operating system such as a Linux distro or Mac OS X - if you’re using Windows, there’s a few extra steps you’ll have to take, such as installing Python, and some of the commands you use may be different.</p>
+<p>Once Django is installed, find a suitable folder in which to store your new Django project (perhaps a Projects folder in your home directory might be a good place). Note that Django includes its own development server, so you don’t need to install a full LAMP stack like you would if you were developing in PHP. Then, from the folder you want to store your project in, run the following command:</p>
+<pre><code class="hljs lang-bash">django-admin.py startproject DjangoB<span class="hljs-built_in">log</span>
+</code></pre>
 <p>This will create a brand-new directory containing all the files you need for your new Django project. If you now cd into this directory, you should see manage.py, as well as a folder called DjangoBlog containing the files <code>__init__.py</code>, <code>settings.py</code> and <code>urls.py</code>.</p>
-
-<p>Let&rsquo;s go through what these files do. First of all, there&rsquo;s <strong>init</strong>.py - don&rsquo;t worry about this, it&rsquo;s a blank file and you don&rsquo;t need to touch it.</p>
-
-<p>Next, manage.py contains a number of extremely useful commands that you will find handy when using Django. You&rsquo;re unlikely to need to edit it, but you&rsquo;ll use it a lot.</p>
-
-<p>Next, settings.py is the settings for the web app you&rsquo;re building. It will specify details like what Django applications you&rsquo;re using, what timezone you&rsquo;re in, your database connection details and so on. You&rsquo;ll need to edit this, so open it up in your favourite text editor.</p>
-
-<p>Look for a line that reads &ldquo;DATABASES&rdquo;. Under here you&rsquo;ll notice the following line:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'>  <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.&#39;</span><span class="p">,</span> <span class="c"># Add &#39;postgresql_psycopg2&#39;,     &#39;postgresql&#39;, &#39;mysql&#39;, &#39;sqlite3&#39; or &#39;oracle&#39;.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You can use pretty much any relational database you like with Django, and because it uses its own Object-Relational Mapping (ORM), it generates the SQL needed for you, taking into account any quirks in that particular database engine. It therefore doesn&rsquo;t really matter what database you use, and it&rsquo;s easy to swap them out. For development purposes, we&rsquo;ll use SQLite as it ships with Python and requires less configuration, so change this line to read as follows:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'>  <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.sqlite3&#39;</span><span class="p">,</span> <span class="c"># Add &#39;postgresql_psycopg2&#39;,     &#39;postgresql&#39;, &#39;mysql&#39;, &#39;sqlite3&#39; or &#39;oracle&#39;.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Next you&rsquo;ll see this line:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'>  <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>                      <span class="c"># Or path to database file if using sqlite3.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>It really doesn&rsquo;t matter what you call the file. I tend to call mine backend.db, as follows:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'>    <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;backend.db&#39;</span><span class="p">,</span>                      <span class="c"># Or path to database file if using sqlite3.</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you keep going down, you&rsquo;ll notice TIME_ZONE and LANGUAGE_CODE. You may wish to change these from their default settings (I change mine to Europe/London for TIME_ZONE and en-gb for LANGUAGE_CODE).</p>
-
-<p>Even further down, you&rsquo;ll notice the INSTALLED_APPS section. Django distinguishes between a project and an application - while a project will normally be a single website, an application will be a set of functionality within that website. For instance, our blog will be a single application, but we could reuse that application on multiple projects. Django also includes a number of applications out of the box - for instance, the flatpages and admin applications can be used together if you wanted to use Django to build a simple CMS, without having to build a new application at all.</p>
-
-<p>For now, we don&rsquo;t need to add any new applications, so let&rsquo;s save the changes we&rsquo;ve made to settings.py and move on to urls.py. This handles directing any incoming HTTP requests to the appropriate place to deal with them. It uses simple regular expressions to evaluate the incoming requests, and maps them to specific view functions. Note that it already includes URLs for the admin functionality, but these are commented out by default.</p>
-
+<p>Let’s go through what these files do. First of all, there’s <strong>init</strong>.py - don’t worry about this, it’s a blank file and you don’t need to touch it.</p>
+<p>Next, manage.py contains a number of extremely useful commands that you will find handy when using Django. You’re unlikely to need to edit it, but you’ll use it a lot.</p>
+<p>Next, settings.py is the settings for the web app you’re building. It will specify details like what Django applications you’re using, what timezone you’re in, your database connection details and so on. You’ll need to edit this, so open it up in your favourite text editor.</p>
+<p>Look for a line that reads “DATABASES”. Under here you’ll notice the following line:</p>
+<pre><code class="hljs lang-python">      <span class="hljs-string">'ENGINE'</span>: <span class="hljs-string">'django.db.backends.'</span>, <span class="hljs-comment"># Add 'postgresql_psycopg2',     'postgresql', 'mysql', 'sqlite3' or 'oracle'.</span>
+</code></pre>
+<p>You can use pretty much any relational database you like with Django, and because it uses its own Object-Relational Mapping (ORM), it generates the SQL needed for you, taking into account any quirks in that particular database engine. It therefore doesn’t really matter what database you use, and it’s easy to swap them out. For development purposes, we’ll use SQLite as it ships with Python and requires less configuration, so change this line to read as follows:</p>
+<pre><code class="hljs lang-python">      <span class="hljs-string">'ENGINE'</span>: <span class="hljs-string">'django.db.backends.sqlite3'</span>, <span class="hljs-comment"># Add 'postgresql_psycopg2',     'postgresql', 'mysql', 'sqlite3' or 'oracle'.</span>
+</code></pre>
+<p>Next you’ll see this line:</p>
+<pre><code class="hljs lang-python">      <span class="hljs-string">'NAME'</span>: <span class="hljs-string">''</span>,                      <span class="hljs-comment"># Or path to database file if using sqlite3.</span>
+</code></pre>
+<p>It really doesn’t matter what you call the file. I tend to call mine backend.db, as follows:</p>
+<pre><code class="hljs lang-python">        <span class="hljs-string">'NAME'</span>: <span class="hljs-string">'backend.db'</span>,                      <span class="hljs-comment"># Or path to database file if using sqlite3.</span>
+</code></pre>
+<p>If you keep going down, you’ll notice TIME_ZONE and LANGUAGE_CODE. You may wish to change these from their default settings (I change mine to Europe/London for TIME_ZONE and en-gb for LANGUAGE_CODE).</p>
+<p>Even further down, you’ll notice the INSTALLED_APPS section. Django distinguishes between a project and an application - while a project will normally be a single website, an application will be a set of functionality within that website. For instance, our blog will be a single application, but we could reuse that application on multiple projects. Django also includes a number of applications out of the box - for instance, the flatpages and admin applications can be used together if you wanted to use Django to build a simple CMS, without having to build a new application at all.</p>
+<p>For now, we don’t need to add any new applications, so let’s save the changes we’ve made to settings.py and move on to urls.py. This handles directing any incoming HTTP requests to the appropriate place to deal with them. It uses simple regular expressions to evaluate the incoming requests, and maps them to specific view functions. Note that it already includes URLs for the admin functionality, but these are commented out by default.</p>
 <p>Exit urls.py and head back to the main directory for your project. Now, we need to test that everything works OK. Run the following command:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py runserver
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Remember I said that the manage.py script had a lot of useful functions? This is one of them. Django has its own simple web server so you don&rsquo;t have to faff around setting up Apache just for development purposes, and this launches it. If you go to <a href="http://127.0.0.1:8000,">http://127.0.0.1:8000,</a> you should see a screen telling you that Django is running.</p>
-
-<p>Now, you can stop the server for now using Ctrl-C, and we&rsquo;ll start work on your new app. Run the following command to create your new app:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py startapp blogengine
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">python manage.py runserver
+</code></pre>
+<p>Remember I said that the manage.py script had a lot of useful functions? This is one of them. Django has its own simple web server so you don’t have to faff around setting up Apache just for development purposes, and this launches it. If you go to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see a screen telling you that Django is running.</p>
+<p>Now, you can stop the server for now using Ctrl-C, and we’ll start work on your new app. Run the following command to create your new app:</p>
+<pre><code class="hljs lang-bash">python manage.py startapp blogengine
+</code></pre>
 <p>Again, note that you used manage.py to do this. There should now be a directory called blogengine in your project. Move into it, and you should find that it contains four files - <strong>init</strong>.py, models.py, tests.py and views.py. Again, <strong>init</strong>.py can be safely ignored, and tests.py can also be left alone, but models.py and views.py deserve closer examination.</p>
-
-<p>If you haven&rsquo;t used an MVC framework before, then you&rsquo;ll need this explaining. MVC stands for Model-View-Controller, and it describes a method of logically separating out code for a web application to make it easier to work with. Models represent the data held by the application, views represent what end-users see of the application, and controllers represent the logic that ties the two together.</p>
-
-<p>Django uses a slightly unusual interpretation of MVC. The models work exactly the same as they do in other frameworks, but the logic is handled by the view, and the presentation is handled by templates. Compared to more conventional MVC frameworks such as CodeIgniter, Django&rsquo;s views are more like controllers, and its templates are more like views. Django is therefore often described as an MTV framework (Model-Template-View), instead of an MVC one.</p>
-
+<p>If you haven’t used an MVC framework before, then you’ll need this explaining. MVC stands for Model-View-Controller, and it describes a method of logically separating out code for a web application to make it easier to work with. Models represent the data held by the application, views represent what end-users see of the application, and controllers represent the logic that ties the two together.</p>
+<p>Django uses a slightly unusual interpretation of MVC. The models work exactly the same as they do in other frameworks, but the logic is handled by the view, and the presentation is handled by templates. Compared to more conventional MVC frameworks such as CodeIgniter, Django’s views are more like controllers, and its templates are more like views. Django is therefore often described as an MTV framework (Model-Template-View), instead of an MVC one.</p>
 <p>So, to create our blog, we first need to create a model to describe the data. Edit models.py so it looks like the following:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Create your models here.</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<span class="hljs-comment"># Create your models here.</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+    pub_date = models.DateTimeField()
+    text = models.TextField()
 
-
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> self.title
+</code></pre>
 <p>To activate our new app, we also need to include it under INSTALLED_APPS in settings.py:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="s">&#39;blogengine&#39;</span><span class="p">,</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>In Django, you create your models as Python classes, which makes it very easy to grasp. Here, a blog post is an object, and it has a title, a publication date, and some text. Note that Post here inherits from models.Model, and has specific types of field that map to field types in the database table. For instance, models.CharField obviously maps to a VARCHAR field in the database, and TextField maps to a TEXT field. You can actually see the SQL that will generate the database table for this model by returning to the project&rsquo;s main directory and running python manage.py sqlall blogengine:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">BEGIN</span><span class="p">;</span>
-</span><span class='line'><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="ss">&quot;blogengine_post&quot;</span> <span class="p">(</span>
-</span><span class='line'>    <span class="ss">&quot;id&quot;</span> <span class="nb">integer</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">PRIMARY</span> <span class="k">KEY</span><span class="p">,</span>
-</span><span class='line'>    <span class="ss">&quot;title&quot;</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-</span><span class='line'>    <span class="ss">&quot;pub_date&quot;</span> <span class="n">datetime</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-</span><span class='line'>    <span class="ss">&quot;text&quot;</span> <span class="nb">text</span> <span class="k">NOT</span> <span class="k">NULL</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'><span class="p">;</span>
-</span><span class='line'><span class="k">COMMIT</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Note the &ldquo;id&rdquo; field. You didn&rsquo;t add this - by default, Django will create an id field in any new table, and will make this the primary key in that database table. You can, however, override this behaviour if you wish. Here it&rsquo;s exactly what we want so we&rsquo;ll stick with it for now.</p>
-
-<p>Also note the <strong>unicode</strong> method. This represents a string that describes that object. Here the title of a blog post seems the most logical way of describing it, so we return the object&rsquo;s title.</p>
-
-<p>Now that we&rsquo;ve got our model set up, how do we get the information into it? For a blog post, all of the information will be submitted by the user, so we need to set up some kind of administrative interface. Fortunately, one of Django&rsquo;s killer features is the admin interface that ships with it. This makes it really quick and easy to get certain kinds of sites up and running.</p>
-
+<pre><code class="hljs lang-python">    <span class="hljs-string">'blogengine'</span>,
+</code></pre>
+<p>In Django, you create your models as Python classes, which makes it very easy to grasp. Here, a blog post is an object, and it has a title, a publication date, and some text. Note that Post here inherits from models.Model, and has specific types of field that map to field types in the database table. For instance, models.CharField obviously maps to a VARCHAR field in the database, and TextField maps to a TEXT field. You can actually see the SQL that will generate the database table for this model by returning to the project’s main directory and running python manage.py sqlall blogengine:</p>
+<pre><code class="hljs lang-sql"><span class="hljs-operator"><span class="hljs-keyword">BEGIN</span>;</span>
+<span class="hljs-operator"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">"blogengine_post"</span> (
+    <span class="hljs-string">"id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">KEY</span>,
+    <span class="hljs-string">"title"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">200</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    <span class="hljs-string">"pub_date"</span> datetime <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+    <span class="hljs-string">"text"</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>
+)
+;</span>
+<span class="hljs-operator"><span class="hljs-keyword">COMMIT</span>;</span>
+</code></pre>
+<p>Note the “id” field. You didn’t add this - by default, Django will create an id field in any new table, and will make this the primary key in that database table. You can, however, override this behaviour if you wish. Here it’s exactly what we want so we’ll stick with it for now.</p>
+<p>Also note the <strong>unicode</strong> method. This represents a string that describes that object. Here the title of a blog post seems the most logical way of describing it, so we return the object’s title.</p>
+<p>Now that we’ve got our model set up, how do we get the information into it? For a blog post, all of the information will be submitted by the user, so we need to set up some kind of administrative interface. Fortunately, one of Django’s killer features is the admin interface that ships with it. This makes it really quick and easy to get certain kinds of sites up and running.</p>
 <p>First of all, we need to activate the admin application. Head up to settings.py and uncomment the line that reads:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/settings.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-python">    <span class="hljs-string">'django.contrib.admin'</span>,
+</code></pre>
 <p>Save it, then head for urls.py and uncomment the following lines:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># from django.contrib import admin</span>
-</span><span class='line'><span class="c"># admin.autodiscover()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-python"><span class="hljs-comment"># from django.contrib import admin</span>
+<span class="hljs-comment"># admin.autodiscover()</span>
+</code></pre>
 <p>And:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'>   <span class="c"># url(r&#39;^admin/&#39;, include(admin.site.urls)),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-python">   <span class="hljs-comment"># url(r'^admin/', include(admin.site.urls)),</span>
+</code></pre>
 <p>Now, in order for the admin interface to be able to set up new blog posts, you need to also register it. In the blogengine directory containing your app, create a new file called admin.py, and fill it out with the following code:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
+<span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/admin.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">models</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Post</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+admin.site.register(models.Post)
+</code></pre>
+<p>Once that’s done, return to the project directory and run this command to create the database tables you need:</p>
+<pre><code class="hljs lang-bash">python manage.py syncdb
+</code></pre>
+<p>You’ll get asked for some information to set up your user account - remember it as you’ll need it to log into the admin interface. Once that’s done, run python manage.py runserver again, and return to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> again. You should be confronted with a 404 page - that’s fine, that’s exactly what we should be seeing. You’ll note that the message states that Django tried the ^admin/ path without success - what this means is that this is the only URL pattern in urls.py at the moment, and the path you entered didn’t match this.</p>
+<p>If you change the URL in the browser to <a href="http://127.0.0.1:8000/admin">http://127.0.0.1:8000/admin</a>, you should get a login screen. Enter the username and password you set when you ran syncdb and click Log in. You should now see Django’s admin interface, with Posts available, and an Add and Change dialogue visible next to it. If you want to add a few blog posts, just to have some data to work with, go ahead. Note that for the Date and Time dialogues, Django automatically adds the Today and Now shortcuts.</p>
+<p>So, our model is now sorted and we have some data in the web app. The next step is to write our views. You’ll notice that the blogengine app contains a file called views.py - open this up and enter the following code:</p>
+<pre><code class="hljs lang-python"><span class="hljs-comment"># Create your views here.</span>
+<span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
 
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getRecentPosts</span><span class="hljs-params">(request)</span>:</span>
+    <span class="hljs-comment"># Get all blog posts</span>
+    posts = Post.objects.all()
 
-<p>Once that&rsquo;s done, return to the project directory and run this command to create the database tables you need:</p>
+    <span class="hljs-comment"># Sort posts into chronological order</span>
+    sorted_posts = posts.order_by(<span class="hljs-string">'-pub_date'</span>)
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py syncdb
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You&rsquo;ll get asked for some information to set up your user account - remember it as you&rsquo;ll need it to log into the admin interface. Once that&rsquo;s done, run python manage.py runserver again, and return to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> again. You should be confronted with a 404 page - that&rsquo;s fine, that&rsquo;s exactly what we should be seeing. You&rsquo;ll note that the message states that Django tried the ^admin/ path without success - what this means is that this is the only URL pattern in urls.py at the moment, and the path you entered didn&rsquo;t match this.</p>
-
-<p>If you change the URL in the browser to <a href="http://127.0.0.1:8000/admin,">http://127.0.0.1:8000/admin,</a> you should get a login screen. Enter the username and password you set when you ran syncdb and click Log in. You should now see Django&rsquo;s admin interface, with Posts available, and an Add and Change dialogue visible next to it. If you want to add a few blog posts, just to have some data to work with, go ahead. Note that for the Date and Time dialogues, Django automatically adds the Today and Now shortcuts.</p>
-
-<p>So, our model is now sorted and we have some data in the web app. The next step is to write our views. You&rsquo;ll notice that the blogengine app contains a file called views.py - open this up and enter the following code:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/views.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Create your views here.</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render_to_response</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">blogengine.models</span> <span class="kn">import</span> <span class="n">Post</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">getRecentPosts</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-</span><span class='line'>    <span class="c"># Get all blog posts</span>
-</span><span class='line'>    <span class="n">posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Sort posts into chronological order</span>
-</span><span class='line'>    <span class="n">sorted_posts</span> <span class="o">=</span> <span class="n">posts</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s">&#39;-pub_date&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Display all the posts</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">render_to_response</span><span class="p">(</span><span class="s">&#39;posts.html&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="s">&#39;posts&#39;</span><span class="p">:</span><span class="n">sorted_posts</span><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Let&rsquo;s go through this code. The first line imports the render_to_response method, which is used to render a template. The second line imports the Post model.</p>
-
-<p>Next, we define the getRecentPosts view. For simplicity&rsquo;s sake, we aren&rsquo;t going to bother about pagination for the moment, so we&rsquo;ll just get all the posts. The view is written as a Python function, and we pass it the request object as the sole parameter.</p>
-
+    <span class="hljs-comment"># Display all the posts</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:sorted_posts})
+</code></pre>
+<p>Let’s go through this code. The first line imports the render_to_response method, which is used to render a template. The second line imports the Post model.</p>
+<p>Next, we define the getRecentPosts view. For simplicity’s sake, we aren’t going to bother about pagination for the moment, so we’ll just get all the posts. The view is written as a Python function, and we pass it the request object as the sole parameter.</p>
 <p>Next, we get all of the Post objects, using Post.objects.all(), and assign it to a list called posts. As we want these to be in reverse chronological order, we then reorder them by pub_date (note the - sign at the beginning to denote reverse order) and assign the result to sorted_posts. Finally, we load the posts.html template and pass through sorted_posts as the value in a dictionary called posts.</p>
-
 <p>With our view done, we now need to produce a template for it. Head back up to your main project directory and create a new folder called templates. Then, go into settings.py and find the line marked TEMPLATE_DIRS. Inside the brackets, underneath the comments, add the full, absolute path to the new templates folder, as in this example:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="s2">&quot;/Users/matthewdaly/Development/Python/Django/blog/templates&quot;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You&rsquo;ll have to change this to the full, absolute path on your machine. This will tell Django to look for the templates in that folder. Now, go into templates, and create a new file called posts.html. Enter the following text into it:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/posts.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;title&gt;</span>My Django Blog<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
-</span><span class='line'>        {% for post in posts %}
-</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ post.title }}<span class="nt">&lt;/h1&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
-</span><span class='line'>        {{ post.text }}
-</span><span class='line'>        {% endfor %}
-</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Most of this is just plain old HTML, but you&rsquo;ll notice that {% %} denotes tags that can include some logic (such as a for loop in this case), and  denotes a variable. Remember that in the view we passed through a dictionary containing all of the Post objects, and here we&rsquo;re iterating through all of those post objects, outputting their title, publication date and text content.</p>
-
+<pre><code class="hljs lang-bash">  <span class="hljs-string">"/Users/matthewdaly/Development/Python/Django/blog/templates"</span>
+</code></pre>
+<p>You’ll have to change this to the full, absolute path on your machine. This will tell Django to look for the templates in that folder. Now, go into templates, and create a new file called posts.html. Enter the following text into it:</p>
+<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+        </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>Most of this is just plain old HTML, but you’ll notice that {% %} denotes tags that can include some logic (such as a for loop in this case), and {{ }} denotes a variable. Remember that in the view we passed through a dictionary containing all of the Post objects, and here we’re iterating through all of those post objects, outputting their title, publication date and text content.</p>
 <p>With this done, we need to configure the routes to call the getRecentPosts view when someone visits the home page. Open urls.py again and add the following code underneath where you enabled the admin, but still inside the parentheses:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>DjangoBlog/urls.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># Home page</span>
-</span><span class='line'><span class="n">url</span><span class="p">(</span><span class="s">r&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;blogengine.views.getRecentPosts&#39;</span><span class="p">),</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-python">    <span class="hljs-comment"># Home page</span>
+    url(<span class="hljs-string">r''</span>, <span class="hljs-string">'blogengine.views.getRecentPosts'</span>),
+</code></pre>
 <p>Now, this is a very simple regular expression. Here, this is our default page, so we leave the single quotes after the r empty. We then specify that this URL should be handled by the getRecentPosts function, inside views.py, in the blogengine application.</p>
+<p>Save that, and start up the development server again with python manage.py runserver. Then, if you haven’t already added a few test posts, do so via the admin interface. Then open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, and you should see your blog posts.</p>
+<p>So, we now have the beginnings of a blogging application! We’ll leave it here for now, and will go on to add functionality like viewing individual posts and pagination later. We’ll also look into adding further functionality to our blog, such as supporting multiple authors, tagging posts, and adding flat pages.</p>
 
-<p>Save that, and start up the development server again with python manage.py runserver. Then, if you haven&rsquo;t already added a few test posts, do so via the admin interface. Then open <a href="http://127.0.0.1:8000,">http://127.0.0.1:8000,</a> and you should see your blog posts.</p>
-
-<p>So, we now have the beginnings of a blogging application! We&rsquo;ll leave it here for now, and will go on to add functionality like viewing individual posts and pagination later. We&rsquo;ll also look into adding further functionality to our blog, such as supporting multiple authors, tagging posts, and adding flat pages.</p>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2012-02-24T16:17:10+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>4:17 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/programming/'>programming</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/web-development/'>web development</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2012/02/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-1/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2012/02/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-1/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2012/01/29/so-you-really-dont-know-regular-expressions/" title="Previous Post: So you REALLY don't know regular expressions?">&laquo; So you REALLY don't know regular expressions?</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/02/28/new-theme/" title="Next Post: New theme">New theme &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'matthewbdaly',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-
-
-  
-</aside>
-
-
+                <ul><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/programming/">programming</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/web development/">web development</a></li></ul>
+                <div class="addthis_sharing_toolbox"></div>
+              <section class="comments">
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                    window.disqus_identifier="";
+                    window.disqus_url="http://www.matthewdaly.co.uk/blog/2012/02/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-1//";
+                    window.disqus_title="Yet Another Tutorial for Building a Blog Using Python and Django - Part 1";
+                  </script>
+                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
+                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+              </section>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <h1>Recent Posts</h1>
+            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
+            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
+            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
+            <section id="github-profile">
+            </section>
+            <h4>My GitHub repositories</h4>
+            <ul id="github-repos">
+                <li>Loading repositories...</li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Matthew Daly -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
-  
+    <div class="row">
+        <div class="col-md-12">
+            <a href="/blog/2012/02/28/new-theme/">New Theme</a>
+            <a href="/blog/2012/01/29/so-you-really-dont-know-regular-expressions/">So You REALLY Don&#x27;t Know Regular Expressions?</a>
+        </div>
+    </div>
 
-<script type="text/javascript">
-      var disqus_shortname = 'matthewdaly';
-      
-        
-        var disqus_script = 'count.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
+</div>
 
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+        <footer>
+            <div class="container">
+                <div class="col-md-12">
+                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
+                </div>
+            </div>
+        </footer>
+        <script type="text/javascript" src="/static/js/all.min.js"></script>
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-17043630-1');ga('send','pageview');
+        </script>
+    </body>
 </html>

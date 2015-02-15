@@ -1,1519 +1,732 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Building a URL Shortener With Node.js and Redis - Matthew Daly's Blog</title>
-  <meta name="author" content="Matthew Daly">
-
-  
-  <meta name="description" content="The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-17043630-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Matthew Daly's Blog</a></h1>
-  
-    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">Building a URL Shortener With Node.js and Redis</h1>
-    
-    
-      <p class="meta">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
         
+        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
+        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
+        <title>Building a URL Shortener With Node.js and Redis - Matthew Daly&#x27;s Blog</title>
+    </head>
+    <body>
+
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
+
+        <header>
+            <nav class="navbar navbar-inverse navbar-static-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="header-nav">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/blog/archives/">Archives</a></li>
+                                <li><a href="/about/">About</a></li>
+                                <li><a href="/atom.xml">RSS</a></li>
+                            </ul>
+                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
+                                <div class="form-group">
+                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></input>
+                                </div>
+                                <input id="site" name="q" type="hidden" value="site:www.matthewdaly.co.uk" />
+                                <input type="submit" class="btn btn-default"></input>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
+                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
+                </div>
+            </div>
+        </header>
+
+<div class="container">
 
 
-
-
-<time class='entry-date' datetime='2014-11-09T17:13:16+00:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>5:13 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren&rsquo;t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p>
-
-<p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it&rsquo;s not generally useful as an alternative to them - instead it is often used alongside them.</p>
-
-<h2>What is Redis?</h2>
-
+    <div class="row">
+        <div class="col-md-8">
+            <article class="post">
+                <p class="date">9th November 2014 5:13 pm</p>
+                <h1>Building a URL Shortener With Node.js and Redis</h1>
+                <p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p>
+<p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p>
+<h2 id="what-is-redis-">What is Redis?</h2>
 <p>Redis is described as follows on the website:</p>
-
-<blockquote><p>Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs.</p></blockquote>
-
-<p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It&rsquo;s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it&rsquo;s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p>
-
-<p>In this tutorial, we&rsquo;ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p>
-
+<blockquote>
+<p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p>
+</blockquote>
+<p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p>
+<p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p>
 <ul>
 <li>A string to identify the correct URL</li>
 <li>The URL</li>
 </ul>
-
-
 <p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p>
-
-<h2>Getting started</h2>
-
-<p>We&rsquo;re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it&rsquo;s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn&rsquo;t have too much trouble following along.</p>
-
-<p>You&rsquo;ll need to have Node.js installed, and I&rsquo;ll leave the details of installing this to you. You&rsquo;ll also need the Grunt CLI - install this globally as follows:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo npm install -g grunt-cli
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Finally, you&rsquo;ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p>
-
-<p>Now, let&rsquo;s create our <code>package.json</code> file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm init
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You&rsquo;ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>package.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;url-shortener&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A URL shortener&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;grunt test&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;URL&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;shortener&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h2 id="getting-started">Getting started</h2>
+<p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p>
+<p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p>
+<pre><code class="hljs lang-bash">$ sudo npm install -g grunt-cli
+</code></pre>
+<p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p>
+<p>Now, let’s create our <code>package.json</code> file:</p>
+<pre><code class="hljs lang-bash">$ npm init
+</code></pre>
+<p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p>
+<pre><code class="hljs lang-json">{
+  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"url-shortener"</span></span>,
+  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
+  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A URL shortener"</span></span>,
+  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
+  "<span class="hljs-attribute">scripts</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">test</span>": <span class="hljs-value"><span class="hljs-string">"grunt test"</span>
+  </span>}</span>,
+  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
+    <span class="hljs-string">"URL"</span>,
+    <span class="hljs-string">"shortener"</span>
+  ]</span>,
+  "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
+  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
+</span>}
+</code></pre>
 <p>Note in particular that we set our test command to <code>grunt test</code>.</p>
-
 <p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install --save body-parser express redis hiredis jade shortid
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
+</code></pre>
 <p>Next, install the development dependencies:</p>
+<pre><code class="hljs lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
+</code></pre>
+<p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
+<span class="hljs-pi">    'use strict'</span>;
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+    grunt.initConfig({
+        jshint: {
+            all: [
+                <span class="hljs-string">'test/*.js'</span>,
+                <span class="hljs-string">'index.js'</span>
+            ]
+        },
+        mocha_istanbul: {
+            coverage: {
+                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
+                options: {
+                    mask: <span class="hljs-string">'*.js'</span>,
+                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
+                }
+            }
+        }
+    });
 
+    <span class="hljs-comment">// Load tasks</span>
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
 
-<p>Now, we&rsquo;re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here&rsquo;s the Gruntfile:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gruntfile.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">grunt</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">initConfig</span><span class="p">({</span>
-</span><span class='line'>        <span class="nx">jshint</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">all</span><span class="o">:</span> <span class="p">[</span>
-</span><span class='line'>                <span class="s1">&#39;test/*.js&#39;</span><span class="p">,</span>
-</span><span class='line'>                <span class="s1">&#39;index.js&#39;</span>
-</span><span class='line'>            <span class="p">]</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="nx">mocha_istanbul</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">coverage</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="c1">// the folder, not the files,</span>
-</span><span class='line'>                <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                    <span class="nx">mask</span><span class="o">:</span> <span class="s1">&#39;*.js&#39;</span><span class="p">,</span>
-</span><span class='line'>                    <span class="nx">reportFormats</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;cobertura&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">]</span>
-</span><span class='line'>                <span class="p">}</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Load tasks</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-contrib-jshint&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-mocha-istanbul&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Register tasks</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">registerTask</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;jshint&#39;</span><span class="p">,</span> <span class="s1">&#39;mocha_istanbul:coverage&#39;</span><span class="p">]);</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We&rsquo;ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: node index.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h2>Creating the views</h2>
-
-<p>For this application we&rsquo;ll be using the Express framework and the Jade templating system. We need three templates:</p>
-
+    <span class="hljs-comment">// Register tasks</span>
+    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
+};
+</code></pre>
+<p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p>
+<pre><code class="hljs lang-bash">web: node index.js
+</code></pre>
+<h2 id="creating-the-views">Creating the views</h2>
+<p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p>
 <ul>
 <li>Submission form</li>
 <li>Output form</li>
 <li>404 page</li>
 </ul>
-
-
 <p>Create the folder <code>views</code> under the application directory and add the following files:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/index.jade</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='jade'><span class='line'><span class="nt">doctype</span> html
-</span><span class='line'><span class="nt">html</span>(<span class="na">lang=</span><span class="s">&quot;en&quot;</span>)
-</span><span class='line'>    <span class="nt">head</span>
-</span><span class='line'>        <span class="nt">title</span><span class="p">=</span><span class="s">&quot;Shortbread&quot;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nt">body</span>
-</span><span class='line'>        <span class="nt">div</span><span class="nc">.container</span>
-</span><span class='line'>            <span class="nt">div</span><span class="nc">.row</span>
-</span><span class='line'>                <span class="nt">h1</span> Shortbread
-</span><span class='line'>
-</span><span class='line'>            <span class="nt">div</span><span class="nc">.row</span>
-</span><span class='line'>                <span class="nt">form</span>(<span class="na">action=</span><span class="s">&quot;/&quot;</span><span class="err">,</span> <span class="na">method=</span><span class="s">&quot;POST&quot;</span>)
-</span><span class='line'>                    <span class="nt">input</span>(<span class="na">type=</span><span class="s">&quot;url&quot;</span><span class="err">,</span> <span class="na">name=</span><span class="s">&quot;url&quot;</span>)
-</span><span class='line'>                    <span class="nt">input</span>(<span class="na">type=</span><span class="s">&quot;submit&quot;</span><span class="err">,</span> <span class="na">value=</span><span class="s">&quot;Submit&quot;</span>)
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/output.jade</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='jade'><span class='line'><span class="nt">doctype</span> html
-</span><span class='line'><span class="nt">html</span>(<span class="na">lang=</span><span class="s">&quot;en&quot;</span>)
-</span><span class='line'>    <span class="nt">head</span>
-</span><span class='line'>        <span class="nt">title</span><span class="p">=</span><span class="nc">Shortbread</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nt">body</span>
-</span><span class='line'>        <span class="nt">div</span><span class="nc">.container</span>
-</span><span class='line'>            <span class="nt">div</span><span class="nc">.row</span>
-</span><span class='line'>                <span class="nt">h1</span> Shortbread
-</span><span class='line'>                <span class="nt">p</span> Your shortened URL is &lt;a href=&#39;<span class="si">#{</span><span class="n">base_url</span><span class="si">}</span>/<span class="si">#{</span><span class="n">id</span><span class="si">}</span>&#39;&gt;<span class="si">#{</span><span class="n">base_url</span><span class="si">}</span>/<span class="si">#{</span><span class="n">id</span><span class="si">}</span>&lt;/a&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/error.jade</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='jade'><span class='line'><span class="nt">doctype</span> html
-</span><span class='line'><span class="nt">html</span>(<span class="na">lang=</span><span class="s">&quot;en&quot;</span>)
-</span><span class='line'>    <span class="nt">head</span>
-</span><span class='line'>        <span class="nt">title</span><span class="p">=</span><span class="nc">Shortbread</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nt">body</span>
-</span><span class='line'>        <span class="nt">div</span><span class="nc">.container</span>
-</span><span class='line'>            <span class="nt">div</span><span class="nc">.row</span>
-</span><span class='line'>                <span class="nt">h1</span> Shortbread
-</span><span class='line'>                <span class="nt">p</span> Link not found
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h2>Writing our first test</h2>
-
-<p>We&rsquo;re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
-</span><span class='line'><span class="cm">/*global describe: false, before: false, after: false, it: false */</span>
-</span><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare the variables used</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;chai&#39;</span><span class="p">).</span><span class="nx">expect</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">redis</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">;</span>
-</span><span class='line'><span class="nx">client</span> <span class="o">=</span> <span class="nx">redis</span><span class="p">.</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Server tasks</span>
-</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Beforehand, start the server</span>
-</span><span class='line'>    <span class="nx">before</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Starting the server&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Afterwards, stop the server and empty the database</span>
-</span><span class='line'>    <span class="nx">after</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Stopping the server&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">flushdb</span><span class="p">();</span>
-</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Test the index route</span>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test the index route&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return a page with the title Shortbread&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000&#39;</span> <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Shortbread&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-type&#39;</span><span class="p">]).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;text/html; charset=utf-8&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p>
-
-<p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p>
-
-<p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p>
-
-<p>We&rsquo;ll need to create our <code>index.js</code> file to avoid a nasty error, but we won&rsquo;t populate it just yet:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch index.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Let&rsquo;s run our tests:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> a page with the title Shortbread
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">0</span> passing <span class="o">(</span>152ms<span class="o">)</span>
-</span><span class='line'>  <span class="m">1</span> failing
-</span><span class='line'>
-</span><span class='line'>  1<span class="o">)</span> server Test the index route should <span class="k">return</span> a page with the title Shortbread:
-</span><span class='line'>     Uncaught AssertionError: expected undefined to include <span class="s1">&#39;Shortbread&#39;</span>
-</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/test/test.js:33:33<span class="o">)</span>
-</span><span class='line'>      at self.callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at Request.onRequestError <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:963:8<span class="o">)</span>
-</span><span class='line'>      at ClientRequest.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at Socket.socketErrorListener <span class="o">(</span>http.js:1551:9<span class="o">)</span>
-</span><span class='line'>      at Socket.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at net.js:440:14
-</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:419:13<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt;
-</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
-</span><span class='line'><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare variables used</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">app</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">,</span> <span class="nx">bodyParser</span><span class="p">,</span> <span class="nx">client</span><span class="p">,</span> <span class="nx">express</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">,</span> <span class="nx">shortid</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Define values</span>
-</span><span class='line'><span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
-</span><span class='line'><span class="nx">port</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PORT</span> <span class="o">||</span> <span class="mi">5000</span><span class="p">;</span>
-</span><span class='line'><span class="nx">shortid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;shortid&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">bodyParser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;body-parser&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">base_url</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BASE_URL</span> <span class="o">||</span> <span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set up connection to Redis</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">rtg</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">).</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">);</span>
-</span><span class='line'>  <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
-</span><span class='line'>  <span class="nx">client</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
-</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set up templating</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;view engine&#39;</span><span class="p">,</span> <span class="s2">&quot;jade&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="s1">&#39;jade&#39;</span><span class="p">,</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;jade&#39;</span><span class="p">).</span><span class="nx">__express</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set URL</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;base_url&#39;</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Handle POST data</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">bodyParser</span><span class="p">.</span><span class="nx">json</span><span class="p">());</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">bodyParser</span><span class="p">.</span><span class="nx">urlencoded</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">extended</span><span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'><span class="p">}));</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Define index route</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Serve static files</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/static&#39;</span><span class="p">));</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Listen</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">);</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Listening on port &#39;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Let&rsquo;s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p>
-
-<p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p>
-
-<p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we&rsquo;ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it&rsquo;s set, we use that to connect. Otherwise, we just connect as normal.</p>
-
-<p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p>
-
-<p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p>
-
-<p>Let&rsquo;s run our test:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'> grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Shortbread <span class="o">(</span>116ms<span class="o">)</span>
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>128ms<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 86.96% <span class="o">(</span> 20/23 <span class="o">)</span>
-</span><span class='line'>Branches     : 83.33% <span class="o">(</span> 5/6 <span class="o">)</span>
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
-</span><span class='line'>Lines        : 86.96% <span class="o">(</span> 20/23 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt; Done. Check coverage folder.
-</span><span class='line'>
-</span><span class='line'>Done, without errors.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won&rsquo;t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/* istanbul ignore if */</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">rtg</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">).</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
-</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p>
-
-<h2>Submitting a URL</h2>
-
-<p>Next, let&rsquo;s add the ability to add a URL. First, add the following test, after the one for the index:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Test submitting a URL</span>
-</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test submitting a URL&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return the shortened URL&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">request</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">form</span><span class="o">:</span> <span class="p">{</span><span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://www.google.co.uk&#39;</span><span class="p">}},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Your shortened URL is&#39;</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-type&#39;</span><span class="p">]).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;text/html; charset=utf-8&#39;</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let&rsquo;s run our tests again:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Shortbread <span class="o">(</span>223ms<span class="o">)</span>
-</span><span class='line'>    Test submitting a URL
-</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> the shortened URL
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>318ms<span class="o">)</span>
-</span><span class='line'>  <span class="m">1</span> failing
-</span><span class='line'>
-</span><span class='line'>  1<span class="o">)</span> server Test submitting a URL should <span class="k">return</span> the shortened URL:
-</span><span class='line'>     Uncaught AssertionError: expected <span class="s1">&#39;Cannot POST /\n&#39;</span> to include <span class="s1">&#39;Your shortened URL is&#39;</span>
-</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/test/test.js:45:33<span class="o">)</span>
-</span><span class='line'>      at Request.self.callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:98:17<span class="o">)</span>
-</span><span class='line'>      at Request.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1258:12<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at _stream_readable.js:943:16
-</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:419:13<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 23/23 <span class="o">)</span>, <span class="m">3</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 23/23 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt;
-</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We have a failing test, so let&rsquo;s make it pass. Add the following route after the index one:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Define submit route</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// Declare variables</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Get URL</span>
-</span><span class='line'>    <span class="nx">url</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">url</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Create a hashed short version</span>
-</span><span class='line'>    <span class="nx">id</span> <span class="o">=</span> <span class="nx">shortid</span><span class="p">.</span><span class="nx">generate</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Store them in Redis</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="c1">// Display the response</span>
-</span><span class='line'>        <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">id</span><span class="o">:</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">base_url</span><span class="o">:</span> <span class="nx">base_url</span> <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p>
-
-<p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p>
-
-<p>With that done, our test should pass:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Shortbread <span class="o">(</span>89ms<span class="o">)</span>
-</span><span class='line'>    Test submitting a URL
-</span><span class='line'>      ✓ should <span class="k">return</span> the shortened URL <span class="o">(</span>65ms<span class="o">)</span>
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">2</span> passing <span class="o">(</span>167ms<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 29/29 <span class="o">)</span>, <span class="m">3</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 3/3 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 29/29 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt; Done. Check coverage folder.
-</span><span class='line'>
-</span><span class='line'>Done, without errors.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn&rsquo;t, we raise a 404 error. For that we need two more tests. Here they are:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="c1">// Test following a URL</span>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test following a URL&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should redirect the user to the shortened URL&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="c1">// Create the URL</span>
-</span><span class='line'>            <span class="nx">client</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;testurl&#39;</span><span class="p">,</span> <span class="s1">&#39;http://www.google.com&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>                <span class="c1">// Follow the link</span>
-</span><span class='line'>                <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span>
-</span><span class='line'>                    <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000/testurl&#39;</span><span class="p">,</span>
-</span><span class='line'>                    <span class="nx">followRedirect</span><span class="o">:</span> <span class="kc">false</span>
-</span><span class='line'>                <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                    <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">location</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;http://www.google.com&#39;</span><span class="p">);</span>
-</span><span class='line'>                    <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">301</span><span class="p">);</span>
-</span><span class='line'>                    <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>                <span class="p">});</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Test non-existent link</span>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test following a non-existent-link&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return a 404 error&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="c1">// Follow the link</span>
-</span><span class='line'>            <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span>
-</span><span class='line'>                <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000/nonexistenturl&#39;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">followRedirect</span><span class="o">:</span> <span class="kc">false</span>
-</span><span class='line'>            <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">404</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Link not found&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p>
-
-<p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p>
-
-<p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p>
-
-<p>If we run our tests, they should now fail:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Shortbread <span class="o">(</span>252ms<span class="o">)</span>
-</span><span class='line'>    Test submitting a URL
-</span><span class='line'>      ✓ should <span class="k">return</span> the shortened URL <span class="o">(</span>47ms<span class="o">)</span>
-</span><span class='line'>    Test following a URL
-</span><span class='line'>      1<span class="o">)</span> should redirect the user to the shortened URL
-</span><span class='line'>    Test following a non-existent-link
-</span><span class='line'>      2<span class="o">)</span> should <span class="k">return</span> a <span class="m">404</span> error
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">2</span> passing <span class="o">(</span>322ms<span class="o">)</span>
-</span><span class='line'>  <span class="m">2</span> failing
-</span><span class='line'>
-</span><span class='line'>  1<span class="o">)</span> server Test following a URL should redirect the user to the shortened URL:
-</span><span class='line'>     Uncaught AssertionError: expected undefined to equal <span class="s1">&#39;http://www.google.com&#39;</span>
-</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/test/test.js:63:58<span class="o">)</span>
-</span><span class='line'>      at Request.self.callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:98:17<span class="o">)</span>
-</span><span class='line'>      at Request.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1258:12<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at _stream_readable.js:943:16
-</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:419:13<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>  2<span class="o">)</span> server Test following a non-existent-link should <span class="k">return</span> a <span class="m">404</span> error:
-</span><span class='line'>     Uncaught AssertionError: expected <span class="s1">&#39;Cannot GET /nonexistenturl\n&#39;</span> to include <span class="s1">&#39;Link not found&#39;</span>
-</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/test/test.js:80:33<span class="o">)</span>
-</span><span class='line'>      at Request.self.callback <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:98:17<span class="o">)</span>
-</span><span class='line'>      at Request.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1258:12<span class="o">)</span>
-</span><span class='line'>      at IncomingMessage.emit <span class="o">(</span>events.js:117:20<span class="o">)</span>
-</span><span class='line'>      at _stream_readable.js:943:16
-</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:419:13<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 29/29 <span class="o">)</span>, <span class="m">3</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 3/3 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 29/29 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt;
-</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, let&rsquo;s add our final route:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Define link route</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s1">&#39;/:id&#39;</span><span class="p">).</span><span class="nx">all</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// Get ID</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">id</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Look up the URL</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">reply</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">err</span> <span class="o">&amp;&amp;</span> <span class="nx">reply</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="c1">// Redirect user to it</span>
-</span><span class='line'>            <span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">301</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">res</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;Location&#39;</span><span class="p">,</span> <span class="nx">reply</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">();</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>            <span class="c1">// Confirm no such link in database</span>
-</span><span class='line'>            <span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="p">(</span><span class="mi">404</span><span class="p">);</span>
-</span><span class='line'>            <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p>
-
-<p>Now, let&rsquo;s check it passes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Shortbread <span class="o">(</span>90ms<span class="o">)</span>
-</span><span class='line'>    Test submitting a URL
-</span><span class='line'>      ✓ should <span class="k">return</span> the shortened URL <span class="o">(</span>47ms<span class="o">)</span>
-</span><span class='line'>    Test following a URL
-</span><span class='line'>      ✓ should redirect the user to the shortened URL
-</span><span class='line'>    Test following a non-existent-link
-</span><span class='line'>      ✓ should <span class="k">return</span> a <span class="m">404</span> error
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">4</span> passing <span class="o">(</span>191ms<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/url-shortener/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 38/38 <span class="o">)</span>, <span class="m">3</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 10/10 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 5/5 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 38/38 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt; Done. Check coverage folder.
-</span><span class='line'>
-</span><span class='line'>Done, without errors.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you&rsquo;ll need to install the Redis to Go addon, and refer to Heroku&rsquo;s documentation on deploying Node.js applications for more details.</p>
-
-<h2>Wrapping up</h2>
-
-<p>You&rsquo;ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p>
-
-<p>I hope you&rsquo;ve enjoyed this brief introduction to Redis, and that it&rsquo;s opened your eyes to at least one of the alternatives out there to a relational database. I&rsquo;ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-11-09T17:13:16+00:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>5:13 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/node-dot-js/'>node.js</a>, <a class='category' href='/blog/categories/redis/'>redis</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/10/19/my-django-web-server-setup/" title="Previous Post: My Django web server setup">&laquo; My Django web server setup</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2014/12/28/my-first-grunt-plugin/" title="Next Post: My first Grunt plugin">My first Grunt plugin &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'matthewbdaly',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
+<pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
+<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
+    head
+        title=<span class="hljs-string">"Shortbread"</span>
+
+    <span class="hljs-tag">body</span>
+        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
+            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+                <span class="hljs-tag">h1</span> Shortbread
+
+            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+                <span class="hljs-function"><span class="hljs-title">form</span><span class="hljs-params">(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)</span></span>
+                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)</span></span>
+                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)</span></span>
+</code></pre>
+<pre><code class="hljs lang-jade">doctype html
+html(lang=<span class="hljs-string">"en"</span>)
+    head
+        title=<span class="hljs-string">"Shortbread"</span>
+
+    body
+        <span class="hljs-operator">div</span>.container
+            <span class="hljs-operator">div</span>.row
+                h1 Shortbread
+                p Your shortened <span class="hljs-built_in">URL</span> is &lt;<span class="hljs-operator">a</span> href=<span class="hljs-string">'#{base_url}/#{id}'</span>&gt;<span class="hljs-comment">#{base_url}/#{id}&lt;/a&gt;</span>
+</code></pre>
+<pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
+<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
+    head
+        title=<span class="hljs-string">"Shortbread"</span>
+
+    <span class="hljs-tag">body</span>
+        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
+            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+                <span class="hljs-tag">h1</span> Shortbread
+                <span class="hljs-tag">p</span> Link not found
+</code></pre>
+<h2 id="writing-our-first-test">Writing our first test</h2>
+<p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
+<span class="hljs-pi">"use strict"</span>;
+
+<span class="hljs-comment">// Declare the variables used</span>
+<span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
+    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
+    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
+    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
+    client;
+client = redis.createClient();
+
+<span class="hljs-comment">// Server tasks</span>
+describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+
+    <span class="hljs-comment">// Beforehand, start the server</span>
+    before(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
+        done();
+    });
+
+    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
+    after(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
+        client.flushdb();
+        done();
+    });
+
+    <span class="hljs-comment">// Test the index route</span>
+    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">'should return a page with the title Shortbread'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            request.get({ url: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+                expect(body).to.include(<span class="hljs-string">'Shortbread'</span>);
+                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
+                done();
+            });
         });
     });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
+});
+</code></pre>
+<p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p>
+<p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p>
+<p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p>
+<p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p>
+<pre><code class="hljs lang-bash">$ touch index.js
+</code></pre>
+<p>Let’s run our tests:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+
+
+  server
+Starting the server
+    Test the index route
+      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> a page with the title Shortbread
+Stopping the server
+
+
+  <span class="hljs-number">0</span> passing (<span class="hljs-number">152</span>ms)
+  <span class="hljs-number">1</span> failing
+
+  <span class="hljs-number">1</span>) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Shortbread:
+     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Shortbread'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">33</span>:<span class="hljs-number">33</span>)
+      at self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+      at Request.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at Request.onRequestError (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">963</span>:<span class="hljs-number">8</span>)
+      at ClientRequest.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at Socket.socketErrorListener (http.js:<span class="hljs-number">1551</span>:<span class="hljs-number">9</span>)
+      at Socket.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at net.js:<span class="hljs-number">440</span>:<span class="hljs-number">14</span>
+      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
 
 
 
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-pi">'use strict'</span>;
+
+<span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, port, rtg, shortid;
+
+<span class="hljs-comment">// Define values</span>
+express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+app = express();
+port = process.env.PORT || <span class="hljs-number">5000</span>;
+shortid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'shortid'</span>);
+bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+  rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+  client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"jade"</span>);
+app.engine(<span class="hljs-string">'jade'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'jade'</span>).__express);
+
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
+
+<span class="hljs-comment">// Handle POST data</span>
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: <span class="hljs-literal">true</span>
+}));
+
+<span class="hljs-comment">// Define index route</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+  res.render(<span class="hljs-string">'index'</span>);
+});
+
+<span class="hljs-comment">// Serve static files</span>
+app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
+
+<span class="hljs-comment">// Listen</span>
+app.listen(port);
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on port '</span> + port);
+</code></pre>
+<p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p>
+<p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p>
+<p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p>
+<p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p>
+<p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p>
+<p>Let’s run our test:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
 
 
-  
-</aside>
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">116</span>ms)
+Stopping the server
 
 
+  <span class="hljs-number">1</span> passing (<span class="hljs-number">128</span>ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
+Branches     : <span class="hljs-number">83.33</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">6</span> )
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+Lines        : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Done, without errors.
+</code></pre>
+<p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+</code></pre>
+<p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p>
+<h2 id="submitting-a-url">Submitting a URL</h2>
+<p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p>
+<pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting a URL</span>
+    describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {form: {url: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+                expect(body).to.include(<span class="hljs-string">'Your shortened URL is'</span>);
+                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
+                done();
+            });
+        });
+    });
+</code></pre>
+<p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">223</span>ms)
+    Test submitting a URL
+      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> the shortened URL
+Stopping the server
+
+
+  <span class="hljs-number">1</span> passing (<span class="hljs-number">318</span>ms)
+  <span class="hljs-number">1</span> failing
+
+  <span class="hljs-number">1</span>) server Test submitting a URL should <span class="hljs-built_in">return</span> the shortened URL:
+     Uncaught AssertionError: expected <span class="hljs-string">'Cannot POST /\n'</span> to include <span class="hljs-string">'Your shortened URL is'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">45</span>:<span class="hljs-number">33</span>)
+      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> ), <span class="hljs-number">3</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define submit route</span>
+app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+    <span class="hljs-comment">// Declare variables</span>
+    <span class="hljs-keyword">var</span> url, id;
+
+    <span class="hljs-comment">// Get URL</span>
+    url = req.body.url;
+
+    <span class="hljs-comment">// Create a hashed short version</span>
+    id = shortid.generate();
+
+    <span class="hljs-comment">// Store them in Redis</span>
+    client.set(id, url, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// Display the response</span>
+        res.render(<span class="hljs-string">'output'</span>, { id: id, base_url: base_url });
+    });
+});
+</code></pre>
+<p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p>
+<p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p>
+<p>With that done, our test should pass:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">89</span>ms)
+    Test submitting a URL
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">65</span>ms)
+Stopping the server
+
+
+  <span class="hljs-number">2</span> passing (<span class="hljs-number">167</span>ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Done, without errors.
+</code></pre>
+<p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p>
+<pre><code class="hljs lang-javascript">
+    <span class="hljs-comment">// Test following a URL</span>
+    describe(<span class="hljs-string">'Test following a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">'should redirect the user to the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            <span class="hljs-comment">// Create the URL</span>
+            client.set(<span class="hljs-string">'testurl'</span>, <span class="hljs-string">'http://www.google.com'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+                <span class="hljs-comment">// Follow the link</span>
+                request.get({
+                    url: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
+                    followRedirect: <span class="hljs-literal">false</span>
+                }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'http://www.google.com'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
+                    done();
+                });
+            });
+        });
+    });
+
+    <span class="hljs-comment">// Test non-existent link</span>
+    describe(<span class="hljs-string">'Test following a non-existent-link'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">'should return a 404 error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            <span class="hljs-comment">// Follow the link</span>
+            request.get({
+                url: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
+                followRedirect: <span class="hljs-literal">false</span>
+            }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+                expect(response.statusCode).to.equal(<span class="hljs-number">404</span>);
+                expect(body).to.include(<span class="hljs-string">'Link not found'</span>);
+                done();
+            });
+        });
+    });
+</code></pre>
+<p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p>
+<p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p>
+<p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p>
+<p>If we run our tests, they should now fail:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">252</span>ms)
+    Test submitting a URL
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
+    Test following a URL
+      <span class="hljs-number">1</span>) should redirect the user to the shortened URL
+    Test following a non-existent-link
+      <span class="hljs-number">2</span>) should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
+Stopping the server
+
+
+  <span class="hljs-number">2</span> passing (<span class="hljs-number">322</span>ms)
+  <span class="hljs-number">2</span> failing
+
+  <span class="hljs-number">1</span>) server Test following a URL should redirect the user to the shortened URL:
+     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'http://www.google.com'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">63</span>:<span class="hljs-number">58</span>)
+      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+
+  <span class="hljs-number">2</span>) server Test following a non-existent-link should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error:
+     Uncaught AssertionError: expected <span class="hljs-string">'Cannot GET /nonexistenturl\n'</span> to include <span class="hljs-string">'Link not found'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">80</span>:<span class="hljs-number">33</span>)
+      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>Now, let’s add our final route:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define link route</span>
+app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+    <span class="hljs-comment">// Get ID</span>
+    <span class="hljs-keyword">var</span> id = req.params.id.trim();
+
+    <span class="hljs-comment">// Look up the URL</span>
+    client.get(id, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(err, reply)</span> </span>{
+        <span class="hljs-keyword">if</span> (!err &amp;&amp; reply) {
+            <span class="hljs-comment">// Redirect user to it</span>
+            res.status(<span class="hljs-number">301</span>);
+            res.set(<span class="hljs-string">'Location'</span>, reply);
+            res.send();
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// Confirm no such link in database</span>
+            res.status(<span class="hljs-number">404</span>);
+            res.render(<span class="hljs-string">'error'</span>);
+        }
+    });
+});
+</code></pre>
+<p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p>
+<p>Now, let’s check it passes:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">90</span>ms)
+    Test submitting a URL
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
+    Test following a URL
+      ✓ should redirect the user to the shortened URL
+    Test following a non-existent-link
+      ✓ should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
+Stopping the server
+
+
+  <span class="hljs-number">4</span> passing (<span class="hljs-number">191</span>ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> ), <span class="hljs-number">3</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">10</span>/<span class="hljs-number">10</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">5</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Done, without errors.
+</code></pre>
+<p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you’ll need to install the Redis to Go addon, and refer to Heroku’s documentation on deploying Node.js applications for more details.</p>
+<h2 id="wrapping-up">Wrapping up</h2>
+<p>You’ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p>
+<p>I hope you’ve enjoyed this brief introduction to Redis, and that it’s opened your eyes to at least one of the alternatives out there to a relational database. I’ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p>
+
+                <ul><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul>
+                <div class="addthis_sharing_toolbox"></div>
+              <section class="comments">
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                    window.disqus_identifier="";
+                    window.disqus_url="http://www.matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis//";
+                    window.disqus_title="Building a URL Shortener With Node.js and Redis";
+                  </script>
+                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
+                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+              </section>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <h1>Recent Posts</h1>
+            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
+            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
+            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
+            <section id="github-profile">
+            </section>
+            <h4>My GitHub repositories</h4>
+            <ul id="github-repos">
+                <li>Loading repositories...</li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Matthew Daly -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
-  
+    <div class="row">
+        <div class="col-md-12">
+            <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
+            <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
+        </div>
+    </div>
 
-<script type="text/javascript">
-      var disqus_shortname = 'matthewdaly';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/';
-        var disqus_url = 'http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
+</div>
 
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+        <footer>
+            <div class="container">
+                <div class="col-md-12">
+                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
+                </div>
+            </div>
+        </footer>
+        <script type="text/javascript" src="/static/js/all.min.js"></script>
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-17043630-1');ga('send','pageview');
+        </script>
+    </body>
 </html>

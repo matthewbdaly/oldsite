@@ -1,1467 +1,707 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Django Blog Tutorial - the Next Generation - Part 9 - Matthew Daly's Blog</title>
-  <meta name="author" content="Matthew Daly">
-
-  
-  <meta name="description" content="Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I&rsquo &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-17043630-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Matthew Daly's Blog</a></h1>
-  
-    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">Django Blog Tutorial - the Next Generation - Part 9</h1>
-    
-    
-      <p class="meta">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
         
+        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
+        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
+        <title>Django Blog Tutorial - the Next Generation - Part 9 - Matthew Daly&#x27;s Blog</title>
+    </head>
+    <body>
+
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
+
+        <header>
+            <nav class="navbar navbar-inverse navbar-static-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="header-nav">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/blog/archives/">Archives</a></li>
+                                <li><a href="/about/">About</a></li>
+                                <li><a href="/atom.xml">RSS</a></li>
+                            </ul>
+                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
+                                <div class="form-group">
+                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></input>
+                                </div>
+                                <input id="site" name="q" type="hidden" value="site:www.matthewdaly.co.uk" />
+                                <input type="submit" class="btn btn-default"></input>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
+                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
+                </div>
+            </div>
+        </header>
+
+<div class="container">
 
 
-
-
-<time class='entry-date' datetime='2014-09-28T20:51:02+01:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>8:51 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I&rsquo;d like to show you how to upgrade to it.</p>
-
-<p>The biggest change is that Django 1.7 introduces its own migration system, which means South is now surplus to requirements. We therefore need to switch from South to Django&rsquo;s native migrations. Fortunately, this is fairly straightforward.</p>
-
+    <div class="row">
+        <div class="col-md-8">
+            <article class="post">
+                <p class="date">28th September 2014 8:51 pm</p>
+                <h1>Django Blog Tutorial - the Next Generation - Part 9</h1>
+                <p>Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I’d like to show you how to upgrade to it.</p>
+<p>The biggest change is that Django 1.7 introduces its own migration system, which means South is now surplus to requirements. We therefore need to switch from South to Django’s native migrations. Fortunately, this is fairly straightforward.</p>
 <p>First of all, activate your virtualenv:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>virtualenv venv
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ virtualenv venv
+</code></pre>
 <p>Then make sure your migrations are up to date:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>python manage.py syncdb
-</span><span class='line'>python manage.py migrate
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ python manage.py syncdb
+$ python manage.py migrate
+</code></pre>
 <p>Then, upgrade your Django version and uninstall South:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install Django --upgrade
-</span><span class='line'>pip uninstall South
-</span><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ pip install Django --upgrade
+$ pip uninstall South
+$ pip freeze &gt; requirements.txt
+</code></pre>
 <p>Next, remove South from <code>INSTALLED_APPS</code> in <code>django_tutorial_blog_ng/settings.py</code>.</p>
-
 <p>You now need to delete all of the numbered migration files in <code>blogengine/migrations/</code>, and the relevant <code>.pyc</code> files, but NOT the directory or the <code>__init__.py</code> file. You can do so with this command on Linux or OS X:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>rm blogengine/migrations/00*
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ rm blogengine/migrations/<span class="hljs-number">00</span>*
+</code></pre>
 <p>Next, we recreate our migrations with the following command:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py makemigrations
-</span><span class='line'>Migrations <span class="k">for</span> <span class="s1">&#39;blogengine&#39;</span>:
-</span><span class='line'>  0001_initial.py:
-</span><span class='line'>    - Create model Category
-</span><span class='line'>    - Create model Post
-</span><span class='line'>    - Create model Tag
-</span><span class='line'>    - Add field tags to post
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ python manage.py makemigrations
+Migrations <span class="hljs-keyword">for</span> <span class="hljs-string">'blogengine'</span>:
+  <span class="hljs-number">0001</span>_initial.py:
+    - Create model Category
+    - Create model Post
+    - Create model Tag
+    - Add field tags to post
+</code></pre>
 <p>Then we run the migrations:</p>
+<pre><code class="hljs lang-bash">$ python manage.py migrate
+Operations to perform:
+  Synchronize unmigrated apps: sitemaps, django_jenkins, debug_toolbar
+  Apply all migrations: sessions, admin, sites, flatpages, contenttypes, auth, blogengine
+Synchronizing apps without migrations:
+  Creating tables...
+  Installing custom SQL...
+  Installing indexes...
+Running migrations:
+  Applying contenttypes.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying auth.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying admin.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying sites.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying blogengine.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying flatpages.<span class="hljs-number">0001</span>_initial... FAKED
+  Applying sessions.<span class="hljs-number">0001</span>_initial... FAKED
+</code></pre>
+<p>Don’t worry too much if the output doesn’t look exactly the same as this - as long as it works, that’s the main thing.</p>
+<p>Let’s run our test suite to ensure it works:</p>
+<pre><code class="hljs lang-bash">$ python manage.py jenkins
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+....FF.F.FFFFFF..............
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_post (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">385</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_post
+    self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+AssertionError: False is not <span class="hljs-literal">true</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py migrate
-</span><span class='line'>Operations to perform:
-</span><span class='line'>  Synchronize unmigrated apps: sitemaps, django_jenkins, debug_toolbar
-</span><span class='line'>  Apply all migrations: sessions, admin, sites, flatpages, contenttypes, auth, blogengine
-</span><span class='line'>Synchronizing apps without migrations:
-</span><span class='line'>  Creating tables...
-</span><span class='line'>  Installing custom SQL...
-</span><span class='line'>  Installing indexes...
-</span><span class='line'>Running migrations:
-</span><span class='line'>  Applying contenttypes.0001_initial... FAKED
-</span><span class='line'>  Applying auth.0001_initial... FAKED
-</span><span class='line'>  Applying admin.0001_initial... FAKED
-</span><span class='line'>  Applying sites.0001_initial... FAKED
-</span><span class='line'>  Applying blogengine.0001_initial... FAKED
-</span><span class='line'>  Applying flatpages.0001_initial... FAKED
-</span><span class='line'>  Applying sessions.0001_initial... FAKED
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_post_without_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">417</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_post_without_tag
+    self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+AssertionError: False is not <span class="hljs-literal">true</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_delete_category (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">278</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_delete_category
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<p>Don&rsquo;t worry too much if the output doesn&rsquo;t look exactly the same as this - as long as it works, that&rsquo;s the main thing.</p>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_delete_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">346</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_delete_tag
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<p>Let&rsquo;s run our test suite to ensure it works:</p>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_category (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">255</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_category
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py jenkins
-</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span><span class='line'>....FF.F.FFFFFF..............
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_create_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 385, in test_create_post
-</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;added successfully&#39;</span> in response.content<span class="o">)</span>
-</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_create_post_without_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 417, in test_create_post_without_tag
-</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;added successfully&#39;</span> in response.content<span class="o">)</span>
-</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_delete_category <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 278, in test_delete_category
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_delete_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 346, in test_delete_tag
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_category <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 255, in test_edit_category
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 447, in test_edit_post
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 323, in test_edit_tag
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_login <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 183, in test_login
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">302</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_logout <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 214, in test_logout
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">302</span> !<span class="o">=</span> 200
-</span><span class='line'>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Ran <span class="m">29</span> tests in 7.383s
-</span><span class='line'>
-</span><span class='line'>FAILED <span class="o">(</span><span class="nv">failures</span><span class="o">=</span>9<span class="o">)</span>
-</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_post (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">447</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_post
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">323</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_tag
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_login (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">183</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_login
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">302</span> != <span class="hljs-number">200</span>
+
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_<span class="hljs-built_in">logout</span> (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">214</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_<span class="hljs-built_in">logout</span>
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">302</span> != <span class="hljs-number">200</span>
+
+----------------------------------------------------------------------
+Ran <span class="hljs-number">29</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">7.383</span>s
+
+FAILED (failures=<span class="hljs-number">9</span>)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre>
 <p>We have an issue here. A load of the tests for the admin interface now fail. If we now try running the dev server, we see this error:</p>
+<pre><code class="hljs lang-bash">$ python manage.py runserver
+Performing system checks...
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py runserver
-</span><span class='line'>Performing system checks...
-</span><span class='line'>
-</span><span class='line'>System check identified no issues <span class="o">(</span><span class="m">0</span> silenced<span class="o">)</span>.
-</span><span class='line'>September 28, <span class="m">2014</span> - 20:16:47
-</span><span class='line'>Django version 1.7, using settings <span class="s1">&#39;django_tutorial_blog_ng.settings&#39;</span>
-</span><span class='line'>Starting development server at http://127.0.0.1:8000/
-</span><span class='line'>Quit the server with CONTROL-C.
-</span><span class='line'>Unhandled exception in thread started by &lt;<span class="k">function</span> wrapper at 0x1024a5ed8&gt;
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/utils/autoreload.py&quot;</span>, line 222, in wrapper
-</span><span class='line'>    fn<span class="o">(</span>*args, **kwargs<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/management/commands/runserver.py&quot;</span>, line 132, in inner_run
-</span><span class='line'>    <span class="nv">handler</span> <span class="o">=</span> self.get_handler<span class="o">(</span>*args, **options<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/contrib/staticfiles/management/commands/runserver.py&quot;</span>, line 25, in get_handler
-</span><span class='line'>    <span class="nv">handler</span> <span class="o">=</span> super<span class="o">(</span>Command, self<span class="o">)</span>.get_handler<span class="o">(</span>*args, **options<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/management/commands/runserver.py&quot;</span>, line 48, in get_handler
-</span><span class='line'>    <span class="k">return</span> get_internal_wsgi_application<span class="o">()</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/servers/basehttp.py&quot;</span>, line 66, in get_internal_wsgi_application
-</span><span class='line'>    sys.exc_info<span class="o">()[</span>2<span class="o">])</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/servers/basehttp.py&quot;</span>, line 56, in get_internal_wsgi_application
-</span><span class='line'>    <span class="k">return</span> import_string<span class="o">(</span>app_path<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/utils/module_loading.py&quot;</span>, line 26, in import_string
-</span><span class='line'>    <span class="nv">module</span> <span class="o">=</span> import_module<span class="o">(</span>module_path<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/usr/local/Cellar/python/2.7.8_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/importlib/__init__.py&quot;</span>, line 37, in import_module
-</span><span class='line'>    __import__<span class="o">(</span>name<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/django_tutorial_blog_ng/wsgi.py&quot;</span>, line 14, in &lt;module&gt;
-</span><span class='line'>    from dj_static import Cling
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/dj_static.py&quot;</span>, line 7, in &lt;module&gt;
-</span><span class='line'>    from django.core.handlers.base import get_path_info
-</span><span class='line'>django.core.exceptions.ImproperlyConfigured: WSGI application <span class="s1">&#39;django_tutorial_blog_ng.wsgi.application&#39;</span> could not be loaded<span class="p">;</span> Error importing module: <span class="s1">&#39;cannot import name get_path_info&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+System check identified no issues (<span class="hljs-number">0</span> silenced).
+September <span class="hljs-number">28</span>, <span class="hljs-number">2014</span> - <span class="hljs-number">20</span>:<span class="hljs-number">16</span>:<span class="hljs-number">47</span>
+Django version <span class="hljs-number">1.7</span>, using settings <span class="hljs-string">'django_tutorial_blog_ng.settings'</span>
+Starting development server at http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">8000</span>/
+Quit the server with CONTROL-C.
+Unhandled exception <span class="hljs-keyword">in</span> thread started by &lt;<span class="hljs-keyword">function</span> wrapper at <span class="hljs-number">0</span>x1024a5ed8&gt;
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/utils/autoreload.py"</span>, line <span class="hljs-number">222</span>, <span class="hljs-keyword">in</span> wrapper
+    fn(*args, **kwargs)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/management/commands/runserver.py"</span>, line <span class="hljs-number">132</span>, <span class="hljs-keyword">in</span> inner_run
+    handler = self.get_handler(*args, **options)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/contrib/staticfiles/management/commands/runserver.py"</span>, line <span class="hljs-number">25</span>, <span class="hljs-keyword">in</span> get_handler
+    handler = super(Command, self).get_handler(*args, **options)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/management/commands/runserver.py"</span>, line <span class="hljs-number">48</span>, <span class="hljs-keyword">in</span> get_handler
+    <span class="hljs-built_in">return</span> get_internal_wsgi_application()
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/servers/basehttp.py"</span>, line <span class="hljs-number">66</span>, <span class="hljs-keyword">in</span> get_internal_wsgi_application
+    sys.exc_info()[<span class="hljs-number">2</span>])
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/core/servers/basehttp.py"</span>, line <span class="hljs-number">56</span>, <span class="hljs-keyword">in</span> get_internal_wsgi_application
+    <span class="hljs-built_in">return</span> import_string(app_path)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/django/utils/module_loading.py"</span>, line <span class="hljs-number">26</span>, <span class="hljs-keyword">in</span> import_string
+    module = import_module(module_path)
+  File <span class="hljs-string">"/usr/local/Cellar/python/2.7.8_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/importlib/__init__.py"</span>, line <span class="hljs-number">37</span>, <span class="hljs-keyword">in</span> import_module
+    __import__(name)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/django_tutorial_blog_ng/wsgi.py"</span>, line <span class="hljs-number">14</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    from dj_static import Cling
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/dj_static.py"</span>, line <span class="hljs-number">7</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    from django.core.handlers.base import get_path_info
+django.core.exceptions.ImproperlyConfigured: WSGI application <span class="hljs-string">'django_tutorial_blog_ng.wsgi.application'</span> could not be loaded; Error importing module: <span class="hljs-string">'cannot import name get_path_info'</span>
+</code></pre>
 <p>Fortunately, the error above is easy to fix by upgrading <code>dj_static</code>:</p>
+<pre><code class="hljs lang-bash">$ pip install dj_static --upgrade
+$ pip freeze &gt; requirements.txt
+</code></pre>
+<p>That resolves the error in serving static files, but not the error with the admin. If you run the dev server, you’ll be able to see that the admin actually works fine. The problem is caused by the test client not following redirects in the admin. We can easily run just the admin tests with the following command:</p>
+<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine.tests.AdminTest
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.FF.F.FFFFFF
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_post (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">385</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_post
+    self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+AssertionError: False is not <span class="hljs-literal">true</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install dj_static --upgrade
-</span><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_post_without_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">417</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_post_without_tag
+    self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+AssertionError: False is not <span class="hljs-literal">true</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_delete_category (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">278</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_delete_category
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<p>That resolves the error in serving static files, but not the error with the admin. If you run the dev server, you&rsquo;ll be able to see that the admin actually works fine. The problem is caused by the test client not following redirects in the admin. We can easily run just the admin tests with the following command:</p>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_delete_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">346</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_delete_tag
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py <span class="nb">test </span>blogengine.tests.AdminTest
-</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span><span class='line'>.FF.F.FFFFFF
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_create_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 385, in test_create_post
-</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;added successfully&#39;</span> in response.content<span class="o">)</span>
-</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_create_post_without_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 417, in test_create_post_without_tag
-</span><span class='line'>    self.assertTrue<span class="o">(</span><span class="s1">&#39;added successfully&#39;</span> in response.content<span class="o">)</span>
-</span><span class='line'>AssertionError: False is not <span class="nb">true</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_delete_category <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 278, in test_delete_category
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_delete_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 346, in test_delete_tag
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_category <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 255, in test_edit_category
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_post <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 447, in test_edit_post
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_edit_tag <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 323, in test_edit_tag
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">404</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_login <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 183, in test_login
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">302</span> !<span class="o">=</span> <span class="nv">200</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>FAIL: test_logout <span class="o">(</span>blogengine.tests.AdminTest<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 214, in test_logout
-</span><span class='line'>    self.assertEquals<span class="o">(</span>response.status_code, 200<span class="o">)</span>
-</span><span class='line'>AssertionError: <span class="m">302</span> !<span class="o">=</span> 200
-</span><span class='line'>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Ran <span class="m">12</span> tests in 3.283s
-</span><span class='line'>
-</span><span class='line'>FAILED <span class="o">(</span><span class="nv">failures</span><span class="o">=</span>9<span class="o">)</span>
-</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_category (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">255</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_category
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_post (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">447</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_post
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<p>Let&rsquo;s commit our changes so far first:</p>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_edit_tag (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">323</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_edit_tag
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">404</span> != <span class="hljs-number">200</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add django_tutorial_blog_ng/ requirements.txt blogengine/
-</span><span class='line'>git commit -m <span class="s1">&#39;Upgraded to Django 1.7&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_login (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">183</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_login
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">302</span> != <span class="hljs-number">200</span>
 
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_<span class="hljs-built_in">logout</span> (blogengine.tests.AdminTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">214</span>, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_<span class="hljs-built_in">logout</span>
+    self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+AssertionError: <span class="hljs-number">302</span> != <span class="hljs-number">200</span>
 
-<p>Now let&rsquo;s fix our tests. Here&rsquo;s the amended version of the <code>AdminTest</code> class:</p>
+----------------------------------------------------------------------
+Ran <span class="hljs-number">12</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">3.283</span>s
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-<span class='line-number'>151</span>
-<span class='line-number'>152</span>
-<span class='line-number'>153</span>
-<span class='line-number'>154</span>
-<span class='line-number'>155</span>
-<span class='line-number'>156</span>
-<span class='line-number'>157</span>
-<span class='line-number'>158</span>
-<span class='line-number'>159</span>
-<span class='line-number'>160</span>
-<span class='line-number'>161</span>
-<span class='line-number'>162</span>
-<span class='line-number'>163</span>
-<span class='line-number'>164</span>
-<span class='line-number'>165</span>
-<span class='line-number'>166</span>
-<span class='line-number'>167</span>
-<span class='line-number'>168</span>
-<span class='line-number'>169</span>
-<span class='line-number'>170</span>
-<span class='line-number'>171</span>
-<span class='line-number'>172</span>
-<span class='line-number'>173</span>
-<span class='line-number'>174</span>
-<span class='line-number'>175</span>
-<span class='line-number'>176</span>
-<span class='line-number'>177</span>
-<span class='line-number'>178</span>
-<span class='line-number'>179</span>
-<span class='line-number'>180</span>
-<span class='line-number'>181</span>
-<span class='line-number'>182</span>
-<span class='line-number'>183</span>
-<span class='line-number'>184</span>
-<span class='line-number'>185</span>
-<span class='line-number'>186</span>
-<span class='line-number'>187</span>
-<span class='line-number'>188</span>
-<span class='line-number'>189</span>
-<span class='line-number'>190</span>
-<span class='line-number'>191</span>
-<span class='line-number'>192</span>
-<span class='line-number'>193</span>
-<span class='line-number'>194</span>
-<span class='line-number'>195</span>
-<span class='line-number'>196</span>
-<span class='line-number'>197</span>
-<span class='line-number'>198</span>
-<span class='line-number'>199</span>
-<span class='line-number'>200</span>
-<span class='line-number'>201</span>
-<span class='line-number'>202</span>
-<span class='line-number'>203</span>
-<span class='line-number'>204</span>
-<span class='line-number'>205</span>
-<span class='line-number'>206</span>
-<span class='line-number'>207</span>
-<span class='line-number'>208</span>
-<span class='line-number'>209</span>
-<span class='line-number'>210</span>
-<span class='line-number'>211</span>
-<span class='line-number'>212</span>
-<span class='line-number'>213</span>
-<span class='line-number'>214</span>
-<span class='line-number'>215</span>
-<span class='line-number'>216</span>
-<span class='line-number'>217</span>
-<span class='line-number'>218</span>
-<span class='line-number'>219</span>
-<span class='line-number'>220</span>
-<span class='line-number'>221</span>
-<span class='line-number'>222</span>
-<span class='line-number'>223</span>
-<span class='line-number'>224</span>
-<span class='line-number'>225</span>
-<span class='line-number'>226</span>
-<span class='line-number'>227</span>
-<span class='line-number'>228</span>
-<span class='line-number'>229</span>
-<span class='line-number'>230</span>
-<span class='line-number'>231</span>
-<span class='line-number'>232</span>
-<span class='line-number'>233</span>
-<span class='line-number'>234</span>
-<span class='line-number'>235</span>
-<span class='line-number'>236</span>
-<span class='line-number'>237</span>
-<span class='line-number'>238</span>
-<span class='line-number'>239</span>
-<span class='line-number'>240</span>
-<span class='line-number'>241</span>
-<span class='line-number'>242</span>
-<span class='line-number'>243</span>
-<span class='line-number'>244</span>
-<span class='line-number'>245</span>
-<span class='line-number'>246</span>
-<span class='line-number'>247</span>
-<span class='line-number'>248</span>
-<span class='line-number'>249</span>
-<span class='line-number'>250</span>
-<span class='line-number'>251</span>
-<span class='line-number'>252</span>
-<span class='line-number'>253</span>
-<span class='line-number'>254</span>
-<span class='line-number'>255</span>
-<span class='line-number'>256</span>
-<span class='line-number'>257</span>
-<span class='line-number'>258</span>
-<span class='line-number'>259</span>
-<span class='line-number'>260</span>
-<span class='line-number'>261</span>
-<span class='line-number'>262</span>
-<span class='line-number'>263</span>
-<span class='line-number'>264</span>
-<span class='line-number'>265</span>
-<span class='line-number'>266</span>
-<span class='line-number'>267</span>
-<span class='line-number'>268</span>
-<span class='line-number'>269</span>
-<span class='line-number'>270</span>
-<span class='line-number'>271</span>
-<span class='line-number'>272</span>
-<span class='line-number'>273</span>
-<span class='line-number'>274</span>
-<span class='line-number'>275</span>
-<span class='line-number'>276</span>
-<span class='line-number'>277</span>
-<span class='line-number'>278</span>
-<span class='line-number'>279</span>
-<span class='line-number'>280</span>
-<span class='line-number'>281</span>
-<span class='line-number'>282</span>
-<span class='line-number'>283</span>
-<span class='line-number'>284</span>
-<span class='line-number'>285</span>
-<span class='line-number'>286</span>
-<span class='line-number'>287</span>
-<span class='line-number'>288</span>
-<span class='line-number'>289</span>
-<span class='line-number'>290</span>
-<span class='line-number'>291</span>
-<span class='line-number'>292</span>
-<span class='line-number'>293</span>
-<span class='line-number'>294</span>
-<span class='line-number'>295</span>
-<span class='line-number'>296</span>
-<span class='line-number'>297</span>
-<span class='line-number'>298</span>
-<span class='line-number'>299</span>
-<span class='line-number'>300</span>
-<span class='line-number'>301</span>
-<span class='line-number'>302</span>
-<span class='line-number'>303</span>
-<span class='line-number'>304</span>
-<span class='line-number'>305</span>
-<span class='line-number'>306</span>
-<span class='line-number'>307</span>
-<span class='line-number'>308</span>
-<span class='line-number'>309</span>
-<span class='line-number'>310</span>
-<span class='line-number'>311</span>
-<span class='line-number'>312</span>
-<span class='line-number'>313</span>
-<span class='line-number'>314</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">AdminTest</span><span class="p">(</span><span class="n">BaseAcceptanceTest</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">fixtures</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;users.json&#39;</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Get login page</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">,</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log the user in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_logout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check &#39;Log out&#39; in response</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log out&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log out</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">,</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check &#39;Log in&#39; in response</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;Log in&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/category/add/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the new category</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/category/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;python&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;The Python programming language&#39;</span>
-</span><span class='line'>            <span class="p">},</span>
-</span><span class='line'>            <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>        <span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check added successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check new category now in database</span>
-</span><span class='line'>        <span class="n">all_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_categories</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_edit_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the category</span>
-</span><span class='line'>        <span class="n">category</span> <span class="o">=</span> <span class="n">CategoryFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Edit the category</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/category/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;perl&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;The Perl programming language&#39;</span>
-</span><span class='line'>            <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check changed successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;changed successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check category amended</span>
-</span><span class='line'>        <span class="n">all_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_categories</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">only_category</span> <span class="o">=</span> <span class="n">all_categories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;perl&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_category</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Perl programming language&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_delete_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the category</span>
-</span><span class='line'>        <span class="n">category</span> <span class="o">=</span> <span class="n">CategoryFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Delete the category</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/category/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/delete/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;post&#39;</span><span class="p">:</span> <span class="s">&#39;yes&#39;</span>
-</span><span class='line'>        <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check deleted successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;deleted successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check category deleted</span>
-</span><span class='line'>        <span class="n">all_categories</span> <span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_categories</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/tag/add/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the new tag</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/tag/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;python&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;The Python programming language&#39;</span>
-</span><span class='line'>            <span class="p">},</span>
-</span><span class='line'>            <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>        <span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check added successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check new tag now in database</span>
-</span><span class='line'>        <span class="n">all_tags</span> <span class="o">=</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_tags</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_edit_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the tag</span>
-</span><span class='line'>        <span class="n">tag</span> <span class="o">=</span> <span class="n">TagFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Edit the tag</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/tag/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;perl&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;The Perl programming language&#39;</span>
-</span><span class='line'>            <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check changed successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;changed successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check tag amended</span>
-</span><span class='line'>        <span class="n">all_tags</span> <span class="o">=</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_tags</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">only_tag</span> <span class="o">=</span> <span class="n">all_tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;perl&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_tag</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;The Perl programming language&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_delete_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the tag</span>
-</span><span class='line'>        <span class="n">tag</span> <span class="o">=</span> <span class="n">TagFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Delete the tag</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/tag/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/delete/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;post&#39;</span><span class="p">:</span> <span class="s">&#39;yes&#39;</span>
-</span><span class='line'>        <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check deleted successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;deleted successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check tag deleted</span>
-</span><span class='line'>        <span class="n">all_tags</span> <span class="o">=</span> <span class="n">Tag</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_tags</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the category</span>
-</span><span class='line'>        <span class="n">category</span> <span class="o">=</span> <span class="n">CategoryFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the tag</span>
-</span><span class='line'>        <span class="n">tag</span> <span class="o">=</span> <span class="n">TagFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the new post</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My first post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my first post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-first-post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;site&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">pk</span><span class="p">),</span>
-</span><span class='line'>            <span class="s">&#39;tags&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>        <span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check added successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check new post now in database</span>
-</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_create_post_without_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the category</span>
-</span><span class='line'>        <span class="n">category</span> <span class="o">=</span> <span class="n">CategoryFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check response code</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the new post</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My first post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my first post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-first-post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;site&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>        <span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check added successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check new post now in database</span>
-</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_edit_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the post</span>
-</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">PostFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the category</span>
-</span><span class='line'>        <span class="n">category</span> <span class="o">=</span> <span class="n">CategoryFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the tag</span>
-</span><span class='line'>        <span class="n">tag</span> <span class="o">=</span> <span class="n">TagFactory</span><span class="p">()</span>
-</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Edit the post</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My second post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-second-post&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;site&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">,</span>
-</span><span class='line'>            <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">pk</span><span class="p">),</span>
-</span><span class='line'>            <span class="s">&#39;tags&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>        <span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check changed successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;changed successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check post amended</span>
-</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">only_post</span> <span class="o">=</span> <span class="n">all_posts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s">&#39;My second post&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">only_post</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s">&#39;This is my second blog post&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">test_delete_post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>        <span class="c"># Create the post</span>
-</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="n">PostFactory</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Create the tag</span>
-</span><span class='line'>        <span class="n">tag</span> <span class="o">=</span> <span class="n">TagFactory</span><span class="p">()</span>
-</span><span class='line'>        <span class="n">post</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check new post saved</span>
-</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Log in</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Delete the post</span>
-</span><span class='line'>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;/delete/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>            <span class="s">&#39;post&#39;</span><span class="p">:</span> <span class="s">&#39;yes&#39;</span>
-</span><span class='line'>        <span class="p">},</span> <span class="n">follow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check deleted successfully</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;deleted successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c"># Check post deleted</span>
-</span><span class='line'>        <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+FAILED (failures=<span class="hljs-number">9</span>)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre>
+<p>Let’s commit our changes so far first:</p>
+<pre><code class="hljs lang-bash">$ git add django_tutorial_blog_ng/ requirements.txt blogengine/
+$ git commit -m <span class="hljs-string">'Upgraded to Django 1.7'</span>
+</code></pre>
+<p>Now let’s fix our tests. Here’s the amended version of the <code>AdminTest</code> class:</p>
+<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdminTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+    fixtures = [<span class="hljs-string">'users.json'</span>]
 
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_login</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Get login page</span>
+        response = self.client.get(<span class="hljs-string">'/admin/'</span>, follow=<span class="hljs-keyword">True</span>)
 
-<p>There are two main issues here. The first is that when we try to edit or delete an existing item, or refer to it when creating something else, we can no longer rely on the number representing the primary key being set to 1. So we need to specifically obtain this, rather than hard-coding it to 1. Therefore, whenever we pass through a number to represent an item (with the exception of the site, but including tags, categories and posts), we need to instead fetch its primary key and return it. So, above where we try to delete a post, we replace <code>1</code> with <code>str(post.pk)</code>. This will solve a lot of the problems. As there&rsquo;s a lot of them, I won&rsquo;t go through each one, but you can see the entire class above for reference, and if you&rsquo;ve followed along so far, you shouldn&rsquo;t have any problems.</p>
+        <span class="hljs-comment"># Check response code</span>
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
 
+        <span class="hljs-comment"># Check 'Log in' in response</span>
+        self.assertTrue(<span class="hljs-string">'Log in'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Log the user in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check 'Log out' in response</span>
+        self.assertTrue(<span class="hljs-string">'Log out'</span> <span class="hljs-keyword">in</span> response.content)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_logout</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check 'Log out' in response</span>
+        self.assertTrue(<span class="hljs-string">'Log out'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Log out</span>
+        self.client.logout()
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/'</span>, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check 'Log in' in response</span>
+        self.assertTrue(<span class="hljs-string">'Log in'</span> <span class="hljs-keyword">in</span> response.content)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/blogengine/category/add/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Create the new category</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/category/add/'</span>, {
+            <span class="hljs-string">'name'</span>: <span class="hljs-string">'python'</span>,
+            <span class="hljs-string">'description'</span>: <span class="hljs-string">'The Python programming language'</span>
+            },
+            follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check added successfully</span>
+        self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check new category now in database</span>
+        all_categories = Category.objects.all()
+        self.assertEquals(len(all_categories), <span class="hljs-number">1</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_edit_category</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the category</span>
+        category = CategoryFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Edit the category</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/category/'</span> + str(category.pk) + <span class="hljs-string">'/'</span>, {
+            <span class="hljs-string">'name'</span>: <span class="hljs-string">'perl'</span>,
+            <span class="hljs-string">'description'</span>: <span class="hljs-string">'The Perl programming language'</span>
+            }, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check changed successfully</span>
+        self.assertTrue(<span class="hljs-string">'changed successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check category amended</span>
+        all_categories = Category.objects.all()
+        self.assertEquals(len(all_categories), <span class="hljs-number">1</span>)
+        only_category = all_categories[<span class="hljs-number">0</span>]
+        self.assertEquals(only_category.name, <span class="hljs-string">'perl'</span>)
+        self.assertEquals(only_category.description, <span class="hljs-string">'The Perl programming language'</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_delete_category</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the category</span>
+        category = CategoryFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Delete the category</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/category/'</span> + str(category.pk) + <span class="hljs-string">'/delete/'</span>, {
+            <span class="hljs-string">'post'</span>: <span class="hljs-string">'yes'</span>
+        }, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check deleted successfully</span>
+        self.assertTrue(<span class="hljs-string">'deleted successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check category deleted</span>
+        all_categories = Category.objects.all()
+        self.assertEquals(len(all_categories), <span class="hljs-number">0</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_tag</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/blogengine/tag/add/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Create the new tag</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/tag/add/'</span>, {
+            <span class="hljs-string">'name'</span>: <span class="hljs-string">'python'</span>,
+            <span class="hljs-string">'description'</span>: <span class="hljs-string">'The Python programming language'</span>
+            },
+            follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check added successfully</span>
+        self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check new tag now in database</span>
+        all_tags = Tag.objects.all()
+        self.assertEquals(len(all_tags), <span class="hljs-number">1</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_edit_tag</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the tag</span>
+        tag = TagFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Edit the tag</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/tag/'</span> + str(tag.pk) + <span class="hljs-string">'/'</span>, {
+            <span class="hljs-string">'name'</span>: <span class="hljs-string">'perl'</span>,
+            <span class="hljs-string">'description'</span>: <span class="hljs-string">'The Perl programming language'</span>
+            }, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check changed successfully</span>
+        self.assertTrue(<span class="hljs-string">'changed successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check tag amended</span>
+        all_tags = Tag.objects.all()
+        self.assertEquals(len(all_tags), <span class="hljs-number">1</span>)
+        only_tag = all_tags[<span class="hljs-number">0</span>]
+        self.assertEquals(only_tag.name, <span class="hljs-string">'perl'</span>)
+        self.assertEquals(only_tag.description, <span class="hljs-string">'The Perl programming language'</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_delete_tag</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the tag</span>
+        tag = TagFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Delete the tag</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/tag/'</span> + str(tag.pk) + <span class="hljs-string">'/delete/'</span>, {
+            <span class="hljs-string">'post'</span>: <span class="hljs-string">'yes'</span>
+        }, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check deleted successfully</span>
+        self.assertTrue(<span class="hljs-string">'deleted successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check tag deleted</span>
+        all_tags = Tag.objects.all()
+        self.assertEquals(len(all_tags), <span class="hljs-number">0</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the category</span>
+        category = CategoryFactory()
+
+        <span class="hljs-comment"># Create the tag</span>
+        tag = TagFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/blogengine/post/add/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Create the new post</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/post/add/'</span>, {
+            <span class="hljs-string">'title'</span>: <span class="hljs-string">'My first post'</span>,
+            <span class="hljs-string">'text'</span>: <span class="hljs-string">'This is my first post'</span>,
+            <span class="hljs-string">'pub_date_0'</span>: <span class="hljs-string">'2013-12-28'</span>,
+            <span class="hljs-string">'pub_date_1'</span>: <span class="hljs-string">'22:00:04'</span>,
+            <span class="hljs-string">'slug'</span>: <span class="hljs-string">'my-first-post'</span>,
+            <span class="hljs-string">'site'</span>: <span class="hljs-string">'1'</span>,
+            <span class="hljs-string">'category'</span>: str(category.pk),
+            <span class="hljs-string">'tags'</span>: str(tag.pk)
+        },
+        follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check added successfully</span>
+        self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check new post now in database</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">1</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post_without_tag</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the category</span>
+        category = CategoryFactory()
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/blogengine/post/add/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Create the new post</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/post/add/'</span>, {
+            <span class="hljs-string">'title'</span>: <span class="hljs-string">'My first post'</span>,
+            <span class="hljs-string">'text'</span>: <span class="hljs-string">'This is my first post'</span>,
+            <span class="hljs-string">'pub_date_0'</span>: <span class="hljs-string">'2013-12-28'</span>,
+            <span class="hljs-string">'pub_date_1'</span>: <span class="hljs-string">'22:00:04'</span>,
+            <span class="hljs-string">'slug'</span>: <span class="hljs-string">'my-first-post'</span>,
+            <span class="hljs-string">'site'</span>: <span class="hljs-string">'1'</span>,
+            <span class="hljs-string">'category'</span>: str(category.pk)
+        },
+        follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check added successfully</span>
+        self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check new post now in database</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">1</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_edit_post</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the post</span>
+        post = PostFactory()
+
+        <span class="hljs-comment"># Create the category</span>
+        category = CategoryFactory()
+
+        <span class="hljs-comment"># Create the tag</span>
+        tag = TagFactory()
+        post.tags.add(tag)
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Edit the post</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/post/'</span> + str(post.pk) + <span class="hljs-string">'/'</span>, {
+            <span class="hljs-string">'title'</span>: <span class="hljs-string">'My second post'</span>,
+            <span class="hljs-string">'text'</span>: <span class="hljs-string">'This is my second blog post'</span>,
+            <span class="hljs-string">'pub_date_0'</span>: <span class="hljs-string">'2013-12-28'</span>,
+            <span class="hljs-string">'pub_date_1'</span>: <span class="hljs-string">'22:00:04'</span>,
+            <span class="hljs-string">'slug'</span>: <span class="hljs-string">'my-second-post'</span>,
+            <span class="hljs-string">'site'</span>: <span class="hljs-string">'1'</span>,
+            <span class="hljs-string">'category'</span>: str(category.pk),
+            <span class="hljs-string">'tags'</span>: str(tag.pk)
+        },
+        follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check changed successfully</span>
+        self.assertTrue(<span class="hljs-string">'changed successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check post amended</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">1</span>)
+        only_post = all_posts[<span class="hljs-number">0</span>]
+        self.assertEquals(only_post.title, <span class="hljs-string">'My second post'</span>)
+        self.assertEquals(only_post.text, <span class="hljs-string">'This is my second blog post'</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_delete_post</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the post</span>
+        post = PostFactory()
+
+        <span class="hljs-comment"># Create the tag</span>
+        tag = TagFactory()
+        post.tags.add(tag)
+
+        <span class="hljs-comment"># Check new post saved</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
+
+        <span class="hljs-comment"># Delete the post</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/post/'</span> + str(post.pk) + <span class="hljs-string">'/delete/'</span>, {
+            <span class="hljs-string">'post'</span>: <span class="hljs-string">'yes'</span>
+        }, follow=<span class="hljs-keyword">True</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
+
+        <span class="hljs-comment"># Check deleted successfully</span>
+        self.assertTrue(<span class="hljs-string">'deleted successfully'</span> <span class="hljs-keyword">in</span> response.content)
+
+        <span class="hljs-comment"># Check post deleted</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">0</span>)
+</code></pre>
+<p>There are two main issues here. The first is that when we try to edit or delete an existing item, or refer to it when creating something else, we can no longer rely on the number representing the primary key being set to 1. So we need to specifically obtain this, rather than hard-coding it to 1. Therefore, whenever we pass through a number to represent an item (with the exception of the site, but including tags, categories and posts), we need to instead fetch its primary key and return it. So, above where we try to delete a post, we replace <code>1</code> with <code>str(post.pk)</code>. This will solve a lot of the problems. As there’s a lot of them, I won’t go through each one, but you can see the entire class above for reference, and if you’ve followed along so far, you shouldn’t have any problems.</p>
 <p>The other issue we need to fix is the login and logout tests. We simply add <code>follow=True</code> to these to ensure that the test client follows the redirects.</p>
+<p>Let’s run our tests to make sure they pass:</p>
+<pre><code class="hljs lang-bash">$ python manage.py jenkins
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.............................
+----------------------------------------------------------------------
+Ran <span class="hljs-number">29</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">8.210</span>s
 
-<p>Let&rsquo;s run our tests to make sure they pass:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py jenkins
-</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span><span class='line'>.............................
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Ran <span class="m">29</span> tests in 8.210s
-</span><span class='line'>
-</span><span class='line'>OK
-</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre>
 <p>With that done, you can commit your changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/tests.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Fixed broken tests&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Don&rsquo;t forget to deploy your changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>fab deploy
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ git add blogengine/tests.py
+$ git commit -m <span class="hljs-string">'Fixed broken tests'</span>
+</code></pre>
+<p>Don’t forget to deploy your changes:</p>
+<pre><code class="hljs lang-bash">$ fab deploy
+</code></pre>
 <p>Our blog has now been happily migrated over to Django 1.7!</p>
-</div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-09-28T20:51:02+01:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>8:51 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/tdd/'>tdd</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/" title="Previous Post: Changing date format from DD/MM/YYYY to YYYY-MM-DD in Vim">&laquo; Changing date format from DD/MM/YYYY to YYYY-MM-DD in Vim</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2014/10/05/introducing-generator-simple-static-blog/" title="Next Post: Introducing generator-simple-static-blog">Introducing generator-simple-static-blog &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'matthewbdaly',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-
-
-  
-</aside>
-
-
+                <ul><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li></ul>
+                <div class="addthis_sharing_toolbox"></div>
+              <section class="comments">
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                    window.disqus_identifier="";
+                    window.disqus_url="http://www.matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9//";
+                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 9";
+                  </script>
+                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
+                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+              </section>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <h1>Recent Posts</h1>
+            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
+            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
+            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
+            <section id="github-profile">
+            </section>
+            <h4>My GitHub repositories</h4>
+            <ul id="github-repos">
+                <li>Loading repositories...</li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Matthew Daly -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
-  
+    <div class="row">
+        <div class="col-md-12">
+            <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
+            <a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim</a>
+        </div>
+    </div>
 
-<script type="text/javascript">
-      var disqus_shortname = 'matthewdaly';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/';
-        var disqus_url = 'http://matthewdaly.co.uk/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
+</div>
 
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+        <footer>
+            <div class="container">
+                <div class="col-md-12">
+                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
+                </div>
+            </div>
+        </footer>
+        <script type="text/javascript" src="/static/js/all.min.js"></script>
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-17043630-1');ga('send','pageview');
+        </script>
+    </body>
 </html>

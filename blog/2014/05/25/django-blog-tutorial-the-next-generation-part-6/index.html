@@ -1,1311 +1,619 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Django Blog Tutorial - the Next Generation - Part 6 - Matthew Daly's Blog</title>
-  <meta name="author" content="Matthew Daly">
-
-  
-  <meta name="description" content="Welcome back! In this tutorial we&rsquo;ll cover the following: Fixing bugs the TDD way
-Setting up syntax highlighting for code snippets
-Tidying up &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-17043630-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Matthew Daly's Blog</a></h1>
-  
-    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">Django Blog Tutorial - the Next Generation - Part 6</h1>
-    
-    
-      <p class="meta">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
         
+        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
+        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
+        <title>Django Blog Tutorial - the Next Generation - Part 6 - Matthew Daly&#x27;s Blog</title>
+    </head>
+    <body>
+
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
+
+        <header>
+            <nav class="navbar navbar-inverse navbar-static-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="header-nav">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/blog/archives/">Archives</a></li>
+                                <li><a href="/about/">About</a></li>
+                                <li><a href="/atom.xml">RSS</a></li>
+                            </ul>
+                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
+                                <div class="form-group">
+                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></input>
+                                </div>
+                                <input id="site" name="q" type="hidden" value="site:www.matthewdaly.co.uk" />
+                                <input type="submit" class="btn btn-default"></input>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
+                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
+                </div>
+            </div>
+        </header>
+
+<div class="container">
 
 
-
-
-<time class='entry-date' datetime='2014-05-25T17:23:28+01:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>5:23 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>Welcome back! In this tutorial we&rsquo;ll cover the following:</p>
-
+    <div class="row">
+        <div class="col-md-8">
+            <article class="post">
+                <p class="date">25th May 2014 5:23 pm</p>
+                <h1>Django Blog Tutorial - the Next Generation - Part 6</h1>
+                <p>Welcome back! In this tutorial we’ll cover the following:</p>
 <ul>
 <li>Fixing bugs the TDD way</li>
 <li>Setting up syntax highlighting for code snippets</li>
 <li>Tidying up the front end</li>
 </ul>
-
-
-<p>Apologies, but I&rsquo;m holding over implementing the search and additional feeds for a future instalment - in the past I&rsquo;ve tried to cover too much in one post and that has led to me putting them off for much too long. So this instalment and future ones are going to be shorter so I can get them out the door quicker.</p>
-
-<p>Ready? Let&rsquo;s get started!</p>
-
-<h1>Fixing bugs</h1>
-
-<p>When someone reports a bug, it&rsquo;s tempting to just dive straight in and start fixing it. But TDD cautions us against this practice. If we have a bug, then our tests should have caught it. If they don&rsquo;t, then before we fix the bug, we have to make sure we can catch it if it crops up in future by implementing a test for it, and ensuring that it fails. Once that test is in place, we can then go ahead and fix the bug, safe in the knowledge that if it should reappear in future, we will be warned when our tests run.</p>
-
-<p>As it happens, we have a bug in our web app. If you activate your virtualenv in the usual way and run the development server, and then try to create a new post without adding a tag, you&rsquo;ll see that it fails as the tag is empty. Now, it&rsquo;s pretty obvious that this is because the <code>tags</code> attribute of the <code>Post</code> model cannot be blank, so we have a good idea of what we need to do to fix this. But to make sure it never occurs again, we need to implement a test first.</p>
-
+<p>Apologies, but I’m holding over implementing the search and additional feeds for a future instalment - in the past I’ve tried to cover too much in one post and that has led to me putting them off for much too long. So this instalment and future ones are going to be shorter so I can get them out the door quicker.</p>
+<p>Ready? Let’s get started!</p>
+<h1 id="fixing-bugs">Fixing bugs</h1>
+<p>When someone reports a bug, it’s tempting to just dive straight in and start fixing it. But TDD cautions us against this practice. If we have a bug, then our tests should have caught it. If they don’t, then before we fix the bug, we have to make sure we can catch it if it crops up in future by implementing a test for it, and ensuring that it fails. Once that test is in place, we can then go ahead and fix the bug, safe in the knowledge that if it should reappear in future, we will be warned when our tests run.</p>
+<p>As it happens, we have a bug in our web app. If you activate your virtualenv in the usual way and run the development server, and then try to create a new post without adding a tag, you’ll see that it fails as the tag is empty. Now, it’s pretty obvious that this is because the <code>tags</code> attribute of the <code>Post</code> model cannot be blank, so we have a good idea of what we need to do to fix this. But to make sure it never occurs again, we need to implement a test first.</p>
 <p>Add the following method to <code>AdminTest</code>:</p>
+<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post_without_tag</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the category</span>
+        category = Category()
+        category.name = <span class="hljs-string">'python'</span>
+        category.description = <span class="hljs-string">'The Python programming language'</span>
+        category.save()
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">test_create_post_without_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span class='line'>    <span class="c"># Create the category</span>
-</span><span class='line'>    <span class="n">category</span> <span class="o">=</span> <span class="n">Category</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;python&#39;</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s">&#39;The Python programming language&#39;</span>
-</span><span class='line'>    <span class="n">category</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Log in</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;bobsmith&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&quot;password&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check response code</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Create the new post</span>
-</span><span class='line'>    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/admin/blogengine/post/add/&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>        <span class="s">&#39;title&#39;</span><span class="p">:</span> <span class="s">&#39;My first post&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;text&#39;</span><span class="p">:</span> <span class="s">&#39;This is my first post&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;pub_date_0&#39;</span><span class="p">:</span> <span class="s">&#39;2013-12-28&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;pub_date_1&#39;</span><span class="p">:</span> <span class="s">&#39;22:00:04&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;slug&#39;</span><span class="p">:</span> <span class="s">&#39;my-first-post&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;site&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span><span class="p">,</span>
-</span><span class='line'>        <span class="s">&#39;category&#39;</span><span class="p">:</span> <span class="s">&#39;1&#39;</span>
-</span><span class='line'>    <span class="p">},</span>
-</span><span class='line'>    <span class="n">follow</span><span class="o">=</span><span class="bp">True</span>
-</span><span class='line'>    <span class="p">)</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check added successfully</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s">&#39;added successfully&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c"># Check new post now in database</span>
-</span><span class='line'>    <span class="n">all_posts</span> <span class="o">=</span> <span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</span><span class='line'>    <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_posts</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-comment"># Log in</span>
+        self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
 
+        <span class="hljs-comment"># Check response code</span>
+        response = self.client.get(<span class="hljs-string">'/admin/blogengine/post/add/'</span>)
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
 
-<p>This is virtually identical to our previous method for adding a post, but doesn&rsquo;t add a tag to the post. If you run <code>python manage.py jenkins</code>, the test should fail. Let&rsquo;s commit our changes:</p>
+        <span class="hljs-comment"># Create the new post</span>
+        response = self.client.post(<span class="hljs-string">'/admin/blogengine/post/add/'</span>, {
+            <span class="hljs-string">'title'</span>: <span class="hljs-string">'My first post'</span>,
+            <span class="hljs-string">'text'</span>: <span class="hljs-string">'This is my first post'</span>,
+            <span class="hljs-string">'pub_date_0'</span>: <span class="hljs-string">'2013-12-28'</span>,
+            <span class="hljs-string">'pub_date_1'</span>: <span class="hljs-string">'22:00:04'</span>,
+            <span class="hljs-string">'slug'</span>: <span class="hljs-string">'my-first-post'</span>,
+            <span class="hljs-string">'site'</span>: <span class="hljs-string">'1'</span>,
+            <span class="hljs-string">'category'</span>: <span class="hljs-string">'1'</span>
+        },
+        follow=<span class="hljs-keyword">True</span>
+        )
+        self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/tests.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Added failing test for posts without tags&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-comment"># Check added successfully</span>
+        self.assertTrue(<span class="hljs-string">'added successfully'</span> <span class="hljs-keyword">in</span> response.content)
 
+        <span class="hljs-comment"># Check new post now in database</span>
+        all_posts = Post.objects.all()
+        self.assertEquals(len(all_posts), <span class="hljs-number">1</span>)
+</code></pre>
+<p>This is virtually identical to our previous method for adding a post, but doesn’t add a tag to the post. If you run <code>python manage.py jenkins</code>, the test should fail. Let’s commit our changes:</p>
+<pre><code class="hljs lang-bash">$ git add blogengine/tests.py
+$ git commit -m <span class="hljs-string">'Added failing test for posts without tags'</span>
+</code></pre>
+<p>Now we’re in a position to fix our bug. Let’s take a look at our models:</p>
+<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+    pub_date = models.DateTimeField()
+    text = models.TextField()
+    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
+    author = models.ForeignKey(User)
+    site = models.ForeignKey(Site)
+    category = models.ForeignKey(Category, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
+    tags = models.ManyToManyField(Tag)
+</code></pre>
+<p>If you compare <code>category</code> and <code>tags</code>, you’ll immediately see that <code>category</code> has the additional parameters <code>blank</code> and <code>null</code> both set to <code>True</code>. So that’s what we need to do for <code>tags</code> as well. Amend the model to look like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+    pub_date = models.DateTimeField()
+    text = models.TextField()
+    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
+    author = models.ForeignKey(User)
+    site = models.ForeignKey(Site)
+    category = models.ForeignKey(Category, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
+    tags = models.ManyToManyField(Tag, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
+</code></pre>
+<p>You shouldn’t have to create a migration for this. Let’s run our tests:</p>
+<pre><code class="hljs lang-bash">$ python manage.py jenkins --coverage-html-report=htmlcov
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.......................
+----------------------------------------------------------------------
+Ran <span class="hljs-number">23</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">7.634</span>s
 
-<p>Now we&rsquo;re in a position to fix our bug. Let&rsquo;s take a look at our models:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">author</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">site</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Site</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">category</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Category</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tags</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you compare <code>category</code> and <code>tags</code>, you&rsquo;ll immediately see that <code>category</code> has the additional parameters <code>blank</code> and <code>null</code> both set to <code>True</code>. So that&rsquo;s what we need to do for <code>tags</code> as well. Amend the model to look like this:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/models.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">pub_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">text</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
-</span><span class='line'>    <span class="n">slug</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">SlugField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">author</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">User</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">site</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Site</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">category</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Category</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">tags</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Tag</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You shouldn&rsquo;t have to create a migration for this. Let&rsquo;s run our tests:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py jenkins --coverage-html-report<span class="o">=</span>htmlcov
-</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span><span class='line'>.......................
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Ran <span class="m">23</span> tests in 7.634s
-</span><span class='line'>
-</span><span class='line'>OK
-</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Our tests pass! So we&rsquo;ve fixed our bug, and we&rsquo;ve ensured that if it happens again, we&rsquo;ll catch it. With that done, it&rsquo;s time to commit:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/models.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Fixed a bug with the Post model&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre>
+<p>Our tests pass! So we’ve fixed our bug, and we’ve ensured that if it happens again, we’ll catch it. With that done, it’s time to commit:</p>
+<pre><code class="hljs lang-bash">$ git add blogengine/models.py
+$ git commit -m <span class="hljs-string">'Fixed a bug with the Post model'</span>
+</code></pre>
 <p><strong>Remember</strong>: Always make the effort to create a test to reproduce your bug before fixing it. That way, you know you can catch it in future.</p>
-
-<h1>Syntax highlighting</h1>
-
-<p>This is one feature that not everyone will want to implement. If you want to be able to show code snippets on your blog, then implementing syntax highlighting is well worth your time. However, if that&rsquo;s not what you want to use your blog for, feel free to skip over this section.</p>
-
-<p>Now, earlier in the series we implemented Markdown support. In Markdown there are two main ways to denote a code block. One is to indent the code by four spaces, while the other is to use <a href="https://help.github.com/articles/github-flavored-markdown#syntax-highlighting">fenced code blocks with syntax highlighting</a>. There are many flavours of Markdown available for Python, and unfortunately the one we&rsquo;ve been using so far doesn&rsquo;t support fenced code blocks, so we&rsquo;ll be switching to one that does.</p>
-
-<p>We also need to be able to generate a suitable stylesheet to highlight the code appropriately. For that, we&rsquo;ll be using <a href="http://pygments.org/">Pygments</a>. So let&rsquo;s first uninstall our existing implementation of Markdown:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip uninstall Markdown
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<h1 id="syntax-highlighting">Syntax highlighting</h1>
+<p>This is one feature that not everyone will want to implement. If you want to be able to show code snippets on your blog, then implementing syntax highlighting is well worth your time. However, if that’s not what you want to use your blog for, feel free to skip over this section.</p>
+<p>Now, earlier in the series we implemented Markdown support. In Markdown there are two main ways to denote a code block. One is to indent the code by four spaces, while the other is to use <a href="https://help.github.com/articles/github-flavored-markdown#syntax-highlighting">fenced code blocks with syntax highlighting</a>. There are many flavours of Markdown available for Python, and unfortunately the one we’ve been using so far doesn’t support fenced code blocks, so we’ll be switching to one that does.</p>
+<p>We also need to be able to generate a suitable stylesheet to highlight the code appropriately. For that, we’ll be using <a href="http://pygments.org/">Pygments</a>. So let’s first uninstall our existing implementation of Markdown:</p>
+<pre><code class="hljs lang-bash">$ pip uninstall Markdown
+</code></pre>
 <p>And install the new modules:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install markdown2 Pygments
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Don&rsquo;t forget to record the changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ pip install markdown2 Pygments
+</code></pre>
+<p>Don’t forget to record the changes:</p>
+<pre><code class="hljs lang-bash">$ pip freeze &gt; requirements.txt
+</code></pre>
 <p>Now, we need to amend our Markdown template tags to use the new version of Markdown:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown2
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/templatetags/custom_markdown.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">markdown2</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">template</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="kn">import</span> <span class="n">stringfilter</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_unicode</span>
-</span><span class='line'><span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="kn">import</span> <span class="n">mark_safe</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="nd">@register.filter</span><span class="p">(</span><span class="n">is_safe</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-</span><span class='line'><span class="nd">@stringfilter</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">custom_markdown</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">extras</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;fenced-code-blocks&quot;</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">markdown2</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">force_unicode</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
-</span><span class='line'>                                       <span class="n">extras</span> <span class="o">=</span> <span class="n">extras</span><span class="p">))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<span class="hljs-keyword">from</span> django <span class="hljs-keyword">import</span> template
+<span class="hljs-keyword">from</span> django.template.defaultfilters <span class="hljs-keyword">import</span> stringfilter
+<span class="hljs-keyword">from</span> django.utils.encoding <span class="hljs-keyword">import</span> force_unicode
+<span class="hljs-keyword">from</span> django.utils.safestring <span class="hljs-keyword">import</span> mark_safe
 
+register = template.Library()
 
+<span class="hljs-decorator">@register.filter(is_safe=True)</span>
+<span class="hljs-decorator">@stringfilter</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">custom_markdown</span><span class="hljs-params">(value)</span>:</span>
+    extras = [<span class="hljs-string">"fenced-code-blocks"</span>]
+
+    <span class="hljs-keyword">return</span> mark_safe(markdown2.markdown(force_unicode(value),
+                                       extras = extras))
+</code></pre>
 <p>All we do here is change the Markdown module that gets imported, and amend how it is called. Note that we pass through the parameter <code>fenced-code-blocks</code> to enable this functionality.</p>
-
-<p>If you now run the development server and create a post with some code in it (just copy the Ruby example from <a href="https://help.github.com/articles/github-flavored-markdown#syntax-highlighting">here</a>), then view it on the site, you should be able to see that it&rsquo;s in a <code>&lt;code&gt;</code> block. However, it&rsquo;s not highlighted yet. Let&rsquo;s commit our changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add requirements/txt blogengine/templatetags/custom_markdown.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Now use Markdown2 to allow for syntax highlighting&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, if you examine the markup for your code blocks using your browser&rsquo;s developer tools, you&rsquo;ll notice that the code is wrapped in many different spans with various classes. Pygments can generate a CSS file that uses those classes to highlight your code.</p>
-
-<p>First, let&rsquo;s create a folder to store our CSS files in:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir blogengine/static/css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Next, we&rsquo;ll add a blank CSS file for any other styling we may want to apply:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch blogengine/static/css/main.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<p>If you now run the development server and create a post with some code in it (just copy the Ruby example from <a href="https://help.github.com/articles/github-flavored-markdown#syntax-highlighting">here</a>), then view it on the site, you should be able to see that it’s in a <code>&lt;code&gt;</code> block. However, it’s not highlighted yet. Let’s commit our changes:</p>
+<pre><code class="hljs lang-bash">$ git add requirements/txt blogengine/templatetags/custom_markdown.py
+$ git commit -m <span class="hljs-string">'Now use Markdown2 to allow for syntax highlighting'</span>
+</code></pre>
+<p>Now, if you examine the markup for your code blocks using your browser’s developer tools, you’ll notice that the code is wrapped in many different spans with various classes. Pygments can generate a CSS file that uses those classes to highlight your code.</p>
+<p>First, let’s create a folder to store our CSS files in:</p>
+<pre><code class="hljs lang-bash">$ mkdir blogengine/static/css
+</code></pre>
+<p>Next, we’ll add a blank CSS file for any other styling we may want to apply:</p>
+<pre><code class="hljs lang-bash">$ touch blogengine/static/css/main.css
+</code></pre>
 <p>Then, we generate our CSS file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -S default -f html &gt; blogengine/static/css/code.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ pygmentize -S default <span class="hljs-operator">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre>
 <p>We need to include our CSS files in our HTML template:</p>
+<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-title">html</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">charset</span>=<span class="hljs-value">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">http-equiv</span>=<span class="hljs-value">"X-UA-Compatible"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> title %}</span><span class="xml">My Django Blog</span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"description"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">""</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"viewport"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"width=device-width, initial-scale=1"</span>&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/includes/base.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!DOCTYPE html&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;no-js&quot;</span><span class="nt">&gt;</span> <span class="c">&lt;!--&lt;![endif]--&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;title&gt;</span>{% block title %}My Django Blog{% endblock %}<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        {% load staticfiles %}
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/normalize.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/main.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap-theme.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;css/main.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;css/code.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
-</span><span class='line'>        <span class="c">&lt;!--[if lt IE 7]&gt;</span>
-</span><span class='line'><span class="c">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
-</span><span class='line'><span class="c">        &lt;![endif]--&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Add your site or application content here --&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;fb-root&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">js</span><span class="p">,</span> <span class="nx">fjs</span> <span class="o">=</span> <span class="nx">d</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">id</span><span class="p">))</span> <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">js</span> <span class="o">=</span> <span class="nx">d</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span> <span class="nx">js</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">js</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="s2">&quot;//connect.facebook.net/en_GB/all.js#xfbml=1&quot;</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">fjs</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">js</span><span class="p">,</span> <span class="nx">fjs</span><span class="p">);</span>
-</span><span class='line'>            <span class="p">}(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;facebook-jssdk&#39;</span><span class="p">));</span><span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar navbar-static-top navbar-inverse&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar-inner&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;btn btn-navbar&quot;</span> <span class="na">data-toggle=</span><span class="s">&quot;collapse&quot;</span> <span class="na">data-target=</span><span class="s">&quot;.nav-collapse&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;brand&quot;</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>My Django Blog<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;nav-collapse collapse&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            {% block header %}
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;page-header&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;h1&gt;</span>My Django Blog<span class="nt">&lt;/h1&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            {% endblock %}
-</span><span class='line'>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                {% block content %}{% endblock %}
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container footer&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;p&gt;</span>Copyright <span class="ni">&amp;copy;</span> {% now &quot;Y&quot; %}<span class="nt">&lt;/p&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span><span class="nb">window</span><span class="p">.</span><span class="nx">jQuery</span> <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;&lt;script src=&quot;{% static &#39;</span><span class="nx">bower_components</span><span class="o">/</span><span class="nx">html5</span><span class="o">-</span><span class="nx">boilerplate</span><span class="o">/</span><span class="nx">js</span><span class="o">/</span><span class="nx">vendor</span><span class="o">/</span><span class="nx">jquery</span><span class="o">-</span><span class="mf">1.10</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="nx">min</span><span class="p">.</span><span class="nx">js</span><span class="s1">&#39; %}&quot;&gt;&lt;\/script&gt;&#39;</span><span class="p">)</span><span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/plugins.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/js/bootstrap.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Google Analytics: change UA-XXXXX-X to be your site&#39;s ID. --&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span>
-</span><span class='line'>            <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span><span class="nx">o</span><span class="p">,</span><span class="nx">i</span><span class="p">,</span><span class="nx">l</span><span class="p">,</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">){</span><span class="nx">b</span><span class="p">.</span><span class="nx">GoogleAnalyticsObject</span><span class="o">=</span><span class="nx">l</span><span class="p">;</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">||</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">=</span>
-</span><span class='line'>            <span class="kd">function</span><span class="p">(){(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">=</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">||</span><span class="p">[]).</span><span class="nx">push</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)});</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">l</span><span class="o">=+</span><span class="k">new</span> <span class="nb">Date</span><span class="p">;</span>
-</span><span class='line'>            <span class="nx">e</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span><span class="nx">r</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
-</span><span class='line'>            <span class="nx">e</span><span class="p">.</span><span class="nx">src</span><span class="o">=</span><span class="s1">&#39;//www.google-analytics.com/analytics.js&#39;</span><span class="p">;</span>
-</span><span class='line'>            <span class="nx">r</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">)}(</span><span class="nb">window</span><span class="p">,</span><span class="nb">document</span><span class="p">,</span><span class="s1">&#39;script&#39;</span><span class="p">,</span><span class="s1">&#39;ga&#39;</span><span class="p">));</span>
-</span><span class='line'>            <span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">,</span><span class="s1">&#39;UA-XXXXX-X&#39;</span><span class="p">);</span><span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span><span class="s1">&#39;pageview&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
 
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> staticfiles %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/css/normalize.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/css/main.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/css/bootstrap-theme.min.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'css/main.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'css/code.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
+            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+        &lt;![endif]--&gt;</span>
 
-<p>Now, if you run the development server and reload the page, your code will be highlighted using the default Pygments style. If you don&rsquo;t like it, there are plenty to choose from. Run the following command:</p>
+        <span class="hljs-comment">&lt;!-- Add your site or application content here --&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -L styles
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"fb-root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(d, s, id)</span> </span>{
+            <span class="hljs-keyword">var</span> js, fjs = d.getElementsByTagName(s)[<span class="hljs-number">0</span>];
+            <span class="hljs-keyword">if</span> (d.getElementById(id)) <span class="hljs-keyword">return</span>;
+                js = d.createElement(s); js.id = id;
+                js.src = <span class="hljs-string">"//connect.facebook.net/en_GB/all.js#xfbml=1"</span>;
+                fjs.parentNode.insertBefore(js, fjs);
+            }(<span class="hljs-built_in">document</span>, <span class="hljs-string">'script'</span>, <span class="hljs-string">'facebook-jssdk'</span>));</span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
 
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-inner"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"btn btn-navbar"</span> <span class="hljs-attribute">data-toggle</span>=<span class="hljs-value">"collapse"</span> <span class="hljs-attribute">data-target</span>=<span class="hljs-value">".nav-collapse"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"brand"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/"</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"nav-collapse collapse"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-<p>That will list the various styles available. For instance, let&rsquo;s say we want to try the Tango style:</p>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> header %}</span><span class="xml">
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"page-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml">
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -S tango -f html &gt; blogengine/static/css/code.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
+                </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container footer"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"span12"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">p</span>&gt;</span>Copyright &amp;copy; </span><span class="hljs-template_tag">{% <span class="hljs-keyword">now</span> "Y" %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-<p>If you like the Monokai theme in Sublime Text, there&rsquo;s a Pygments version of that:</p>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript"><span class="hljs-built_in">window</span>.jQuery || <span class="hljs-built_in">document</span>.write(<span class="hljs-string">'&lt;script src="</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/vendor/jquery-1.10.2.min.js' %}</span><span class="xml"><span class="javascript"><span class="hljs-string">"&gt;&lt;\/script&gt;')</span></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/plugins.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -S monokai -f html &gt; blogengine/static/css/code.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you like the Solarized theme, that&rsquo;s not bundled with Pygments, but can be installed separately:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip install pygments-style-solarized
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+        <span class="hljs-comment">&lt;!-- Google Analytics: change UA-XXXXX-X to be your site's ID. --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">
+            (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(b,o,i,l,e,r)</span></span>{b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{(b[l].q=b[l].q||[]).push(<span class="hljs-built_in">arguments</span>)});b[l].l=+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[<span class="hljs-number">0</span>];
+            e.src=<span class="hljs-string">'//www.google-analytics.com/analytics.js'</span>;
+            r.parentNode.insertBefore(e,r)}(<span class="hljs-built_in">window</span>,<span class="hljs-built_in">document</span>,<span class="hljs-string">'script'</span>,<span class="hljs-string">'ga'</span>));
+            ga(<span class="hljs-string">'create'</span>,<span class="hljs-string">'UA-XXXXX-X'</span>);ga(<span class="hljs-string">'send'</span>,<span class="hljs-string">'pageview'</span>);
+        </span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>Now, if you run the development server and reload the page, your code will be highlighted using the default Pygments style. If you don’t like it, there are plenty to choose from. Run the following command:</p>
+<pre><code class="hljs lang-bash">$ pygmentize -L styles
+</code></pre>
+<p>That will list the various styles available. For instance, let’s say we want to try the Tango style:</p>
+<pre><code class="hljs lang-bash">$ pygmentize -S tango <span class="hljs-operator">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre>
+<p>If you like the Monokai theme in Sublime Text, there’s a Pygments version of that:</p>
+<pre><code class="hljs lang-bash">$ pygmentize -S monokai <span class="hljs-operator">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre>
+<p>If you like the Solarized theme, that’s not bundled with Pygments, but can be installed separately:</p>
+<pre><code class="hljs lang-bash">$ pip install pygments-style-solarized
+</code></pre>
 <p>Then run this for the light version:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -S solarizedlight -f html &gt; blogengine/static/css/code.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ pygmentize -S solarizedlight <span class="hljs-operator">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre>
 <p>And this for the dark version:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pygmentize -S solarizeddark -f html &gt; blogengine/static/css/code.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Pick one that you like - I&rsquo;m going to go for the dark version of Solarized.</p>
-
-<p>Note that this doesn&rsquo;t actually change the background colour of the code blocks. You will therefore need to set this manually using the CSS file we created earlier. If you&rsquo;re using Solarized Dark like I am, then this should set it correctly:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/static/css/main.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.codehilite</span> <span class="nt">pre</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">background-color</span><span class="o">:</span> <span class="m">#002b36</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you&rsquo;re using Solarized Light, then this should be more appropriate:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/static/css/main.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.codehilite</span> <span class="nt">pre</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">background-color</span><span class="o">:</span> <span class="m">#fdf6e3</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Or, if you&rsquo;re using Monokai, black will do:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/static/css/main.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.codehilite</span> <span class="nt">pre</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">background-color</span><span class="o">:</span> <span class="m">#000000</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>With that done, let&rsquo;s record the additional Pygments style:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>pip freeze &gt; requirements.txt
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ pygmentize -S solarizeddark <span class="hljs-operator">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre>
+<p>Pick one that you like - I’m going to go for the dark version of Solarized.</p>
+<p>Note that this doesn’t actually change the background colour of the code blocks. You will therefore need to set this manually using the CSS file we created earlier. If you’re using Solarized Dark like I am, then this should set it correctly:</p>
+<pre><code class="hljs lang-css"><span class="hljs-tag">div</span><span class="hljs-class">.codehilite</span> <span class="hljs-tag">pre</span> <span class="hljs-rules">{
+    <span class="hljs-rule"><span class="hljs-attribute">background-color</span>:<span class="hljs-value"> <span class="hljs-hexcolor">#002b36</span></span></span>;
+<span class="hljs-rule">}</span></span>
+</code></pre>
+<p>If you’re using Solarized Light, then this should be more appropriate:</p>
+<pre><code class="hljs lang-css"><span class="hljs-tag">div</span><span class="hljs-class">.codehilite</span> <span class="hljs-tag">pre</span> <span class="hljs-rules">{
+    <span class="hljs-rule"><span class="hljs-attribute">background-color</span>:<span class="hljs-value"> <span class="hljs-hexcolor">#fdf6e3</span></span></span>;
+<span class="hljs-rule">}</span></span>
+</code></pre>
+<p>Or, if you’re using Monokai, black will do:</p>
+<pre><code class="hljs lang-css"><span class="hljs-tag">div</span><span class="hljs-class">.codehilite</span> <span class="hljs-tag">pre</span> <span class="hljs-rules">{
+    <span class="hljs-rule"><span class="hljs-attribute">background-color</span>:<span class="hljs-value"> <span class="hljs-hexcolor">#000000</span></span></span>;
+<span class="hljs-rule">}</span></span>
+</code></pre>
+<p>With that done, let’s record the additional Pygments style:</p>
+<pre><code class="hljs lang-bash">$ pip freeze &gt; requirements.txt
+</code></pre>
 <p>And commit our changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add requirements.txt blogengine/static/css/ templates/blogengine/includes/base.html
-</span><span class='line'>git commit -m <span class="s1">&#39;Styled code with Solarized Dark&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Let&rsquo;s run our tests:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>python manage.py jenkins
-</span><span class='line'>Creating <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span><span class='line'><span class="nv">E</span>
-</span><span class='line'><span class="o">======================================================================</span>
-</span><span class='line'>ERROR: blogengine.tests <span class="o">(</span>unittest.loader.ModuleImportFailure<span class="o">)</span>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>ImportError: Failed to import <span class="nb">test </span>module: blogengine.tests
-</span><span class='line'>Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
-</span><span class='line'>  File <span class="s2">&quot;/usr/local/Cellar/python/2.7.6_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py&quot;</span>, line 254, in _find_tests
-</span><span class='line'>    <span class="nv">module</span> <span class="o">=</span> self._get_module_from_name<span class="o">(</span>name<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/usr/local/Cellar/python/2.7.6_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py&quot;</span>, line 232, in _get_module_from_name
-</span><span class='line'>    __import__<span class="o">(</span>name<span class="o">)</span>
-</span><span class='line'>  File <span class="s2">&quot;/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py&quot;</span>, line 7, in &lt;module&gt;
-</span><span class='line'>    import markdown
-</span><span class='line'>ImportError: No module named markdown
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>----------------------------------------------------------------------
-</span><span class='line'>Ran <span class="m">1</span> <span class="nb">test </span>in 0.001s
-</span><span class='line'>
-</span><span class='line'>FAILED <span class="o">(</span><span class="nv">errors</span><span class="o">=</span>1<span class="o">)</span>
-</span><span class='line'>Destroying <span class="nb">test </span>database <span class="k">for</span> <span class="nb">alias</span> <span class="s1">&#39;default&#39;</span>...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code class="hljs lang-bash">$ git add requirements.txt blogengine/static/css/ templates/blogengine/includes/base.html
+$ git commit -m <span class="hljs-string">'Styled code with Solarized Dark'</span>
+</code></pre>
+<p>Let’s run our tests:</p>
+<pre><code class="hljs lang-bash">$ python manage.py jenkins
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+E
+======================================================================
+ERROR: blogengine.tests (unittest.loader.ModuleImportFailure)
+----------------------------------------------------------------------
+ImportError: Failed to import <span class="hljs-built_in">test</span> module: blogengine.tests
+Traceback (most recent call last):
+  File <span class="hljs-string">"/usr/local/Cellar/python/2.7.6_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py"</span>, line <span class="hljs-number">254</span>, <span class="hljs-keyword">in</span> _find_tests
+    module = self._get_module_from_name(name)
+  File <span class="hljs-string">"/usr/local/Cellar/python/2.7.6_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/loader.py"</span>, line <span class="hljs-number">232</span>, <span class="hljs-keyword">in</span> _get_module_from_name
+    __import__(name)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/blogengine/tests.py"</span>, line <span class="hljs-number">7</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    import markdown
+ImportError: No module named markdown
 
 
+----------------------------------------------------------------------
+Ran <span class="hljs-number">1</span> <span class="hljs-built_in">test</span> <span class="hljs-keyword">in</span> <span class="hljs-number">0.001</span>s
+
+FAILED (errors=<span class="hljs-number">1</span>)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre>
 <p>Whoops! We introduced an error here. If we take a look, we can see that the problem is on line 7, where we import the Markdown module. That makes sense, as we now use a different implementation of Markdown. Fortunately, in Python you can import modules with a different name, which makes this a breeze to fix. Change the line to:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>blogengine/tests.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">markdown2</span> <span class="kn">as</span> <span class="nn">markdown</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, if you run your tests, they should pass. It&rsquo;s important that if a test breaks, you fix it as soon as possible and don&rsquo;t put it off. Let&rsquo;s commit these changes:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add blogengine/tests.py
-</span><span class='line'>git commit -m <span class="s1">&#39;Fixed a broken test&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown2 <span class="hljs-keyword">as</span> markdown
+</code></pre>
+<p>Now, if you run your tests, they should pass. It’s important that if a test breaks, you fix it as soon as possible and don’t put it off. Let’s commit these changes:</p>
+<pre><code class="hljs lang-bash">$ git add blogengine/tests.py
+$ git commit -m <span class="hljs-string">'Fixed a broken test'</span>
+</code></pre>
 <p>Our syntax highlighting is now done! If you want to see it in action using the Solarized Dark theme, check out the copy of this blogging engine hosted <a href="http://blog.shellshocked.info/">here</a>.</p>
+<h1 id="tidying-up">Tidying up</h1>
+<p>Now that our blog is up and running on Heroku, it could do with a bit of work on the front end to make it look a bit nicer. If you recall, we’re using Bootstrap for our front end, so you may want to refer to the documentation for that to give you some ideas on how you want to style your blog.</p>
+<p>Bootstrap has a nifty pager class for Next and Previous links, so let’s apply that to our post list template:</p>
+<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">ul</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"pager"</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page_obj.has_previous %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">li</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"previous"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page_obj.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page_obj.has_next %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">li</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"next"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page_obj.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-title">ul</span>&gt;</span></span>
+</code></pre>
+<p>Let’s also add labels to our categories and tags. We’ll also place our posts and other content inside proper columns:</p>
+<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
-<h1>Tidying up</h1>
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
-<p>Now that our blog is up and running on Heroku, it could do with a bit of work on the front end to make it look a bit nicer. If you recall, we&rsquo;re using Bootstrap for our front end, so you may want to refer to the documentation for that to give you some ideas on how you want to style your blog.</p>
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> object_list %}</span><span class="xml">
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"post col-md-12"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+            </span><span class="hljs-variable">{{ post.text<span class="hljs-filter">|custom</span>_markdown }}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> post.category %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-12"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ post.category.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"label label-primary"</span>&gt;</span></span><span class="hljs-variable">{{ post.category.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> post.tags %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-12"</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> tag <span class="hljs-keyword">in</span> post.tags.all %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ tag.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"label label-success"</span>&gt;</span></span><span class="hljs-variable">{{ tag.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">else</span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;<span class="hljs-title">p</span>&gt;</span>No posts found<span class="hljs-tag">&lt;/<span class="hljs-title">p</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
-<p>Bootstrap has a nifty pager class for Next and Previous links, so let&rsquo;s apply that to our post list template:</p>
+        <span class="hljs-tag">&lt;<span class="hljs-title">ul</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"pager"</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page_obj.has_previous %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">li</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"previous"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page_obj.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page_obj.has_next %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">li</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"next"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page_obj.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-title">ul</span>&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">&quot;pager&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        {% if page_obj.has_previous %}
-</span><span class='line'>        <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">&quot;previous&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        {% if page_obj.has_next %}
-</span><span class='line'>        <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">&quot;next&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        <span class="nt">&lt;/ul&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
+</code></pre>
+<p>We’ll also want to tidy up the layout for our individual post pages:</p>
+<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
-<p>Let&rsquo;s also add labels to our categories and tags. We&rsquo;ll also place our posts and other content inside proper columns:</p>
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"post col-md-12"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ object.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ object.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+        </span><span class="hljs-variable">{{ object.text<span class="hljs-filter">|custom</span>_markdown }}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> object.category %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-12"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ object.category.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"label label-primary"</span>&gt;</span></span><span class="hljs-variable">{{ object.category.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> object.tags %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-12"</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> tag <span class="hljs-keyword">in</span> object.tags.all %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ tag.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"label label-success"</span>&gt;</span></span><span class="hljs-variable">{{ tag.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_list.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
-</span><span class='line'>
-</span><span class='line'>    {% load custom_markdown %}
-</span><span class='line'>
-</span><span class='line'>    {% block content %}
-</span><span class='line'>        {% if object_list %}
-</span><span class='line'>            {% for post in object_list %}
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.get_absolute_url }}&quot;</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;h3&gt;</span>{{ post.pub_date }}<span class="nt">&lt;/h3&gt;</span>
-</span><span class='line'>            {{ post.text|custom_markdown }}
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            {% if post.category %}
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ post.category.get_absolute_url }}&quot;</span><span class="nt">&gt;&lt;span</span> <span class="na">class=</span><span class="s">&quot;label label-primary&quot;</span><span class="nt">&gt;</span>{{ post.category.name }}<span class="nt">&lt;/span&gt;&lt;/a&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            {% endif %}
-</span><span class='line'>            {% if post.tags %}
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            {% for tag in post.tags.all %}
-</span><span class='line'>            <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ tag.get_absolute_url }}&quot;</span><span class="nt">&gt;&lt;span</span> <span class="na">class=</span><span class="s">&quot;label label-success&quot;</span><span class="nt">&gt;</span>{{ tag.name }}<span class="nt">&lt;/span&gt;&lt;/a&gt;</span>
-</span><span class='line'>            {% endfor %}
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            {% endif %}
-</span><span class='line'>            {% endfor %}
-</span><span class='line'>        {% else %}
-</span><span class='line'>            <span class="nt">&lt;p&gt;</span>No posts found<span class="nt">&lt;/p&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">&quot;pager&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        {% if page_obj.has_previous %}
-</span><span class='line'>        <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">&quot;previous&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.previous_page_number }}/&quot;</span><span class="nt">&gt;</span>Previous Page<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        {% if page_obj.has_next %}
-</span><span class='line'>        <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">&quot;next&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/{{ page_obj.next_page_number }}/&quot;</span><span class="nt">&gt;</span>Next Page<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        <span class="nt">&lt;/ul&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    {% endblock %}
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-12"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h4</span>&gt;</span>Comments<span class="hljs-tag">&lt;/<span class="hljs-title">h4</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"fb-comments"</span> <span class="hljs-attribute">data-href</span>=<span class="hljs-value">"http://</span></span></span><span class="hljs-variable">{{ object.site }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value"></span></span></span><span class="hljs-variable">{{ object.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span> <span class="hljs-attribute">data-width</span>=<span class="hljs-value">"470"</span> <span class="hljs-attribute">data-num-posts</span>=<span class="hljs-value">"10"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-
-<p>We&rsquo;ll also want to tidy up the layout for our individual post pages:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/post_detail.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>{% extends &quot;blogengine/includes/base.html&quot; %}
-</span><span class='line'>
-</span><span class='line'>    {% load custom_markdown %}
-</span><span class='line'>
-</span><span class='line'>    {% block content %}
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;post col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>{{ object.title }}<span class="nt">&lt;/h1&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;h3&gt;</span>{{ object.pub_date }}<span class="nt">&lt;/h3&gt;</span>
-</span><span class='line'>        {{ object.text|custom_markdown }}
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        {% if object.category %}
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ object.category.get_absolute_url }}&quot;</span><span class="nt">&gt;&lt;span</span> <span class="na">class=</span><span class="s">&quot;label label-primary&quot;</span><span class="nt">&gt;</span>{{ object.category.name }}<span class="nt">&lt;/span&gt;&lt;/a&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>        {% if object.tags %}
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        {% for tag in object.tags.all %}
-</span><span class='line'>        <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ tag.get_absolute_url }}&quot;</span><span class="nt">&gt;&lt;span</span> <span class="na">class=</span><span class="s">&quot;label label-success&quot;</span><span class="nt">&gt;</span>{{ tag.name }}<span class="nt">&lt;/span&gt;&lt;/a&gt;</span>
-</span><span class='line'>        {% endfor %}
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        {% endif %}
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;h4&gt;</span>Comments<span class="nt">&lt;/h4&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;fb-comments&quot;</span> <span class="na">data-href=</span><span class="s">&quot;http://{{ object.site }}{{ object.get_absolute_url }}&quot;</span> <span class="na">data-width=</span><span class="s">&quot;470&quot;</span> <span class="na">data-num-posts=</span><span class="s">&quot;10&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    {% endblock %}
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
+</code></pre>
 <p>Time to commit our changes:</p>
+<pre><code class="hljs lang-bash">$ git add templates/blogengine/
+$ git commit -m <span class="hljs-string">'Tidied up post templates'</span>
+</code></pre>
+<p>With that done, let’s turn our attention to our base template. We’ll amend the header to collapse down at smaller screen widths. This is easy to do with Bootstrap:</p>
+<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-title">html</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">charset</span>=<span class="hljs-value">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">http-equiv</span>=<span class="hljs-value">"X-UA-Compatible"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> title %}</span><span class="xml">My Django Blog</span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"description"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">""</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"viewport"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"width=device-width, initial-scale=1"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"alternate"</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"application/rss+xml"</span> <span class="hljs-attribute">title</span>=<span class="hljs-value">"Blog posts"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/feeds/posts/"</span> &gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/blogengine/
-</span><span class='line'>git commit -m <span class="s1">&#39;Tidied up post templates&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
 
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> staticfiles %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/css/normalize.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/css/main.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/css/bootstrap-theme.min.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'css/main.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'css/code.css' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
+            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+        &lt;![endif]--&gt;</span>
 
-<p>With that done, let&rsquo;s turn our attention to our base template. We&rsquo;ll amend the header to collapse down at smaller screen widths. This is easy to do with Bootstrap:</p>
+        <span class="hljs-comment">&lt;!-- Add your site or application content here --&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>templates/blogengine/includes/base.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!DOCTYPE html&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;no-js&quot;</span><span class="nt">&gt;</span> <span class="c">&lt;!--&lt;![endif]--&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;title&gt;</span>{% block title %}My Django Blog{% endblock %}<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;alternate&quot;</span> <span class="na">type=</span><span class="s">&quot;application/rss+xml&quot;</span> <span class="na">title=</span><span class="s">&quot;Blog posts&quot;</span> <span class="na">href=</span><span class="s">&quot;/feeds/posts/&quot;</span> <span class="nt">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        {% load staticfiles %}
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/normalize.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/css/main.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/css/bootstrap-theme.min.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;css/main.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;{% static &#39;css/code.css&#39; %}&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
-</span><span class='line'>        <span class="c">&lt;!--[if lt IE 7]&gt;</span>
-</span><span class='line'><span class="c">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
-</span><span class='line'><span class="c">        &lt;![endif]--&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Add your site or application content here --&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;fb-root&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">js</span><span class="p">,</span> <span class="nx">fjs</span> <span class="o">=</span> <span class="nx">d</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">id</span><span class="p">))</span> <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">js</span> <span class="o">=</span> <span class="nx">d</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span> <span class="nx">js</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">js</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="s2">&quot;//connect.facebook.net/en_GB/all.js#xfbml=1&quot;</span><span class="p">;</span>
-</span><span class='line'>                <span class="nx">fjs</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">js</span><span class="p">,</span> <span class="nx">fjs</span><span class="p">);</span>
-</span><span class='line'>            <span class="p">}(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;facebook-jssdk&#39;</span><span class="p">));</span><span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar navbar-static-top navbar-inverse&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container-fluid&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar-header&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">&quot;button&quot;</span> <span class="na">class=</span><span class="s">&quot;navbar-toggle&quot;</span> <span class="na">data-toggle=</span><span class="s">&quot;collapse&quot;</span> <span class="na">data-target=</span><span class="s">&quot;#header-nav&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;icon-bar&quot;</span><span class="nt">&gt;&lt;/span&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/button&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;navbar-brand&quot;</span> <span class="na">href=</span><span class="s">&quot;/&quot;</span><span class="nt">&gt;</span>My Django Blog<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;collapse navbar-collapse&quot;</span> <span class="na">id=</span><span class="s">&quot;header-nav&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">&quot;nav navbar-nav&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                        {% load flatpages %}
-</span><span class='line'>                        {% get_flatpages as flatpages %}
-</span><span class='line'>                        {% for flatpage in flatpages %}
-</span><span class='line'>                        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;{{ flatpage.url }}&quot;</span><span class="nt">&gt;</span>{{ flatpage.title }}<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>                        {% endfor %}
-</span><span class='line'>                        <span class="nt">&lt;li&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;/feeds/posts/&quot;</span><span class="nt">&gt;</span>RSS feed<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/ul&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            {% block header %}
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;page-header&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;h1&gt;</span>My Django Blog<span class="nt">&lt;/h1&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            {% endblock %}
-</span><span class='line'>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                {% block content %}{% endblock %}
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container footer&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;span12&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;p&gt;</span>Copyright <span class="ni">&amp;copy;</span> {% now &quot;Y&quot; %}<span class="nt">&lt;/p&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span><span class="nb">window</span><span class="p">.</span><span class="nx">jQuery</span> <span class="o">||</span> <span class="nb">document</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;&lt;script src=&quot;{% static &#39;</span><span class="nx">bower_components</span><span class="o">/</span><span class="nx">html5</span><span class="o">-</span><span class="nx">boilerplate</span><span class="o">/</span><span class="nx">js</span><span class="o">/</span><span class="nx">vendor</span><span class="o">/</span><span class="nx">jquery</span><span class="o">-</span><span class="mf">1.10</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="nx">min</span><span class="p">.</span><span class="nx">js</span><span class="s1">&#39; %}&quot;&gt;&lt;\/script&gt;&#39;</span><span class="p">)</span><span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/html5-boilerplate/js/plugins.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;{% static &#39;bower_components/bootstrap/dist/js/bootstrap.min.js&#39; %}&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Google Analytics: change UA-XXXXX-X to be your site&#39;s ID. --&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script&gt;</span>
-</span><span class='line'>            <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span><span class="nx">o</span><span class="p">,</span><span class="nx">i</span><span class="p">,</span><span class="nx">l</span><span class="p">,</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">){</span><span class="nx">b</span><span class="p">.</span><span class="nx">GoogleAnalyticsObject</span><span class="o">=</span><span class="nx">l</span><span class="p">;</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">||</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">=</span>
-</span><span class='line'>            <span class="kd">function</span><span class="p">(){(</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">=</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">q</span><span class="o">||</span><span class="p">[]).</span><span class="nx">push</span><span class="p">(</span><span class="nx">arguments</span><span class="p">)});</span><span class="nx">b</span><span class="p">[</span><span class="nx">l</span><span class="p">].</span><span class="nx">l</span><span class="o">=+</span><span class="k">new</span> <span class="nb">Date</span><span class="p">;</span>
-</span><span class='line'>            <span class="nx">e</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span><span class="nx">r</span><span class="o">=</span><span class="nx">o</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="nx">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">];</span>
-</span><span class='line'>            <span class="nx">e</span><span class="p">.</span><span class="nx">src</span><span class="o">=</span><span class="s1">&#39;//www.google-analytics.com/analytics.js&#39;</span><span class="p">;</span>
-</span><span class='line'>            <span class="nx">r</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="nx">r</span><span class="p">)}(</span><span class="nb">window</span><span class="p">,</span><span class="nb">document</span><span class="p">,</span><span class="s1">&#39;script&#39;</span><span class="p">,</span><span class="s1">&#39;ga&#39;</span><span class="p">));</span>
-</span><span class='line'>            <span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">,</span><span class="s1">&#39;UA-XXXXX-X&#39;</span><span class="p">);</span><span class="nx">ga</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span><span class="s1">&#39;pageview&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nt">&lt;/script&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"fb-root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(d, s, id)</span> </span>{
+            <span class="hljs-keyword">var</span> js, fjs = d.getElementsByTagName(s)[<span class="hljs-number">0</span>];
+            <span class="hljs-keyword">if</span> (d.getElementById(id)) <span class="hljs-keyword">return</span>;
+                js = d.createElement(s); js.id = id;
+                js.src = <span class="hljs-string">"//connect.facebook.net/en_GB/all.js#xfbml=1"</span>;
+                fjs.parentNode.insertBefore(js, fjs);
+            }(<span class="hljs-built_in">document</span>, <span class="hljs-string">'script'</span>, <span class="hljs-string">'facebook-jssdk'</span>));</span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
 
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container-fluid"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">button</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"button"</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-toggle"</span> <span class="hljs-attribute">data-toggle</span>=<span class="hljs-value">"collapse"</span> <span class="hljs-attribute">data-target</span>=<span class="hljs-value">"#header-nav"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-brand"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/"</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"collapse navbar-collapse"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"header-nav"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">ul</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"nav navbar-nav"</span>&gt;</span>
+                        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> flatpages %}</span><span class="xml">
+                        </span><span class="hljs-template_tag">{% get_flatpages <span class="hljs-keyword">as</span> flatpages %}</span><span class="xml">
+                        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> flatpage <span class="hljs-keyword">in</span> flatpages %}</span><span class="xml">
+                        <span class="hljs-tag">&lt;<span class="hljs-title">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ flatpage.url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+                        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+                        <span class="hljs-tag">&lt;<span class="hljs-title">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/feeds/posts/"</span>&gt;</span>RSS feed<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">ul</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-<p>Here we&rsquo;ve also added a link to our RSS feed in the header, and another in the page head to facilitate working with browsers that support RSS better.</p>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> header %}</span><span class="xml">
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"page-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml">
 
-<p>Our blog&rsquo;s now looking much more presentable. All that remains is to commit it:</p>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
+                </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git add templates/blogengine/includes/base.html
-</span><span class='line'>git commit -m <span class="s1">&#39;Amended base template&#39;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container footer"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"span12"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">p</span>&gt;</span>Copyright &amp;copy; </span><span class="hljs-template_tag">{% <span class="hljs-keyword">now</span> "Y" %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">p</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript"><span class="hljs-built_in">window</span>.jQuery || <span class="hljs-built_in">document</span>.write(<span class="hljs-string">'&lt;script src="</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/vendor/jquery-1.10.2.min.js' %}</span><span class="xml"><span class="javascript"><span class="hljs-string">"&gt;&lt;\/script&gt;')</span></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/html5-boilerplate/js/plugins.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"</span></span></span><span class="hljs-template_tag">{% <span class="hljs-keyword">static</span> 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
 
+        <span class="hljs-comment">&lt;!-- Google Analytics: change UA-XXXXX-X to be your site's ID. --&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">
+            (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(b,o,i,l,e,r)</span></span>{b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span></span>{(b[l].q=b[l].q||[]).push(<span class="hljs-built_in">arguments</span>)});b[l].l=+<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[<span class="hljs-number">0</span>];
+            e.src=<span class="hljs-string">'//www.google-analytics.com/analytics.js'</span>;
+            r.parentNode.insertBefore(e,r)}(<span class="hljs-built_in">window</span>,<span class="hljs-built_in">document</span>,<span class="hljs-string">'script'</span>,<span class="hljs-string">'ga'</span>));
+            ga(<span class="hljs-string">'create'</span>,<span class="hljs-string">'UA-XXXXX-X'</span>);ga(<span class="hljs-string">'send'</span>,<span class="hljs-string">'pageview'</span>);
+        </span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>Here we’ve also added a link to our RSS feed in the header, and another in the page head to facilitate working with browsers that support RSS better.</p>
+<p>Our blog’s now looking much more presentable. All that remains is to commit it:</p>
+<pre><code class="hljs lang-bash">$ git add templates/blogengine/includes/base.html
+$ git commit -m <span class="hljs-string">'Amended base template'</span>
+</code></pre>
 <p>Now we can push it to GitHub and deploy it on Heroku:</p>
+<pre><code class="hljs lang-bash">$ git push origin master
+$ git push heroku master
+</code></pre>
+<p>And we’re done! Don’t forget, you can grab this lesson with <code>git checkout lesson-6</code>.</p>
+<p>Next time, we’ll cover search (I promise!).</p>
 
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>git push origin master
-</span><span class='line'>git push heroku master
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>And we&rsquo;re done! Don&rsquo;t forget, you can grab this lesson with <code>git checkout lesson-6</code>.</p>
-
-<p>Next time, we&rsquo;ll cover search (I promise!).</p>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-05-25T17:23:28+01:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>5:23 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/tdd/'>tdd</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/" title="Previous Post: Django blog tutorial - the next generation - part 5">&laquo; Django blog tutorial - the next generation - part 5</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/" title="Next Post: Django Blog Tutorial - the Next Generation - Part 7">Django Blog Tutorial - the Next Generation - Part 7 &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'matthewbdaly',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-
-
-  
-</aside>
-
-
+                <ul><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul>
+                <div class="addthis_sharing_toolbox"></div>
+              <section class="comments">
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                    window.disqus_identifier="";
+                    window.disqus_url="http://www.matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6//";
+                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 6";
+                  </script>
+                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
+                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+              </section>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <h1>Recent Posts</h1>
+            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
+            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
+            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
+            <section id="github-profile">
+            </section>
+            <h4>My GitHub repositories</h4>
+            <ul id="github-repos">
+                <li>Loading repositories...</li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Matthew Daly -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
-  
+    <div class="row">
+        <div class="col-md-12">
+            <a href="/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/">Django Blog Tutorial - the Next Generation - Part 7</a>
+            <a href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/">Django Blog Tutorial - the Next Generation - Part 5</a>
+        </div>
+    </div>
 
-<script type="text/javascript">
-      var disqus_shortname = 'matthewdaly';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/';
-        var disqus_url = 'http://matthewdaly.co.uk/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
+</div>
 
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+        <footer>
+            <div class="container">
+                <div class="col-md-12">
+                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
+                </div>
+            </div>
+        </footer>
+        <script type="text/javascript" src="/static/js/all.min.js"></script>
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-17043630-1');ga('send','pageview');
+        </script>
+    </body>
 </html>

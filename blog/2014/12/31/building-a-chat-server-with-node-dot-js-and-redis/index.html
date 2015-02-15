@@ -1,1410 +1,675 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>Building a Chat Server With Node.js and Redis - Matthew Daly's Blog</title>
-  <meta name="author" content="Matthew Daly">
-
-  
-  <meta name="description" content="One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="Matthew Daly's Blog" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-17043630-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">Matthew Daly's Blog</a></h1>
-  
-    <h2>I'm a web developer in Norfolk. This is my blog...</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:matthewdaly.co.uk" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/about/">About</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div>
-<article class="hentry" role="article">
-  
-  <header>
-    
-      <h1 class="entry-title">Building a Chat Server With Node.js and Redis</h1>
-    
-    
-      <p class="meta">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
         
+        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
+        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
+        <title>Building a Chat Server With Node.js and Redis - Matthew Daly&#x27;s Blog</title>
+    </head>
+    <body>
+
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
+
+        <header>
+            <nav class="navbar navbar-inverse navbar-static-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="header-nav">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/blog/archives/">Archives</a></li>
+                                <li><a href="/about/">About</a></li>
+                                <li><a href="/atom.xml">RSS</a></li>
+                            </ul>
+                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
+                                <div class="form-group">
+                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></input>
+                                </div>
+                                <input id="site" name="q" type="hidden" value="site:www.matthewdaly.co.uk" />
+                                <input type="submit" class="btn btn-default"></input>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
+                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
+                </div>
+            </div>
+        </header>
+
+<div class="container">
 
 
-
-
-<time class='entry-date' datetime='2014-12-31T14:10:57+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>31</span><span class='date-suffix'>st</span>, <span class='date-year'>2014</span></span> <span class='time'>2:10 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-<div class="entry-content"><p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we&rsquo;ll build a very simple web-based chat system that demonstrates Redis&rsquo;s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it&rsquo;s widely considered the &ldquo;Hello, World!&rdquo; of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p>
-
-<h2>Installing Node.js</h2>
-
-<p>Since the last tutorial, I&rsquo;ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you&rsquo;re using any flavour of Unix, I highly recommend using it. It&rsquo;s not an option if you&rsquo;re using Windows, however Redis doesn&rsquo;t officially support Windows anyway, so if you want to follow along on a Windows machine I&rsquo;d recommend using a VM.</p>
-
-<p>If you followed the URL shortener tutorial, you should already have everything you need, though I&rsquo;d still recommend switching to NVM as it&rsquo;s very convenient. We&rsquo;ll be using Grunt again, so you&rsquo;ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install -g grunt-cli
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>This assumes you used NVM to install Node - if it&rsquo;s installed globally, you may need to use <code>sudo</code>.</p>
-
-<h2>Installing dependencies</h2>
-
+    <div class="row">
+        <div class="col-md-8">
+            <article class="post">
+                <p class="date">31st December 2014 2:10 pm</p>
+                <h1>Building a Chat Server With Node.js and Redis</h1>
+                <p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we’ll build a very simple web-based chat system that demonstrates Redis’s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it’s widely considered the “Hello, World!” of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p>
+<h2 id="installing-node-js">Installing Node.js</h2>
+<p>Since the last tutorial, I’ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you’re using any flavour of Unix, I highly recommend using it. It’s not an option if you’re using Windows, however Redis doesn’t officially support Windows anyway, so if you want to follow along on a Windows machine I’d recommend using a VM.</p>
+<p>If you followed the URL shortener tutorial, you should already have everything you need, though I’d still recommend switching to NVM as it’s very convenient. We’ll be using Grunt again, so you’ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p>
+<pre><code class="hljs lang-bash">$ npm install -g grunt-cli
+</code></pre>
+<p>This assumes you used NVM to install Node - if it’s installed globally, you may need to use <code>sudo</code>.</p>
+<h2 id="installing-dependencies">Installing dependencies</h2>
 <p>As usual with a Node.js project, our first step is to create our <code>package.json</code> file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm init
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-bash">$ npm init
+</code></pre>
 <p>Answer the questions so you end up with something like this (or just paste this into <code>package.json</code> and amend it as you see fit):</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>package.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Chat client&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;grunt test --verbose&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now let&rsquo;s install our dependencies:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>npm install express hbs redis hiredis socket.io socket.io-client --save
-</span><span class='line'>npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
+<pre><code class="hljs lang-json">{
+  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"babblr"</span></span>,
+  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
+  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"Chat client"</span></span>,
+  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
+  "<span class="hljs-attribute">scripts</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">test</span>": <span class="hljs-value"><span class="hljs-string">"grunt test --verbose"</span>
+  </span>}</span>,
+  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
+    <span class="hljs-string">"chat"</span>
+  ]</span>,
+  "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
+  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
+</span>}
+</code></pre>
+<p>Now let’s install our dependencies:</p>
+<pre><code class="hljs lang-bash">$ npm install express hbs redis hiredis socket.io socket.io-client --save
+$ npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
+</code></pre>
 <p>These two commands will install our dependencies.</p>
-
-<p>Now, if you followed on with the URL shortener tutorial, you&rsquo;ll notice that we aren&rsquo;t using Jade - instead we&rsquo;re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We&rsquo;ll also use Socket.IO extensively on this project.</p>
-
-<h2>Support files</h2>
-
-<p>As before, we&rsquo;ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We&rsquo;ll need a Grunt configuration for that, so here it is:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Gruntfile.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">grunt</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">initConfig</span><span class="p">({</span>
-</span><span class='line'>        <span class="nx">jshint</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">all</span><span class="o">:</span> <span class="p">[</span>
-</span><span class='line'>                <span class="s1">&#39;test/*.js&#39;</span><span class="p">,</span>
-</span><span class='line'>                <span class="s1">&#39;index.js&#39;</span>
-</span><span class='line'>            <span class="p">]</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="nx">mocha_istanbul</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">coverage</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="c1">// the folder, not the files,</span>
-</span><span class='line'>                <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                    <span class="nx">mask</span><span class="o">:</span> <span class="s1">&#39;*.js&#39;</span><span class="p">,</span>
-</span><span class='line'>                    <span class="nx">reportFormats</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;cobertura&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;lcovonly&#39;</span><span class="p">]</span>
-</span><span class='line'>                <span class="p">}</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">},</span>
-</span><span class='line'>        <span class="nx">coveralls</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">options</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span><span class="p">,</span>
-</span><span class='line'>                <span class="nx">force</span><span class="o">:</span> <span class="kc">false</span>
-</span><span class='line'>            <span class="p">},</span>
-</span><span class='line'>            <span class="nx">app</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">src</span><span class="o">:</span> <span class="s1">&#39;coverage/lcov.info&#39;</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Load tasks</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-contrib-jshint&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-coveralls&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">loadNpmTasks</span><span class="p">(</span><span class="s1">&#39;grunt-mocha-istanbul&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Register tasks</span>
-</span><span class='line'>    <span class="nx">grunt</span><span class="p">.</span><span class="nx">registerTask</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;jshint&#39;</span><span class="p">,</span> <span class="s1">&#39;mocha_istanbul:coverage&#39;</span><span class="p">,</span> <span class="s1">&#39;coveralls&#39;</span><span class="p">]);</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We also need a <code>.bowerrc</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>.bowerrc</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;directory&quot;</span><span class="p">:</span> <span class="s2">&quot;static/bower_components&quot;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>And a <code>bower.json</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>bower.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;babblr&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;authors&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;Matthew Daly &lt;matthewbdaly@gmail.com&gt;&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A simple chat server&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;moduleType&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;node&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;chat&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;GPLv2&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;homepage&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.matthewdaly.co.uk&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;private&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;ignore&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;**/.*&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;node_modules&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;bower_components&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;test&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;tests&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;html5-boilerplate&quot;</span><span class="p">:</span> <span class="s2">&quot;~4.3.0&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;jquery&quot;</span><span class="p">:</span> <span class="s2">&quot;~2.1.1&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;bootstrap&quot;</span><span class="p">:</span> <span class="s2">&quot;~3.3.1&quot;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Then install the Bower dependencies:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>bower install
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We also need a <code>Procfile</code> so we can run it on Heroku:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Procfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>web: node index.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, let&rsquo;s create the main file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>touch index.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>And our test file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir <span class="nb">test</span>
-</span><span class='line'>touch <span class="nb">test</span>/test.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<h2>Implementing the chat server</h2>
-
-<p>Next, let&rsquo;s implement our first test. First of all, we&rsquo;ll verify that the index route works:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
-</span><span class='line'><span class="cm">/*global describe: false, before: false, after: false, it: false */</span>
-</span><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare the variables used</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">expect</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;chai&#39;</span><span class="p">).</span><span class="nx">expect</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">redis</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io-client&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">;</span>
-</span><span class='line'><span class="nx">client</span> <span class="o">=</span> <span class="nx">redis</span><span class="p">.</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Server tasks</span>
-</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Beforehand, start the server</span>
-</span><span class='line'>    <span class="nx">before</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Starting the server&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Afterwards, stop the server and empty the database</span>
-</span><span class='line'>    <span class="nx">after</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Stopping the server&#39;</span><span class="p">);</span>
-</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">flushdb</span><span class="p">();</span>
-</span><span class='line'>        <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Test the index route</span>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test the index route&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should return a page with the title Babblr&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">request</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://localhost:5000/&#39;</span> <span class="p">},</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">body</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Babblr&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusCode</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;content-type&#39;</span><span class="p">]).</span><span class="nx">to</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;text/html; charset=utf-8&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Note that this is very similar to the first test for the URL shortener, because it&rsquo;s doing basically the same thing.</p>
-
-<p>Now, run the test and make sure it fails:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> a page with the title Babblr
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">0</span> passing <span class="o">(</span>873ms<span class="o">)</span>
-</span><span class='line'>  <span class="m">1</span> failing
-</span><span class='line'>
-</span><span class='line'>  1<span class="o">)</span> server Test the index route should <span class="k">return</span> a page with the title Babblr:
-</span><span class='line'>     Uncaught AssertionError: expected undefined to include <span class="s1">&#39;Babblr&#39;</span>
-</span><span class='line'>      at Request._callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/test/test.js:34:33<span class="o">)</span>
-</span><span class='line'>      at self.callback <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22<span class="o">)</span>
-</span><span class='line'>      at Request.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at Request.onRequestError <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:971:8<span class="o">)</span>
-</span><span class='line'>      at ClientRequest.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at Socket.socketErrorListener <span class="o">(</span>http.js:1552:9<span class="o">)</span>
-</span><span class='line'>      at Socket.emit <span class="o">(</span>events.js:95:17<span class="o">)</span>
-</span><span class='line'>      at net.js:441:14
-</span><span class='line'>      at process._tickCallback <span class="o">(</span>node.js:442:13<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 0/0 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt;
-</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>With that confirmed, we can start writing code to make the test pass:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="cm">/*jslint node: true */</span>
-</span><span class='line'><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare variables used</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">app</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">,</span> <span class="nx">client</span><span class="p">,</span> <span class="nx">express</span><span class="p">,</span> <span class="nx">hbs</span><span class="p">,</span> <span class="nx">io</span><span class="p">,</span> <span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">,</span> <span class="nx">subscribe</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Define values</span>
-</span><span class='line'><span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
-</span><span class='line'><span class="nx">port</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PORT</span> <span class="o">||</span> <span class="mi">5000</span><span class="p">;</span>
-</span><span class='line'><span class="nx">base_url</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BASE_URL</span> <span class="o">||</span> <span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="nx">hbs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set up connection to Redis</span>
-</span><span class='line'><span class="cm">/* istanbul ignore if */</span>
-</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">rtg</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">).</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REDISTOGO_URL</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;redis&quot;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">port</span><span class="p">,</span> <span class="nx">rtg</span><span class="p">.</span><span class="nx">hostname</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">client</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
-</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">auth</span><span class="p">(</span><span class="nx">rtg</span><span class="p">.</span><span class="nx">auth</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]);</span>
-</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">client</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'>    <span class="nx">subscribe</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;redis&#39;</span><span class="p">).</span><span class="nx">createClient</span><span class="p">();</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set up templating</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;view engine&#39;</span><span class="p">,</span> <span class="s2">&quot;hbs&quot;</span><span class="p">);</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">,</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;hbs&#39;</span><span class="p">).</span><span class="nx">__express</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Register partials</span>
-</span><span class='line'><span class="nx">hbs</span><span class="p">.</span><span class="nx">registerPartials</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/views/partials&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Set URL</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;base_url&#39;</span><span class="p">,</span> <span class="nx">base_url</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Define index route</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Serve static files</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/static&#39;</span><span class="p">));</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Listen</span>
-</span><span class='line'><span class="nx">io</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;socket.io&#39;</span><span class="p">)({</span>
-</span><span class='line'><span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">port</span><span class="p">));</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Listening on port &quot;</span> <span class="o">+</span> <span class="nx">port</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you compare this to the code for the URL shortener, you&rsquo;ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that&rsquo;s because we need to do so when using Pub/Sub with Redis. You&rsquo;ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we&rsquo;ll be using Socket.IO.</p>
-
-<p>Now, you can run your tests again at this point, but they won&rsquo;t pass because we haven&rsquo;t created our views. So let&rsquo;s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/index.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>{{&gt; header }}
-</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;conversation&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-4&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;form&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;form-group&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                            <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;message&quot;</span><span class="nt">&gt;</span>Message<span class="nt">&lt;/label&gt;</span>
-</span><span class='line'>                            <span class="nt">&lt;textarea</span> <span class="na">class=</span><span class="s">&quot;form-control&quot;</span> <span class="na">id=</span><span class="s">&quot;message&quot;</span> <span class="na">rows=</span><span class="s">&quot;20&quot;</span><span class="nt">&gt;&lt;/textarea&gt;</span>
-</span><span class='line'>                            <span class="nt">&lt;a</span> <span class="na">id=</span><span class="s">&quot;submitbutton&quot;</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary form-control&quot;</span><span class="nt">&gt;</span>Submit<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                        <span class="nt">&lt;div&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;/form&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>{{&gt; footer }}
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Add this to <code>views/partials/header.hbs</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/partials/header.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="cp">&lt;!DOCTYPE html&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if lt IE 7]&gt;      &lt;html class=&quot;no-js lt-ie9 lt-ie8 lt-ie7&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 7]&gt;         &lt;html class=&quot;no-js lt-ie9 lt-ie8&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if IE 8]&gt;         &lt;html class=&quot;no-js lt-ie9&quot;&gt; &lt;![endif]--&gt;</span>
-</span><span class='line'><span class="c">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="nt">&lt;html</span> <span class="na">class=</span><span class="s">&quot;no-js&quot;</span><span class="nt">&gt;</span> <span class="c">&lt;!--&lt;![endif]--&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">&quot;X-UA-Compatible&quot;</span> <span class="na">content=</span><span class="s">&quot;IE=edge&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;title&gt;</span>Babblr<span class="nt">&lt;/title&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;description&quot;</span> <span class="na">content=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content=</span><span class="s">&quot;width=device-width, initial-scale=1&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;/bower_components/bootstrap/dist/css/bootstrap.min.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;/bower_components/bootstrap/dist/css/bootstrap-theme.min.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href=</span><span class="s">&quot;/css/style.css&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
-</span><span class='line'>        <span class="c">&lt;!--[if lt IE 7]&gt;</span>
-</span><span class='line'><span class="c">            &lt;p class=&quot;browsehappy&quot;&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href=&quot;http://browsehappy.com/&quot;&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;</span>
-</span><span class='line'><span class="c">        &lt;![endif]--&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;nav</span> <span class="na">class=</span><span class="s">&quot;navbar navbar-inverse navbar-static-top&quot;</span> <span class="na">role=</span><span class="s">&quot;navigation&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;navbar-header&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>                    <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;navbar-brand&quot;</span> <span class="na">href=</span><span class="s">&quot;#&quot;</span><span class="nt">&gt;</span>Babblr<span class="nt">&lt;/a&gt;</span>
-</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;/nav&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>And add this to <code>views/partials/footer.hbs</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>views/partials/footer.hbs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/bower_components/jquery/dist/jquery.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/bower_components/bootstrap/dist/js/bootstrap.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/socket.io/socket.io.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;/js/main.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
-</span><span class='line'><span class="nt">&lt;/html&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>You&rsquo;ll also want to create placeholder CSS and JavaScript files:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir static/js
-</span><span class='line'>mkdir static/css
-</span><span class='line'>touch static/js/main.js
-</span><span class='line'>touch static/css/style.css
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>The test should now pass:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'> grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>41ms<span class="o">)</span>
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>54ms<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt; Done. Check coverage folder.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
-</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
-</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Don&rsquo;t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p>
-
-<p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>test/test.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'>    <span class="c1">// Test sending a message</span>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Test sending a message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">it</span><span class="p">(</span><span class="s2">&quot;should return &#39;Message received&#39;&quot;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="c1">// Connect to server</span>
-</span><span class='line'>            <span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">&#39;http://localhost:5000&#39;</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>                <span class="s1">&#39;reconnection delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>                <span class="s1">&#39;reopen delay&#39;</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>                <span class="s1">&#39;force new connection&#39;</span> <span class="o">:</span> <span class="kc">true</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// Handle the message being received</span>
-</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nx">expect</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">to</span><span class="p">.</span><span class="nx">include</span><span class="p">(</span><span class="s1">&#39;Message received&#39;</span><span class="p">);</span>
-</span><span class='line'>                <span class="nx">socket</span><span class="p">.</span><span class="nx">disconnect</span><span class="p">();</span>
-</span><span class='line'>                <span class="nx">done</span><span class="p">();</span>
-</span><span class='line'>            <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// Send the message</span>
-</span><span class='line'>            <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="s1">&#39;Message received&#39;</span> <span class="p">});</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let&rsquo;s run the tests to make sure we get the expected result:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>337ms<span class="o">)</span>
-</span><span class='line'>    Test sending a message
-</span><span class='line'>      1<span class="o">)</span> should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">1</span> passing <span class="o">(</span>2s<span class="o">)</span>
-</span><span class='line'>  <span class="m">1</span> failing
-</span><span class='line'>
-</span><span class='line'>  1<span class="o">)</span> server Test sending a message should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span>:
-</span><span class='line'>     Error: timeout of 2000ms exceeded
-</span><span class='line'>      at null.&lt;anonymous&gt; <span class="o">(</span>/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:159:19<span class="o">)</span>
-</span><span class='line'>      at Timer.listOnTimeout <span class="o">[</span>as ontimeout<span class="o">]</span> <span class="o">(</span>timers.js:112:15<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 24/24 <span class="o">)</span>, <span class="m">5</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 1/1 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 24/24 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt;
-</span><span class='line'>Warning: Task <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, let&rsquo;s implement this functionality. Add this at the end of <code>index.js</code>:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>index.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// Handle new messages</span>
-</span><span class='line'><span class="nx">io</span><span class="p">.</span><span class="nx">sockets</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;connection&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">socket</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// Subscribe to the Redis channel</span>
-</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
-</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="c1">// Publish it</span>
-</span><span class='line'>        <span class="nx">client</span><span class="p">.</span><span class="nx">publish</span><span class="p">(</span><span class="s1">&#39;ChatChannel&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Handle receiving messages</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">callback</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">channel</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">};</span>
-</span><span class='line'>    <span class="nx">subscribe</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Handle disconnect</span>
-</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;disconnect&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">subscribe</span><span class="p">.</span><span class="nx">removeListener</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>We&rsquo;ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p>
-
-<p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p>
-
-<p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p>
-
-<p>We&rsquo;ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>static/js/main.js</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Set up the connection</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">field</span><span class="p">,</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">output</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Get a reference to the input</span>
-</span><span class='line'>    <span class="nx">field</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;textarea#message&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Get a reference to the output</span>
-</span><span class='line'>    <span class="nx">output</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;div.conversation&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Handle message submit</span>
-</span><span class='line'>    <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;a#submitbutton&#39;</span><span class="p">).</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="c1">// Create the message</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">msg</span><span class="p">;</span>
-</span><span class='line'>        <span class="nx">msg</span> <span class="o">=</span> <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">();</span>
-</span><span class='line'>        <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">msg</span> <span class="p">});</span>
-</span><span class='line'>        <span class="nx">field</span><span class="p">.</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Handle incoming messages</span>
-</span><span class='line'>    <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="c1">// Insert the message</span>
-</span><span class='line'>        <span class="nx">output</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s1">&#39;&lt;p&gt;Anonymous Coward : &#39;</span> <span class="o">+</span> <span class="nx">data</span> <span class="o">+</span> <span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won&rsquo;t implement user names at this point (though I plan it for a future instalment).</p>
-
-<p>We&rsquo;ll also add a little bit of additional styling:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>static/css/style.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">div</span><span class="nc">.conversation</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">height</span><span class="o">:</span> <span class="m">500px</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">overflow-y</span><span class="o">:</span> <span class="k">scroll</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">border</span><span class="o">:</span> <span class="m">1px</span> <span class="k">solid</span> <span class="m">#000</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">padding</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Now, if you run your tests, they should pass:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>grunt <span class="nb">test</span>
-</span><span class='line'>Running <span class="s2">&quot;jshint:all&quot;</span> <span class="o">(</span>jshint<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; <span class="m">2</span> files lint free.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;mocha_istanbul:coverage&quot;</span> <span class="o">(</span>mocha_istanbul<span class="o">)</span> task
-</span><span class='line'>Listening on port 5000
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  server
-</span><span class='line'>Starting the server
-</span><span class='line'>    Test the index route
-</span><span class='line'>      ✓ should <span class="k">return</span> a page with the title Babblr <span class="o">(</span>40ms<span class="o">)</span>
-</span><span class='line'>    Test sending a message
-</span><span class='line'>      ✓ should <span class="k">return</span> <span class="s1">&#39;Message received&#39;</span> <span class="o">(</span>45ms<span class="o">)</span>
-</span><span class='line'>Stopping the server
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>  <span class="m">2</span> passing <span class="o">(</span>101ms<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>Writing coverage object <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage/coverage.json<span class="o">]</span>
-</span><span class='line'>Writing coverage reports at <span class="o">[</span>/Users/matthewdaly/Projects/babblr/coverage<span class="o">]</span>
-</span><span class='line'><span class="o">=============================================================================</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">===============================</span> Coverage <span class="nv">summary</span> <span class="o">===============================</span>
-</span><span class='line'>Statements   : 100% <span class="o">(</span> 33/33 <span class="o">)</span>, <span class="m">5</span> ignored
-</span><span class='line'>Branches     : 100% <span class="o">(</span> 6/6 <span class="o">)</span>, <span class="m">1</span> ignored
-</span><span class='line'>Functions    : 100% <span class="o">(</span> 5/5 <span class="o">)</span>
-</span><span class='line'>Lines        : 100% <span class="o">(</span> 33/33 <span class="o">)</span>
-</span><span class='line'><span class="o">================================================================================</span>
-</span><span class='line'>&gt;&gt; Done. Check coverage folder.
-</span><span class='line'>
-</span><span class='line'>Running <span class="s2">&quot;coveralls:app&quot;</span> <span class="o">(</span>coveralls<span class="o">)</span> task
-</span><span class='line'>&gt;&gt; Failed to submit <span class="s1">&#39;coverage/lcov.info&#39;</span> to coveralls: Bad response: <span class="m">422</span> <span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="s2">&quot;Couldn&#39;t find a repository matching this job.&quot;</span>,<span class="s2">&quot;error&quot;</span>:true<span class="o">}</span>
-</span><span class='line'>&gt;&gt; Failed to submit coverage results to coveralls
-</span><span class='line'>Warning: Task <span class="s2">&quot;coveralls:app&quot;</span> failed. Use --force to <span class="k">continue</span>.
-</span><span class='line'>
-</span><span class='line'>Aborted due to warnings.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>If you now run the following command:</p>
-
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>node index.js
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-
-<p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p>
-
-<h2>Wrapping up</h2>
-
-<p>This illustrates just how straightforward it is to use Redis&rsquo;s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we&rsquo;ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p>
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">Matthew Daly</span></span>
-
-      
-
-
-
-
-<time class='entry-date' datetime='2014-12-31T14:10:57+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>31</span><span class='date-suffix'>st</span>, <span class='date-year'>2014</span></span> <span class='time'>2:10 pm</span></time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/node-dot-js/'>node.js</a>, <a class='category' href='/blog/categories/redis/'>redis</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/" data-via="mattbd" data-counturl="http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2014/12/28/my-first-grunt-plugin/" title="Previous Post: My first Grunt plugin">&laquo; My first Grunt plugin</a>
-      
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-  </section>
-
-</div>
-
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a>
-      </li>
-    
-  </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/matthewbdaly">@matthewbdaly</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
+<p>Now, if you followed on with the URL shortener tutorial, you’ll notice that we aren’t using Jade - instead we’re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We’ll also use Socket.IO extensively on this project.</p>
+<h2 id="support-files">Support files</h2>
+<p>As before, we’ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We’ll need a Grunt configuration for that, so here it is:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
+<span class="hljs-pi">    'use strict'</span>;
+
+    grunt.initConfig({
+        jshint: {
+            all: [
+                <span class="hljs-string">'test/*.js'</span>,
+                <span class="hljs-string">'index.js'</span>
+            ]
+        },
+        mocha_istanbul: {
+            coverage: {
+                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
+                options: {
+                    mask: <span class="hljs-string">'*.js'</span>,
+                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>, <span class="hljs-string">'lcovonly'</span>]
+                }
+            }
+        },
+        coveralls: {
+            options: {
+                src: <span class="hljs-string">'coverage/lcov.info'</span>,
+                force: <span class="hljs-literal">false</span>
+            },
+            app: {
+                src: <span class="hljs-string">'coverage/lcov.info'</span>
+            }
         }
+    });
 
-        github.showRepos({
-            user: 'matthewbdaly',
-            count: 0,
-            skip_forks: true,
-            target: '#gh_repos'
+    <span class="hljs-comment">// Load tasks</span>
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-coveralls'</span>);
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
+
+    <span class="hljs-comment">// Register tasks</span>
+    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>, <span class="hljs-string">'coveralls'</span>]);
+};
+</code></pre>
+<p>We also need a <code>.bowerrc</code>:</p>
+<pre><code class="hljs lang-json">{
+    "<span class="hljs-attribute">directory</span>": <span class="hljs-value"><span class="hljs-string">"static/bower_components"</span>
+</span>}
+</code></pre>
+<p>And a <code>bower.json</code>:</p>
+<pre><code class="hljs lang-json">{
+  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"babblr"</span></span>,
+  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
+  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
+  "<span class="hljs-attribute">authors</span>": <span class="hljs-value">[
+    <span class="hljs-string">"Matthew Daly &lt;matthewbdaly@gmail.com&gt;"</span>
+  ]</span>,
+  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A simple chat server"</span></span>,
+  "<span class="hljs-attribute">moduleType</span>": <span class="hljs-value">[
+    <span class="hljs-string">"node"</span>
+  ]</span>,
+  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
+    <span class="hljs-string">"chat"</span>
+  ]</span>,
+  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span></span>,
+  "<span class="hljs-attribute">homepage</span>": <span class="hljs-value"><span class="hljs-string">"http://www.matthewdaly.co.uk"</span></span>,
+  "<span class="hljs-attribute">private</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+  "<span class="hljs-attribute">ignore</span>": <span class="hljs-value">[
+    <span class="hljs-string">"**/.*"</span>,
+    <span class="hljs-string">"node_modules"</span>,
+    <span class="hljs-string">"bower_components"</span>,
+    <span class="hljs-string">"test"</span>,
+    <span class="hljs-string">"tests"</span>
+  ]</span>,
+  "<span class="hljs-attribute">dependencies</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">html5-boilerplate</span>": <span class="hljs-value"><span class="hljs-string">"~4.3.0"</span></span>,
+    "<span class="hljs-attribute">jquery</span>": <span class="hljs-value"><span class="hljs-string">"~2.1.1"</span></span>,
+    "<span class="hljs-attribute">bootstrap</span>": <span class="hljs-value"><span class="hljs-string">"~3.3.1"</span>
+  </span>}
+</span>}
+</code></pre>
+<p>Then install the Bower dependencies:</p>
+<pre><code class="hljs lang-bash">$ bower install
+</code></pre>
+<p>We also need a <code>Procfile</code> so we can run it on Heroku:</p>
+<pre><code class="hljs lang-bash">web: node index.js
+</code></pre>
+<p>Now, let’s create the main file:</p>
+<pre><code class="hljs lang-bash">$ touch index.js
+</code></pre>
+<p>And our test file:</p>
+<pre><code class="hljs lang-bash">$ mkdir <span class="hljs-built_in">test</span>
+$ touch <span class="hljs-built_in">test</span>/test.js
+</code></pre>
+<h2 id="implementing-the-chat-server">Implementing the chat server</h2>
+<p>Next, let’s implement our first test. First of all, we’ll verify that the index route works:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
+<span class="hljs-pi">"use strict"</span>;
+
+<span class="hljs-comment">// Declare the variables used</span>
+<span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
+    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
+    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
+    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
+    io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>),
+    client;
+client = redis.createClient();
+
+<span class="hljs-comment">// Server tasks</span>
+describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+
+    <span class="hljs-comment">// Beforehand, start the server</span>
+    before(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
+        done();
+    });
+
+    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
+    after(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
+        client.flushdb();
+        done();
+    });
+
+    <span class="hljs-comment">// Test the index route</span>
+    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">'should return a page with the title Babblr'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            request.get({ url: <span class="hljs-string">'http://localhost:5000/'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+                expect(body).to.include(<span class="hljs-string">'Babblr'</span>);
+                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
+                done();
+            });
         });
     });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
-</section>
+});
+</code></pre>
+<p>Note that this is very similar to the first test for the URL shortener, because it’s doing basically the same thing.</p>
+<p>Now, run the test and make sure it fails:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+
+
+  server
+Starting the server
+    Test the index route
+      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> a page with the title Babblr
+Stopping the server
+
+
+  <span class="hljs-number">0</span> passing (<span class="hljs-number">873</span>ms)
+  <span class="hljs-number">1</span> failing
+
+  <span class="hljs-number">1</span>) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Babblr:
+     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Babblr'</span>
+      at Request._callback (/Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">34</span>:<span class="hljs-number">33</span>)
+      at self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:<span class="hljs-number">373</span>:<span class="hljs-number">22</span>)
+      at Request.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at Request.onRequestError (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:<span class="hljs-number">971</span>:<span class="hljs-number">8</span>)
+      at ClientRequest.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at Socket.socketErrorListener (http.js:<span class="hljs-number">1552</span>:<span class="hljs-number">9</span>)
+      at Socket.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+      at net.js:<span class="hljs-number">441</span>:<span class="hljs-number">14</span>
+      at process._tickCallback (node.js:<span class="hljs-number">442</span>:<span class="hljs-number">13</span>)
 
 
 
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>With that confirmed, we can start writing code to make the test pass:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-pi">'use strict'</span>;
+
+<span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, client, express, hbs, io, port, rtg, subscribe;
+
+<span class="hljs-comment">// Define values</span>
+express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+app = express();
+port = process.env.PORT || <span class="hljs-number">5000</span>;
+base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+    subscribe.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"hbs"</span>);
+app.engine(<span class="hljs-string">'hbs'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>).__express);
+
+<span class="hljs-comment">// Register partials</span>
+hbs.registerPartials(__dirname + <span class="hljs-string">'/views/partials'</span>);
+
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
+
+<span class="hljs-comment">// Define index route</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+    res.render(<span class="hljs-string">'index'</span>);
+});
+
+<span class="hljs-comment">// Serve static files</span>
+app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
+
+<span class="hljs-comment">// Listen</span>
+io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)({
+}).listen(app.listen(port));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Listening on port "</span> + port);
+</code></pre>
+<p>If you compare this to the code for the URL shortener, you’ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that’s because we need to do so when using Pub/Sub with Redis. You’ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we’ll be using Socket.IO.</p>
+<p>Now, you can run your tests again at this point, but they won’t pass because we haven’t created our views. So let’s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
+<pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-expression">{{&gt; <span class="hljs-variable">header</span> }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-8"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"conversation"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-4"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">form</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"form-group"</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-title">label</span> <span class="hljs-attribute">for</span>=<span class="hljs-value">"message"</span>&gt;</span>Message<span class="hljs-tag">&lt;/<span class="hljs-title">label</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-title">textarea</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"form-control"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"message"</span> <span class="hljs-attribute">rows</span>=<span class="hljs-value">"20"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">textarea</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"submitbutton"</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"btn btn-primary form-control"</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-title">form</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+</span><span class="hljs-expression">{{&gt; <span class="hljs-variable">footer</span> }}</span><span class="xml"></span>
+</code></pre>
+<p>Add this to <code>views/partials/header.hbs</code>:</p>
+<pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-title">html</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">charset</span>=<span class="hljs-value">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">http-equiv</span>=<span class="hljs-value">"X-UA-Compatible"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"description"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">""</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"viewport"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"width=device-width, initial-scale=1"</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/css/bootstrap.min.css"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/css/bootstrap-theme.min.css"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/css/style.css"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
+            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+        &lt;![endif]--&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">nav</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-inverse navbar-static-top"</span> <span class="hljs-attribute">role</span>=<span class="hljs-value">"navigation"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-brand"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"#"</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">nav</span>&gt;</span></span>
+</code></pre>
+<p>And add this to <code>views/partials/footer.hbs</code>:</p>
+<pre><code class="hljs lang-handlebars"><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/jquery/dist/jquery.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/js/bootstrap.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/socket.io/socket.io.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/js/main.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>You’ll also want to create placeholder CSS and JavaScript files:</p>
+<pre><code class="hljs lang-bash">$ mkdir static/js
+$ mkdir static/css
+$ touch static/js/main.js
+$ touch static/css/style.css
+</code></pre>
+<p>The test should now pass:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
 
 
-  
-</aside>
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">41</span>ms)
+Stopping the server
 
 
+  <span class="hljs-number">1</span> passing (<span class="hljs-number">54</span>ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> ), <span class="hljs-number">5</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: <span class="hljs-number">422</span> {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>Don’t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p>
+<p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p>
+<pre><code class="hljs lang-javascript">
+    <span class="hljs-comment">// Test sending a message</span>
+    describe(<span class="hljs-string">'Test sending a message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        it(<span class="hljs-string">"should return 'Message received'"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+            <span class="hljs-comment">// Connect to server</span>
+            <span class="hljs-keyword">var</span> socket = io.connect(<span class="hljs-string">'http://localhost:5000'</span>, {
+                <span class="hljs-string">'reconnection delay'</span> : <span class="hljs-number">0</span>,
+                <span class="hljs-string">'reopen delay'</span> : <span class="hljs-number">0</span>,
+                <span class="hljs-string">'force new connection'</span> : <span class="hljs-literal">true</span>
+            });
+
+            <span class="hljs-comment">// Handle the message being received</span>
+            socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
+                expect(data).to.include(<span class="hljs-string">'Message received'</span>);
+                socket.disconnect();
+                done();
+            });
+
+            <span class="hljs-comment">// Send the message</span>
+            socket.emit(<span class="hljs-string">'send'</span>, { message: <span class="hljs-string">'Message received'</span> });
+        });
+    });
+</code></pre>
+<p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let’s run the tests to make sure we get the expected result:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">337</span>ms)
+    Test sending a message
+      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>
+Stopping the server
+
+
+  <span class="hljs-number">1</span> passing (<span class="hljs-number">2</span>s)
+  <span class="hljs-number">1</span> failing
+
+  <span class="hljs-number">1</span>) server Test sending a message should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>:
+     Error: timeout of <span class="hljs-number">2000</span>ms exceeded
+      at null.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:<span class="hljs-number">159</span>:<span class="hljs-number">19</span>)
+      at Timer.listOnTimeout [as ontimeout] (timers.js:<span class="hljs-number">112</span>:<span class="hljs-number">15</span>)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> ), <span class="hljs-number">5</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>Now, let’s implement this functionality. Add this at the end of <code>index.js</code>:</p>
+<pre><code class="hljs lang-javascript"><span class="hljs-comment">// Handle new messages</span>
+io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(socket)</span> </span>{
+    <span class="hljs-comment">// Subscribe to the Redis channel</span>
+    subscribe.subscribe(<span class="hljs-string">'ChatChannel'</span>);
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'send'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
+        <span class="hljs-comment">// Publish it</span>
+        client.publish(<span class="hljs-string">'ChatChannel'</span>, data.message);
+    });
+
+    <span class="hljs-comment">// Handle receiving messages</span>
+    <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(channel, data)</span> </span>{
+        socket.emit(<span class="hljs-string">'message'</span>, data);
+    };
+    subscribe.on(<span class="hljs-string">'message'</span>, callback);
+
+    <span class="hljs-comment">// Handle disconnect</span>
+    socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
+    });
+});
+</code></pre>
+<p>We’ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p>
+<p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p>
+<p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p>
+<p>We’ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p>
+<pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">    'use strict'</span>;
+
+    <span class="hljs-comment">// Set up the connection</span>
+    <span class="hljs-keyword">var</span> field, socket, output;
+    socket = io.connect(<span class="hljs-built_in">window</span>.location.href);
+
+    <span class="hljs-comment">// Get a reference to the input</span>
+    field = $(<span class="hljs-string">'textarea#message'</span>);
+
+    <span class="hljs-comment">// Get a reference to the output</span>
+    output = $(<span class="hljs-string">'div.conversation'</span>);
+
+    <span class="hljs-comment">// Handle message submit</span>
+    $(<span class="hljs-string">'a#submitbutton'</span>).on(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        <span class="hljs-comment">// Create the message</span>
+        <span class="hljs-keyword">var</span> msg;
+        msg = field.val();
+        socket.emit(<span class="hljs-string">'send'</span>, { message: msg });
+        field.val(<span class="hljs-string">''</span>);
+    });
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
+        <span class="hljs-comment">// Insert the message</span>
+        output.append(<span class="hljs-string">'&lt;p&gt;Anonymous Coward : '</span> + data + <span class="hljs-string">'&lt;/p&gt;'</span>);
+    });
+});
+</code></pre>
+<p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won’t implement user names at this point (though I plan it for a future instalment).</p>
+<p>We’ll also add a little bit of additional styling:</p>
+<pre><code class="hljs lang-css"><span class="hljs-tag">div</span><span class="hljs-class">.conversation</span> <span class="hljs-rules">{
+    <span class="hljs-rule"><span class="hljs-attribute">height</span>:<span class="hljs-value"> <span class="hljs-number">500px</span></span></span>;
+    <span class="hljs-rule"><span class="hljs-attribute">overflow-y</span>:<span class="hljs-value"> scroll</span></span>;
+    <span class="hljs-rule"><span class="hljs-attribute">border</span>:<span class="hljs-value"> <span class="hljs-number">1px</span> solid <span class="hljs-hexcolor">#000</span></span></span>;
+    <span class="hljs-rule"><span class="hljs-attribute">padding</span>:<span class="hljs-value"> <span class="hljs-number">10px</span></span></span>;
+<span class="hljs-rule">}</span></span>
+</code></pre>
+<p>Now, if you run your tests, they should pass:</p>
+<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; <span class="hljs-number">2</span> files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Listening on port <span class="hljs-number">5000</span>
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">40</span>ms)
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (<span class="hljs-number">45</span>ms)
+Stopping the server
+
+
+  <span class="hljs-number">2</span> passing (<span class="hljs-number">101</span>ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">33</span>/<span class="hljs-number">33</span> ), <span class="hljs-number">5</span> ignored
+Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">5</span> )
+Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">33</span>/<span class="hljs-number">33</span> )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: <span class="hljs-number">422</span> {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre>
+<p>If you now run the following command:</p>
+<pre><code class="hljs lang-bash">$ node index.js
+</code></pre>
+<p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p>
+<h2 id="wrapping-up">Wrapping up</h2>
+<p>This illustrates just how straightforward it is to use Redis’s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we’ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p>
+
+                <ul><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul>
+                <div class="addthis_sharing_toolbox"></div>
+              <section class="comments">
+                  <div id="disqus_thread"></div>
+                  <script type="text/javascript">
+                    window.disqus_identifier="";
+                    window.disqus_url="http://www.matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis//";
+                    window.disqus_title="Building a Chat Server With Node.js and Redis";
+                  </script>
+                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
+                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+              </section>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <h1>Recent Posts</h1>
+            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
+            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
+            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
+            <p><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></p>
+            <section id="github-profile">
+            </section>
+            <h4>My GitHub repositories</h4>
+            <ul id="github-repos">
+                <li>Loading repositories...</li>
+            </ul>
+        </div>
     </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Matthew Daly -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
-  
+    <div class="row">
+        <div class="col-md-12">
+            <a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a>
+        </div>
+    </div>
 
-<script type="text/javascript">
-      var disqus_shortname = 'matthewdaly';
-      
-        
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/';
-        var disqus_url = 'http://matthewdaly.co.uk/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/';
-        var disqus_script = 'embed.js';
-      
-    (function () {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    }());
-</script>
+</div>
 
-
-
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id; js.async = true;
-  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+        <footer>
+            <div class="container">
+                <div class="col-md-12">
+                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
+                </div>
+            </div>
+        </footer>
+        <script type="text/javascript" src="/static/js/all.min.js"></script>
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-17043630-1');ga('send','pageview');
+        </script>
+    </body>
 </html>
