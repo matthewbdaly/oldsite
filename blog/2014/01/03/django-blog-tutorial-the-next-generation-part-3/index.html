@@ -285,7 +285,7 @@ FAILED (errors=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 </code></pre>
 <p>Our test still fails, but we can easily see  why - the template <code>flatpages/default.html</code> doesn’t exist. So we create it:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -731,7 +731,7 @@ $ git commit -m <span class="hljs-string">'Added author field'</span>
 </ul>
 <p>For demonstration purposes, we’ll use Facebook comments, but this shouldn’t require much work to adapt it to the other providers.</p>
 <p>First of all, we need to include the Facebook JavaScript SDK:</p>
-<pre><code class="hljs lang-html">        <span class="hljs-comment">&lt;!-- Add your site or application content here --&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-comment">&lt;!-- Add your site or application content here --&gt;</span>
 
         <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"fb-root"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">script</span>&gt;</span><span class="javascript">(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(d, s, id)</span> </span>{
@@ -755,7 +755,7 @@ $ git commit -m <span class="hljs-string">'Added author field'</span>
                     <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
                 <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
             <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span></span>
 </code></pre>
 <p>Now, the Facebook comment system requires that you pass through the absolute page URL when initialising the comments. At present we can’t do that without hard-coding the domain name in our template, which we want to avoid. So, we need to add a site field to each post to identify the site it’s associated with.</p>
 <p>As usual, we update our tests first:</p>
@@ -1179,22 +1179,22 @@ OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 </code></pre>
 <p>Now we can include our full page URL on the post detail page:</p>
-<pre><code class="hljs lang-html"><span class="xml">{% extends "blogengine/includes/base.html" %}
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
-    {% load custom_markdown %}
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
-    {% block content %}
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"post"</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-expression">{{ <span class="hljs-variable">object.title</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-expression">{{ <span class="hljs-variable">object.pub</span>_<span class="hljs-variable">date</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
-        </span><span class="hljs-expression">{{ <span class="hljs-variable">object.text</span>|<span class="hljs-variable">custom</span>_<span class="hljs-variable">markdown</span> }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ object.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ object.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+        </span><span class="hljs-variable">{{ object.text<span class="hljs-filter">|custom</span>_markdown }}</span><span class="xml">
 
         <span class="hljs-tag">&lt;<span class="hljs-title">h4</span>&gt;</span>Comments<span class="hljs-tag">&lt;/<span class="hljs-title">h4</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"fb-comments"</span> <span class="hljs-attribute">data-href</span>=<span class="hljs-value">"http://</span></span></span><span class="hljs-expression">{{ <span class="hljs-variable">post.site</span> }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value"></span></span></span><span class="hljs-expression">{{ <span class="hljs-variable">post.get</span>_<span class="hljs-variable">absolute</span>_<span class="hljs-variable">url</span> }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span> <span class="hljs-attribute">data-width</span>=<span class="hljs-value">"470"</span> <span class="hljs-attribute">data-num-posts</span>=<span class="hljs-value">"10"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"fb-comments"</span> <span class="hljs-attribute">data-href</span>=<span class="hljs-value">"http://</span></span></span><span class="hljs-variable">{{ post.site }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value"></span></span></span><span class="hljs-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span> <span class="hljs-attribute">data-width</span>=<span class="hljs-value">"470"</span> <span class="hljs-attribute">data-num-posts</span>=<span class="hljs-value">"10"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
-    {% endblock %}</span>
+    </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
 </code></pre>
 <p>If you want to customise the comments, take a look at <a href="https://developers.facebook.com/docs/plugins/comments/">the documentation for Facebook Comments</a>.</p>
 <p>With that done, we can commit our changes:</p>

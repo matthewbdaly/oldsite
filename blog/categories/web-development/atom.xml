@@ -5,7 +5,7 @@
         <description><![CDATA[web development | I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Mon, 16 Feb 2015 19:00:35 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 20 Feb 2015 21:22:45 GMT</lastBuildDate>
         <item>
             <title><![CDATA[Yet another tutorial for building a blog using Python and Django - part 5]]></title>
             <description><![CDATA[<p>In this instalment I’ll be showing you how we can make our blogging engine a little nicer to look at by adding some CSS and images, as well as expanding on Django’s templating system.</p>
@@ -41,7 +41,7 @@
 </code></pre>
 <p>In the same folder, I have a PNG icon for an RSS feed, and if you had some JavaScript files you wanted to use (such as a copy of jQuery), you would put them here too. Note that there’s nothing to stop you creating subfolders within /static, and in fact I would recommend you do so for any future project so you can separate out images, CSS and JavaScript easily.</p>
 <p>With that done, we now need to change our templates to make use of this CSS. Here’s what header.html should look like:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"text/css"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/static/style.css"</span> /&gt;</span>
@@ -60,12 +60,12 @@
             <span class="hljs-tag">&lt;/<span class="hljs-title">ul</span>&gt;</span></span>
 </code></pre>
 <p>Next, here’s footer.html:</p>
-<pre><code class="hljs lang-html">        <span class="hljs-tag">&lt;/div&gt;</span>
-    <span class="hljs-tag">&lt;/body&gt;</span>
-<span class="hljs-tag">&lt;/html&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
 </code></pre>
 <p>Now here’s category.html:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>Posts for </span><span class="hljs-variable">{{ category.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> posts %}</span><span class="xml">
@@ -92,7 +92,7 @@
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
 </code></pre>
 <p>Then, posts.html:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> posts %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
@@ -118,7 +118,7 @@
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
 </code></pre>
 <p>Here’s single.html:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"post"</span>&gt;</span>
@@ -148,7 +148,7 @@
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
 </code></pre>
 <p>And finally, flatpages/default.html:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"page"</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-variable">{{ flatpage.content }}</span><span class="xml">
@@ -157,14 +157,14 @@
 </code></pre>
 <p>Phew! There’s quite a lot there, so you may wish to grab these files from the GitHub repository rather than enter them yourself.</p>
 <p>Now, all of the references to the CSS or image file need to refer to the /static folder under the root of the web server. Here’s the reference to our stylesheet:</p>
-<pre><code class="hljs lang-html">&lt;link <span class="hljs-variable">rel=</span><span class="hljs-string">"stylesheet"</span> <span class="hljs-variable">type=</span><span class="hljs-string">"text/css"</span> <span class="hljs-variable">href=</span><span class="hljs-string">"/static/style.css"</span> /&gt;
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">type</span>=<span class="hljs-value">"text/css"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/static/style.css"</span> /&gt;</span></span>
 </code></pre>
 <p>And here’s where we get the image:</p>
-<pre><code class="hljs lang-html">&lt;<span class="hljs-tag">a</span> href=<span class="hljs-string">"/feeds/posts/"</span>&gt;&lt;<span class="hljs-tag">img</span> src=<span class="hljs-string">"/static/rss.png"</span> <span class="hljs-attribute">width</span>=<span class="hljs-string">"50px"</span> <span class="hljs-attribute">height</span>=<span class="hljs-string">"50px"</span>&gt;&lt;/a&gt;
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/feeds/posts/"</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">img</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/static/rss.png"</span> <span class="hljs-attribute">width</span>=<span class="hljs-value">"50px"</span> <span class="hljs-attribute">height</span>=<span class="hljs-value">"50px"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span></span>
 </code></pre>
 <p>All of our static files can be referenced via the /static folder by default, without needing to set up a rule to cover them in urls.py.</p>
 <p>One other point worth noting is that we’ve added some code to the header to display links to all of the flat pages. This particular snippet of code in header.html is noteworthy:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> flatpages %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> flatpages %}</span><span class="xml">
                 </span><span class="hljs-template_tag">{% get_flatpages <span class="hljs-keyword">as</span> flatpages %}</span><span class="xml">
                 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> flatpage <span class="hljs-keyword">in</span> flatpages %}</span><span class="xml">
                 <span class="hljs-tag">&lt;<span class="hljs-title">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ flatpage.url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">li</span>&gt;</span>
@@ -187,7 +187,7 @@
         )),
 </code></pre>
 <p>Then, go into your templates folder and create a new folder in there called blogengine (or whatever you’re calling your blog application). In there, create a new file called category_list.html and enter the following code in it:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> category <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
             <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ category.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-title">p</span>&gt;</span></span><span class="hljs-variable">{{ category.description }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">p</span>&gt;</span>
@@ -208,7 +208,7 @@
 <pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Category, Post
 </code></pre>
 <p>Then move posts.html into your templates/blogengine folder and rename it post_list.html, then amend it to look like the following:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> object_list %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
@@ -370,7 +370,7 @@ admin.site.register(models.Category, CategoryAdmin)
 </code></pre>
 <p>Here we import the Category model as well as the Post model. Then, the only additional change we need to make is to add a brand new getCategory view function. Note that this is quite similar to the getPosts function - we set up pagination in the same way, and rather than get all the posts, we get just those in the specified category. Also note that we’re using the template category.html rather than posts.html here, and we pass through category as well as posts and page when we return the render_to_response.</p>
 <p>The next change we need to make is adding category.html. Go into your template directory and save the code below as category.html:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>Posts for </span><span class="hljs-variable">{{ category.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> posts %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
@@ -432,7 +432,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 </code></pre>
 <p>Place this before the URLconf for the flat pages.</p>
 <p>Comments can be attached to any type of content, but we only want to attach them to blog posts, and they should only be visible in the single post template. But first of all, let’s add a comment count to posts in posts.html and category.html. Replace posts.html with this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> posts %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
@@ -454,7 +454,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
 </code></pre>
 <p>And replace category.html with this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span>Posts for </span><span class="hljs-variable">{{ category.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> posts %}</span><span class="xml">
@@ -478,7 +478,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 </code></pre>
 <p>The only significant changes here are that at the top we load comments, and underneath the post text we get the comment count for each post as the variable comment_count, then we display it underneath.</p>
 <p>Now, we want to go further with our single post template. As well as a comment count, we want to add the actual comments themselves. Finally, we need a form for adding comments - in theory you can use the admin interface for doing this, but it’s very unlikely you’d want to do so. Open up single.html and edit it to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> comments %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
@@ -600,7 +600,7 @@ datetime.datetime(<span class="hljs-number">2012</span>, <span class="hljs-numbe
 </code></pre>
 <p>What we’ve changed here is that we’ve told urls.py to expect blog posts that look like 4 digits, then a forward slash, then one or two digits, then another forward slash, then a slug that can include hyphens, upper or lower case letters, and numbers.</p>
 <p>With that done, we just need to update our template. Edit templates/posts.html to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
@@ -692,7 +692,7 @@ admin.site.register(models.Post, PostAdmin)
 </code></pre>
 <p>Here, we can see that it’s easy to get the author’s details from the post. We define p as a reference to the single Post object,then we get the author, which in this case is called root. As I’ve defined a first and last name, we can get those too with p.author.first_name and p.author.last_name, which are strings containing the first and last name respectively. Note the ‘u’ before the string – this just indicates that the string is Unicode.</p>
 <p>So from here, it’s pretty easy to display the author’s name in each post. Go into templates/posts.html and add the following line where you want your author details to appear:</p>
-<pre><code class="hljs lang-html"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span>By </span><span class="hljs-expression">{{ <span class="hljs-variable">post.author.first</span>_<span class="hljs-variable">name</span> }}</span><span class="xml"> </span><span class="hljs-expression">{{ <span class="hljs-variable">post.author.last</span>_<span class="hljs-variable">name</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span></span>
+<pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span>By </span><span class="hljs-variable">{{ post.author.first_name }}</span><span class="xml"> </span><span class="hljs-variable">{{ post.author.last_name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span></span>
 </code></pre>
 <p>Now, as long as you’ve added a first name and last name to that author’s details, if you visit <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see the appropriate details.</p>
 <p>Our next step is to add the facility to create flat pages, somewhat like the Pages functionality in WordPress. Again, Django comes with an application that will handle this, called flatpages, but it’s not enabled by default. Go into DjangoBlog/settings.py and at the bottom of INSTALLED_APPS, add the following:</p>
@@ -739,19 +739,19 @@ Now fire up python manage.py shell again:</p>
     url(<span class="hljs-string">r''</span>, include(<span class="hljs-string">'django.contrib.flatpages.urls'</span>)),
 </code></pre>
 <p>Note that this must be the last rule in your urls.py, because it will match anything. Now, you can try and load /about/, or whatever page you’ve created, but you’ll get an error stating that the template does not exist, so we need to create that. Go into your template directory, and create a directory inside that called flatpages. Then create a new file in there called default.html, and add the following code to it:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-expression">{{ <span class="hljs-variable">flatpage.title</span> }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
-        </span><span class="hljs-expression">{{ <span class="hljs-variable">flatpage.content</span> }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        </span><span class="hljs-variable">{{ flatpage.content }}</span><span class="xml">
     <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
 </code></pre>
 <p>Now, make sure you have the development server running and try to load <a href="http://127.0.0.1:8000/about/">http://127.0.0.1:8000/about/</a>, or whatever your flat page URL is, and you should see your flat page’s title and content.</p>
 <p>One final task for this lesson – we’re going to refactor our templates a little so that as little code as possible is duplicated and if we want to change anything we need to only do so in one place. Go to your template directory and edit posts.html to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
@@ -768,18 +768,18 @@ Now fire up python manage.py shell again:</p>
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
 </code></pre>
 <p>Here we’re taking the header and footer of the page out and replacing them with code that includes another file there instead. Next, we need to create those files in the same directory. Here’s header.html:</p>
-<pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span></span>
 </code></pre>
 <p>And here’s footer.html:</p>
-<pre><code class="hljs lang-html">    <span class="hljs-tag">&lt;/body&gt;</span>
-<span class="hljs-tag">&lt;/html&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml">    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
 </code></pre>
 <p>None of this is terribly complex – we’re just moving the code into another file so that other templates can use the same files. Now save a copy of posts.html as single.html – we’re going to create a template for a single blog post. Edit the original posts.html to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"</span></span></span><span class="hljs-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
@@ -795,7 +795,7 @@ Now fire up python manage.py shell again:</p>
 </code></pre>
 <p>We’re just removing the date and author details from the template that shows multiple posts. Our existing single.html file can remain as it is for now, since that still has all the additional information we want to include in an individual post.</p>
 <p>While we’re here, let’s update our flat pages to use the same header and footer. Go into the flatpages directory and change default.html to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'header.html' %}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
         </span><span class="hljs-variable">{{ flatpage.content }}</span><span class="xml">
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">include</span> 'footer.html' %}</span><span class="xml"></span>
@@ -889,7 +889,7 @@ admin.site.register(models.Post, PostAdmin)
     url(<span class="hljs-string">r'^(?P&lt;postSlug&gt;[-a-zA-Z0-9]+)/?$'</span>, <span class="hljs-string">'blogengine.views.getPost'</span>),
 </code></pre>
 <p>So, now we have a dedicated URL for each post. But how do we get there? We need to create a link from the home page to each individual blog post. Open up your posts.html template and edit it to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
@@ -940,7 +940,7 @@ admin.site.register(models.Post, PostAdmin)
     <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:returned_page.object_list, <span class="hljs-string">'page'</span>:returned_page})
 </code></pre>
 <p>Here in addition to the existing posts object, we now pass through returned_page as page. Now, amend your posts.html template as follows:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
@@ -1087,7 +1087,7 @@ admin.site.register(models.Post)
 <pre><code class="hljs lang-bash">  <span class="hljs-string">"/Users/matthewdaly/Development/Python/Django/blog/templates"</span>
 </code></pre>
 <p>You’ll have to change this to the full, absolute path on your machine. This will tell Django to look for the templates in that folder. Now, go into templates, and create a new file called posts.html. Enter the following text into it:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>

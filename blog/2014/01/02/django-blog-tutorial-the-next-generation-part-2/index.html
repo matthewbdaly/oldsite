@@ -97,7 +97,7 @@ $ git commit -m <span class="hljs-string">'Added Bower config'</span>
 <pre><code class="hljs lang-bash">$ cp blogengine/static/bower_components/html5-boilerplate/index.html templates/blogengine/includes/base.html
 </code></pre>
 <p>Now amend this file to look like this:</p>
-<pre><code class="hljs lang-html"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -151,7 +151,7 @@ $ git commit -m <span class="hljs-string">'Added Bower config'</span>
 </ul>
 <p>Please note that HTML5 Boilerplate may conceivable change in future, so bear in mind that all you really need to do is load the staticfiles app, use the <code>static</code> tag for any static files that need to be loaded, and define the blocks in the appropriate places.</p>
 <p>Next, let’s amend our existing template to inherit from this one:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
@@ -166,7 +166,7 @@ $ git commit -m <span class="hljs-string">'Added Bower config'</span>
 $ git commit -m <span class="hljs-string">'Now use Bootstrap and HTML5 Boilerplate for templates'</span>
 </code></pre>
 <p>Now, let’s use Bootstrap to style our blog a little. First we’ll add a navigation bar at the top of our blog. Edit the base template as follows:</p>
-<pre><code class="hljs lang-html"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
+<pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-inner"</span>&gt;</span>
                 <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
                     <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"btn btn-navbar"</span> <span class="hljs-attribute">data-toggle</span>=<span class="hljs-value">"collapse"</span> <span class="hljs-attribute">data-target</span>=<span class="hljs-value">".nav-collapse"</span>&gt;</span>
@@ -203,7 +203,7 @@ $ git commit -m <span class="hljs-string">'Now use Bootstrap and HTML5 Boilerpla
 </code></pre>
 <p>Note the footer copyright section. Here we output the current year using <code>now</code>. Also note the addition of the header block. This will let us override the page header if necessary.</p>
 <p>We’ll also wrap the posts in a div:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
@@ -291,7 +291,7 @@ register = template.Library()
                                        enable_attributes=<span class="hljs-keyword">False</span>))
 </code></pre>
 <p>Then just amend the post list template to use it:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -325,7 +325,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 )
 </code></pre>
 <p>That will automatically paginate our posts by 5 - feel free to change the value of <code>paginate_by</code> if you wish. However, we need to place the links in our template as well:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -741,7 +741,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 )
 </code></pre>
 <p>Running our tests again will still fail, but now because the template <code>post_detail.html</code> has not been found. So let’s create it:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -755,7 +755,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
 </code></pre>
 <p>If you run your tests again, they should now pass. However, we still need to provide a hyperlink from each post in the index to the post page, so let’s do that:</p>
-<pre><code class="hljs lang-html"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
