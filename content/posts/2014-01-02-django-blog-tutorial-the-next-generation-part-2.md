@@ -78,7 +78,7 @@ $ cp blogengine/static/bower_components/html5-boilerplate/index.html templates/b
 
 Now amend this file to look like this:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -136,7 +136,7 @@ Please note that HTML5 Boilerplate may conceivable change in future, so bear in 
 
 Next, let's amend our existing template to inherit from this one:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% block content %}
@@ -157,7 +157,7 @@ $ git commit -m 'Now use Bootstrap and HTML5 Boilerplate for templates'
 
 Now, let's use Bootstrap to style our blog a little. First we'll add a navigation bar at the top of our blog. Edit the base template as follows:
 
-```html
+```django
         <div class="navbar navbar-static-top navbar-inverse">
             <div class="navbar-inner">
                 <div class="container">
@@ -198,7 +198,7 @@ Note the footer copyright section. Here we output the current year using `now`. 
 
 We'll also wrap the posts in a div:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% block content %}
@@ -313,7 +313,7 @@ def custom_markdown(value):
 
 Then just amend the post list template to use it:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -359,7 +359,7 @@ urlpatterns = patterns('',
 
 That will automatically paginate our posts by 5 - feel free to change the value of `paginate_by` if you wish. However, we need to place the links in our template as well:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -823,7 +823,7 @@ urlpatterns = patterns('',
 
 Running our tests again will still fail, but now because the template `post_detail.html` has not been found. So let's create it:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -840,7 +840,7 @@ Running our tests again will still fail, but now because the template `post_deta
 
 If you run your tests again, they should now pass. However, we still need to provide a hyperlink from each post in the index to the post page, so let's do that:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}

@@ -95,7 +95,7 @@ What we’ve changed here is that we’ve told urls.py to expect blog posts that
 
 With that done, we just need to update our template. Edit templates/posts.html to look like this:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
@@ -216,7 +216,7 @@ Here, we can see that it’s easy to get the author’s details from the post. W
 
 So from here, it’s pretty easy to display the author’s name in each post. Go into templates/posts.html and add the following line where you want your author details to appear:
 
-```html
+```django
         <h3>By {{ post.author.first_name }} {{ post.author.last_name }}</h3>
 ```
 
@@ -284,7 +284,7 @@ We can easily access any of the fields in the flat page. Now, we need to define 
 
 Note that this must be the last rule in your urls.py, because it will match anything. Now, you can try and load /about/, or whatever page you’ve created, but you’ll get an error stating that the template does not exist, so we need to create that. Go into your template directory, and create a directory inside that called flatpages. Then create a new file in there called default.html, and add the following code to it:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
@@ -300,7 +300,7 @@ Now, make sure you have the development server running and try to load http://12
 
 One final task for this lesson – we’re going to refactor our templates a little so that as little code as possible is duplicated and if we want to change anything we need to only do so in one place. Go to your template directory and edit posts.html to look like this:
 
-```html
+```django
 {% include 'header.html' %}
         {% for post in posts %}
         <h1><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h1>
@@ -320,7 +320,7 @@ One final task for this lesson – we’re going to refactor our templates a lit
 
 Here we’re taking the header and footer of the page out and replacing them with code that includes another file there instead. Next, we need to create those files in the same directory. Here’s header.html:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
@@ -330,14 +330,14 @@ Here we’re taking the header and footer of the page out and replacing them wit
 
 And here’s footer.html:
 
-```html
+```django
     </body>
 </html>
 ```
 
 None of this is terribly complex – we’re just moving the code into another file so that other templates can use the same files. Now save a copy of posts.html as single.html – we’re going to create a template for a single blog post. Edit the original posts.html to look like this:
 
-```html
+```django
 {% include 'header.html' %}
         {% for post in posts %}
         <h1><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h1>
@@ -357,7 +357,7 @@ We’re just removing the date and author details from the template that shows m
 
 While we’re here, let’s update our flat pages to use the same header and footer. Go into the flatpages directory and change default.html to look like this:
 
-```html
+```django
 {% include 'header.html' %}
         <h1>{{ flatpage.title }}</h1>
         {{ flatpage.content }}

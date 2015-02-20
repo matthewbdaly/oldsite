@@ -153,7 +153,7 @@ Here we import the Category model as well as the Post model. Then, the only addi
 
 The next change we need to make is adding category.html. Go into your template directory and save the code below as category.html:
 
-```html
+```django
 {% include 'header.html' %}
         <h1>Posts for {{ category.title }}</h1>
         {% if posts %}
@@ -229,7 +229,7 @@ Place this before the URLconf for the flat pages.
 
 Comments can be attached to any type of content, but we only want to attach them to blog posts, and they should only be visible in the single post template. But first of all, let's add a comment count to posts in posts.html and category.html. Replace posts.html with this:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         {% if posts %}
@@ -254,7 +254,7 @@ Comments can be attached to any type of content, but we only want to attach them
 
 And replace category.html with this:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         <h1>Posts for {{ category.title }}</h1>
@@ -282,7 +282,7 @@ The only significant changes here are that at the top we load comments, and unde
 
 Now, we want to go further with our single post template. As well as a comment count, we want to add the actual comments themselves. Finally, we need a form for adding comments - in theory you can use the admin interface for doing this, but it's very unlikely you'd want to do so. Open up single.html and edit it to look like this:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         {% for post in posts %}

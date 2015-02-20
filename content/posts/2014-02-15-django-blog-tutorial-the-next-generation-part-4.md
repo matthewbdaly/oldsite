@@ -1210,7 +1210,7 @@ $ python manage.py migrate
 
 Now, running our tests will show that the tables are in place, but we still have some work to do. The index and post pages don't show our categories, so we'll fix that. First, we'll fix our post list:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -1237,7 +1237,7 @@ Now, running our tests will show that the tables are in place, but we still have
 
 Next, we'll take care of our post detail page:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -2329,7 +2329,7 @@ So, we need to implement the following things:
 
 As we have seen already with the categories, this is actually quite simple. First, we'll sort out the tags on the index page:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -2359,7 +2359,7 @@ As we have seen already with the categories, this is actually quite simple. Firs
 
 This is quite simple. We retrieve all the tags with `post.tags.all` and loop through them. We then do basically the same for the individual post pages:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}

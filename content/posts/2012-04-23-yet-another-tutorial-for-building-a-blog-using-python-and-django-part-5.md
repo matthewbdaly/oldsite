@@ -50,7 +50,7 @@ In the same folder, I have a PNG icon for an RSS feed, and if you had some JavaS
 
 With that done, we now need to change our templates to make use of this CSS. Here's what header.html should look like:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
@@ -72,7 +72,7 @@ With that done, we now need to change our templates to make use of this CSS. Her
 
 Next, here's footer.html:
 
-```html
+```django
         </div>
     </body>
 </html>
@@ -80,7 +80,7 @@ Next, here's footer.html:
 
 Now here's category.html:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         <h1>Posts for {{ category.title }}</h1>
@@ -110,7 +110,7 @@ Now here's category.html:
 
 Then, posts.html:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         {% if posts %}
@@ -139,7 +139,7 @@ Then, posts.html:
 
 Here's single.html:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         {% for post in posts %}
@@ -171,7 +171,7 @@ Here's single.html:
 ```
 
 And finally, flatpages/default.html:
-```html
+```django
 {% include 'header.html' %}
         <div class="page">
         <h1>{{ flatpage.title }}</h1>
@@ -184,13 +184,13 @@ Phew! There's quite a lot there, so you may wish to grab these files from the Gi
 
 Now, all of the references to the CSS or image file need to refer to the /static folder under the root of the web server. Here's the reference to our stylesheet:
 
-```html
+```django
 <link rel="stylesheet" type="text/css" href="/static/style.css" />
 ```
 
 And here's where we get the image:
 
-```html
+```django
 <a href="/feeds/posts/"><img src="/static/rss.png" width="50px" height="50px"></a>
 ```
 
@@ -198,7 +198,7 @@ All of our static files can be referenced via the /static folder by default, wit
 
 One other point worth noting is that we've added some code to the header to display links to all of the flat pages. This particular snippet of code in header.html is noteworthy:
 
-```html
+```django
 {% load flatpages %}
                 {% get_flatpages as flatpages %}
                 {% for flatpage in flatpages %}
@@ -237,7 +237,7 @@ Then, add the following lines at the top of the section for categories:
 
 Then, go into your templates folder and create a new folder in there called blogengine (or whatever you're calling your blog application). In there, create a new file called category_list.html and enter the following code in it:
 
-```html
+```django
 {% include 'header.html' %}
         {% for category in object_list %}
             <h3>{{ category.title }}</h3>
@@ -271,7 +271,7 @@ from blogengine.models import Category, Post
 
 Then move posts.html into your templates/blogengine folder and rename it post_list.html, then amend it to look like the following:
 
-```html
+```django
 {% include 'header.html' %}
         {% load comments %}
         {% if object_list %}

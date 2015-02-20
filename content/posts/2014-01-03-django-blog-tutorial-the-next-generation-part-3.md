@@ -285,7 +285,7 @@ Destroying test database for alias 'default'...
 
 Our test still fails, but we can easily see  why - the template `flatpages/default.html` doesn't exist. So we create it:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -773,7 +773,7 @@ For demonstration purposes, we'll use Facebook comments, but this shouldn't requ
 
 First of all, we need to include the Facebook JavaScript SDK:
 
-```html
+```django
         <!-- Add your site or application content here -->
 
         <div id="fb-root"></div>
@@ -1240,7 +1240,7 @@ Destroying test database for alias 'default'...
 
 Now we can include our full page URL on the post detail page:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}

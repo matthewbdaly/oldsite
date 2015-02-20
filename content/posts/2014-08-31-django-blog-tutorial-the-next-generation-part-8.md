@@ -494,7 +494,7 @@ urlpatterns = patterns('',
 
 You also need to amend two of your templates:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -603,7 +603,7 @@ You also need to amend two of your templates:
 </html>
 ```
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -804,7 +804,7 @@ module.exports = function (grunt) {
 
 You'll also need to change the paths in your base HTML file to point to the minified versions:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->

@@ -125,7 +125,7 @@ With that done, the next step is to add a URLconf to handle blog posts. Open url
 
 So, now we have a dedicated URL for each post. But how do we get there? We need to create a link from the home page to each individual blog post. Open up your posts.html template and edit it to look like this:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
@@ -189,7 +189,7 @@ With this done, the next step is to create links for the next and previous pages
 
 Here in addition to the existing posts object, we now pass through returned_page as page. Now, amend your posts.html template as follows:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>

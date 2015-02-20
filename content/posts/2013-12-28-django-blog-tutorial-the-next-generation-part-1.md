@@ -1046,7 +1046,7 @@ Destroying test database for alias 'default'...
 
 To fix this, we make sure the template shows the data we want. Open up `templates/blogengine/post_list.html` and enter the following:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>

@@ -94,7 +94,7 @@ Now, if your code so far is largely identical to mine, you'll notice that the mo
 
 First, our template needs to be able to handle empty lists.
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}

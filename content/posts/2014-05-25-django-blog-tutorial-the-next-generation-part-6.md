@@ -199,7 +199,7 @@ $ pygmentize -S default -f html > blogengine/static/css/code.css
 
 We need to include our CSS files in our HTML template:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -416,7 +416,7 @@ Now that our blog is up and running on Heroku, it could do with a bit of work on
 
 Bootstrap has a nifty pager class for Next and Previous links, so let's apply that to our post list template:
 
-```html
+```django
 <ul class="pager">
         {% if page_obj.has_previous %}
         <li class="previous"><a href="/{{ page_obj.previous_page_number }}/">Previous Page</a></li>
@@ -429,7 +429,7 @@ Bootstrap has a nifty pager class for Next and Previous links, so let's apply th
 
 Let's also add labels to our categories and tags. We'll also place our posts and other content inside proper columns:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -473,7 +473,7 @@ Let's also add labels to our categories and tags. We'll also place our posts and
 
 We'll also want to tidy up the layout for our individual post pages:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -515,7 +515,7 @@ $ git commit -m 'Tidied up post templates'
 
 With that done, let's turn our attention to our base template. We'll amend the header to collapse down at smaller screen widths. This is easy to do with Bootstrap:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->

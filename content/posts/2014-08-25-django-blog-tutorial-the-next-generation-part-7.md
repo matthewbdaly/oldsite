@@ -1306,7 +1306,7 @@ Note that we first of all change the template used by this view. Then, we overri
 
 Finally, we create our new template:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -1505,7 +1505,7 @@ We also need a template for the tag pages. Add this to the end of the `test_tag_
 
 Let's create that template:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}
@@ -1686,7 +1686,7 @@ Destroying test database for alias 'default'...
 
 With that done, we can add the search form to the header:
 
-```html
+```django
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -1858,7 +1858,7 @@ We also need to add a route for our new view:
 
 Finally, let's create a new template to show our results:
 
-```html
+```django
 {% extends "blogengine/includes/base.html" %}
 
     {% load custom_markdown %}

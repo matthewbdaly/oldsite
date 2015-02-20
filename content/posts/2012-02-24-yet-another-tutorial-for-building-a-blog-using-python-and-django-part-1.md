@@ -193,7 +193,7 @@ With our view done, we now need to produce a template for it. Head back up to yo
 
 You'll have to change this to the full, absolute path on your machine. This will tell Django to look for the templates in that folder. Now, go into templates, and create a new file called posts.html. Enter the following text into it:
 
-```html
+```django
 <html>
     <head>
         <title>My Django Blog</title>
