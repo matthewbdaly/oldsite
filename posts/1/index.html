@@ -345,7 +345,7 @@ io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socke
 </code></pre>
 <p>If you compare this to the code for the URL shortener, you’ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that’s because we need to do so when using Pub/Sub with Redis. You’ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we’ll be using Socket.IO.</p>
 <p>Now, you can run your tests again at this point, but they won’t pass because we haven’t created our views. So let’s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p>
-<pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-expression">{{&gt; <span class="hljs-variable">header</span> }}</span><span class="xml">
+<pre><code class="hljs lang-hbs"><span class="xml"></span><span class="hljs-expression">{{&gt; <span class="hljs-variable">header</span> }}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
                 <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-8"</span>&gt;</span>
@@ -366,7 +366,7 @@ io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socke
 </span><span class="hljs-expression">{{&gt; <span class="hljs-variable">footer</span> }}</span><span class="xml"></span>
 </code></pre>
 <p>Add this to <code>views/partials/header.hbs</code>:</p>
-<pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+<pre><code class="hljs lang-hbs"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -394,17 +394,17 @@ io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socke
                     <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-brand"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"#"</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
                 <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
             <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-title">nav</span>&gt;</span></span>
+        <span class="hljs-tag">&lt;/<span class="hljs-title">nav</span>&gt;</span>
 </code></pre>
 <p>And add this to <code>views/partials/footer.hbs</code>:</p>
-<pre><code class="hljs lang-handlebars"><span class="xml">
+<pre><code class="hljs lang-hbs">
         <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/jquery/dist/jquery.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/js/bootstrap.min.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/socket.io/socket.io.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/js/main.js"</span>&gt;</span><span class="javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
 
     <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span>
 </code></pre>
 <p>You’ll also want to create placeholder CSS and JavaScript files:</p>
 <pre><code class="hljs lang-bash">$ mkdir static/js
@@ -755,17 +755,19 @@ Aborted due to warnings.
                     <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)</span></span>
                     <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)</span></span>
 </code></pre>
-<p><code>views/output.jade</code></p>
+<p>Also <code>views/output.jade</code>:</p>
 <pre><code class="hljs lang-jade">doctype html
 html(lang=<span class="hljs-string">"en"</span>)
     head
-        title=<span class="hljs-string">"Shortbread"</span>
+        title=Shortbread
 
     body
         <span class="hljs-operator">div</span>.container
             <span class="hljs-operator">div</span>.row
                 h1 Shortbread
-                p Your shortened <span class="hljs-built_in">URL</span> is &lt;<span class="hljs-operator">a</span> href=<span class="hljs-string">'#{base_url}/#{id}'</span>&gt;<span class="hljs-comment">#{base_url}/#{id}&lt;/a&gt;</span>
+                p
+                    | Your shortened <span class="hljs-built_in">URL</span> is
+                    <span class="hljs-operator">a</span>(href=base_url+<span class="hljs-string">'/'</span>+id) <span class="hljs-comment">#{base_url}/#{id}</span>
 </code></pre>
 <p>and <code>views/error.jade</code>:</p>
 <pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
