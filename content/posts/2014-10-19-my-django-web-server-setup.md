@@ -50,7 +50,7 @@ server {
 }
 ```
 
-For the application server, I use Gunicorn. You can install this with `pip install gunicorn`, then add it to `INSTALLED_APPS`. Then add the following config file to the root of your project:
+For the application server, I use Gunicorn. You can install this with `pip install gunicorn`, then add it to `INSTALLED_APPS`. Then add the following config file to the root of your project, as `gunicorn.conf.py`:
 
 ```python
 bind = "127.0.0.1:8000"
@@ -61,9 +61,9 @@ workers = 3
 
 You should normally set the number of workers to 2 times the number of cores on your machine, plus one.
 
-In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won't give details here - your package manager of choice should have a suitable package available. Here's a typical Supervisor config file I might use for running Gunicorn for a Django app:
+In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won't give details here - your package manager of choice should have a suitable package available. Here's a typical Supervisor config file I might use for running Gunicorn for a Django app, named `mysite-supervisor.conf`:
 
-```bash
+```ini
 [program:mysite]
 command=/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=3
 directory=/var/www/mysite/
@@ -109,9 +109,9 @@ So far, both of the web apps I've built professionally have been ones where it m
 
 I've used it in cases where I needed to send an email or a push notification, since these don't have to be done within the context of the same HTTP request, but need to be reliable.
 
-I generally use RabbitMQ as my message queue. I'll leave setting this up as an exercise for the reader since it's covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here's a typical config file:
+I generally use RabbitMQ as my message queue. I'll leave setting this up as an exercise for the reader since it's covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here's a typical config file, which might be called `celery-supervisor.conf`:
 
-```bash
+```ini
 [program:celeryd]
 command=/var/www/mysite/venv/bin/python manage.py celery worker
 directory=/var/www/mysite/
