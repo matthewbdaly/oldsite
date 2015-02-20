@@ -1300,20 +1300,20 @@ Done, without errors.
     }
 }
 </code></pre>
-<p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project:</p>
+<p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project, as <code>gunicorn.conf.py</code>:</p>
 <pre><code class="hljs lang-python">bind = <span class="hljs-string">"127.0.0.1:8000"</span>
 logfile = <span class="hljs-string">"/var/log/gunicorn.log"</span>
 loglevel = <span class="hljs-string">"debug"</span>
 workers = <span class="hljs-number">3</span>
 </code></pre>
 <p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p>
-<p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app:</p>
-<pre><code class="hljs lang-bash">[program:mysite]
-<span class="hljs-built_in">command</span>=/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=<span class="hljs-number">3</span>
-directory=/var/www/mysite/
-user=nobody
-autostart=<span class="hljs-literal">true</span>
-autorestart=<span class="hljs-literal">true</span>
+<p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app, named <code>mysite-supervisor.conf</code>:</p>
+<pre><code class="hljs lang-ini"><span class="hljs-title">[program:mysite]</span>
+<span class="hljs-setting">command=<span class="hljs-value">/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=<span class="hljs-number">3</span></span></span>
+<span class="hljs-setting">directory=<span class="hljs-value">/var/www/mysite/</span></span>
+<span class="hljs-setting">user=<span class="hljs-value">nobody</span></span>
+<span class="hljs-setting">autostart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
+<span class="hljs-setting">autorestart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
 </code></pre>
 <p>Once that’s in place, you can easily add the new app:</p>
 <pre><code class="hljs lang-bash">$ sudo supervisorctl reread
@@ -1337,13 +1337,13 @@ $ sudo supervisorctl update
 <li>Scheduling tasks</li>
 </ul>
 <p>I’ve used it in cases where I needed to send an email or a push notification, since these don’t have to be done within the context of the same HTTP request, but need to be reliable.</p>
-<p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file:</p>
-<pre><code class="hljs lang-bash">[program:celeryd]
-<span class="hljs-built_in">command</span>=/var/www/mysite/venv/bin/python manage.py celery worker
-directory=/var/www/mysite/
-user=nobody
-autostart=<span class="hljs-literal">true</span>
-autorestart=<span class="hljs-literal">true</span>
+<p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file, which might be called <code>celery-supervisor.conf</code>:</p>
+<pre><code class="hljs lang-ini"><span class="hljs-title">[program:celeryd]</span>
+<span class="hljs-setting">command=<span class="hljs-value">/var/www/mysite/venv/bin/python manage.py celery worker</span></span>
+<span class="hljs-setting">directory=<span class="hljs-value">/var/www/mysite/</span></span>
+<span class="hljs-setting">user=<span class="hljs-value">nobody</span></span>
+<span class="hljs-setting">autostart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
+<span class="hljs-setting">autorestart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
 </code></pre>
 <p>Then start it up:</p>
 <pre><code class="hljs lang-bash">$ sudo supervisorctl reread
