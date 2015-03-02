@@ -336,7 +336,7 @@ If you compare this to the code for the URL shortener, you'll notice a few fairl
 
 Now, you can run your tests again at this point, but they won't pass because we haven't created our views. So let's do that. Create the directory `views` and the subdirectory `partials` inside it. Then add the following content to `views/index.hbs`:
 
-```handlebars
+```hbs
 {{> header }}
         <div class="container">
             <div class="row">
@@ -360,7 +360,7 @@ Now, you can run your tests again at this point, but they won't pass because we 
 
 Add this to `views/partials/header.hbs`:
 
-```handlebars
+```hbs
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -394,7 +394,7 @@ Add this to `views/partials/header.hbs`:
 
 And add this to `views/partials/footer.hbs`:
 
-```handlebars
+```hbs
 
         <script src="/bower_components/jquery/dist/jquery.min.js"></script>
         <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>

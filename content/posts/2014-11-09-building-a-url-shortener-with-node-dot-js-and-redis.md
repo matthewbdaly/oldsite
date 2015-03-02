@@ -148,20 +148,23 @@ html(lang="en")
                     input(type="submit", value="Submit")
 ```
 
-`views/output.jade`
+Also `views/output.jade`:
 
 ```jade
 doctype html
 html(lang="en")
     head
-        title="Shortbread"
+        title=Shortbread
 
     body
         div.container
             div.row
                 h1 Shortbread
-                p Your shortened URL is <a href='#{base_url}/#{id}'>#{base_url}/#{id}</a>
+                p
+                    | Your shortened URL is
+                    a(href=base_url+'/'+id) #{base_url}/#{id}
 ```
+
 and `views/error.jade`:
 
 ```jade
