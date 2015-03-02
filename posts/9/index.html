@@ -57,6 +57,12 @@
     <div class="row">
         <div class="col-md-8">
     <article class="post">
+        <p class="date">13th November 2010 8:20 pm</p>
+        <h1><a href="/blog/2010/11/13/a-slight-change/">A Slight Change...</a></h1>
+        <p>Just to say I’ve changed the contact form I use on here. I always wanted to use one with a built-in CAPTCHA facility, as Disqus seems to have pretty much killed off the comment spam, but I was still getting it via the contact form. I’ve put off doing something about it till now, but it was getting out of hand so I’ve gone and found a new contact form. Let’s hope this kills the spam…</p>
+
+    </article>
+    <article class="post">
         <p class="date">29th October 2010 8:49 pm</p>
         <h1><a href="/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/">Deleting Unwanted Vim Swap Files Using Perl</a></h1>
         <p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I’d written between several computers, and it would be a good idea to clear them up. I didn’t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p>
@@ -236,80 +242,14 @@ searchDir(<span class="hljs-variable">$beginSearch</span>);
 <p>At some point I may go back to this basic concept and expand on it a little - it would make sense to add a GUI to it, either by using a graphical toolkit such as Tk or turning it into a web app. I also like the idea of adapting it to use a non-relational database - something like CouchDB perhaps.</p>
 
     </article>
-    <article class="post">
-        <p class="date">15th October 2010 8:39 pm</p>
-        <h1><a href="/blog/2010/10/15/getting-work-done-with-perl/">Getting Work Done With Perl</a></h1>
-        <p>After my initial struggles with Perl, I now think I’m really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.</p>
-<p>As one of the exercises for my studies I had to open a database connection to a Microsoft Access database, but I wanted to do the exercise in Ubuntu (I’ve always preferred using Unix-like operating systems for programming, and thanks to apt-get it’s a lot less grief installing additional libraries and modules as you need them) and couldn’t get Perl to connect to the database properly, so I resolved to export it to either MySQL or SQLite.</p>
-<p>I was able to export it to MySQL in the end using mdbtools, but I wasn’t entirely happy with the end result. I resorted to re-exporting the data as a CSV file, then resolved to write a small Perl script to read the file, parse it using a regular expression to obtain the necessary information, then insert it into a new SQLite database.</p>
-<p>Here’s what I came up with:</p>
-<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
-
-<span class="hljs-keyword">use</span> strict;
-<span class="hljs-keyword">use</span> DBI;
-
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$db</span> = <span class="hljs-string">"dbi:SQLite:backend.db"</span>;
-
-<span class="hljs-keyword">if</span> (!(-e <span class="hljs-string">"backend.db"</span>))
-{
-   <span class="hljs-keyword">print</span> <span class="hljs-string">"Database does not exist. Creating it..."</span>;
-
-   <span class="hljs-comment"># Create the database</span>
-   <span class="hljs-keyword">my</span> <span class="hljs-variable">$dbh</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! <span class="hljs-variable">$DBI::errstr</span>"</span>;
-   <span class="hljs-keyword">my</span> <span class="hljs-variable">$createdb</span> = <span class="hljs-variable">$dbh</span>-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"CREATE TABLE CARS( ID INTEGER PRIMARY KEY, YEAR INTEGER, MAKE VARCHAR(30), MODEL VARCHAR(30), COLOR VARCHAR(30), PRICE INTEGER);"</span>);
-   <span class="hljs-variable">$dbh</span>-&gt;disconnect();
-}
-
-<span class="hljs-keyword">open</span>(READFILE, <span class="hljs-string">"cartable.csv"</span>);
-
-<span class="hljs-keyword">while</span>()
-{
-   <span class="hljs-keyword">unless</span>(<span class="hljs-variable">$_</span> =~ <span class="hljs-regexp">m/id,/</span>)
-   {
-      <span class="hljs-regexp">m/\d+\,(\d{4})\,\"(\w+)\"\,\"(\w+)\"\,\"(\w+)\"\,\"(\d+)\"/</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$year</span> = <span class="hljs-variable">$1</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$make</span> = <span class="hljs-variable">$2</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$model</span> = <span class="hljs-variable">$3</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$color</span> = <span class="hljs-variable">$4</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$price</span> = <span class="hljs-variable">$5</span>;
-
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$dbh2</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! <span class="hljs-variable">$DBI::errstr</span>"</span>;
-      <span class="hljs-keyword">my</span> <span class="hljs-variable">$insertdb</span> = <span class="hljs-variable">$dbh2</span>-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"INSERT INTO CARS (YEAR, MAKE, MODEL, COLOR, PRICE) VALUES (\"<span class="hljs-variable">$year</span>\", \"<span class="hljs-variable">$make</span>\", \"<span class="hljs-variable">$model</span>\", \"<span class="hljs-variable">$color</span>\", \"<span class="hljs-variable">$price</span>\");"</span>);
-      <span class="hljs-variable">$dbh2</span>-&gt;disconnect;
-   }
-}
-<span class="hljs-keyword">close</span>(READFILE);
-
-<span class="hljs-keyword">print</span> <span class="hljs-string">"Write completed!\n"</span>;
-<span class="hljs-keyword">print</span> <span class="hljs-string">"To demonstrate it works, we'll run a SELECT query against the database...\n"</span>;
-
-<span class="hljs-comment"># Read the database</span>
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$readdb</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>);
-<span class="hljs-keyword">my</span> <span class="hljs-variable">$dbselect</span> = <span class="hljs-variable">$readdb</span>-&gt;prepare(<span class="hljs-string">"SELECT * FROM CARS;"</span>);
-<span class="hljs-variable">$dbselect</span>-&gt;execute;
-
-<span class="hljs-comment"># Print the results</span>
-<span class="hljs-keyword">print</span> <span class="hljs-string">"ID\tYear\tMake\tModel\tColor\tPrice\n"</span>;
-<span class="hljs-keyword">while</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">@row</span> = <span class="hljs-variable">$dbselect</span>-&gt;fetchrow_array)
-{
-   <span class="hljs-keyword">print</span> <span class="hljs-string">"<span class="hljs-variable">$row</span>[0]\t<span class="hljs-variable">$row</span>[1]\t<span class="hljs-variable">$row</span>[2]\t<span class="hljs-variable">$row</span>[3]\t<span class="hljs-variable">$row</span>[4]\t<span class="hljs-variable">$row</span>[5]\n"</span>;
-}
-
-<span class="hljs-comment"># Close the connection</span>
-<span class="hljs-variable">$readdb</span>-&gt;disconnect;
-</code></pre>
-<p>Apologies for the fact that the indentation doesn’t seem to have copied across from Vim very well (can anyone recommend a good WordPress plugin for displaying code, none of the ones I’ve tried seem to be any good?). It works well, and it’s also helped me grasp Perl’s database API better.</p>
-<p>I think I’ve got a better idea now of what Python and Perl are best at and when to use each. Perl is a great language, but the fact that a lot of it is implicit makes it a little harder to pick up at first than Python - for instance, the default variable, which is quite a good idea, but takes a little getting used to. Its regex support is great, and I like the database API, but I would find it a lot harder to do any object-oriented programming in Perl than in Python (which I guess is why <a href="http://www.iinteractive.com/moose/">Moose</a> exists). I’ve found Perl very useful for quick and dirty scripts and as a glue language, but for longer scripts Python seems the better choice.</p>
-
-    </article>
         </div>
         <div class="col-md-4">
             <h1>Recent Posts</h1>
+            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
             <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
             <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
             <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
             <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
             <section id="github-profile">
             </section>
             <h4>My GitHub repositories</h4>

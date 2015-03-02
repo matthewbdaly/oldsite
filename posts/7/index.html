@@ -57,6 +57,159 @@
     <div class="row">
         <div class="col-md-8">
     <article class="post">
+        <p class="date">19th March 2012 3:18 pm</p>
+        <h1><a href="/blog/2012/03/19/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-2/">Yet Another Tutorial for Building a Blog Using Python and Django – Part 2</a></h1>
+        <p>In the first part of this tutorial, we got the core elements of our blogging application working - we set up our model for posts, and a view, template and URL configuration to view the index. Next we’ll start extending this very basic functionality - we’ll add a view for individual posts as well, and we’ll allow for each post to have a separate URL.</p>
+<p>First, we need to set up some pagination for the home page. At this point, it’s worth taking the time to look at how we want our URL to look. Here, we’ll work on the basis that by default, the home page will show the first five blog posts, and if someone wants to see later posts, they need to append a number to the end. Here’s the URL for the second page assuming it’s at example.com:</p>
+<pre><code><span class="hljs-string">http:</span><span class="hljs-comment">//www.example.com/2/</span>
+</code></pre><p>So, we need two separate rules for the URLs. We need one for a URL with no number at the end, and one for a URL with a number at the end, and an optional forward slash. Open up urls.py and edit it so the Home page section looks like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-comment"># Home page</span>
+url(<span class="hljs-string">r'^$'</span>, <span class="hljs-string">'blogengine.views.getPosts'</span>),
+url(<span class="hljs-string">r'^(?P&lt;selected_page&gt;\d+)/?$'</span>, <span class="hljs-string">'blogengine.views.getPosts'</span>),
+</code></pre>
+<p>Note that I’ve edited the first rule to include ^$ as the regular expression. ^ denotes the start of a regex, and $ denotes the end, so this represents a URL with nothing added after the domain name, such as <a href="http://www.example.com">http://www.example.com</a>. We’ve also changed getRecentPosts to getPosts, as that’s now a more descriptive name.</p>
+<p>The second line will match if there is a digit (denoted by the \d+ section) and will pass that digit through to the getPosts function as selected_page. With that done, we now need to make the necessary changes in the view, so move into the blogengine directory and amend views.py to look like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-comment"># Create your views here.</span>
+<span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> django.core.paginator <span class="hljs-keyword">import</span> Paginator
+<span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getPosts</span><span class="hljs-params">(request, selected_page=<span class="hljs-number">1</span>)</span>:</span>
+    <span class="hljs-comment"># Get all blog posts</span>
+    posts = Post.objects.all().order_by(<span class="hljs-string">'-pub_date'</span>)
+
+    <span class="hljs-comment"># Add pagination</span>
+    pages = Paginator(posts, <span class="hljs-number">5</span>)
+    returned_page = pages.page(selected_page)
+
+    <span class="hljs-comment"># Display all the posts</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, {<span class="hljs-string">'posts'</span>:returned_page.object_list})
+</code></pre>
+<p>Again, note the change in function name from getRecentPosts to getPosts. Now, let’s work through the rest of the code. You’ll notice the following line near the top:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.core.paginator <span class="hljs-keyword">import</span> Paginator
+</code></pre>
+<p>This imports the Paginator class, which is very useful for creating pagination. Then, you’ll notice the following line:</p>
+<pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getPosts</span><span class="hljs-params">(request, selected_page=<span class="hljs-number">1</span>)</span>:</span>
+</code></pre>
+<p>If you know much about Python, you’ll know that you can specify a default value for a parameter passed to a function or method. Here, what we’re doing is setting the default value of selected_page to 1, so if someone visits <a href="http://www.example.com">http://www.example.com</a>, for which the URLconf doesn’t specify a number, this defaults to 1. If they visit <a href="http://www.example.com/2">http://www.example.com/2</a> instead, the default value for selected_page will be overriden to 2.</p>
+<p>Then you’ll note that we’ve refactored the lines that fetched the posts and sorted them into one line, and called that posts. After that we define pages as a Paginator object, and passed it the values of posts and 5. The first parameter is what we want to divide between pages, and the second is how many instances of this we should allow on an individual page. Here we’re passing through all of the posts, and allowing 5 posts per page. We then define returned_page as the page from pages that matches the number submitted in the selected_page variable. Finally we pass a list of all the objects that make up returned_page through to the template as posts.</p>
+<p>So, we now have basic pagination in place. Next, we’ll add the capability to display individual posts.</p>
+<p>Now, we could just be lazy and have each post referred to by the numerical ID that’s automatically added by Django to the database, but why would we want to do that? We want a nice, human and search engine friendly URL that gives some idea what the blog post is about. Django is structured in such a way that nice, friendly URLs without cruft are very easy to create, and it actually has a special type of field in the models called a slug field that’s ideal for creating URLs.</p>
+<p>So first of all, go into blogengine/models.py and edit it to look like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+
+<span class="hljs-comment"># Create your models here.</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+    pub_date = models.DateTimeField()
+    text = models.TextField()
+    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> self.title
+</code></pre>
+<p>The only change is the addition of the slug field. Like any other field, you’ll be able to edit the slug field using the admin interface. But, why should you have to? Existing blogging solutions like WordPress will suggest a URL for a blog post, so that’s what we want to do as well. Open blogengine/admin.py and edit it to look like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
+<span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostAdmin</span><span class="hljs-params">(admin.ModelAdmin)</span>:</span>
+    prepopulated_fields = {<span class="hljs-string">"slug"</span>: (<span class="hljs-string">"title"</span>,)}
+
+admin.site.register(models.Post, PostAdmin)
+</code></pre>
+<p>If you know a little about object-oriented programming in Python, you should be able to grasp what’s going on here. We’re creating PostAdmin, which inherits from ModelAdmin, and using the title to prepopulate the slug field. We then register this as before, but using PostAdmin rather than the default ModelAdmin.</p>
+<p>A fairly typical slug will be based on your title, but will strip out whitespace and other characters between the words and replace them with hyphens, and convert the result to lowercase, so a title like “My new bike” will become my-new-bike.</p>
+<p>Also, note that in models.py, we pass the parameter unique=True for the slug. This indicates that the slug must be unique, so we can’t have the same URL applied to two different posts.</p>
+<p>With our model and admin amended, it’s now time to create a view to deal with displaying an individual post. Add the following function to blogengine/views.py:</p>
+<pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getPost</span><span class="hljs-params">(request, postSlug)</span>:</span>
+    <span class="hljs-comment"># Get specified post</span>
+    post = Post.objects.filter(slug=postSlug)
+
+    <span class="hljs-comment"># Display specified post</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:post})
+</code></pre>
+<p>This function receives the request object and a slug for the post. It then gets the specific post with that slug, and returns it. For now we’ll just use the existing posts.html template, but we’ll want to add a new template for single posts at some point.</p>
+<p>With that done, the next step is to add a URLconf to handle blog posts. Open urls.py and add the following code after the lines for the home page:</p>
+<pre><code class="hljs lang-python">    <span class="hljs-comment"># Blog posts</span>
+    url(<span class="hljs-string">r'^(?P&lt;postSlug&gt;[-a-zA-Z0-9]+)/?$'</span>, <span class="hljs-string">'blogengine.views.getPost'</span>),
+</code></pre>
+<p>So, now we have a dedicated URL for each post. But how do we get there? We need to create a link from the home page to each individual blog post. Open up your posts.html template and edit it to look like this:</p>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ post.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+        </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>Now, if you run python manage.py syncdb, the changes to your database schema will be made automatically. However, if you already have some test posts in the database, these won’t have a slug and that could cause problems. So you can either add slugs to the existing posts manually using an UPDATE SQL command, or if you’re using something like PHPMyAdmin you can use that to add slugs for these posts. Or if they’re just test posts and you don’t care about them in the slightest, just delete your database and start again from scratch.</p>
+<p>With that done, if you then run python manage.py runserver, and then visit <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see your home page. If you have at least one blog post set up, you should see those posts on the home page, and the title should be a hyperlink to that post. If you have more than 5 posts, you should be able to go to <a href="http://127.0.0.1:8000/2">http://127.0.0.1:8000/2</a> and see the next 5 posts.</p>
+<p>But wait! What if you don’t have more posts? You want some code in place to handle what happens if you try to go to <a href="http://127.0.0.1:8000/2">http://127.0.0.1:8000/2</a> and it isn’t there. You also want to dynamically generate links for older and newer posts so that users can click back as far as they need to.</p>
+<p>First of all, let’s put something in place to catch nonexistent pages. Open blogengine/views.py and edit the getPosts function to look like this:</p>
+<pre><code class="hljs lang-python"><span class="hljs-comment"># Create your views here.</span>
+<span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> django.core.paginator <span class="hljs-keyword">import</span> Paginator, EmptyPage
+<span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getPosts</span><span class="hljs-params">(request, selected_page=<span class="hljs-number">1</span>)</span>:</span>
+    <span class="hljs-comment"># Get all blog posts</span>
+    posts = Post.objects.all().order_by(<span class="hljs-string">'-pub_date'</span>)
+
+    <span class="hljs-comment"># Add pagination</span>
+    pages = Paginator(posts, <span class="hljs-number">5</span>)
+
+    <span class="hljs-comment"># Get the specified page</span>
+    <span class="hljs-keyword">try</span>:
+        returned_page = pages.page(selected_page)
+    <span class="hljs-keyword">except</span> EmptyPage:
+        returned_page = pages.page(pages.num_pages)
+
+    <span class="hljs-comment"># Display all the posts</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:returned_page.object_list})
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getPost</span><span class="hljs-params">(request, postSlug)</span>:</span>
+    <span class="hljs-comment"># Get specified post</span>
+    post = Post.objects.filter(slug=postSlug)
+
+    <span class="hljs-comment"># Display specified post</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:post})
+</code></pre>
+<p>The only differences here are that EmptyPage is imported, and we add error checking to returned_page so that if it throws an EmptyPage exception (meaning that the given page doesn’t exist), then it defaults to returning the highest numbered page. The value of pages.num_pages is the number of pages in total, so you use this to get the last numbered page. If you prefer, you can change it to default to the first page by replacing pages.num_pages with 1.</p>
+<p>With this done, the next step is to create links for the next and previous pages. Fortunately Django makes this really easy. First, you have to pass through the returned_page object in views.py, like this:</p>
+<pre><code class="hljs lang-python">    <span class="hljs-comment"># Display all the posts</span>
+    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:returned_page.object_list, <span class="hljs-string">'page'</span>:returned_page})
+</code></pre>
+<p>Here in addition to the existing posts object, we now pass through returned_page as page. Now, amend your posts.html template as follows:</p>
+<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ post.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">"</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+        </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">br</span> /&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page.has_previous %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">if</span> page.has_next %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/</span></span></span><span class="hljs-variable">{{ page.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
+        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
+</code></pre>
+<p>Here, if the given page has a previous page, we display a link to it, and if it has a next page, we display a link to that too. page.has_previous and page.has_next return True or False, and page.previous_page_number and page.next_page_number display a number for the appropriate page, so it’s easy to use them to link to the appropriate page.</p>
+<p>And that will do for now! We’ve gotten quite a lot done this time, and we actually have something that, although it’s still missing many of the more sophisticated features of blogging platforms such as WordPress, is fundamentally usable as a blog as long as you either don’t want comment functionality or are prepared to use a third-party system such as Disqus. Feel free to congratulate yourself with a beverage of your choice, and we’ll carry on later.</p>
+
+    </article>
+    <article class="post">
         <p class="date">28th February 2012 6:25 pm</p>
         <h1><a href="/blog/2012/02/28/new-theme/">New Theme</a></h1>
         <p>For a long time now, I’ve kept meaning to write my own WordPress theme from scratch for this site, but just haven’t been able to find the time to do so. Now, I’ve finally found the time to do so, and here it is!</p>
@@ -323,26 +476,14 @@ cherry
 <p>I have to say, Github is a truly wonderful service. The tutorials for getting started with Git are really good, and make it easy to get started. It’s probably one of the main reasons why Git is becoming more and more popular- there isn’t really anything comparable for Subversion.</p>
 
     </article>
-    <article class="post">
-        <p class="date">24th October 2011 10:18 pm</p>
-        <h1><a href="/blog/2011/10/24/linux-in-the-workplace/">Linux in the Workplace</a></h1>
-        <p>At the start of September I left my customer services role and started a new position as a web developer. I won’t give the name of either my old or new employer, but I will say that the new role is with a much smaller company, and the part I work for now is an e-commerce store that enjoys a significant degree of independence from the parent company. There are only two developers including myself, and we are solely responsible for the company’s IT infrastructure, and we don’t have the hassle of dealing with legacy applications or infrastructure. We therefore have considerable freedom in terms of what we choose to use to get our work done.</p>
-<p>When I first started, I used Windows XP Professional since that was what my work laptop came with, but it soon became obvious that there wasn’t actually anything I specifically needed to be using Windows for. I mostly work on the company’s intranet, which doesn’t really need to be tested in Internet Explorer as we use Firefox internally. For email and calendar, we use Google Apps, which works fine with virtually any email client that supports IMAP, so I was using Thunderbird with the Lightning plugin. When coding I used Netbeans with the jVi plugin for most of my work, with occasional usage of Vim for writing shorter scripts. I used AppServ to provide local versions of Apache, MySQL and PHP, and I used PHPMyAdmin to interact with the database. For version control, I used Subversion. From time to time I need to remote into another machine using VNC, SSH or RDP, for which I used mRemote, but I was confident I could find an equivalent application. Also, we use Ubuntu on most of our servers, so it made a lot of sense from a compatibility point of view to also use it on my own desktop. From time to time, I also found myself writing bash or Perl scripts for systems administration purposes, and since it wasn’t really very practical to do that in Windows when it was going to be running in Ubuntu, I’d used an Ubuntu Server install in Virtualbox to write it, but it was obvious that running Ubuntu as my desktop OS would make more sense.</p>
-<p>As Ubuntu 11.10 was due a little over a month after I first started, I decided to hold off making the switch until then so I could start with the most recent version and not have the hassle of upgrading an existing install. I had already downloaded the 64-bit version of Ubuntu 11.10 for my home machines and burned them to a CD, so I brought the CD into work and set up a dual boot so I could revert back to XP if anything went wrong, and also so I could easily copy across any files I needed from the Windows partition.</p>
-<p>It took a fair while to get everything I wanted installed, but a lot less time than it would have taken if I’d set up Windows XP from scratch. The hardware all worked fine out of the box, and most of the software I needed was in the repositories. The only thing that I really needed that wasn’t there was Netbeans (which has apparently now been removed from the repositories), but the version in the Ubuntu repositories has never been very up-to-date anyway. Instead I installed the version of Netbeans available on the website, and that has worked fine for me. While there wasn’t a version of mRemote available, I did discover Remmina, which has proven to be an excellent client for SSH, RDP and VNC, to the point that I’ve now stopped using the terminal to connect via SSH in favour of using Remmina instead. Thunderbird does just as good a job with my email and calendar as it does on Windows, and I also have Mutt available. Naturally, it couldn’t be simpler to install a full LAMP stack and PHPMyAdmin either. In fact, the only application that I use much that I couldn’t get a decent version of was MySQL Workbench, and that was only because Oracle haven’t yet released a version for Ubuntu 11.10 (tried the version for 11.04, but it doesn’t seem to work), but I can live without that.</p>
-<p>What’s interesting is that despite all the scaremongering I’ve heard over the years about how Linux isn’t ready for the workplace, I’ve as yet had no problems whatsoever. For everything I used in Windows, it was either available on Ubuntu, or there was a viable equivalent, or I could get by fine without it. Granted, the nature of my work means I have little need for the small amount of functionality that Microsoft Office has and LibreOffice doesn’t, and I don’t need to use the kind of ghastly legacy apps written in Visual Basic that most large enterprises commonly use, but I haven’t noticed any significant barriers to my productivity.</p>
-<p>In fact, if anything I’m considerably more productive. I know people like to rag on Unity, and I wasn’t happy with it in the netbook edition of Ubuntu 10.10 myself, but in 11.10 it’s really starting to show its promise, and I haven’t had any problems with it. The fact that I know Ubuntu a lot more thoroughly than I do Windows, purely from my own experience at home, means that I can get things done a lot quicker, but also the whole package management system means I’m largely free from the annoyances of opening an application in the morning to be confronted with an update dialogue, quite apart from the fact that very few updates require a restart. I’d go so far as to say that I’ve been more productive using Ubuntu at work than I would have been with either Windows 7 or OS X (and over the last few years I’ve used Windows Vista, Windows 7 and OS X fairly extensively).</p>
-<p>I really don’t want this to turn into Yet Another Year of the Linux Desktop blog post, because that’s rather a tired old cliche, but I have absolutely no problems whatsoever getting my work done on Ubuntu. I’ll concede that as a developer I have significant freedom that isn’t often afforded to other people, and running some flavour of Unix makes a lot of sense if you’re a developer working with one of the open-source server-side languages such as PHP or Python (if I were a .NET developer, it would make rather less sense). I’m also lucky to be in a position where I don’t have to worry about legacy apps or IE compatibility too much. Nonetheless, it’s still remarkable how smoothly my migration across to Ubuntu on my work desktop has gone, and the extent to which I find it’s improved my workflow.</p>
-
-    </article>
         </div>
         <div class="col-md-4">
             <h1>Recent Posts</h1>
+            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
             <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
             <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
             <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
             <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
             <section id="github-profile">
             </section>
             <h4>My GitHub repositories</h4>
