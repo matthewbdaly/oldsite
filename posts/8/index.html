@@ -57,6 +57,16 @@
     <div class="row">
         <div class="col-md-8">
     <article class="post">
+        <p class="date">29th May 2011 2:53 pm</p>
+        <h1><a href="/blog/2011/05/29/hacked/">Hacked!</a></h1>
+        <p>Had a rather unfortunate incident last month - someone hacked into my Pogoplug mail server, and managed to get their mitts on my .fetchmailrc, which had all the login details for several email accounts. They promptly began sending spam out using my Gmail account.</p>
+<p>Naturally this meant I spent ages running round like a headless chicken trying to lock them out - when I first noticed that they’d been sending emails directly from my mail server, I logged into it via SSH and shut it down, then changed the passwords on all my email accounts.</p>
+<p>Thinking logically, there were four services that I had forwarded ports to the server for - SSH, Apache, Postfix and Dovecot. Now, I was running SSH on a non-standard port, had disabled root access, and didn’t allow password authentication (SSH keys only). Also, I had enabled DenyHosts, so I’m fairly confident SSH was not the point of entry.</p>
+<p>So that leaves either Apache, Postfix or Dovecot. I had noticed in the error logs a lot of characters prefixed with backslashes, and wondered if someone was trying some kind of shellcode injection, and to be safe I had added new iptables rules to blacklist the IP addresses responsible. I had done what I could to secure Apache, but I can’t rule it out as the application that was compromised. I went through the server logs, but without finding anything - I’m guessing whoever was responsible deleted the appropriate entries in the log files. I couldn’t be sure that the server could still be trusted, so I did a fresh install, and have disabled port forwarding on my router.</p>
+<p>This has certainly made me much more cautious and suspicious about security, which I guess can’t be a bad thing. Even beforehand, I found it pretty scary to see the sheer number of script kiddies who will try to hack into any server on the Internet.</p>
+
+    </article>
+    <article class="post">
         <p class="date">30th March 2011 8:34 pm</p>
         <h1><a href="/blog/2011/03/30/new-phone/">New Phone</a></h1>
         <p>On Friday of last week I unexpectedly got a text from Vodafone saying I was able to upgrade my phone early. I was pretty pleased about this as having been something of an Android early adopter, I was still using an early Android phone, namely my HTC Magic. While a fine phone when it was released, it was only the second Android phone to become available in the UK and was therefore a bit dated compared to newer devices. It has been upgraded to Froyo (albeit a cut-down custom build) but that did slow the phone down somewhat.</p>
@@ -93,90 +103,14 @@
         <p>Just to say I’ve changed the contact form I use on here. I always wanted to use one with a built-in CAPTCHA facility, as Disqus seems to have pretty much killed off the comment spam, but I was still getting it via the contact form. I’ve put off doing something about it till now, but it was getting out of hand so I’ve gone and found a new contact form. Let’s hope this kills the spam…</p>
 
     </article>
-    <article class="post">
-        <p class="date">29th October 2010 8:49 pm</p>
-        <h1><a href="/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/">Deleting Unwanted Vim Swap Files Using Perl</a></h1>
-        <p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I’d written between several computers, and it would be a good idea to clear them up. I didn’t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p>
-<p>I came up with the following:</p>
-<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
-
-<span class="hljs-keyword">use</span> strict;
-<span class="hljs-keyword">use</span> Cwd;
-
-<span class="hljs-sub"><span class="hljs-keyword">sub</span> searchDir
-{</span>
-    <span class="hljs-comment"># Subroutine to scan a directory looking for Vim swap files</span>
-    <span class="hljs-comment"># Get directory to read and current directory</span>
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$readdir</span> = <span class="hljs-keyword">shift</span>;
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">$startdir</span> = cwd();
-
-    <span class="hljs-comment"># Change directory to the target one</span>
-    <span class="hljs-keyword">chdir</span>(<span class="hljs-variable">$readdir</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open <span class="hljs-variable">$readdir</span>! <span class="hljs-variable">$!</span>\n"</span>;
-    <span class="hljs-keyword">print</span> <span class="hljs-string">"Scanning contents of directory <span class="hljs-variable">$startdir</span>\n"</span>;
-
-    <span class="hljs-comment"># Open the directory and grab the names of all the files and folders in it</span>
-    <span class="hljs-keyword">opendir</span>(DIR, <span class="hljs-string">"."</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open current directory! <span class="hljs-variable">$!</span>\n"</span>;
-    <span class="hljs-keyword">my</span> <span class="hljs-variable">@entries</span> = <span class="hljs-keyword">readdir</span>(DIR) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to read directory! <span class="hljs-variable">$!</span>\n"</span>;
-    closedir(DIR);
-
-    <span class="hljs-comment"># Loop through the files and folders in the directory</span>
-    <span class="hljs-keyword">foreach</span> <span class="hljs-keyword">my</span> <span class="hljs-variable">$entry</span> (<span class="hljs-variable">@entries</span>)
-    {
-        <span class="hljs-comment"># Skip this one and the one above it in the filesystem hierarchy</span>
-        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> eq <span class="hljs-string">"."</span>);
-        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> eq <span class="hljs-string">".."</span>);
-
-        <span class="hljs-comment"># If a file is a directory, call the searchDir subroutine recursively in order to scan it</span>
-        <span class="hljs-keyword">if</span>(-d <span class="hljs-variable">$entry</span>)
-        {
-            searchDir(<span class="hljs-variable">$entry</span>);
-            <span class="hljs-keyword">next</span>;
-        }
-
-        <span class="hljs-comment"># Use a regular expression to check to see if the current file starts with a period, and ends with .swp - if it does, it's a Vim swap file</span>
-        <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> =~ <span class="hljs-regexp">m/^\..*\.swp$/</span>)
-        {
-            <span class="hljs-comment"># Inform the user that a Vim swap file has been found and print out the path to it</span>
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"Found a Vim swap file!\n"</span>;
-            <span class="hljs-keyword">my</span> <span class="hljs-variable">$swppath</span> = cwd();
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"It's the file <span class="hljs-variable">$entry</span> in <span class="hljs-variable">$swppath</span>.\n"</span>;
-            <span class="hljs-keyword">my</span> <span class="hljs-variable">$fullpath</span> = <span class="hljs-variable">$swppath</span> . <span class="hljs-string">"/"</span> . <span class="hljs-variable">$entry</span>;
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"The full path is <span class="hljs-variable">$fullpath</span>.\n"</span>;
-
-            <span class="hljs-comment"># Prompt the user to delete the file</span>
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"Do you wish to delete this file? (Y/N)\t"</span>;
-            <span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">$reply</span> = );
-            <span class="hljs-keyword">if</span>(<span class="hljs-variable">$reply</span> =~ <span class="hljs-regexp">m/y/i</span>)
-            {
-                <span class="hljs-keyword">print</span> <span class="hljs-string">"Deleting <span class="hljs-variable">$fullpath</span>...\n"</span>;
-                <span class="hljs-keyword">unlink</span>(<span class="hljs-variable">$fullpath</span>);
-            }
-        }
-    }
-
-    <span class="hljs-keyword">chdir</span>(<span class="hljs-variable">$startdir</span>);
-}
-
-<span class="hljs-comment"># Get directory to begin the search</span>
-<span class="hljs-keyword">print</span> <span class="hljs-string">"Enter directory to start search: "</span>;
-<span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">$beginSearch</span> = );
-
-<span class="hljs-comment"># call searchDir to start the search</span>
-searchDir(<span class="hljs-variable">$beginSearch</span>);
-</code></pre>
-<p>Thankfully, I’ve now discovered the <a href="https://wordpress.org/extend/plugins/preserve-code-formatting/">Preserve Code Formatting plugin</a> for WordPress, which seems to do a good job at making the code look presentable!</p>
-<p>This isn’t perfect - it uses recursion to examine subdirectories, and when I ran it on my /home folder it somehow wound up in /sys on my Ubuntu machine and I ended up getting a deep recursion warning (a little research suggests this happens when it goes over 100 directories in). However, it seems to work fine for scanning individual folders in my /home directory, and that’s all I really wanted anyway.</p>
-<p>I love how Perl makes writing this kind of simple script so easy. It’s a great language for that kind of systems administration task.</p>
-
-    </article>
         </div>
         <div class="col-md-4">
             <h1>Recent Posts</h1>
+            <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
             <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
             <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
             <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
             <p><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></p>
-            <p><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></p>
             <section id="github-profile">
             </section>
             <h4>My GitHub repositories</h4>
