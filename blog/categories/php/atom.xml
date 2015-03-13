@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[php | Matthew Daly's Blog]]></title>
+        <description><![CDATA[php | I'm a web developer in Norfolk. This is my blog...]]></description>
+        <link>http://github.com/dylang/node-rss</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Fri, 13 Mar 2015 20:18:09 GMT</lastBuildDate>
+        <item>
+            <title><![CDATA[New theme]]></title>
+            <description><![CDATA[<p>For a long time now, I’ve kept meaning to write my own WordPress theme from scratch for this site, but just haven’t been able to find the time to do so. Now, I’ve finally found the time to do so, and here it is!</p>
+<p>Please let me know what you think, but be gentle (this is my first solo WordPress theme, and also the only one I’ve built completely from scratch), and if you find any issues with it please let me know. Don’t expect it to look great in IE6 or IE7 however - I’ve given it a very cursory review in those browsers, and that’s all. It’s still perfectly readable, but it uses a fair amount of CSS3 so it’s inevitably not going to look as pretty in those browsers.</p>
+<p>The code is <a href="https://github.com/matthewbdaly/Steel-Age">on GitHub</a> if you want to take a look.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2012/02/28/new-theme/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2012/02/28/new-theme/</guid>
+            <pubDate>Tue, 28 Feb 2012 18:25:30 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[So you REALLY don't know regular expressions?]]></title>
+            <description><![CDATA[<p>Ever since I started my new job, I’ve noticed a curious phenomenon. I work with two wonderfully gifted programmers who both know PHP much better than I do, and I learn something new from them all the time. However, neither one of them really knows or uses regular expressions.</p>
+<p>Now, as I learned Perl before I learned PHP, naturally I learned regular expressions quite early on in that process. In Perl, regular expressions are a huge part of the language - you simply cannot get away without learning them to some extent as they are used extensively in so many parts of the language.</p>
+<p>Apparently I’m not the only one to notice this. Here’s a quote I found on Stack Exchange:</p>
+<blockquote>
+<p>In earlier phases of my career (ie. pre-PHP), I was a Perl guru, and one major aspect of Perl gurudom is mastery of regular expressions.</p>
+<p>On my current team, I’m literally the only one of us who reaches for regex before other (usually nastier) tools. Seems like to the rest of the team they’re pure magic. They’ll wheel over to my desk and ask for a regex that takes me literally ten seconds to put together, and then be blown away when it works. I don’t know—I’ve worked with them so long, it’s just natural at this point.</p>
+<p>In the absence of regex-fluency, you’re left with combinations of flow-control statements wrapping strstr and strpos statements, which gets ugly and hard to run in your head. I’d much rather craft one elegant regex than thirty lines of plodding string searching.</p>
+</blockquote>
+<p>While I would hesitate to call myself a Perl guru (at best I would call myself intermediate with Perl), I would say I know enough about regular expressions that I can generally get useful work done with them.</p>
+<p>Take the following example in Perl (edited somewhat as it didn’t play nice with TinyMCE):</p>
+<pre><code class="hljs lang-perl"><span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="hljs-keyword">print</span> <span class="hljs-variable">$fruit</span>;
+<span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/,/</span>,<span class="hljs-variable">$fruit</span>);
+<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">@fruit</span>)
+{
+    <span class="hljs-keyword">print</span> <span class="hljs-variable">$_</span>.<span class="hljs-string">"\n"</span>;
+}
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+<p>Now, this code should be fairly easy to understand, even if you don’t really know Perl. $fruit is a string containing “apple,banana,cherry”. The split() function takes two arguments, a regular expression defining the character(s) that are used to separate the parts of the string you want to put into an array, and the string you want to split. This returns the array @fruit, which consists of three strings, “apple’, “banana”, and “cherry”.</p>
+<p>In PHP, you can do pretty much the same thing, using the explode() function:</p>
+<pre><code class="hljs lang-php"><span class="hljs-preprocessor">&lt;?php</span>
+<span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
+<span class="hljs-variable">$fruitArray</span> = explode(<span class="hljs-string">","</span>,<span class="hljs-variable">$fruit</span>);
+<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
+{
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
+}
+<span class="hljs-preprocessor">?&gt;</span>
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+<p>As you can see, they work in pretty much the same way here. Both return basically the same output, and the syntax for using the appropriate functions for splitting the strings is virtually identical.</p>
+<p>However, it’s once things get a bit more difficult that it becomes obvious how much more powerful regular expressions are. Say you’re dealing with a string that’s similar to that above, but may use different characters to separate the elements. For instance, say you’ve obtained the data that you want to pass through into an array from a text file and it’s somewhat inconsistent - perhaps the information you want is separated by differing amounts and types of whitespace, or different characters. The explode() function simply won’t handle that (at least, not without a lot of pain). But with Perl’s split() function, that’s no problem. Here’s how you might deal with input that had different types and quantities of whitespace as a separator:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/\s+/</span>,<span class="hljs-variable">$fruit</span>);
+</code></pre>
+<p>Yes, it’s that simple! The \s metacharacter matches any type of whitespace, and the + modifier means that it will match one or more times. Now you can very easily convert the contents of that string into an array.</p>
+<p>Or say you want to convert an entire string of text, with all kinds of punctuation and whitespace, into an array, but only keep the actual words. This wouldn’t be practical with explode(), but with split() it’s easy:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/\W+/</span>,<span class="hljs-variable">$fruit</span>);
+</code></pre>
+<p>The \W metacharacter matches any non-word character (ie anything other than a-z, A-Z or 0-9), and again the + modifier means that it will match one or more times.</p>
+<p>And of course, regular expressions are useful for many more tasks than this that, while possible with most language’s existing string functions, can get very nasty quite quickly. Say you want to match a UK postcode to check that it’s valid (note that for the sake of simplicity, I’m going to ignore BFPO and GIR postcodes). These use a format of one or two letters, followed by one digit, then may have an additional digit or letter, then a space, then a digit, then two letters. This would be a nightmare to check using most language’s native string functions, but with a regex in Perl, it’s relatively simple:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">m/^[a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1})(|\s+)\d{1}\w{2}$/</span>)
+{
+    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched!\n"</span>;
+}
+</code></pre>
+<p>And if you wanted to return the first part of the postcode if it matched as well, that’s simple too:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">s/^([a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1}))(|\s+)\d{1}\w{2}$/$1/</span>)
+{
+    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched! <span class="hljs-variable">$postcode</span>\n"</span>;
+}
+</code></pre>
+<p>Now, you may say “But that’s in Perl! I’m using PHP!’. Well, regular expressions are an extremely powerful part of PHP that are very useful, they’re just not as central to the language as they are in Perl. PHP actually has two distinct types of regular expressions - POSIX-extended regular expressions, and Perl-compatible regular expressions (or PCRE). However, POSIX-extended regular expressions were deprecated from PHP 5.3 onwards, so it’s not really worth taking the time to learn them when PCRE will do exactly the same thing and is going to be around for the future. Furthermore, most other programming languages also support Perl-compatible regular expressions, so they’re fairly portable between languages, and once you’ve learned them in one language, you can easily use them in another. In other words, if you learn how to work with regular expressions in Perl, you can very easily transfer that knowledge to most other programming languages that support regular expressions.</p>
+<p>In the first example given above, we can replace explode() with preg_split, and the syntax is virtually identical to split() in Perl, with the only difference being the name of the function and that the pattern to match is wrapped in double quotes:</p>
+<pre><code class="hljs lang-php"><span class="hljs-preprocessor">&lt;?php</span>
+<span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
+<span class="hljs-variable">$fruitArray</span> = preg_split(<span class="hljs-string">"/,/"</span>,<span class="hljs-variable">$fruit</span>);
+<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
+{
+    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
+}
+<span class="hljs-preprocessor">?&gt;</span>
+apple,banana,cherry
+apple
+banana
+cherry
+</code></pre>
+<p>Along similar lines, if we want to check if a string matches a pattern, we can use preg_match(), and if we want to search and replace, we can use preg_replace(). PHP’s regular expression support is not appreciably poorer than Perl’s, even if it’s less central to the language as a whole.</p>
+<blockquote>
+<p>But regular expressions are slower than PHP’s string functions!</p>
+</blockquote>
+<p>Yes, that’s true. So it’s a mistake to use regular expressions for something that can be handled quickly and easily using string functions. For instance, if in the following string you wanted to replace the word “cow” with “sheep”:</p>
+<blockquote>
+<p>The cow jumped over the moon</p>
+</blockquote>
+<p>You could use something like this:</p>
+<pre><code class="hljs lang-php"><span class="hljs-preprocessor">&lt;?php</span>
+<span class="hljs-variable">$text</span> = <span class="hljs-string">"The cow jumped over the moon"</span>;
+<span class="hljs-variable">$text</span> = preg_replace(<span class="hljs-string">"/cow/"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
+<span class="hljs-preprocessor">?&gt;</span>
+</code></pre>
+<p>However, because here you are only looking to match literal characters, you don’t need to use a regular expression. Just use the following:</p>
+<pre><code class="hljs lang-php"><span class="hljs-preprocessor">&lt;?php</span>
+<span class="hljs-variable">$text</span> = str_replace(<span class="hljs-string">"cow"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
+<span class="hljs-preprocessor">?&gt;</span>
+</code></pre>
+<p>But, if you have to do some more complex pattern matching, you have to start using strpos to get the location of specific characters and returning substrings between those characters, and it gets very messy, very quickly indeed. In those cases, while I haven’t done any kind of benchmarking on it, it stands to reason that quite quickly you’ll reach a point where a regex would be faster.</p>
+<p>However, for a number of common tasks, such as validating email addresses and URLs, there’s another way and you don’t need to resort to regular expressions, or faffing about with loads of string functions. The filter_var() function can be used for validating or sanitising email addresses and URLs, among other things, so this is worth using instead of writing a regex. If you’re using a framework such as CodeIgniter, you may have access to its native functions for validating this kind of thing, so you should use those instead.</p>
+<blockquote>
+<p>But regular expressions are ugly and make for less readable code!</p>
+</blockquote>
+<p>Not really. They seem intimidating to the newcomer, and very few people can just glance at a regex and instantly know what it does. But with regexes, you can often do complex things in far fewer lines of code than would be needed to accomplish the same thing using just PHP’s string functions. If you can do something in a line or two using string functions, it’s probably best to do that. But after that, things go downhill very quickly.</p>
+<p>Once you learn them, regular expressions really are not that hard, and you’ll probably find enough things to use them for that you’ll get plenty of practice at them. They’re certainly more readable to anyone with even a modicum of experience using them than line after line of flow-control statements.</p>
+<blockquote>
+<p>But you shouldn’t be using regular expressions for parsing HTML or XML!</p>
+</blockquote>
+<p>Quite true. Regular expressions are the wrong tool for that. You should probably use an existing library of some kind for that.</p>
+<blockquote>
+<p>Some people, when confronted with a problem, think “I know, I’ll use regular expressions.” Now they have two problems.</p>
+</blockquote>
+<p>Ah, yes, surely one of the most misused quotes on the web! Again, regular expressions are not the right tool for every job, and there’s a lot of tasks they get used for, and quite frankly, shouldn’t be. Most of us who know regular expressions have been known to use them for things we probably shouldn’t (I actually only just stumbled across filter_var, so I’ve done my share of validating email addresses using regexes, and I’m as guilty as anyone else of overusing them). But there’s still plenty of stuff you should use it for when what you need to do can’t be accomplished quickly and easily using string functions.</p>
+<p>Regular expressions are not inherently evil. They’re a tool like any other. What is bad is using them for things where a simple alternative exists. However, they are still extremely useful, and there’s plenty of valid use cases for them.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2012/01/29/so-you-really-dont-know-regular-expressions/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2012/01/29/so-you-really-dont-know-regular-expressions/</guid>
+            <pubDate>Sun, 29 Jan 2012 19:52:53 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[First steps with PHP]]></title>
+            <description><![CDATA[<p>I’m currently working on my very first website for anyone other than myself. It’s a simple brochure-style website advertising a friend’s chalet at a seaside resort, which she wants to be able to rent out, and includes a simple contact form so that people can get in touch to ask questions or make a booking enquiry. Now, at present Python is the only programming language I know at all well that’s useful for server-side scripting, but I decided to have a bash at building it using PHP, since that’s pretty well supported and there’s loads of tutorials and resources for teaching PHP to newbies, as well as innumerable third-party scripts and libraries. Also, PHP’s such a popular language that you can’t really get away from it if you want to get into web development - I see loads of PHP jobs advertised but very few Python ones. So I figured it’ll be useful to have picked up a little PHP.</p>
+<p>I got the form working, and I’ve added reCAPTCHA support to it to help prevent spam. All in all the form is working well, and it didn’t take a great deal of PHP knowledge to write the script. I’m already pretty confident that it’s a language I can work with in future, possibly even on a professional basis. That said, I can already tell that I will never like working with PHP as much as I like working with Python - the syntax is far less elegant than that of Python, and the object-orientation looks and feels much more clumsy to me.</p>
+<p>There’s plenty of things I’d like to be able to do that require PHP, so I will be learning it thoroughly at some point, although I have no plans to do so immediately - I’m about to do my JavaScript Fundamentals exam later this month, and after that I’ve got to learn Perl, so it’s not till I get that done that I’ll be learning PHP properly. In particular, I’m really interested in Wordpress theme development - I want to build a theme of my own for this blog since that’ll say more about my abilities than an off-the-shelf theme, and it also happens to be an increasingly marketable skill.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/06/08/first-steps-with-php/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/06/08/first-steps-with-php/</guid>
+            <pubDate>Tue, 08 Jun 2010 21:24:59 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
