@@ -51,7 +51,7 @@ module.exports = function (grunt) {
                 pages: 'content/pages/'
               },
               www: {
-                dest: 'build'
+                dest: 'blogbuilderoutput'
               }
             },
             files: {
@@ -94,10 +94,10 @@ module.exports = function (grunt) {
                 dest: 'www/static/js/'
             },
             rss: {
-                cwd: 'build/',
+                cwd: 'blogbuilderoutput/',
                 expand: true,
                 src: [
-                    'atom.xml'
+                    '**/atom.xml'
                 ],
                 dest: 'www/'
             },
@@ -106,7 +106,7 @@ module.exports = function (grunt) {
                 dest: 'www/'
             },
             sitemap: {
-                cwd: 'build/',
+                cwd: 'blogbuilderoutput/',
                 expand: true,
                 src: [
                     'sitemap.xml'
@@ -114,7 +114,7 @@ module.exports = function (grunt) {
                 dest: 'www/'
             },
             robots: {
-                cwd: 'build/',
+                cwd: 'blogbuilderoutput/',
                 expand: true,
                 src: [
                     'robots.txt'
@@ -124,7 +124,8 @@ module.exports = function (grunt) {
         },
         clean: [
             'www',
-            'build'
+            'build',
+            'blogbuilderoutput'
         ],
         watch: {
             scripts: {
@@ -185,6 +186,20 @@ module.exports = function (grunt) {
                 dest: 'build/css/style.min.css'
             }
         },
+        htmlmin: {
+            dist: {
+                options: {
+                    removeComments: true,
+                    collapseWhitespace: true
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'blogbuilderoutput',
+                    src: '**/*.html',
+                    dest: 'build/'
+                }]
+            }
+        },
         uglify: {
             dist: {
                 src: [
@@ -206,11 +221,11 @@ module.exports = function (grunt) {
         },
         sitemap: {
             dist: {
-                siteRoot: 'build/',
+                siteRoot: 'blogbuilderoutput/',
                 pattern: [
-                    'build/index.html',
-                    'build/**/*.html',
-                    'build/**/atom.xml'
+                    'blogbuilderoutput/index.html',
+                    'blogbuilderoutput/**/*.html',
+                    'blogbuilderoutput/**/atom.xml'
                 ],
                 homepage: 'http://matthewdaly.co.uk/'
             }
@@ -233,6 +248,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-gh-pages');
@@ -248,6 +264,7 @@ module.exports = function (grunt) {
         'compass',
         'concat',
         'cssmin',
+        'htmlmin',
         'uglify',
         'imagemin',
         'copy'
