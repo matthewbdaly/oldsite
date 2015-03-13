@@ -357,7 +357,7 @@ At present, it's hard to carry on a conversation with someone using this site be
 Now, Express doesn't include any support for sessions out of the box, so we have to install some additional libraries:
 
 ```bash
-npm install connect-redis express-session body-parser --save
+$ npm install connect-redis express-session body-parser --save
 ```
 
 The `express-session` library is middleware for Express that allows for storing and retrieving session variables, while `connect-redis` allows it to use Redis to store this data. We used `body-parser` for the URL shortener to process `POST` data, so we will use it again here. Now, we need to set it up. Replace the part of `index.js` before we set up the templating with this:
@@ -666,7 +666,6 @@ npm ERR! not ok code 0
 Next, we need to process the submitted form, set the session, and redirect the user back to the index. First, let's add another test:
 
 ```javascript
-
     // Test submitting to the login route
     describe('Test submitting to the login route', function () {
         it('should store the username in the session and redirect the user to the index', function (done) {
@@ -995,7 +994,7 @@ npm ERR! not ok code 0
 Our test now passes (bar, of course, Coveralls failing). Our next step is to actually do something with the session. Now, the `request` module we use in our test requires a third-party module called `tough-cookie` to work with cookies, so we need to install that:
 
 ```bash
-npm install tough-cookie --save-dev
+$ npm install tough-cookie --save-dev
 ```
 
 Next, amend the login test as follows:

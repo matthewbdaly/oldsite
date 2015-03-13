@@ -10,7 +10,7 @@ categories:
 
 Recently I had the occasion to reformat a load of dates in Vim from `DD/MM/YYYY` to `YYYY-MM-DD`. In Vim, this is quite simple:
 
-```vim
+```viml
 :%s/\(\d\{2}\)\/\(\d\{2}\)\/\(\d\{4}\)/\3-\2-\1/g
 ```
 
