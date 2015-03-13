@@ -5,7 +5,7 @@
         <description><![CDATA[redis | I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Fri, 13 Mar 2015 20:18:08 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 13 Mar 2015 20:37:20 GMT</lastBuildDate>
         <item>
             <title><![CDATA[Extending our Node.js and Redis chat server]]></title>
             <description><![CDATA[<p>In this tutorial, we’re going to extend the chat system we built in <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">the first tutorial</a> to include the following functionality:</p>
@@ -329,7 +329,7 @@ npm ERR! not ok code <span class="hljs-number">0</span>
 <h2 id="sessions-and-user-login">Sessions and user login</h2>
 <p>At present, it’s hard to carry on a conversation with someone using this site because you can’t see who is responding to you. We need to implement a mechanism to obtain a username for each user, store it in a session, and then use it to identify all of a user’s messages. In this case, we’re going to just prompt the user to enter a username of their choice, but if you wish, you can use something like <a href="http://passportjs.org/">Passport.js</a> to allow authentication using third-party services - I’ll leave that as an exercise for the reader.</p>
 <p>Now, Express doesn’t include any support for sessions out of the box, so we have to install some additional libraries:</p>
-<pre><code class="hljs lang-bash">npm install connect-redis express-session body-parser --save
+<pre><code class="hljs lang-bash">$ npm install connect-redis express-session body-parser --save
 </code></pre>
 <p>The <code>express-session</code> library is middleware for Express that allows for storing and retrieving session variables, while <code>connect-redis</code> allows it to use Redis to store this data. We used <code>body-parser</code> for the URL shortener to process <code>POST</code> data, so we will use it again here. Now, we need to set it up. Replace the part of <code>index.js</code> before we set up the templating with this:</p>
 <pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
@@ -614,8 +614,7 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
 npm ERR! not ok code <span class="hljs-number">0</span>
 </code></pre>
 <p>Next, we need to process the submitted form, set the session, and redirect the user back to the index. First, let’s add another test:</p>
-<pre><code class="hljs lang-javascript">
-    <span class="hljs-comment">// Test submitting to the login route</span>
+<pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting to the login route</span>
     describe(<span class="hljs-string">'Test submitting to the login route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
         it(<span class="hljs-string">'should store the username in the session and redirect the user to the index'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
             request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
@@ -924,7 +923,7 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
 npm ERR! not ok code <span class="hljs-number">0</span>
 </code></pre>
 <p>Our test now passes (bar, of course, Coveralls failing). Our next step is to actually do something with the session. Now, the <code>request</code> module we use in our test requires a third-party module called <code>tough-cookie</code> to work with cookies, so we need to install that:</p>
-<pre><code class="hljs lang-bash">npm install tough-cookie --save-dev
+<pre><code class="hljs lang-bash">$ npm install tough-cookie --save-dev
 </code></pre>
 <p>Next, amend the login test as follows:</p>
 <pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting to the login route</span>
