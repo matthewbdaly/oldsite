@@ -1,98 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
-        
-        <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
-        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
-        <title>Django Blog Tutorial - the Next Generation - Part 7 - Matthew Daly&#x27;s Blog</title>
-    </head>
-    <body>
-
-        <!-- Go to www.addthis.com/dashboard to customize your tools -->
-        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
-
-        <header>
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="header-nav">
-                            <ul class="nav navbar-nav">
-                                <li><a href="/">Home</a></li>
-                                <li><a href="/blog/archives/">Archives</a></li>
-                                <li><a href="/about/">About</a></li>
-                                <li><a href="/atom.xml">RSS</a></li>
-                            </ul>
-                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
-                                <div class="form-group">
-                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control">
-                                </div>
-                                <input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk" />
-                                <input type="submit" class="btn btn-default">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container">
-                <div class="page-header">
-                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
-                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
-                </div>
-            </div>
-        </header>
-
-<div class="container">
-
-
-    <div class="row">
-        <div class="col-md-8">
-            <article class="post">
-                <p class="date">25th August 2014 5:15 pm</p>
-                <h1>Django Blog Tutorial - the Next Generation - Part 7</h1>
-                <p>Hello once again! In this instalment we’ll cover:</p>
-<ul>
-<li>Caching your content with Memcached to improve your site’s performance</li>
-<li>Refactoring and simplifying our tests</li>
-<li>Implementing additional feeds</li>
-<li>Creating a simple search engine</li>
-</ul>
-<p>Don’t forget to activate your virtualenv:</p>
-<pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
-</code></pre>
-<p>Now let’s get started!</p>
-<h1 id="memcached">Memcached</h1>
-<p>If you frequent (or used to frequent) social media sites like Reddit, Slashdot or Digg, you may be familiar with something called variously the Digg or Slashdot effect, whereby if a page gets submitted to a social media site, and subsequently becomes popular, it can be hit by a huge number of HTTP requests in a very short period of time, slowing it down or even taking the server down completely.</p>
-<p>Now, as a general rule of thumb, for most dynamic websites such as blogs, the bottleneck is not the web server or the programming language, but the database. If you have a lot of people hitting the same page over and over again in quick succession, then you’re essentially running the same query over and over again and getting the same result each time, which is expensive in terms of processing power. What you need to be able to do is cache the results of the query in memory for a given period of time so that the number of queries is reduced.</p>
-<p>That’s where Memcached comes in. It’s a simple key-value store that allows you to store values in memory for a given period of time so that they can be retrieved without having to query the database. Memcached is a very common choice for caching, and is by far the fastest and most efficient type of cache available for Django. It’s also available on Heroku’s free tier.</p>
-<p>Django has a very powerful caching framework that supports numerous types of cache in addition to Memcached, such as:</p>
-<ul>
-<li>Database caching</li>
-<li>Filesystem caching</li>
-<li>Local memory caching</li>
-</ul>
-<p>There are also third-party backends for using other caching systems such as Redis.</p>
-<p>Now, the cache can be used in a number of different ways. You can cache only certain parts of your site if you wish. However, because our site is heavily content-driven, we should be pretty safe to use the per-site cache, which is the simplest way to set up caching.</p>
-<p>In order to set up Memcached, there’s a couple of Python libraries we’ll need. If you want to install them locally, however, you’ll need to install both memcached and libmemcached (on Ubuntu, the packages you need are called <code>memcached</code> and <code>libmemcached-dev</code>) on your development machine. If you don’t want to do this, then just copy and paste these lines into <code>requirements.txt</code> instead:</p>
-<pre><code class="hljs lang-bash">django-pylibmc-sasl==<span class="hljs-number">0.2</span>.<span class="hljs-number">4</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Django Blog Tutorial - the Next Generation - Part 7 - Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container-fluid"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></div><input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk"> <input type="submit" class="btn btn-default"></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">25th August 2014 5:15 pm</p><h1>Django Blog Tutorial - the Next Generation - Part 7</h1><p>Hello once again! In this instalment we’ll cover:</p><ul><li>Caching your content with Memcached to improve your site’s performance</li><li>Refactoring and simplifying our tests</li><li>Implementing additional feeds</li><li>Creating a simple search engine</li></ul><p>Don’t forget to activate your virtualenv:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
+</code></pre><p>Now let’s get started!</p><h1 id="memcached">Memcached</h1><p>If you frequent (or used to frequent) social media sites like Reddit, Slashdot or Digg, you may be familiar with something called variously the Digg or Slashdot effect, whereby if a page gets submitted to a social media site, and subsequently becomes popular, it can be hit by a huge number of HTTP requests in a very short period of time, slowing it down or even taking the server down completely.</p><p>Now, as a general rule of thumb, for most dynamic websites such as blogs, the bottleneck is not the web server or the programming language, but the database. If you have a lot of people hitting the same page over and over again in quick succession, then you’re essentially running the same query over and over again and getting the same result each time, which is expensive in terms of processing power. What you need to be able to do is cache the results of the query in memory for a given period of time so that the number of queries is reduced.</p><p>That’s where Memcached comes in. It’s a simple key-value store that allows you to store values in memory for a given period of time so that they can be retrieved without having to query the database. Memcached is a very common choice for caching, and is by far the fastest and most efficient type of cache available for Django. It’s also available on Heroku’s free tier.</p><p>Django has a very powerful caching framework that supports numerous types of cache in addition to Memcached, such as:</p><ul><li>Database caching</li><li>Filesystem caching</li><li>Local memory caching</li></ul><p>There are also third-party backends for using other caching systems such as Redis.</p><p>Now, the cache can be used in a number of different ways. You can cache only certain parts of your site if you wish. However, because our site is heavily content-driven, we should be pretty safe to use the per-site cache, which is the simplest way to set up caching.</p><p>In order to set up Memcached, there’s a couple of Python libraries we’ll need. If you want to install them locally, however, you’ll need to install both memcached and libmemcached (on Ubuntu, the packages you need are called <code>memcached</code> and <code>libmemcached-dev</code>) on your development machine. If you don’t want to do this, then just copy and paste these lines into <code>requirements.txt</code> instead:</p><pre><code class="hljs lang-bash">django-pylibmc-sasl==<span class="hljs-number">0.2</span>.<span class="hljs-number">4</span>
 pylibmc==<span class="hljs-number">1.3</span>.<span class="hljs-number">0</span>
-</code></pre>
-<p>If you are happy to install these dependencies locally, then run this command once memcached and libmemcached are installed:</p>
-<pre><code class="hljs lang-bash">$ pip install pylibmc django-pylibmc-sasl
-</code></pre>
-<p>With that done let’s configure Memcached. Open up the settings file and add the following at the bottom:</p>
-<pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_cache</span><span class="hljs-params">()</span>:</span>
+</code></pre><p>If you are happy to install these dependencies locally, then run this command once memcached and libmemcached are installed:</p><pre><code class="hljs lang-bash">$ pip install pylibmc django-pylibmc-sasl
+</code></pre><p>With that done let’s configure Memcached. Open up the settings file and add the following at the bottom:</p><pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_cache</span><span class="hljs-params">()</span>:</span>
   <span class="hljs-keyword">import</span> os
   <span class="hljs-keyword">try</span>:
     os.environ[<span class="hljs-string">'MEMCACHE_SERVERS'</span>] = os.environ[<span class="hljs-string">'MEMCACHIER_SERVERS'</span>].replace(<span class="hljs-string">','</span>, <span class="hljs-string">';'</span>)
@@ -117,32 +27,15 @@ CACHES = get_cache()
 CACHE_MIDDLEWARE_ALIAS = <span class="hljs-string">'default'</span>
 CACHE_MIDDLEWARE_SECONDS = <span class="hljs-number">300</span>
 CACHE_MIDDLEWARE_KEY_PREFIX = <span class="hljs-string">''</span>
-</code></pre>
-<p>Then add the following to <code>MIDDLEWARE_CLASSES</code>:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-string">'django.middleware.cache.UpdateCacheMiddleware'</span>,
+</code></pre><p>Then add the following to <code>MIDDLEWARE_CLASSES</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-string">'django.middleware.cache.UpdateCacheMiddleware'</span>,
     <span class="hljs-string">'django.middleware.common.CommonMiddleware'</span>,
     <span class="hljs-string">'django.middleware.cache.FetchFromCacheMiddleware'</span>,
-</code></pre>
-<p>That’s it! The first section configures the application to use Memcached to cache the content when running on Heroku, and sets some configuration parameters, while the second  section tells Django to use the per-site cache in order to cache all the site content.</p>
-<p>Now, Heroku doesn’t include Memcached by default - instead it’s available as an add-on called Memcachier. To use add-ons you need to set up a credit card for billing. We will set it up to use the free developer plan, but if you outgrow this you can easily switch to a paid plan. To add Memcachier, run this command:</p>
-<pre><code class="hljs lang-bash">$ heroku addons:add memcachier:dev
-</code></pre>
-<p>Please note that Memcachier can take a few minutes to get set up, so you may want to leave it a little while between adding it and pushing up your changes. Now we’ll commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add requirements.txt django_tutorial_blog_ng/settings.py
+</code></pre><p>That’s it! The first section configures the application to use Memcached to cache the content when running on Heroku, and sets some configuration parameters, while the second section tells Django to use the per-site cache in order to cache all the site content.</p><p>Now, Heroku doesn’t include Memcached by default - instead it’s available as an add-on called Memcachier. To use add-ons you need to set up a credit card for billing. We will set it up to use the free developer plan, but if you outgrow this you can easily switch to a paid plan. To add Memcachier, run this command:</p><pre><code class="hljs lang-bash">$ heroku addons:add memcachier:dev
+</code></pre><p>Please note that Memcachier can take a few minutes to get set up, so you may want to leave it a little while between adding it and pushing up your changes. Now we’ll commit our changes:</p><pre><code class="hljs lang-bash">$ git add requirements.txt django_tutorial_blog_ng/settings.py
 $ git commit -m <span class="hljs-string">'Implemented caching with Memcached'</span>
-</code></pre>
-<p>Then we’ll push them up to our remote repository and to Heroku:</p>
-<pre><code class="hljs lang-bash">$ git push origin master
+</code></pre><p>Then we’ll push them up to our remote repository and to Heroku:</p><pre><code class="hljs lang-bash">$ git push origin master
 $ git push heroku master
-</code></pre>
-<p>And that’s all you need to do to set up Memcached. In addition to storing your query results in Memcached, enabling the caching framework in Django will also set various HTTP headers to enable web proxies and browsers to cache content for an appropriate length of time. If you open up your browser’s developer tools and compare the response headers for your homepage on the latest version of the code with the previous version, you’ll notice that a number of additional headers appear, including <code>Cache-Control</code>, <code>Expires</code> and <code>Last-Modified</code>. These tell web browsers and web proxies how often to request the latest version of the HTML document, in order to help you reduce the bandwidth used.</p>
-<p>As you can see, for a site like this where you are the only person adding content, it’s really easy to implement caching with Django, and for a blog there’s very little reason not to do it. If you’re not using Heroku and are instead hosting your site on a VPS, then the configuration will be somewhat different - see <a href="https://docs.djangoproject.com/en/1.6/topics/cache/#memcached">here</a> for details. You can also find information on using other cache backends on the same page.</p>
-<p>That isn’t all you can do to speed up your site. Heroku doesn’t seem to be very good for serving static files, and if your site is attracting a lot of traffic you might want to host your static files elsewhere, such as on Amazon’s S3 service. Doing so is outside the scope of this tutorial, but for that use case, you should check out <a href="http://django-storages.readthedocs.org/en/latest/index.html">django-storages</a>.</p>
-<h1 id="clearing-the-cache-automatically">Clearing the cache automatically</h1>
-<p>There is one issue with this implementation. As it is right now, if you view the home page, add a post, then reload the page, you may not see the new post immediately because the cache will continue serving the old version until it has expired. That behaviour is less than ideal - we would like the cache to be cleared automatically when a new post gets added so that users will see the new version immediately. That response will still be cached afterwards, so it only means one extra query.</p>
-<p>This is the ideal place to introduce <a href="https://docs.djangoproject.com/en/dev/topics/signals/">signals</a>. Signals are a way to carry out a given action when an event takes place. In our case, we plan to clear the cache when a post is saved (either created or updated).</p>
-<p>Note that as we’ll be testing the behaviour of the cache at this point, you’ll need to install Memcached on your local machine, and we’ll need to change the settings to fall back to our local Memcached instance:</p>
-<pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_cache</span><span class="hljs-params">()</span>:</span>
+</code></pre><p>And that’s all you need to do to set up Memcached. In addition to storing your query results in Memcached, enabling the caching framework in Django will also set various HTTP headers to enable web proxies and browsers to cache content for an appropriate length of time. If you open up your browser’s developer tools and compare the response headers for your homepage on the latest version of the code with the previous version, you’ll notice that a number of additional headers appear, including <code>Cache-Control</code>, <code>Expires</code> and <code>Last-Modified</code>. These tell web browsers and web proxies how often to request the latest version of the HTML document, in order to help you reduce the bandwidth used.</p><p>As you can see, for a site like this where you are the only person adding content, it’s really easy to implement caching with Django, and for a blog there’s very little reason not to do it. If you’re not using Heroku and are instead hosting your site on a VPS, then the configuration will be somewhat different - see <a href="https://docs.djangoproject.com/en/1.6/topics/cache/#memcached">here</a> for details. You can also find information on using other cache backends on the same page.</p><p>That isn’t all you can do to speed up your site. Heroku doesn’t seem to be very good for serving static files, and if your site is attracting a lot of traffic you might want to host your static files elsewhere, such as on Amazon’s S3 service. Doing so is outside the scope of this tutorial, but for that use case, you should check out <a href="http://django-storages.readthedocs.org/en/latest/index.html">django-storages</a>.</p><h1 id="clearing-the-cache-automatically">Clearing the cache automatically</h1><p>There is one issue with this implementation. As it is right now, if you view the home page, add a post, then reload the page, you may not see the new post immediately because the cache will continue serving the old version until it has expired. That behaviour is less than ideal - we would like the cache to be cleared automatically when a new post gets added so that users will see the new version immediately. That response will still be cached afterwards, so it only means one extra query.</p><p>This is the ideal place to introduce <a href="https://docs.djangoproject.com/en/dev/topics/signals/">signals</a>. Signals are a way to carry out a given action when an event takes place. In our case, we plan to clear the cache when a post is saved (either created or updated).</p><p>Note that as we’ll be testing the behaviour of the cache at this point, you’ll need to install Memcached on your local machine, and we’ll need to change the settings to fall back to our local Memcached instance:</p><pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_cache</span><span class="hljs-params">()</span>:</span>
   <span class="hljs-keyword">import</span> os
   <span class="hljs-keyword">try</span>:
     os.environ[<span class="hljs-string">'MEMCACHE_SERVERS'</span>] = os.environ[<span class="hljs-string">'MEMCACHIER_SERVERS'</span>].replace(<span class="hljs-string">','</span>, <span class="hljs-string">';'</span>)
@@ -168,23 +61,16 @@ CACHES = get_cache()
 CACHE_MIDDLEWARE_ALIAS = <span class="hljs-string">'default'</span>
 CACHE_MIDDLEWARE_SECONDS = <span class="hljs-number">300</span>
 CACHE_MIDDLEWARE_KEY_PREFIX = <span class="hljs-string">''</span>
-</code></pre>
-<p>If you don’t want to install Memcached locally, you can skip this step, but be aware that the test we write for clearing the cache will always pass if you do skip it.</p>
-<p>Then we’ll run our tests to make sure nothing has been broken:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins blogengine
+</code></pre><p>If you don’t want to install Memcached locally, you can skip this step, but be aware that the test we write for clearing the cache will always pass if you do skip it.</p><p>Then we’ll run our tests to make sure nothing has been broken:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .......................
 ----------------------------------------------------------------------
 Ran <span class="hljs-number">23</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">6.164</span>s
 
 OK
-</code></pre>
-<p>Let’s commit:</p>
-<pre><code class="hljs lang-bash">$ git add django_tutorial_blog_ng/settings.py
+</code></pre><p>Let’s commit:</p><pre><code class="hljs lang-bash">$ git add django_tutorial_blog_ng/settings.py
 $ git commit -m <span class="hljs-string">'Now use Memcached in development'</span>
-</code></pre>
-<p>Now we’ll add a test for clearing the cache to <code>PostViewTest</code>:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_clear_cache</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>Now we’ll add a test for clearing the cache to <code>PostViewTest</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_clear_cache</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -244,24 +130,16 @@ $ git commit -m <span class="hljs-string">'Now use Memcached in development'</sp
 
         <span class="hljs-comment"># Check second post present</span>
         self.assertTrue(<span class="hljs-string">'my second blog post'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>This should be fairly self-explanatory. We create one post, and request the index page. We then add a second post, request the index page again, and check for the second post. The test should fail because the cached version is returned, rather than the version in the database.</p>
-<p>Now we have a test in place, we can implement a fix. First, add this to the top of your <code>models.py</code>:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db.models.signals <span class="hljs-keyword">import</span> post_save
+</code></pre><p>This should be fairly self-explanatory. We create one post, and request the index page. We then add a second post, request the index page again, and check for the second post. The test should fail because the cached version is returned, rather than the version in the database.</p><p>Now we have a test in place, we can implement a fix. First, add this to the top of your <code>models.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db.models.signals <span class="hljs-keyword">import</span> post_save
 <span class="hljs-keyword">from</span> django.core.cache <span class="hljs-keyword">import</span> cache
-</code></pre>
-<p>Then add the following at the bottom of the file:</p>
-<pre><code class="hljs lang-python">
+</code></pre><p>Then add the following at the bottom of the file:</p><pre><code class="hljs lang-python">
 <span class="hljs-comment"># Define signals</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">new_post</span><span class="hljs-params">(sender, instance, created, **kwargs)</span>:</span>
     cache.clear()
 
 <span class="hljs-comment"># Set up signals</span>
 post_save.connect(new_post, sender=Post)
-</code></pre>
-<p>This is fairly straightforward. What we’re doing is first defining a function called <code>new_post</code> that is called when a new post is created. We then connect it to the <code>post_save</code> signal. When a post is saved, it calls <code>new_post</code>, which clears the cache, making sure users are seeing the latest and greatest version of your site immediately.</p>
-<p>Let’s test it:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins blogengine
+</code></pre><p>This is fairly straightforward. What we’re doing is first defining a function called <code>new_post</code> that is called when a new post is created. We then connect it to the <code>post_save</code> signal. When a post is saved, it calls <code>new_post</code>, which clears the cache, making sure users are seeing the latest and greatest version of your site immediately.</p><p>Let’s test it:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -269,10 +147,7 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>There are a number of signals available, and when you create one, you have access to the created object via the <code>instance</code> parameter. Using signals you can implement all kinds of functionality. For instance, you could implement the functionality to send an email when a new post is published.</p>
-<p>If you’re using Travis CI, you’ll also need to update the config file:</p>
-<pre><code class="hljs lang-yaml"><span class="hljs-label">language:</span> python
+</code></pre><p>There are a number of signals available, and when you create one, you have access to the created object via the <code>instance</code> parameter. Using signals you can implement all kinds of functionality. For instance, you could implement the functionality to send an email when a new post is published.</p><p>If you’re using Travis CI, you’ll also need to update the config file:</p><pre><code class="hljs lang-yaml"><span class="hljs-label">language:</span> python
 <span class="hljs-label">python:</span>
 - <span class="hljs-string">"2.7"</span>
 <span class="hljs-label">services:</span> memcached
@@ -284,15 +159,9 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 <span class="hljs-label">script:</span> coverage run --include=<span class="hljs-string">"blogengine/*"</span> --omit=<span class="hljs-string">"blogengine/migrations/*"</span> manage.py test blogengine
 <span class="hljs-label">after_success:</span>
     coveralls
-</code></pre>
-<p>Time to commit:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/ .travis.yml
+</code></pre><p>Time to commit:</p><pre><code class="hljs lang-bash">$ git add blogengine/ .travis.yml
 $ git commit -m <span class="hljs-string">'Now clear cache when post added'</span>
-</code></pre>
-<h1 id="formatting-for-rss-feeds">Formatting for RSS feeds</h1>
-<p>Now, we want to offer more than one option for RSS feeds. For instance, if your blog is aggregated on a site such as <a href="http://planet.python.org/">Planet Python</a>, but you also blog about JavaScript, you may want to be able to provide a feed for posts in the <code>python</code> category only.</p>
-<p>If you have written any posts that use any of Markdown’s custom formatting, you may notice that if you load your RSS feed in a reader, it isn’t formatted as Markdown. Let’s fix that. First we’ll amend our test:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><h1 id="formatting-for-rss-feeds">Formatting for RSS feeds</h1><p>Now, we want to offer more than one option for RSS feeds. For instance, if your blog is aggregated on a site such as <a href="http://planet.python.org/">Planet Python</a>, but you also blog about JavaScript, you may want to be able to provide a feed for posts in the <code>python</code> category only.</p><p>If you have written any posts that use any of Markdown’s custom formatting, you may notice that if you load your RSS feed in a reader, it isn’t formatted as Markdown. Let’s fix that. First we’ll amend our test:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_all_post_feed</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
@@ -353,9 +222,7 @@ $ git commit -m <span class="hljs-string">'Now clear cache when post added'</spa
         feed_post = feed.entries[<span class="hljs-number">0</span>]
         self.assertEquals(feed_post.title, post.title)
         self.assertTrue(<span class="hljs-string">'This is my &lt;em&gt;first&lt;/em&gt; blog post'</span> <span class="hljs-keyword">in</span> feed_post.description)
-</code></pre>
-<p>Don’t forget to run the tests to make sure they fail. Now, let’s fix it:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
+</code></pre><p>Don’t forget to run the tests to make sure they fail. Now, let’s fix it:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Category, Post, Tag
 <span class="hljs-keyword">from</span> django.contrib.syndication.views <span class="hljs-keyword">import</span> Feed
@@ -400,9 +267,7 @@ $ git commit -m <span class="hljs-string">'Now clear cache when post added'</spa
         content = mark_safe(markdown2.markdown(force_unicode(item.text),
                                                extras = extras))
         <span class="hljs-keyword">return</span> content
-</code></pre>
-<p>All we’re doing here is amending the <code>item_description</code> method of <code>PostsFeed</code> to render it as Markdown. Now let’s run our tests again:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins
+</code></pre><p>All we’re doing here is amending the <code>item_description</code> method of <code>PostsFeed</code> to render it as Markdown. Now let’s run our tests again:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -410,23 +275,14 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>With that done, we’ll commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>With that done, we’ll commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Fixed rendering for post feed'</span>
-</code></pre>
-<h1 id="refactoring-our-tests">Refactoring our tests</h1>
-<p>Now, before we get into implementing the feed, our tests are a bit verbose. We create a lot of items over and over again - let’s sort that out. Factory Boy is a handy Python module that allows you to create easy-to-use factories for creating objects over and over again in tests. Let’s install it:</p>
-<pre><code class="hljs lang-bash">$ pip install factory_boy
+</code></pre><h1 id="refactoring-our-tests">Refactoring our tests</h1><p>Now, before we get into implementing the feed, our tests are a bit verbose. We create a lot of items over and over again - let’s sort that out. Factory Boy is a handy Python module that allows you to create easy-to-use factories for creating objects over and over again in tests. Let’s install it:</p><pre><code class="hljs lang-bash">$ pip install factory_boy
 $ pip freeze &gt; requirements.txt
 $ git add requirements.txt
 $ git commit -m <span class="hljs-string">'Installed Factory Boy'</span>
-</code></pre>
-<p>Now let’s set up a factory for creating posts. Add this at the top of the test file:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> factory.django
-</code></pre>
-<p>Then, before your actual tests, insert the following:</p>
-<pre><code class="hljs lang-python"><span class="hljs-comment"># Factories</span>
+</code></pre><p>Now let’s set up a factory for creating posts. Add this at the top of the test file:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> factory.django
+</code></pre><p>Then, before your actual tests, insert the following:</p><pre><code class="hljs lang-python"><span class="hljs-comment"># Factories</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SiteFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         model = Site
@@ -437,12 +293,8 @@ $ git commit -m <span class="hljs-string">'Installed Factory Boy'</span>
 
     name = <span class="hljs-string">'example.com'</span>
     domain = <span class="hljs-string">'example.com'</span>
-</code></pre>
-<p>Now, wherever you call <code>Site()</code>, add its attributes, and save it, replace those lines with the following:</p>
-<pre><code class="hljs lang-python">        site = SiteFactory()
-</code></pre>
-<p>Much simpler and more concise, I’m sure you’ll agree! Now, let’s run the tests to make sure they aren’t broken:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Now, wherever you call <code>Site()</code>, add its attributes, and save it, replace those lines with the following:</p><pre><code class="hljs lang-python">        site = SiteFactory()
+</code></pre><p>Much simpler and more concise, I’m sure you’ll agree! Now, let’s run the tests to make sure they aren’t broken:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -450,13 +302,9 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s commit again:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/tests.py
+</code></pre><p>Let’s commit again:</p><pre><code class="hljs lang-bash">$ git add blogengine/tests.py
 $ git commit -m <span class="hljs-string">'Now use Factory Boy for site objects'</span>
-</code></pre>
-<p>Let’s do the same thing with <code>Category</code> objects:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CategoryFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+</code></pre><p>Let’s do the same thing with <code>Category</code> objects:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CategoryFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         model = Category
         django_get_or_create = (
@@ -468,12 +316,8 @@ $ git commit -m <span class="hljs-string">'Now use Factory Boy for site objects'
     name = <span class="hljs-string">'python'</span>
     description = <span class="hljs-string">'The Python programming language'</span>
     slug = <span class="hljs-string">'python'</span>
-</code></pre>
-<p>Again, just find every time we call <code>Category()</code> and replace it with the following:</p>
-<pre><code class="hljs lang-python">        category = CategoryFactory()
-</code></pre>
-<p>Now if we run our tests, we’ll notice a serious error:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Again, just find every time we call <code>Category()</code> and replace it with the following:</p><pre><code class="hljs lang-python">        category = CategoryFactory()
+</code></pre><p>Now if we run our tests, we’ll notice a serious error:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 EE..EE.EE.EE...E.EEE..E.
 ======================================================================
@@ -797,15 +641,11 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (errors=<span class="hljs-number">13</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Thankfully, this is easy to fix. We just need to amend the custom <code>save()</code> method of the <code>Category</code> model:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save</span><span class="hljs-params">(self, *args, **kwargs)</span>:</span>
+</code></pre><p>Thankfully, this is easy to fix. We just need to amend the custom <code>save()</code> method of the <code>Category</code> model:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save</span><span class="hljs-params">(self, *args, **kwargs)</span>:</span>
         <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.slug:
             self.slug = slugify(unicode(self.name))
         super(Category, self).save(*args, **kwargs)
-</code></pre>
-<p>That should resolve the issue:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins
+</code></pre><p>That should resolve the issue:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -813,13 +653,9 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s commit again:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Let’s commit again:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Category now uses Factory Boy'</span>
-</code></pre>
-<p>Now let’s do the same thing for tags:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+</code></pre><p>Now let’s do the same thing for tags:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         model = Tag
         django_get_or_create = (
@@ -831,21 +667,13 @@ $ git commit -m <span class="hljs-string">'Category now uses Factory Boy'</span>
     name = <span class="hljs-string">'python'</span>
     description = <span class="hljs-string">'The Python programming language'</span>
     slug = <span class="hljs-string">'python'</span>
-</code></pre>
-<p>And replace the sections where we create new <code>Tag</code> objects:</p>
-<pre><code class="hljs lang-python">        tag = TagFactory()
-</code></pre>
-<p>Note that some tags have different values. We can easily pass different values to our <code>TagFactory()</code> to override the default values:</p>
-<pre><code class="hljs lang-python">        tag = TagFactory(name=<span class="hljs-string">'perl'</span>, description=<span class="hljs-string">'The Perl programming language'</span>)
-</code></pre>
-<p>The <code>Tag</code> model has the same issue as the <code>Category</code> one did, so let’s fix that:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save</span><span class="hljs-params">(self, *args, **kwargs)</span>:</span>
+</code></pre><p>And replace the sections where we create new <code>Tag</code> objects:</p><pre><code class="hljs lang-python">        tag = TagFactory()
+</code></pre><p>Note that some tags have different values. We can easily pass different values to our <code>TagFactory()</code> to override the default values:</p><pre><code class="hljs lang-python">        tag = TagFactory(name=<span class="hljs-string">'perl'</span>, description=<span class="hljs-string">'The Perl programming language'</span>)
+</code></pre><p>The <code>Tag</code> model has the same issue as the <code>Category</code> one did, so let’s fix that:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save</span><span class="hljs-params">(self, *args, **kwargs)</span>:</span>
         <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> self.slug:
             self.slug = slugify(unicode(self.name))
         super(Tag, self).save(*args, **kwargs)
-</code></pre>
-<p>We run our tests again:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine/
+</code></pre><p>We run our tests again:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine/
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -853,13 +681,9 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Time to commit again:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Time to commit again:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Now use Factory Boy for tags'</span>
-</code></pre>
-<p>Next we’ll create a factory for adding users. Note that the factory name doesn’t have to match the object name, so you can create factories for different types of users. Here we create a factory for authors - you could, for instance, create a separate factory for subscribers if you wanted:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthorFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+</code></pre><p>Next we’ll create a factory for adding users. Note that the factory name doesn’t have to match the object name, so you can create factories for different types of users. Here we create a factory for authors - you could, for instance, create a separate factory for subscribers if you wanted:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthorFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         model = User
         django_get_or_create = (<span class="hljs-string">'username'</span>,<span class="hljs-string">'email'</span>, <span class="hljs-string">'password'</span>,)
@@ -867,12 +691,8 @@ $ git commit -m <span class="hljs-string">'Now use Factory Boy for tags'</span>
     username = <span class="hljs-string">'testuser'</span>
     email = <span class="hljs-string">'user@example.com'</span>
     password = <span class="hljs-string">'password'</span>
-</code></pre>
-<p>And as before, replace those sections where we create users with the following:</p>
-<pre><code class="hljs lang-python">        author = AuthorFactory()
-</code></pre>
-<p>Run the tests again:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>And as before, replace those sections where we create users with the following:</p><pre><code class="hljs lang-python">        author = AuthorFactory()
+</code></pre><p>Run the tests again:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -880,13 +700,9 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>We commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>We commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Now use Factory Boy for creating authors'</span>
-</code></pre>
-<p>Now we’ll create a flat page factory:</p>
-<pre><code class="hljs lang-python">
+</code></pre><p>Now we’ll create a flat page factory:</p><pre><code class="hljs lang-python">
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FlatPageFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
@@ -900,12 +716,8 @@ $ git commit -m <span class="hljs-string">'Now use Factory Boy for creating auth
     url = <span class="hljs-string">'/about/'</span>
     title = <span class="hljs-string">'About me'</span>
     content = <span class="hljs-string">'All about me'</span>
-</code></pre>
-<p>And use it for our flat page test:</p>
-<pre><code class="hljs lang-python">        page = FlatPageFactory()
-</code></pre>
-<p>Check the tests pass:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>And use it for our flat page test:</p><pre><code class="hljs lang-python">        page = FlatPageFactory()
+</code></pre><p>Check the tests pass:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ........................
 ----------------------------------------------------------------------
@@ -913,13 +725,9 @@ Ran <span class="hljs-number">24</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>And commit again:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>And commit again:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Now use Factory Boy for flat page test'</span>
-</code></pre>
-<p>Now we’ll create a final factory for posts:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+</code></pre><p>Now we’ll create a final factory for posts:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         model = Post
         django_get_or_create = (
@@ -936,17 +744,9 @@ $ git commit -m <span class="hljs-string">'Now use Factory Boy for flat page tes
     author = factory.SubFactory(AuthorFactory)
     site = factory.SubFactory(SiteFactory)
     category = factory.SubFactory(CategoryFactory)
-</code></pre>
-<p>This factory is a little bit different. Because our <code>Post</code> model depends on several others, we need to be able to create those additional objects on demand. By designating them as subfactories, we can easily create the associated objects for our <code>Post</code> object.</p>
-<p>That means that not only can we get rid of our <code>Post()</code> calls, but we can also get rid of the factory calls to create the associated objects for <code>Post</code> models. Again, I’ll leave actually doing this as an exercise for the reader, but you can always refer to the GitHub repository if you’re not too sure.</p>
-<p>Make sure your tests still pass, then commit the changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>This factory is a little bit different. Because our <code>Post</code> model depends on several others, we need to be able to create those additional objects on demand. By designating them as subfactories, we can easily create the associated objects for our <code>Post</code> object.</p><p>That means that not only can we get rid of our <code>Post()</code> calls, but we can also get rid of the factory calls to create the associated objects for <code>Post</code> models. Again, I’ll leave actually doing this as an exercise for the reader, but you can always refer to the GitHub repository if you’re not too sure.</p><p>Make sure your tests still pass, then commit the changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Now use Factory Boy for testing posts'</span>
-</code></pre>
-<p>Using Factory Boy made a big difference to the size of the test file - I was able to cut it down by over 200 lines of code. As your application gets bigger, it gets harder to maintain, so do what you can to keep the size down.</p>
-<h1 id="additional-rss-feeds">Additional RSS feeds</h1>
-<p>Now, let’s implement our additional RSS feeds. First, we’ll write a test for the category feed. Add this to the <code>FeedTest</code> class:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_category_feed</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>Using Factory Boy made a big difference to the size of the test file - I was able to cut it down by over 200 lines of code. As your application gets bigger, it gets harder to maintain, so do what you can to keep the size down.</p><h1 id="additional-rss-feeds">Additional RSS feeds</h1><p>Now, let’s implement our additional RSS feeds. First, we’ll write a test for the category feed. Add this to the <code>FeedTest</code> class:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_category_feed</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create a post</span>
         post = PostFactory(text=<span class="hljs-string">'This is my *first* blog post'</span>)
 
@@ -971,10 +771,7 @@ $ git commit -m <span class="hljs-string">'Now use Factory Boy for testing posts
 
         <span class="hljs-comment"># Check other post is not in this feed</span>
         self.assertTrue(<span class="hljs-string">'This is my &lt;em&gt;second&lt;/em&gt; blog post'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>Here we create two posts in different categories (note that we create a new category and override the post category for it). We then fetch <code>/feeds/posts/category/python/</code> and assert that it contains only one post, with the content of the first post and not the content of the second.</p>
-<p>Run the tests and they should fail:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Here we create two posts in different categories (note that we create a new category and override the post category for it). We then fetch <code>/feeds/posts/category/python/</code> and assert that it contains only one post, with the content of the first post and not the content of the second.</p><p>Run the tests and they should fail:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ................F........
 ======================================================================
@@ -990,9 +787,7 @@ Ran <span class="hljs-number">25</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Because we haven’t yet implemented that route, we get a 404 error. So let’s create a route for this:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><p>Because we haven’t yet implemented that route, we get a 404 error. So let’s create a route for this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category, Tag
 <span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView, TagListView, PostsFeed, CategoryPostsFeed
@@ -1027,9 +822,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
     <span class="hljs-comment"># Category RSS feed</span>
     url(<span class="hljs-string">r'^feeds/posts/category/(?P&lt;slug&gt;[a-zA-Z0-9-]+)/?$'</span>, CategoryPostsFeed()),
 )
-</code></pre>
-<p>Note that the category RSS feed route is similar to the post RSS feed route, but accepts a <code>slug</code> parameter. We will use this to pass through the slug for the category in question. Also note we import the <code>CategoryPostsFeed</code> view. Now, we need to create that view. Fortunately, because it’s written as a Python class, we can extend the existing <code>PostsFeed</code> class. Open up your views file and amend it to look like this:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> get_object_or_404
+</code></pre><p>Note that the category RSS feed route is similar to the post RSS feed route, but accepts a <code>slug</code> parameter. We will use this to pass through the slug for the category in question. Also note we import the <code>CategoryPostsFeed</code> view. Now, we need to create that view. Fortunately, because it’s written as a Python class, we can extend the existing <code>PostsFeed</code> class. Open up your views file and amend it to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> get_object_or_404
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Category, Post, Tag
 <span class="hljs-keyword">from</span> django.contrib.syndication.views <span class="hljs-keyword">import</span> Feed
@@ -1091,12 +884,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">items</span><span class="hljs-params">(self, obj)</span>:</span>
         <span class="hljs-keyword">return</span> Post.objects.filter(category=obj).order_by(<span class="hljs-string">'-pub_date'</span>)
-</code></pre>
-<p>Note that many of our fields don’t have to be explicitly defined as they are inherited from <code>PostsFeed</code>. We can’t hard-code the title, link or description because they depend on the category, so we instead define methods to return the appropriate text.</p>
-<p>Also note <code>get_object()</code> - we define this so that we can ensure the category exists. If it doesn’t exist, then it returns a 404 error rather than showing an empty feed.</p>
-<p>We also override <code>items()</code> to filter it to just those posts that are in the given category.</p>
-<p>If you run the tests again, they should now pass:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Note that many of our fields don’t have to be explicitly defined as they are inherited from <code>PostsFeed</code>. We can’t hard-code the title, link or description because they depend on the category, so we instead define methods to return the appropriate text.</p><p>Also note <code>get_object()</code> - we define this so that we can ensure the category exists. If it doesn’t exist, then it returns a 404 error rather than showing an empty feed.</p><p>We also override <code>items()</code> to filter it to just those posts that are in the given category.</p><p>If you run the tests again, they should now pass:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .........................
 ----------------------------------------------------------------------
@@ -1104,27 +892,16 @@ Ran <span class="hljs-number">25</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Implemented category RSS feed'</span>
-</code></pre>
-<p>Now, we can get our category RSS feed, but how do we navigate to it? Let’s add a link to each category page that directs a user to its RSS feed. To do so, we’ll need to create a new template for category pages. First, let’s add some code to our tests to ensure that the right template is used at all times. Add the following to the end of the <code>test_index</code> method of <code>PostViewTest</code>:</p>
-<pre><code class="hljs lang-python">        <span class="hljs-comment"># Check the correct template was used</span>
+</code></pre><p>Now, we can get our category RSS feed, but how do we navigate to it? Let’s add a link to each category page that directs a user to its RSS feed. To do so, we’ll need to create a new template for category pages. First, let’s add some code to our tests to ensure that the right template is used at all times. Add the following to the end of the <code>test_index</code> method of <code>PostViewTest</code>:</p><pre><code class="hljs lang-python">        <span class="hljs-comment"># Check the correct template was used</span>
         self.assertTemplateUsed(response, <span class="hljs-string">'blogengine/post_list.html'</span>)
-</code></pre>
-<p>Then, add this to the end of <code>test_post_page</code>:</p>
-<pre><code class="hljs lang-python">
+</code></pre><p>Then, add this to the end of <code>test_post_page</code>:</p><pre><code class="hljs lang-python">
         <span class="hljs-comment"># Check the correct template was used</span>
         self.assertTemplateUsed(response, <span class="hljs-string">'blogengine/post_detail.html'</span>)
-</code></pre>
-<p>Finally, add this to the end of <code>test_category_page</code>:</p>
-<pre><code class="hljs lang-python">        <span class="hljs-comment"># Check the correct template was used</span>
+</code></pre><p>Finally, add this to the end of <code>test_category_page</code>:</p><pre><code class="hljs lang-python">        <span class="hljs-comment"># Check the correct template was used</span>
         self.assertTemplateUsed(response, <span class="hljs-string">'blogengine/category_post_list.html'</span>)
-</code></pre>
-<p>These assertions confirm which template was used to generate which request.</p>
-<p>Next, we head into our views file:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CategoryListView</span><span class="hljs-params">(ListView)</span>:</span>
+</code></pre><p>These assertions confirm which template was used to generate which request.</p><p>Next, we head into our views file:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CategoryListView</span><span class="hljs-params">(ListView)</span>:</span>
     template_name = <span class="hljs-string">'blogengine/category_post_list.html'</span>
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_queryset</span><span class="hljs-params">(self)</span>:</span>
@@ -1143,10 +920,7 @@ $ git commit -m <span class="hljs-string">'Implemented category RSS feed'</span>
         <span class="hljs-keyword">except</span> Category.DoesNotExist:
             context[<span class="hljs-string">'category'</span>] = <span class="hljs-keyword">None</span>
         <span class="hljs-keyword">return</span> context
-</code></pre>
-<p>Note that we first of all change the template used by this view. Then, we override <code>get_context_data</code> to add in additional data. What we’re doing is getting the slug that was passed through, looking up any category for which it is the slug, and returning it as additional context data. Using this method, you can easily add additional data that you may wish to render in your Django templates.</p>
-<p>Finally, we create our new template:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Note that we first of all change the template used by this view. Then, we override <code>get_context_data</code> to add in additional data. What we’re doing is getting the slug that was passed through, looking up any category for which it is the slug, and returning it as additional context data. Using this method, you can easily add additional data that you may wish to render in your Django templates.</p><p>Finally, we create our new template:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -1187,9 +961,7 @@ $ git commit -m <span class="hljs-string">'Implemented category RSS feed'</span>
         <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/feeds/posts/category/</span></span></span><span class="hljs-variable">{{ category.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>RSS feed for category </span><span class="hljs-variable">{{ category.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Note that the category has been passed through to the template and is now accessible. If you run the tests, they should now pass:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins
+</code></pre><p>Note that the category has been passed through to the template and is now accessible. If you run the tests, they should now pass:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .........................
 ----------------------------------------------------------------------
@@ -1197,13 +969,9 @@ Ran <span class="hljs-number">25</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>With that done. we can commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add templates/ blogengine/
+</code></pre><p>With that done. we can commit our changes:</p><pre><code class="hljs lang-bash">$ git add templates/ blogengine/
 $ git commit -m <span class="hljs-string">'Added link to RSS feed from category page'</span>
-</code></pre>
-<p>Next up, let’s implement another RSS feed for tags. First, we’ll implement our test:</p>
-<pre><code class="hljs lang-python">      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_tag_feed</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>Next up, let’s implement another RSS feed for tags. First, we’ll implement our test:</p><pre><code class="hljs lang-python">      <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_tag_feed</span><span class="hljs-params">(self)</span>:</span>
           <span class="hljs-comment"># Create a post</span>
           post = PostFactory(text=<span class="hljs-string">'This is my *first* blog post'</span>)
           tag = TagFactory()
@@ -1233,9 +1001,7 @@ $ git commit -m <span class="hljs-string">'Added link to RSS feed from category 
 
           <span class="hljs-comment"># Check other post is not in this feed</span>
           self.assertTrue(<span class="hljs-string">'This is my &lt;em&gt;second&lt;/em&gt; blog post'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>This is virtually identical to the test for the categroy feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>This is virtually identical to the test for the categroy feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .................F........
 ======================================================================
@@ -1251,9 +1017,7 @@ Ran <span class="hljs-number">26</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>As before, we create a route for this:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><p>As before, we create a route for this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category, Tag
 <span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView, TagListView, PostsFeed, CategoryPostsFeed, TagPostsFeed
@@ -1291,9 +1055,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
     <span class="hljs-comment"># Tag RSS feed</span>
     url(<span class="hljs-string">r'^feeds/posts/tag/(?P&lt;slug&gt;[a-zA-Z0-9-]+)/?$'</span>, TagPostsFeed()),
 )
-</code></pre>
-<p>Next, we create our view:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagPostsFeed</span><span class="hljs-params">(PostsFeed)</span>:</span>
+</code></pre><p>Next, we create our view:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagPostsFeed</span><span class="hljs-params">(PostsFeed)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_object</span><span class="hljs-params">(self, request, slug)</span>:</span>
         <span class="hljs-keyword">return</span> get_object_or_404(Tag, slug=slug)
 
@@ -1312,15 +1074,10 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
             <span class="hljs-keyword">return</span> tag.post_set.all()
         <span class="hljs-keyword">except</span> Tag.DoesNotExist:
             <span class="hljs-keyword">return</span> Post.objects.none()
-</code></pre>
-<p>Again, this inherits from <code>PostsFeed</code>, but the syntax for getting posts matching a tag is slightly different because they use a many-to-many relationship.</p>
-<p>We also need a template for the tag pages. Add this to the end of the <code>test_tag_page</code> method:</p>
-<pre><code class="hljs lang-python">
+</code></pre><p>Again, this inherits from <code>PostsFeed</code>, but the syntax for getting posts matching a tag is slightly different because they use a many-to-many relationship.</p><p>We also need a template for the tag pages. Add this to the end of the <code>test_tag_page</code> method:</p><pre><code class="hljs lang-python">
         <span class="hljs-comment"># Check the correct template was used</span>
         self.assertTemplateUsed(response, <span class="hljs-string">'blogengine/tag_post_list.html'</span>)
-</code></pre>
-<p>Let’s create that template:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Let’s create that template:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -1361,9 +1118,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/feeds/posts/tag/</span></span></span><span class="hljs-variable">{{ tag.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-value">/"</span>&gt;</span>RSS feed for tag </span><span class="hljs-variable">{{ tag.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>This is virtually identical to the category template. You’ll also need to apply this template in the view for the tag list, and pass the tag name through as context data:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagListView</span><span class="hljs-params">(ListView)</span>:</span>
+</code></pre><p>This is virtually identical to the category template. You’ll also need to apply this template in the view for the tag list, and pass the tag name through as context data:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagListView</span><span class="hljs-params">(ListView)</span>:</span>
     template_name = <span class="hljs-string">'blogengine/tag_post_list.html'</span>
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_queryset</span><span class="hljs-params">(self)</span>:</span>
@@ -1382,9 +1137,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         <span class="hljs-keyword">except</span> Tag.DoesNotExist:
             context[<span class="hljs-string">'tag'</span>] = <span class="hljs-keyword">None</span>
         <span class="hljs-keyword">return</span> context
-</code></pre>
-<p>Let’s run our tests:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..........................
 ----------------------------------------------------------------------
@@ -1392,17 +1145,10 @@ Ran <span class="hljs-number">26</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>You may want to do a quick check to ensure your tag feed link works as expected. Time to commit:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine templates
+</code></pre><p>You may want to do a quick check to ensure your tag feed link works as expected. Time to commit:</p><pre><code class="hljs lang-bash">$ git add blogengine templates
 $ git commit -m <span class="hljs-string">'Implemented tag feeds'</span>
-</code></pre>
-<h1 id="moving-our-templates">Moving our templates</h1>
-<p>Before we crack on with implementing search, there’s one more piece of housekeeping. In Django, templates can be applied at project level or at app level. So far, we’ve been storing them in the project, but we would like our app to be as self-contained as possible so it can just be dropped into future projects where we need a blog. That way, it can be easily overridden for specific projects. You can move the folders and update the Git repository at the same time with this command:</p>
-<pre><code class="hljs lang-bash">$ git mv templates/ blogengine/
-</code></pre>
-<p>We run the tests to make sure nothing untoward has happened:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
+</code></pre><h1 id="moving-our-templates">Moving our templates</h1><p>Before we crack on with implementing search, there’s one more piece of housekeeping. In Django, templates can be applied at project level or at app level. So far, we’ve been storing them in the project, but we would like our app to be as self-contained as possible so it can just be dropped into future projects where we need a blog. That way, it can be easily overridden for specific projects. You can move the folders and update the Git repository at the same time with this command:</p><pre><code class="hljs lang-bash">$ git mv templates/ blogengine/
+</code></pre><p>We run the tests to make sure nothing untoward has happened:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..........................
 ----------------------------------------------------------------------
@@ -1410,19 +1156,8 @@ Ran <span class="hljs-number">26</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>And we commit:</p>
-<pre><code class="hljs lang-bash">$ git commit -m <span class="hljs-string">'Moved templates'</span>
-</code></pre>
-<p>Note that <code>git mv</code> updates Git and moves the files, so you don’t need to call <code>git add</code>.</p>
-<h1 id="implementing-search">Implementing search</h1>
-<p>For our final task today, we will be implementing a very simple search engine. Our requirements are:</p>
-<ul>
-<li>It should be in the header, to allow for easy access from anywhere in the front end.</li>
-<li>It should search the title and text of posts.</li>
-</ul>
-<p>First, we’ll write our tests:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>And we commit:</p><pre><code class="hljs lang-bash">$ git commit -m <span class="hljs-string">'Moved templates'</span>
+</code></pre><p>Note that <code>git mv</code> updates Git and moves the files, so you don’t need to call <code>git add</code>.</p><h1 id="implementing-search">Implementing search</h1><p>For our final task today, we will be implementing a very simple search engine. Our requirements are:</p><ul><li>It should be in the header, to allow for easy access from anywhere in the front end.</li><li>It should search the title and text of posts.</li></ul><p>First, we’ll write our tests:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SearchViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_search</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create a post</span>
         post = PostFactory()
@@ -1449,9 +1184,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
         <span class="hljs-comment"># Check the second post is contained in the results</span>
         self.assertTrue(<span class="hljs-string">'My second post'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>Don’t forget to run the tests to make sure they fail:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
+</code></pre><p>Don’t forget to run the tests to make sure they fail:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..........................F
 ======================================================================
@@ -1467,9 +1200,7 @@ Ran <span class="hljs-number">27</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>With that done, we can add the search form to the header:</p>
-<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+</code></pre><p>With that done, we can add the search form to the header:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -1575,9 +1306,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         </span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
-</code></pre>
-<p>Now we’ll actually implement our search. Implementing search using Django’s generic views can be fiddly, so we’ll write our search view as a function instead. First, amend the imports at the top of your view file to look like this:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> get_object_or_404, render_to_response
+</code></pre><p>Now we’ll actually implement our search. Implementing search using Django’s generic views can be fiddly, so we’ll write our search view as a function instead. First, amend the imports at the top of your view file to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> get_object_or_404, render_to_response
 <span class="hljs-keyword">from</span> django.core.paginator <span class="hljs-keyword">import</span> Paginator, EmptyPage
 <span class="hljs-keyword">from</span> django.db.models <span class="hljs-keyword">import</span> Q
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
@@ -1586,9 +1315,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 <span class="hljs-keyword">from</span> django.utils.encoding <span class="hljs-keyword">import</span> force_unicode
 <span class="hljs-keyword">from</span> django.utils.safestring <span class="hljs-keyword">import</span> mark_safe
 <span class="hljs-keyword">import</span> markdown2
-</code></pre>
-<p>Next, add the following code to the end of the file:</p>
-<pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getSearchResults</span><span class="hljs-params">(request)</span>:</span>
+</code></pre><p>Next, add the following code to the end of the file:</p><pre><code class="hljs lang-python"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getSearchResults</span><span class="hljs-params">(request)</span>:</span>
     <span class="hljs-string">"""
     Search for a post by title or text
     """</span>
@@ -1616,17 +1343,10 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
                               {<span class="hljs-string">'page_obj'</span>: returned_page,
                                <span class="hljs-string">'object_list'</span>: returned_page.object_list,
                                <span class="hljs-string">'search'</span>: query})
-</code></pre>
-<p>As this is the first time we’ve written a view without using generic views, a little explanation is called for. First we get the values of the <code>q</code> and <code>page</code> parameters passed to the view. <code>q</code> contains the query text and <code>page</code> contains the page number. Note also that our page defaults to 1 if not set.</p>
-<p>We then use the Q object to perform a query. The Django ORM will <code>AND</code> together keyword argument queries, but that’s not the behaviour we want here. Instead we want to be able to search for content in the title or text, so we need to use a query with an <code>OR</code> statement, which necessitates using the <a href="https://docs.djangoproject.com/en/dev/topics/db/queries/#complex-lookups-with-q-objects">Q</a> object.</p>
-<p>Next, we use the <code>Paginator</code> object to manually paginate the results, and if it raises an <code>EmptyPage</code> exception, to just show the last page instead. Finally we render the template <code>blogengine/search_post_list.html</code>, and pass through the parameters <code>page_obj</code> for the returned page, <code>object_list</code> for the objects, and <code>search</code> for the query.</p>
-<p>We also need to add a route for our new view:</p>
-<pre><code class="hljs lang-python">
+</code></pre><p>As this is the first time we’ve written a view without using generic views, a little explanation is called for. First we get the values of the <code>q</code> and <code>page</code> parameters passed to the view. <code>q</code> contains the query text and <code>page</code> contains the page number. Note also that our page defaults to 1 if not set.</p><p>We then use the Q object to perform a query. The Django ORM will <code>AND</code> together keyword argument queries, but that’s not the behaviour we want here. Instead we want to be able to search for content in the title or text, so we need to use a query with an <code>OR</code> statement, which necessitates using the <a href="https://docs.djangoproject.com/en/dev/topics/db/queries/#complex-lookups-with-q-objects">Q</a> object.</p><p>Next, we use the <code>Paginator</code> object to manually paginate the results, and if it raises an <code>EmptyPage</code> exception, to just show the last page instead. Finally we render the template <code>blogengine/search_post_list.html</code>, and pass through the parameters <code>page_obj</code> for the returned page, <code>object_list</code> for the objects, and <code>search</code> for the query.</p><p>We also need to add a route for our new view:</p><pre><code class="hljs lang-python">
     <span class="hljs-comment"># Search posts</span>
     url(<span class="hljs-string">r'^search'</span>, <span class="hljs-string">'blogengine.views.getSearchResults'</span>),
-</code></pre>
-<p>Finally, let’s create a new template to show our results:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Finally, let’s create a new template to show our results:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -1665,9 +1385,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;/<span class="hljs-title">ul</span>&gt;</span>
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Let’s run our tests:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
+</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ...........................
 ----------------------------------------------------------------------
@@ -1675,82 +1393,15 @@ Ran <span class="hljs-number">27</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Don’t forget to do a quick sense check to make sure it’s all working as expected. Then it’s time to commit:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Don’t forget to do a quick sense check to make sure it’s all working as expected. Then it’s time to commit:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Implemented search'</span>
-</code></pre>
-<p>And push up your changes:</p>
-<pre><code class="hljs lang-bash">$ git push origin master
+</code></pre><p>And push up your changes:</p><pre><code class="hljs lang-bash">$ git push origin master
 $ git push heroku master
-</code></pre>
-<p>And that’s the end of this instalment. Please note this particular search solution is quite basic, and if you want something more powerful, you may want to look at <a href="http://haystacksearch.org/">Haystack</a>.</p>
-<p>As usual, you can get this lesson with <code>git checkout lesson-7</code> - if you have any problems, the <a href="https://github.com/matthewbdaly/django_tutorial_blog_ng">repository</a> should be the first place you look for answers as this is the working code base for the application, and with judicious use of a tool like <code>diff</code>, it’s generally pretty easy to track down most issues.</p>
-<p>In our next, and final instalment, we’ll cover:</p>
-<ul>
-<li>Tidying everything up</li>
-<li>Implementing an XML sitemap for search engines</li>
-<li>Optimising our site</li>
-<li>Using Fabric to make deployment easier</li>
-</ul>
-<p>Hope to see you then!</p>
-
-                <ul class="categorylist"><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li></ul>
-                <div class="addthis_sharing_toolbox"></div>
-              <section class="comments">
-                  <div id="disqus_thread"></div>
-                  <script type="text/javascript">
-                    window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/";
+</code></pre><p>And that’s the end of this instalment. Please note this particular search solution is quite basic, and if you want something more powerful, you may want to look at <a href="http://haystacksearch.org/">Haystack</a>.</p><p>As usual, you can get this lesson with <code>git checkout lesson-7</code> - if you have any problems, the <a href="https://github.com/matthewbdaly/django_tutorial_blog_ng">repository</a> should be the first place you look for answers as this is the working code base for the application, and with judicious use of a tool like <code>diff</code>, it’s generally pretty easy to track down most issues.</p><p>In our next, and final instalment, we’ll cover:</p><ul><li>Tidying everything up</li><li>Implementing an XML sitemap for search engines</li><li>Optimising our site</li><li>Using Fabric to make deployment easier</li></ul><p>Hope to see you then!</p><ul class="categorylist"><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li></ul><div class="addthis_sharing_toolbox"></div><section class="comments"><div id="disqus_thread"></div><script type="text/javascript">window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/";
                     window.disqus_url="http://matthewdaly.co.uk/blog/2014/08/25/django-blog-tutorial-the-next-generation-part-7/";
-                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 7";
-                  </script>
-                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
-                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
-              </section>
-            </article>
-        </div>
-        <div class="col-md-4">
-            <h1>Recent Posts</h1>
-            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
-            <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
-            <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
-            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
-            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <section id="github-profile">
-            </section>
-            <h4>My GitHub repositories</h4>
-            <ul id="github-repos">
-                <li>Loading repositories...</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="pager">
-                <li><a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a></li>
-                <li><a href="/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/">Django Blog Tutorial - the Next Generation - Part 6</a></li>
-            </ul>
-        </div>
-    </div>
-
-</div>
-
-        <footer>
-            <div class="container">
-                <div class="col-md-12">
-                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
-                </div>
-            </div>
-        </footer>
-        <script type="text/javascript" src="/static/js/all.min.js"></script>
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 7";</script><script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script><noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript></section></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p><p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/">Django Blog Tutorial - the Next Generation - Part 8</a></li><li><a href="/blog/2014/05/25/django-blog-tutorial-the-next-generation-part-6/">Django Blog Tutorial - the Next Generation - Part 6</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-17043630-1');ga('send','pageview');
-        </script>
-    </body>
-</html>
+            ga('create','UA-17043630-1');ga('send','pageview');</script></body></html>

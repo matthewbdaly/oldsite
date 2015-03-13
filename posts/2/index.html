@@ -1,89 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
-        
-        <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
-        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
-        <title>Matthew Daly&#x27;s Blog</title>
-    </head>
-    <body>
-
-        <!-- Go to www.addthis.com/dashboard to customize your tools -->
-        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
-
-        <header>
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="header-nav">
-                            <ul class="nav navbar-nav">
-                                <li><a href="/">Home</a></li>
-                                <li><a href="/blog/archives/">Archives</a></li>
-                                <li><a href="/about/">About</a></li>
-                                <li><a href="/atom.xml">RSS</a></li>
-                            </ul>
-                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
-                                <div class="form-group">
-                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control">
-                                </div>
-                                <input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk" />
-                                <input type="submit" class="btn btn-default">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container">
-                <div class="page-header">
-                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
-                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
-                </div>
-            </div>
-        </header>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-    <article class="post">
-        <p class="date">9th November 2014 5:13 pm</p>
-        <h1><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></h1>
-        <p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p>
-<p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p>
-<h2 id="what-is-redis-">What is Redis?</h2>
-<p>Redis is described as follows on the website:</p>
-<blockquote>
-<p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p>
-</blockquote>
-<p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p>
-<p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p>
-<ul>
-<li>A string to identify the correct URL</li>
-<li>The URL</li>
-</ul>
-<p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p>
-<h2 id="getting-started">Getting started</h2>
-<p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p>
-<p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p>
-<pre><code class="hljs lang-bash">$ sudo npm install -g grunt-cli
-</code></pre>
-<p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p>
-<p>Now, let’s create our <code>package.json</code> file:</p>
-<pre><code class="hljs lang-bash">$ npm init
-</code></pre>
-<p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p>
-<pre><code class="hljs lang-json">{
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container-fluid"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></div><input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk"> <input type="submit" class="btn btn-default"></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th November 2014 5:13 pm</p><h1><a href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/">Building a URL Shortener With Node.js and Redis</a></h1><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p><p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p><h2 id="what-is-redis-">What is Redis?</h2><p>Redis is described as follows on the website:</p><blockquote><p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p></blockquote><p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p><p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p><ul><li>A string to identify the correct URL</li><li>The URL</li></ul><p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p><h2 id="getting-started">Getting started</h2><p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p><p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p><pre><code class="hljs lang-bash">$ sudo npm install -g grunt-cli
+</code></pre><p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p><p>Now, let’s create our <code>package.json</code> file:</p><pre><code class="hljs lang-bash">$ npm init
+</code></pre><p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p><pre><code class="hljs lang-json">{
   "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"url-shortener"</span></span>,
   "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
   "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A URL shortener"</span></span>,
@@ -98,16 +15,9 @@
   "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
   "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
 </span>}
-</code></pre>
-<p>Note in particular that we set our test command to <code>grunt test</code>.</p>
-<p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p>
-<pre><code class="hljs lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
-</code></pre>
-<p>Next, install the development dependencies:</p>
-<pre><code class="hljs lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
-</code></pre>
-<p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
+</code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
+</code></pre><p>Next, install the development dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
+</code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
 <span class="hljs-pi">    'use strict'</span>;
 
     grunt.initConfig({
@@ -135,19 +45,8 @@
     <span class="hljs-comment">// Register tasks</span>
     grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
 };
-</code></pre>
-<p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p>
-<pre><code class="hljs lang-bash">web: node index.js
-</code></pre>
-<h2 id="creating-the-views">Creating the views</h2>
-<p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p>
-<ul>
-<li>Submission form</li>
-<li>Output form</li>
-<li>404 page</li>
-</ul>
-<p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p>
-<pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
+</code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="hljs lang-bash">web: node index.js
+</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
 <span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
     head
         title=<span class="hljs-string">"Shortbread"</span>
@@ -161,9 +60,7 @@
                 <span class="hljs-function"><span class="hljs-title">form</span><span class="hljs-params">(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)</span></span>
                     <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)</span></span>
                     <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)</span></span>
-</code></pre>
-<p>Also <code>views/output.jade</code>:</p>
-<pre><code class="hljs lang-jade">doctype html
+</code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="hljs lang-jade">doctype html
 html(lang=<span class="hljs-string">"en"</span>)
     head
         title=Shortbread
@@ -175,9 +72,7 @@ html(lang=<span class="hljs-string">"en"</span>)
                 p
                     | Your shortened <span class="hljs-built_in">URL</span> is
                     <span class="hljs-operator">a</span>(href=base_url+<span class="hljs-string">'/'</span>+id) <span class="hljs-comment">#{base_url}/#{id}</span>
-</code></pre>
-<p>and <code>views/error.jade</code>:</p>
-<pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
+</code></pre><p>and <code>views/error.jade</code>:</p><pre><code class="hljs lang-jade">doctype <span class="hljs-tag">html</span>
 <span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
     head
         title=<span class="hljs-string">"Shortbread"</span>
@@ -187,10 +82,7 @@ html(lang=<span class="hljs-string">"en"</span>)
             <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
                 <span class="hljs-tag">h1</span> Shortbread
                 <span class="hljs-tag">p</span> Link not found
-</code></pre>
-<h2 id="writing-our-first-test">Writing our first test</h2>
-<p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+</code></pre><h2 id="writing-our-first-test">Writing our first test</h2><p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
 <span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
 <span class="hljs-pi">"use strict"</span>;
 
@@ -230,15 +122,8 @@ describe(<span class="hljs-string">'server'</span>, <span class="hljs-function">
         });
     });
 });
-</code></pre>
-<p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p>
-<p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p>
-<p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p>
-<p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p>
-<pre><code class="hljs lang-bash">$ touch index.js
-</code></pre>
-<p>Let’s run our tests:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p><p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p><p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p><p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p><pre><code class="hljs lang-bash">$ touch index.js
+</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -284,9 +169,7 @@ Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number"
 Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
 
 Aborted due to warnings.
-</code></pre>
-<p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+</code></pre><p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
 <span class="hljs-pi">'use strict'</span>;
 
 <span class="hljs-comment">// Declare variables used</span>
@@ -334,14 +217,7 @@ app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
 <span class="hljs-comment">// Listen</span>
 app.listen(port);
 <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on port '</span> + port);
-</code></pre>
-<p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p>
-<p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p>
-<p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p>
-<p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p>
-<p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p>
-<p>Let’s run our test:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p><p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p><p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p><p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p><p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p><p>Let’s run our test:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -372,9 +248,7 @@ Lines        : <span class="hljs-number">86.96</span>% ( <span class="hljs-numbe
 &gt;&gt; Done. Check coverage folder.
 
 Done, without errors.
-</code></pre>
-<p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-comment">/* istanbul ignore if */</span>
+</code></pre><p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/* istanbul ignore if */</span>
 <span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
     rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
     client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
@@ -382,11 +256,7 @@ Done, without errors.
 } <span class="hljs-keyword">else</span> {
     client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
 }
-</code></pre>
-<p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p>
-<h2 id="submitting-a-url">Submitting a URL</h2>
-<p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p>
-<pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting a URL</span>
+</code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting a URL</span>
     describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
         it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
             request.post(<span class="hljs-string">'http://localhost:5000'</span>, {form: {url: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
@@ -397,9 +267,7 @@ Done, without errors.
             });
         });
     });
-</code></pre>
-<p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -448,9 +316,7 @@ Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number"
 Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
 
 Aborted due to warnings.
-</code></pre>
-<p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define submit route</span>
+</code></pre><p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define submit route</span>
 app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
     <span class="hljs-comment">// Declare variables</span>
     <span class="hljs-keyword">var</span> url, id;
@@ -467,11 +333,7 @@ app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span
         res.render(<span class="hljs-string">'output'</span>, { id: id, base_url: base_url });
     });
 });
-</code></pre>
-<p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p>
-<p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p>
-<p>With that done, our test should pass:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -504,9 +366,7 @@ Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number"
 &gt;&gt; Done. Check coverage folder.
 
 Done, without errors.
-</code></pre>
-<p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p>
-<pre><code class="hljs lang-javascript">
+</code></pre><p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p><pre><code class="hljs lang-javascript">
     <span class="hljs-comment">// Test following a URL</span>
     describe(<span class="hljs-string">'Test following a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
         it(<span class="hljs-string">'should redirect the user to the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
@@ -539,12 +399,7 @@ Done, without errors.
             });
         });
     });
-</code></pre>
-<p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p>
-<p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p>
-<p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p>
-<p>If we run our tests, they should now fail:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p><p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p><p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p><p>If we run our tests, they should now fail:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -609,9 +464,7 @@ Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number"
 Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
 
 Aborted due to warnings.
-</code></pre>
-<p>Now, let’s add our final route:</p>
-<pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define link route</span>
+</code></pre><p>Now, let’s add our final route:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define link route</span>
 app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
     <span class="hljs-comment">// Get ID</span>
     <span class="hljs-keyword">var</span> id = req.params.id.trim();
@@ -630,10 +483,7 @@ app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-functio
         }
     });
 });
-</code></pre>
-<p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p>
-<p>Now, let’s check it passes:</p>
-<pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+</code></pre><p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p><p>Now, let’s check it passes:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
 Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; <span class="hljs-number">2</span> files lint free.
 
@@ -670,25 +520,7 @@ Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number"
 &gt;&gt; Done. Check coverage folder.
 
 Done, without errors.
-</code></pre>
-<p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you’ll need to install the Redis to Go addon, and refer to Heroku’s documentation on deploying Node.js applications for more details.</p>
-<h2 id="wrapping-up">Wrapping up</h2>
-<p>You’ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p>
-<p>I hope you’ve enjoyed this brief introduction to Redis, and that it’s opened your eyes to at least one of the alternatives out there to a relational database. I’ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p>
-
-    </article>
-    <article class="post">
-        <p class="date">19th October 2014 7:52 pm</p>
-        <h1><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></h1>
-        <p>This isn’t really part of my Django tutorial series (that has now definitely concluded!), but I thought I’d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don’t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p>
-<h2 id="operating-system">Operating system</h2>
-<p>This isn’t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it’s fanatically stable.</p>
-<h2 id="database-server">Database server</h2>
-<p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn’t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I’m currently in the process of deploying at work. So far I haven’t had any problems with it.</p>
-<h2 id="web-server">Web server</h2>
-<p>It’s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p>
-<p>For serving the static files, I use Nginx - it’s generally considered to be faster than Apache for this use case. Here’s a typical Nginx config file:</p>
-<pre><code class="hljs lang-nginx"><span class="hljs-title">server</span> {
+</code></pre><p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you’ll need to install the Redis to Go addon, and refer to Heroku’s documentation on deploying Node.js applications for more details.</p><h2 id="wrapping-up">Wrapping up</h2><p>You’ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p><p>I hope you’ve enjoyed this brief introduction to Redis, and that it’s opened your eyes to at least one of the alternatives out there to a relational database. I’ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p></article><article class="post"><p class="date">19th October 2014 7:52 pm</p><h1><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></h1><p>This isn’t really part of my Django tutorial series (that has now definitely concluded!), but I thought I’d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don’t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p><h2 id="operating-system">Operating system</h2><p>This isn’t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it’s fanatically stable.</p><h2 id="database-server">Database server</h2><p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn’t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I’m currently in the process of deploying at work. So far I haven’t had any problems with it.</p><h2 id="web-server">Web server</h2><p>It’s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p><p>For serving the static files, I use Nginx - it’s generally considered to be faster than Apache for this use case. Here’s a typical Nginx config file:</p><pre><code class="hljs lang-nginx"><span class="hljs-title">server</span> {
     <span class="hljs-title">listen</span> <span class="hljs-number">80</span>;
     <span class="hljs-title">server_name</span> example.com;
     <span class="hljs-title">client_max_body_size</span> <span class="hljs-number">50M</span>;
@@ -708,101 +540,45 @@ Done, without errors.
         <span class="hljs-title">proxy_pass</span> <span class="hljs-url">http://127.0.0.1:8000</span>;
     }
 }
-</code></pre>
-<p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project, as <code>gunicorn.conf.py</code>:</p>
-<pre><code class="hljs lang-python">bind = <span class="hljs-string">"127.0.0.1:8000"</span>
+</code></pre><p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project, as <code>gunicorn.conf.py</code>:</p><pre><code class="hljs lang-python">bind = <span class="hljs-string">"127.0.0.1:8000"</span>
 logfile = <span class="hljs-string">"/var/log/gunicorn.log"</span>
 loglevel = <span class="hljs-string">"debug"</span>
 workers = <span class="hljs-number">3</span>
-</code></pre>
-<p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p>
-<p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app, named <code>mysite-supervisor.conf</code>:</p>
-<pre><code class="hljs lang-ini"><span class="hljs-title">[program:mysite]</span>
+</code></pre><p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p><p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app, named <code>mysite-supervisor.conf</code>:</p><pre><code class="hljs lang-ini"><span class="hljs-title">[program:mysite]</span>
 <span class="hljs-setting">command=<span class="hljs-value">/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=<span class="hljs-number">3</span></span></span>
 <span class="hljs-setting">directory=<span class="hljs-value">/var/www/mysite/</span></span>
 <span class="hljs-setting">user=<span class="hljs-value">nobody</span></span>
 <span class="hljs-setting">autostart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
 <span class="hljs-setting">autorestart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
-</code></pre>
-<p>Once that’s in place, you can easily add the new app:</p>
-<pre><code class="hljs lang-bash">$ sudo supervisorctl reread
+</code></pre><p>Once that’s in place, you can easily add the new app:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl reread
 $ sudo supervisorctl update
-</code></pre>
-<p>Then to start it:</p>
-<pre><code class="hljs lang-bash">$ sudo supervisorctl start mysite
-</code></pre>
-<p>Or stop it with:</p>
-<pre><code class="hljs lang-bash">$ sudo supervisorctl stop mysite
-</code></pre>
-<p>Or restart it:</p>
-<pre><code class="hljs lang-bash">$ sudo supervisorctl restart mysite
-</code></pre>
-<h2 id="celery">Celery</h2>
-<p>So far, both of the web apps I’ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p>
-<ul>
-<li>The user doesn’t need to wait for the task to be completed before getting a response, improving performance</li>
-<li>It’s more robust, since if the task fails, it can be automatically retried</li>
-<li>The task queue can be moved to another server if desired, making it easier to scale</li>
-<li>Scheduling tasks</li>
-</ul>
-<p>I’ve used it in cases where I needed to send an email or a push notification, since these don’t have to be done within the context of the same HTTP request, but need to be reliable.</p>
-<p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file, which might be called <code>celery-supervisor.conf</code>:</p>
-<pre><code class="hljs lang-ini"><span class="hljs-title">[program:celeryd]</span>
+</code></pre><p>Then to start it:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl start mysite
+</code></pre><p>Or stop it with:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl stop mysite
+</code></pre><p>Or restart it:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl restart mysite
+</code></pre><h2 id="celery">Celery</h2><p>So far, both of the web apps I’ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p><ul><li>The user doesn’t need to wait for the task to be completed before getting a response, improving performance</li><li>It’s more robust, since if the task fails, it can be automatically retried</li><li>The task queue can be moved to another server if desired, making it easier to scale</li><li>Scheduling tasks</li></ul><p>I’ve used it in cases where I needed to send an email or a push notification, since these don’t have to be done within the context of the same HTTP request, but need to be reliable.</p><p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file, which might be called <code>celery-supervisor.conf</code>:</p><pre><code class="hljs lang-ini"><span class="hljs-title">[program:celeryd]</span>
 <span class="hljs-setting">command=<span class="hljs-value">/var/www/mysite/venv/bin/python manage.py celery worker</span></span>
 <span class="hljs-setting">directory=<span class="hljs-value">/var/www/mysite/</span></span>
 <span class="hljs-setting">user=<span class="hljs-value">nobody</span></span>
 <span class="hljs-setting">autostart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
 <span class="hljs-setting">autorestart=<span class="hljs-value"><span class="hljs-keyword">true</span></span></span>
-</code></pre>
-<p>Then start it up:</p>
-<pre><code class="hljs lang-bash">$ sudo supervisorctl reread
+</code></pre><p>Then start it up:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl reread
 $ sudo supervisorctl update
 $ sudo supervisorctl start celeryd
-</code></pre>
-<p>I make no claims about how good this setup is, but it works well for me. I haven’t yet had the occasion to deploy a Django app to anywhere other than Heroku that really benefited from caching, so I haven’t got any tips to share about that, but if I were building a content-driven web app, I would use Memcached since it’s well-supported.</p>
-
-    </article>
-    <article class="post">
-        <p class="date">5th October 2014 7:56 pm</p>
-        <h1><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></h1>
-        <p>I’m a big fan of static site generators. I ditched WordPress for Octopress over two years ago because it was free to host on GitHub Pages and much faster, had much better syntax highlighting, and I liked being able to write posts in Vim, and I’ve never looked back since.</p>
-<p>That said, Octopress is written in Ruby, a language I’ve never been that keen on. Ideally I’d prefer to use Python or JavaScript, but none of the solutions I’ve found have been to my liking. Recently I’ve been using Grunt and Yeoman to some extent, and I’ve wondered about the idea of creating a Yeoman generator to build a static blogging engine. After discovering <code>grunt-markdown-blog</code>, I took the plunge and have built a simple blog generator called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>.</p>
-<p>I’ve published it to NPM, so feel free to check it out. It includes code highlighting with the Zenburn colour scheme by default (although highlight.js includes many other themes, so just switch to another one if you want), and it should be easy to edit the templates. I’ve also included the ability to deploy automatically to GitHub Pages using Grunt.</p>
-<p>I don’t anticipate moving over to this from Octopress for the foreseeable future, but it’s been an interesting project for the weekend.</p>
-
-    </article>
-    <article class="post">
-        <p class="date">28th September 2014 8:51 pm</p>
-        <h1><a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a></h1>
-        <p>Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I’d like to show you how to upgrade to it.</p>
-<p>The biggest change is that Django 1.7 introduces its own migration system, which means South is now surplus to requirements. We therefore need to switch from South to Django’s native migrations. Fortunately, this is fairly straightforward.</p>
-<p>First of all, activate your virtualenv:</p>
-<pre><code class="hljs lang-bash">$ virtualenv venv
-</code></pre>
-<p>Then make sure your migrations are up to date:</p>
-<pre><code class="hljs lang-bash">$ python manage.py syncdb
+</code></pre><p>I make no claims about how good this setup is, but it works well for me. I haven’t yet had the occasion to deploy a Django app to anywhere other than Heroku that really benefited from caching, so I haven’t got any tips to share about that, but if I were building a content-driven web app, I would use Memcached since it’s well-supported.</p></article><article class="post"><p class="date">5th October 2014 7:56 pm</p><h1><a href="/blog/2014/10/05/introducing-generator-simple-static-blog/">Introducing Generator-simple-static-blog</a></h1><p>I’m a big fan of static site generators. I ditched WordPress for Octopress over two years ago because it was free to host on GitHub Pages and much faster, had much better syntax highlighting, and I liked being able to write posts in Vim, and I’ve never looked back since.</p><p>That said, Octopress is written in Ruby, a language I’ve never been that keen on. Ideally I’d prefer to use Python or JavaScript, but none of the solutions I’ve found have been to my liking. Recently I’ve been using Grunt and Yeoman to some extent, and I’ve wondered about the idea of creating a Yeoman generator to build a static blogging engine. After discovering <code>grunt-markdown-blog</code>, I took the plunge and have built a simple blog generator called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>.</p><p>I’ve published it to NPM, so feel free to check it out. It includes code highlighting with the Zenburn colour scheme by default (although highlight.js includes many other themes, so just switch to another one if you want), and it should be easy to edit the templates. I’ve also included the ability to deploy automatically to GitHub Pages using Grunt.</p><p>I don’t anticipate moving over to this from Octopress for the foreseeable future, but it’s been an interesting project for the weekend.</p></article><article class="post"><p class="date">28th September 2014 8:51 pm</p><h1><a href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/">Django Blog Tutorial - the Next Generation - Part 9</a></h1><p>Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I’d like to show you how to upgrade to it.</p><p>The biggest change is that Django 1.7 introduces its own migration system, which means South is now surplus to requirements. We therefore need to switch from South to Django’s native migrations. Fortunately, this is fairly straightforward.</p><p>First of all, activate your virtualenv:</p><pre><code class="hljs lang-bash">$ virtualenv venv
+</code></pre><p>Then make sure your migrations are up to date:</p><pre><code class="hljs lang-bash">$ python manage.py syncdb
 $ python manage.py migrate
-</code></pre>
-<p>Then, upgrade your Django version and uninstall South:</p>
-<pre><code class="hljs lang-bash">$ pip install Django --upgrade
+</code></pre><p>Then, upgrade your Django version and uninstall South:</p><pre><code class="hljs lang-bash">$ pip install Django --upgrade
 $ pip uninstall South
 $ pip freeze &gt; requirements.txt
-</code></pre>
-<p>Next, remove South from <code>INSTALLED_APPS</code> in <code>django_tutorial_blog_ng/settings.py</code>.</p>
-<p>You now need to delete all of the numbered migration files in <code>blogengine/migrations/</code>, and the relevant <code>.pyc</code> files, but NOT the directory or the <code>__init__.py</code> file. You can do so with this command on Linux or OS X:</p>
-<pre><code class="hljs lang-bash">$ rm blogengine/migrations/<span class="hljs-number">00</span>*
-</code></pre>
-<p>Next, we recreate our migrations with the following command:</p>
-<pre><code class="hljs lang-bash">$ python manage.py makemigrations
+</code></pre><p>Next, remove South from <code>INSTALLED_APPS</code> in <code>django_tutorial_blog_ng/settings.py</code>.</p><p>You now need to delete all of the numbered migration files in <code>blogengine/migrations/</code>, and the relevant <code>.pyc</code> files, but NOT the directory or the <code>__init__.py</code> file. You can do so with this command on Linux or OS X:</p><pre><code class="hljs lang-bash">$ rm blogengine/migrations/<span class="hljs-number">00</span>*
+</code></pre><p>Next, we recreate our migrations with the following command:</p><pre><code class="hljs lang-bash">$ python manage.py makemigrations
 Migrations <span class="hljs-keyword">for</span> <span class="hljs-string">'blogengine'</span>:
   <span class="hljs-number">0001</span>_initial.py:
     - Create model Category
     - Create model Post
     - Create model Tag
     - Add field tags to post
-</code></pre>
-<p>Then we run the migrations:</p>
-<pre><code class="hljs lang-bash">$ python manage.py migrate
+</code></pre><p>Then we run the migrations:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
 Operations to perform:
   Synchronize unmigrated apps: sitemaps, django_jenkins, debug_toolbar
   Apply all migrations: sessions, admin, sites, flatpages, contenttypes, auth, blogengine
@@ -818,10 +594,7 @@ Running migrations:
   Applying blogengine.<span class="hljs-number">0001</span>_initial... FAKED
   Applying flatpages.<span class="hljs-number">0001</span>_initial... FAKED
   Applying sessions.<span class="hljs-number">0001</span>_initial... FAKED
-</code></pre>
-<p>Don’t worry too much if the output doesn’t look exactly the same as this - as long as it works, that’s the main thing.</p>
-<p>Let’s run our test suite to ensure it works:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins
+</code></pre><p>Don’t worry too much if the output doesn’t look exactly the same as this - as long as it works, that’s the main thing.</p><p>Let’s run our test suite to ensure it works:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ....FF.F.FFFFFF..............
 ======================================================================
@@ -901,9 +674,7 @@ Ran <span class="hljs-number">29</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">9</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>We have an issue here. A load of the tests for the admin interface now fail. If we now try running the dev server, we see this error:</p>
-<pre><code class="hljs lang-bash">$ python manage.py runserver
+</code></pre><p>We have an issue here. A load of the tests for the admin interface now fail. If we now try running the dev server, we see this error:</p><pre><code class="hljs lang-bash">$ python manage.py runserver
 Performing system checks...
 
 System check identified no issues (<span class="hljs-number">0</span> silenced).
@@ -934,13 +705,9 @@ Traceback (most recent call last):
   File <span class="hljs-string">"/Users/matthewdaly/Projects/django_tutorial_blog_ng/venv/lib/python2.7/site-packages/dj_static.py"</span>, line <span class="hljs-number">7</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
     from django.core.handlers.base import get_path_info
 django.core.exceptions.ImproperlyConfigured: WSGI application <span class="hljs-string">'django_tutorial_blog_ng.wsgi.application'</span> could not be loaded; Error importing module: <span class="hljs-string">'cannot import name get_path_info'</span>
-</code></pre>
-<p>Fortunately, the error above is easy to fix by upgrading <code>dj_static</code>:</p>
-<pre><code class="hljs lang-bash">$ pip install dj_static --upgrade
+</code></pre><p>Fortunately, the error above is easy to fix by upgrading <code>dj_static</code>:</p><pre><code class="hljs lang-bash">$ pip install dj_static --upgrade
 $ pip freeze &gt; requirements.txt
-</code></pre>
-<p>That resolves the error in serving static files, but not the error with the admin. If you run the dev server, you’ll be able to see that the admin actually works fine. The problem is caused by the test client not following redirects in the admin. We can easily run just the admin tests with the following command:</p>
-<pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine.tests.AdminTest
+</code></pre><p>That resolves the error in serving static files, but not the error with the admin. If you run the dev server, you’ll be able to see that the admin actually works fine. The problem is caused by the test client not following redirects in the admin. We can easily run just the admin tests with the following command:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine.tests.AdminTest
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .FF.F.FFFFFF
 ======================================================================
@@ -1020,13 +787,9 @@ Ran <span class="hljs-number">12</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">9</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s commit our changes so far first:</p>
-<pre><code class="hljs lang-bash">$ git add django_tutorial_blog_ng/ requirements.txt blogengine/
+</code></pre><p>Let’s commit our changes so far first:</p><pre><code class="hljs lang-bash">$ git add django_tutorial_blog_ng/ requirements.txt blogengine/
 $ git commit -m <span class="hljs-string">'Upgraded to Django 1.7'</span>
-</code></pre>
-<p>Now let’s fix our tests. Here’s the amended version of the <code>AdminTest</code> class:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdminTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>Now let’s fix our tests. Here’s the amended version of the <code>AdminTest</code> class:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdminTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     fixtures = [<span class="hljs-string">'users.json'</span>]
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_login</span><span class="hljs-params">(self)</span>:</span>
@@ -1340,11 +1103,7 @@ $ git commit -m <span class="hljs-string">'Upgraded to Django 1.7'</span>
         <span class="hljs-comment"># Check post deleted</span>
         all_posts = Post.objects.all()
         self.assertEquals(len(all_posts), <span class="hljs-number">0</span>)
-</code></pre>
-<p>There are two main issues here. The first is that when we try to edit or delete an existing item, or refer to it when creating something else, we can no longer rely on the number representing the primary key being set to 1. So we need to specifically obtain this, rather than hard-coding it to 1. Therefore, whenever we pass through a number to represent an item (with the exception of the site, but including tags, categories and posts), we need to instead fetch its primary key and return it. So, above where we try to delete a post, we replace <code>1</code> with <code>str(post.pk)</code>. This will solve a lot of the problems. As there’s a lot of them, I won’t go through each one, but you can see the entire class above for reference, and if you’ve followed along so far, you shouldn’t have any problems.</p>
-<p>The other issue we need to fix is the login and logout tests. We simply add <code>follow=True</code> to these to ensure that the test client follows the redirects.</p>
-<p>Let’s run our tests to make sure they pass:</p>
-<pre><code class="hljs lang-bash">$ python manage.py jenkins
+</code></pre><p>There are two main issues here. The first is that when we try to edit or delete an existing item, or refer to it when creating something else, we can no longer rely on the number representing the primary key being set to 1. So we need to specifically obtain this, rather than hard-coding it to 1. Therefore, whenever we pass through a number to represent an item (with the exception of the site, but including tags, categories and posts), we need to instead fetch its primary key and return it. So, above where we try to delete a post, we replace <code>1</code> with <code>str(post.pk)</code>. This will solve a lot of the problems. As there’s a lot of them, I won’t go through each one, but you can see the entire class above for reference, and if you’ve followed along so far, you shouldn’t have any problems.</p><p>The other issue we need to fix is the login and logout tests. We simply add <code>follow=True</code> to these to ensure that the test client follows the redirects.</p><p>Let’s run our tests to make sure they pass:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .............................
 ----------------------------------------------------------------------
@@ -1352,67 +1111,13 @@ Ran <span class="hljs-number">29</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>With that done, you can commit your changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/tests.py
+</code></pre><p>With that done, you can commit your changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/tests.py
 $ git commit -m <span class="hljs-string">'Fixed broken tests'</span>
-</code></pre>
-<p>Don’t forget to deploy your changes:</p>
-<pre><code class="hljs lang-bash">$ fab deploy
-</code></pre>
-<p>Our blog has now been happily migrated over to Django 1.7!</p>
-
-    </article>
-    <article class="post">
-        <p class="date">28th September 2014 7:53 pm</p>
-        <h1><a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim</a></h1>
-        <p>Recently I had the occasion to reformat a load of dates in Vim from <code>DD/MM/YYYY</code> to <code>YYYY-MM-DD</code>. In Vim, this is quite simple:</p>
-<pre><code class="hljs lang-vim">:%s/\(\d\{2}\)\/\(\d\{2}\)\/\(\d\{4}\)/\3-\2-\1/g
-</code></pre>
-<p>This should be easy to adapt to reformatting other date formats.</p>
-
-    </article>
-        </div>
-        <div class="col-md-4">
-            <h1>Recent Posts</h1>
-            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
-            <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
-            <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
-            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
-            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <section id="github-profile">
-            </section>
-            <h4>My GitHub repositories</h4>
-            <ul id="github-repos">
-                <li>Loading repositories...</li>
-            </ul>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-             <ul class="pager">
-                <li><a href="/posts/1/">Newer</a></li>
-
-                <li><a href="/posts/3/">Older</a></li>
-             </ul>
-        </div>
-    </div>
-</div>
-        <footer>
-            <div class="container">
-                <div class="col-md-12">
-                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
-                </div>
-            </div>
-        </footer>
-        <script type="text/javascript" src="/static/js/all.min.js"></script>
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+</code></pre><p>Don’t forget to deploy your changes:</p><pre><code class="hljs lang-bash">$ fab deploy
+</code></pre><p>Our blog has now been happily migrated over to Django 1.7!</p></article><article class="post"><p class="date">28th September 2014 7:53 pm</p><h1><a href="/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim</a></h1><p>Recently I had the occasion to reformat a load of dates in Vim from <code>DD/MM/YYYY</code> to <code>YYYY-MM-DD</code>. In Vim, this is quite simple:</p><pre><code class="hljs lang-vim">:%s/\(\d\{2}\)\/\(\d\{2}\)\/\(\d\{4}\)/\3-\2-\1/g
+</code></pre><p>This should be easy to adapt to reformatting other date formats.</p></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p><p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/posts/1/">Newer</a></li><li><a href="/posts/3/">Older</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-17043630-1');ga('send','pageview');
-        </script>
-    </body>
-</html>
+            ga('create','UA-17043630-1');ga('send','pageview');</script></body></html>

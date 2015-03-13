@@ -1,82 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
-        
-        <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
-        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
-        <title>Django Blog Tutorial - the Next Generation - Part 4 - Matthew Daly&#x27;s Blog</title>
-    </head>
-    <body>
-
-        <!-- Go to www.addthis.com/dashboard to customize your tools -->
-        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
-
-        <header>
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="header-nav">
-                            <ul class="nav navbar-nav">
-                                <li><a href="/">Home</a></li>
-                                <li><a href="/blog/archives/">Archives</a></li>
-                                <li><a href="/about/">About</a></li>
-                                <li><a href="/atom.xml">RSS</a></li>
-                            </ul>
-                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
-                                <div class="form-group">
-                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control">
-                                </div>
-                                <input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk" />
-                                <input type="submit" class="btn btn-default">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container">
-                <div class="page-header">
-                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
-                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
-                </div>
-            </div>
-        </header>
-
-<div class="container">
-
-
-    <div class="row">
-        <div class="col-md-8">
-            <article class="post">
-                <p class="date">15th February 2014 5:45 pm</p>
-                <h1>Django Blog Tutorial - the Next Generation - Part 4</h1>
-                <p>Hello again! As promised, in this instalment we’ll implement categories and tags, as well as an RSS feed.</p>
-<p>As usual, we need to switch into our virtualenv:</p>
-<pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
-</code></pre>
-<h2 id="categories">Categories</h2>
-<p>It’s worth taking a little time at this point to set out what we mean by categories and tags in this case, as the two can be very similar. In this case, we’ll use the following criteria:</p>
-<ul>
-<li>A post can have only one category, or none, but a category can be applied to any number of posts</li>
-<li>A post can have any number of tags, and a tag can be applied to any number of posts</li>
-</ul>
-<p>If you’re not too familiar with relational database theory, the significance of this may not be apparent, so here’s a quick explanation. Because the categories are limited to one per post, the relationship between a post and a category is known as <em>one-to-many</em>. In other words, one post can only have one category, but one category can have many posts. You can therefore define the categories in one table in your database, and refer to them by their ID (the reference to the category in the post table is referred to as a <em>foreign key</em>).</p>
-<p>As usual, we will write a test first. Open up <code>blogengine/tests.py</code> and edit the line importing the <code>Post</code> model as follows:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category
-</code></pre>
-<p>Also, add the following method before <code>test_create_post</code>:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Django Blog Tutorial - the Next Generation - Part 4 - Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container-fluid"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></div><input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk"> <input type="submit" class="btn btn-default"></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">15th February 2014 5:45 pm</p><h1>Django Blog Tutorial - the Next Generation - Part 4</h1><p>Hello again! As promised, in this instalment we’ll implement categories and tags, as well as an RSS feed.</p><p>As usual, we need to switch into our virtualenv:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
+</code></pre><h2 id="categories">Categories</h2><p>It’s worth taking a little time at this point to set out what we mean by categories and tags in this case, as the two can be very similar. In this case, we’ll use the following criteria:</p><ul><li>A post can have only one category, or none, but a category can be applied to any number of posts</li><li>A post can have any number of tags, and a tag can be applied to any number of posts</li></ul><p>If you’re not too familiar with relational database theory, the significance of this may not be apparent, so here’s a quick explanation. Because the categories are limited to one per post, the relationship between a post and a category is known as <em>one-to-many</em>. In other words, one post can only have one category, but one category can have many posts. You can therefore define the categories in one table in your database, and refer to them by their ID (the reference to the category in the post table is referred to as a <em>foreign key</em>).</p><p>As usual, we will write a test first. Open up <code>blogengine/tests.py</code> and edit the line importing the <code>Post</code> model as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category
+</code></pre><p>Also, add the following method before <code>test_create_post</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
 
@@ -96,9 +20,7 @@
         <span class="hljs-comment"># Check attributes</span>
         self.assertEquals(only_category.name, <span class="hljs-string">'python'</span>)
         self.assertEquals(only_category.description, <span class="hljs-string">'The Python programming language'</span>)
-</code></pre>
-<p>This test checks that we can create categories. But categories aren’t much use unless we can actually apply them to our posts. So we need to edit our <code>Post</code> model as well, and to do so we need to have a test in place first. Edit the <code>test_create_post</code> method as follows:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>This test checks that we can create categories. But categories aren’t much use unless we can actually apply them to our posts. So we need to edit our <code>Post</code> model as well, and to do so we need to have a test in place first. Edit the <code>test_create_post</code> method as follows:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -152,10 +74,7 @@
         self.assertEquals(only_post.author.email, <span class="hljs-string">'user@example.com'</span>)
         self.assertEquals(only_post.category.name, <span class="hljs-string">'python'</span>)
         self.assertEquals(only_post.category.description, <span class="hljs-string">'The Python programming language'</span>)
-</code></pre>
-<p>What we’re doing here is adding a <code>category</code> attribute to the posts. This attribute contains a reference to a <code>Category</code> object.</p>
-<p>Now, we also want to test adding, editing, and deleting a category from the admin interface. Add this code to the <code>AdminTest</code> class:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>What we’re doing here is adding a <code>category</code> attribute to the posts. This attribute contains a reference to a <code>Category</code> object.</p><p>Now, we also want to test adding, editing, and deleting a category from the admin interface. Add this code to the <code>AdminTest</code> class:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Log in</span>
         self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
 
@@ -228,9 +147,7 @@
         <span class="hljs-comment"># Check category deleted</span>
         all_categories = Category.objects.all()
         self.assertEquals(len(all_categories), <span class="hljs-number">0</span>)
-</code></pre>
-<p>This is very similar to the prior code for the posts, and just checks we can create categories via the admin. We also need to check we can apply these categories to posts, and that they don’t break the existing tests:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>This is very similar to the prior code for the posts, and just checks we can create categories via the admin. We also need to check we can apply these categories to posts, and that they don’t break the existing tests:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -366,9 +283,7 @@
         <span class="hljs-comment"># Check post deleted</span>
         all_posts = Post.objects.all()
         self.assertEquals(len(all_posts), <span class="hljs-number">0</span>)
-</code></pre>
-<p>Here we basically take our existing post tests in the admin interface and add the category to them. Finally, we edit the <code>PostViewTest</code> class to include categories:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>Here we basically take our existing post tests in the admin interface and add the category to them. Finally, we edit the <code>PostViewTest</code> class to include categories:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_index</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
@@ -473,9 +388,7 @@
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>Now it’s time to run our tests:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Now it’s time to run our tests:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 E
 ======================================================================
@@ -497,9 +410,7 @@ Ran <span class="hljs-number">1</span> <span class="hljs-built_in">test</span> <
 
 FAILED (errors=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>This is the expected result. We need to create our Category model. So let’s do that:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+</code></pre><p>This is the expected result. We need to create our Category model. So let’s do that:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
 <span class="hljs-keyword">from</span> django.contrib.sites.models <span class="hljs-keyword">import</span> Site
 
@@ -526,11 +437,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         ordering = [<span class="hljs-string">"-pub_date"</span>]
-</code></pre>
-<p>Note that we add <code>Category</code> before <code>Post</code> - this is because <code>Category</code> is a foreign key in <code>Post</code>, and must be defined in order to be used. Also, note that we add the <code>category</code> attribute as a <code>ForeignKey</code> field, like <code>User</code> and <code>Site</code>, indicating that it is an item in another table being references.</p>
-<p>We also allow for <code>category</code> to be blank or null, so the user does not have to apply a category if they don’t wish to.</p>
-<p>If we run our tests, they should still fail:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Note that we add <code>Category</code> before <code>Post</code> - this is because <code>Category</code> is a foreign key in <code>Post</code>, and must be defined in order to be used. Also, note that we add the <code>category</code> attribute as a <code>ForeignKey</code> field, like <code>User</code> and <code>Site</code>, indicating that it is an item in another table being references.</p><p>We also allow for <code>category</code> to be blank or null, so the user does not have to apply a category if they don’t wish to.</p><p>If we run our tests, they should still fail:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 EEFEEEEE...EE
 ======================================================================
@@ -816,13 +723,9 @@ Ran <span class="hljs-number">13</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>, errors=<span class="hljs-number">9</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>The category table hasn’t yet been created, so we need to use South to create and run the migrations:</p>
-<pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
+</code></pre><p>The category table hasn’t yet been created, so we need to use South to create and run the migrations:</p><pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
 $ python manage.py migrate
-</code></pre>
-<p>If we then run our tests again, some of them will still fail:</p>
-<pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>If we then run our tests again, some of them will still fail:</p><pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..F.F.F......
 ======================================================================
 FAIL: <span class="hljs-built_in">test</span>_create_category (blogengine.tests.AdminTest)
@@ -853,9 +756,7 @@ Ran <span class="hljs-number">13</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">3</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>That’s because we haven’t registered the categories in the admin. So, that’s our next job:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
+</code></pre><p>That’s because we haven’t registered the categories in the admin. So, that’s our next job:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
 <span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
 
@@ -869,9 +770,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
 admin.site.register(models.Category)
 admin.site.register(models.Post, PostAdmin)
-</code></pre>
-<p>Now we try again:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Now we try again:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .............
 ----------------------------------------------------------------------
@@ -879,12 +778,8 @@ Ran <span class="hljs-number">13</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>It passes! Let’s do a quick sense check before committing. Run the server:</p>
-<pre><code class="hljs lang-bash">$ python manage.py runserver
-</code></pre>
-<p>If you visit the <a href="http://127.0.0.1:8000/admin/">admin</a>, you’ll see the text for category is <code>Categorys</code>, which is incorrect. We also don’t have a good representation of the category in the admin. Let’s fix that:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+</code></pre><p>It passes! Let’s do a quick sense check before committing. Run the server:</p><pre><code class="hljs lang-bash">$ python manage.py runserver
+</code></pre><p>If you visit the <a href="http://127.0.0.1:8000/admin/">admin</a>, you’ll see the text for category is <code>Categorys</code>, which is incorrect. We also don’t have a good representation of the category in the admin. Let’s fix that:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
 <span class="hljs-keyword">from</span> django.contrib.sites.models <span class="hljs-keyword">import</span> Site
 
@@ -917,18 +812,9 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         ordering = [<span class="hljs-string">"-pub_date"</span>]
-</code></pre>
-<p>Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Implemented categories'</span>
-</code></pre>
-<p>Now, as yet our categories don’t actually do all that much. We would like to be able to:</p>
-<ul>
-<li>List all posts under a category</li>
-<li>Show the post category at the base of the post</li>
-</ul>
-<p>So, let’s implement that. First, as usual, we implement tests first:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>Now, as yet our categories don’t actually do all that much. We would like to be able to:</p><ul><li>List all posts under a category</li><li>Show the post category at the base of the post</li></ul><p>So, let’s implement that. First, as usual, we implement tests first:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_index</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
@@ -1039,9 +925,7 @@ $ git commit -m <span class="hljs-string">'Implemented categories'</span>
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>All we do here is assert that for both the post pages and the index, the text from the category name is shown in the response. We also need to check the category-specific route works. Add this method to <code>PostViewTest</code>:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_category_page</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>All we do here is assert that for both the post pages and the index, the text from the category name is shown in the response. We also need to check the category-specific route works. Add this method to <code>PostViewTest</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_category_page</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -1095,9 +979,7 @@ $ git commit -m <span class="hljs-string">'Implemented categories'</span>
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>This is very similar to the previous tests, but fetches the absolute URL for the category, and ensures the category name and post content are shown. Now, let’s run our new tests:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>This is very similar to the previous tests, but fetches the absolute URL for the category, and ensures the category name and post content are shown. Now, let’s run our new tests:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ...........EFF
 ======================================================================
@@ -1129,9 +1011,7 @@ Ran <span class="hljs-number">14</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">2</span>, errors=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s take a look at why they failed. <code>test_category_page</code> failed because the <code>Category</code> object had no method <code>get_absolute_url</code>. So we need to implement one. To do so, we really need to add a slug field, like the posts already have. Ideally, we want this to be populated automatically, but with the option to create one manually. So, edit the models as follows:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+</code></pre><p>Let’s take a look at why they failed. <code>test_category_page</code> failed because the <code>Category</code> object had no method <code>get_absolute_url</code>. So we need to implement one. To do so, we really need to add a slug field, like the posts already have. Ideally, we want this to be populated automatically, but with the option to create one manually. So, edit the models as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
 <span class="hljs-keyword">from</span> django.contrib.sites.models <span class="hljs-keyword">import</span> Site
 <span class="hljs-keyword">from</span> django.utils.text <span class="hljs-keyword">import</span> slugify
@@ -1174,16 +1054,9 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         ordering = [<span class="hljs-string">"-pub_date"</span>]
-</code></pre>
-<p>We’re adding the <code>slug</code> attribute to the <code>Category</code> model here. However, we’re also overriding the <code>save</code> method to detect if the slug is set, and if not, to create a slug using the <code>slugify</code> function, and set it as the category’s slug. We also define an absolute URL for the category.</p>
-<p>Now, if you run the tests, they will fail because we haven’t made the changes to the database. So, we use South again:</p>
-<pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
-</code></pre>
-<p>Then run the migration:</p>
-<pre><code class="hljs lang-bash">$ python manage.py migrate
-</code></pre>
-<p>Now, running our tests will show that the tables are in place, but we still have some work to do. The index and post pages don’t show our categories, so we’ll fix that. First, we’ll fix our post list:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>We’re adding the <code>slug</code> attribute to the <code>Category</code> model here. However, we’re also overriding the <code>save</code> method to detect if the slug is set, and if not, to create a slug using the <code>slugify</code> function, and set it as the category’s slug. We also define an absolute URL for the category.</p><p>Now, if you run the tests, they will fail because we haven’t made the changes to the database. So, we use South again:</p><pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
+</code></pre><p>Then run the migration:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+</code></pre><p>Now, running our tests will show that the tables are in place, but we still have some work to do. The index and post pages don’t show our categories, so we’ll fix that. First, we’ll fix our post list:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -1205,9 +1078,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Next, we’ll take care of our post detail page:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Next, we’ll take care of our post detail page:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -1224,10 +1095,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Note that in both cases we include a link to the category URL.</p>
-<p>Now, we should only have one failing test outstanding - the category page. For this, generic views aren’t sufficient as we need to limit the queryset to only show those posts with a specific category. Fortunately, we can extend Django’s generic views to add this functionality. First, we edit our URLconfs:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><p>Note that in both cases we include a link to the category URL.</p><p>Now, we should only have one failing test outstanding - the category page. For this, generic views aren’t sufficient as we need to limit the queryset to only show those posts with a specific category. Fortunately, we can extend Django’s generic views to add this functionality. First, we edit our URLconfs:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category
 <span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView
@@ -1250,9 +1118,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         model=Category,
         )),
 )
-</code></pre>
-<p>Note we import a new view from <code>blogengine.views</code> called <code>CategoryListView</code>. Next, we create that listview:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
+</code></pre><p>Note we import a new view from <code>blogengine.views</code> called <code>CategoryListView</code>. Next, we create that listview:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Category, Post
 
@@ -1265,25 +1131,16 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
             <span class="hljs-keyword">return</span> Post.objects.filter(category=category)
         <span class="hljs-keyword">except</span> Category.DoesNotExist:
             <span class="hljs-keyword">return</span> Post.objects.none()
-</code></pre>
-<p>This is quite simple. We import the <code>ListView</code>, as well as our models. Then we extend <code>ListView</code> by getting the slug from the request, fetching the appropriate category, and returning only those posts that have that category. If the category does not exist, we return the empty <code>Post</code> object list. We haven’t had to set the template manually as it is inherited from <code>ListView</code>.</p>
-<p>If you run the tests, they should now pass:</p>
-<pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>This is quite simple. We import the <code>ListView</code>, as well as our models. Then we extend <code>ListView</code> by getting the slug from the request, fetching the appropriate category, and returning only those posts that have that category. If the category does not exist, we return the empty <code>Post</code> object list. We haven’t had to set the template manually as it is inherited from <code>ListView</code>.</p><p>If you run the tests, they should now pass:</p><pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..............
 ----------------------------------------------------------------------
 Ran <span class="hljs-number">14</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">5.083</span>s
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>So let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/ templates/
+</code></pre><p>So let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/ templates/
 $ git commit -m <span class="hljs-string">'Categories are now shown'</span>
-</code></pre>
-<h2 id="tags">Tags</h2>
-<p>Tags are fairly similar to categories, but more complex. The relationship they have is called <em>many-to-many</em> - in other words, a tag can be applied to many posts, and one post can have many tags. This is more difficult to model with a relational database. The usual way to do so is to create an intermediate table between the posts and tags, to identify mappings between the two. Fortunately, Django makes this quite easy.</p>
-<p>Let’s write the tests for our tagging system. As with the categories, we’ll write the tests for creating and editing them first, and add in tests for them being visible later. First we’ll create a test for creating a new tag object:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_tag</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><h2 id="tags">Tags</h2><p>Tags are fairly similar to categories, but more complex. The relationship they have is called <em>many-to-many</em> - in other words, a tag can be applied to many posts, and one post can have many tags. This is more difficult to model with a relational database. The usual way to do so is to create an intermediate table between the posts and tags, to identify mappings between the two. Fortunately, Django makes this quite easy.</p><p>Let’s write the tests for our tagging system. As with the categories, we’ll write the tests for creating and editing them first, and add in tests for them being visible later. First we’ll create a test for creating a new tag object:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_tag</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the tag</span>
         tag = Tag()
 
@@ -1303,9 +1160,7 @@ $ git commit -m <span class="hljs-string">'Categories are now shown'</span>
         <span class="hljs-comment"># Check attributes</span>
         self.assertEquals(only_tag.name, <span class="hljs-string">'python'</span>)
         self.assertEquals(only_tag.description, <span class="hljs-string">'The Python programming language'</span>)
-</code></pre>
-<p>Next, we’ll amend the test for creating a post to include tags:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>Next, we’ll amend the test for creating a post to include tags:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -1377,10 +1232,7 @@ $ git commit -m <span class="hljs-string">'Categories are now shown'</span>
         self.assertEquals(only_post_tag, tag)
         self.assertEquals(only_post_tag.name, <span class="hljs-string">'python'</span>)
         self.assertEquals(only_post_tag.description, <span class="hljs-string">'The Python programming language'</span>)
-</code></pre>
-<p>Note the difference in how we apply the tags. Because a post can have more than one tag, we can’t just define <code>post.tag</code> in the same way. Instead, we have <code>post.tags</code>, which you can think of as a list, and we use the <code>add</code> method to add a new tag. Note also that the post must already exist before we can add a tag.</p>
-<p>We also need to create acceptance tests for creating, editing and deleting tags:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_tag</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>Note the difference in how we apply the tags. Because a post can have more than one tag, we can’t just define <code>post.tag</code> in the same way. Instead, we have <code>post.tags</code>, which you can think of as a list, and we use the <code>add</code> method to add a new tag. Note also that the post must already exist before we can add a tag.</p><p>We also need to create acceptance tests for creating, editing and deleting tags:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_tag</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Log in</span>
         self.client.login(username=<span class="hljs-string">'bobsmith'</span>, password=<span class="hljs-string">"password"</span>)
 
@@ -1453,9 +1305,7 @@ $ git commit -m <span class="hljs-string">'Categories are now shown'</span>
         <span class="hljs-comment"># Check tag deleted</span>
         all_tags = Tag.objects.all()
         self.assertEquals(len(all_tags), <span class="hljs-number">0</span>)
-</code></pre>
-<p>These tests are virtually identical to those for the <code>Category</code> objects, as we plan for our <code>Tag</code> objects to be very similar. Finally, we need to amend the acceptance tests for <code>Post</code> objects to include a tag:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>These tests are virtually identical to those for the <code>Category</code> objects, as we plan for our <code>Tag</code> objects to be very similar. Finally, we need to amend the acceptance tests for <code>Post</code> objects to include a tag:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
         category.name = <span class="hljs-string">'python'</span>
@@ -1615,10 +1465,7 @@ $ git commit -m <span class="hljs-string">'Categories are now shown'</span>
         <span class="hljs-comment"># Check post deleted</span>
         all_posts = Post.objects.all()
         self.assertEquals(len(all_posts), <span class="hljs-number">0</span>)
-</code></pre>
-<p>Here we’re just adding tags to our <code>Post</code> objects.</p>
-<p>Now it’s time to run our tests to make sure they fail as expected:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Here we’re just adding tags to our <code>Post</code> objects.</p><p>Now it’s time to run our tests to make sure they fail as expected:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 E
 ======================================================================
@@ -1640,9 +1487,7 @@ Ran <span class="hljs-number">1</span> <span class="hljs-built_in">test</span> <
 
 FAILED (errors=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>So here we can’t import our <code>Tag</code> model, because we haven’t created it. So, we’ll do that:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Tag</span><span class="hljs-params">(models.Model)</span>:</span>
+</code></pre><p>So here we can’t import our <code>Tag</code> model, because we haven’t created it. So, we’ll do that:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Tag</span><span class="hljs-params">(models.Model)</span>:</span>
     name = models.CharField(max_length=<span class="hljs-number">200</span>)
     description = models.TextField()
     slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
@@ -1657,10 +1502,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-keyword">return</span> self.name
-</code></pre>
-<p>Our <code>Tag</code> model is very much like our <code>Category</code> model, but we don’t need to change the <code>verbose_name_plural</code> value, and we amend the absolute URL to show it as a tag rather than a category.</p>
-<p>We also need to amend our <code>Post</code> model to include a <code>tags</code> field:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+</code></pre><p>Our <code>Tag</code> model is very much like our <code>Category</code> model, but we don’t need to change the <code>verbose_name_plural</code> value, and we amend the absolute URL to show it as a tag rather than a category.</p><p>We also need to amend our <code>Post</code> model to include a <code>tags</code> field:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
     title = models.CharField(max_length=<span class="hljs-number">200</span>)
     pub_date = models.DateTimeField()
     text = models.TextField()
@@ -1678,10 +1520,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         ordering = [<span class="hljs-string">"-pub_date"</span>]
-</code></pre>
-<p>Note that <code>tags</code> is a <code>ManyToManyField</code>, and we pass through the model we wish to use, much like we did with the categories. The difference is that one tag can be applied to many posts and a post can have many tags, so we need an intermediate database table to handle the relationship between the two. With Django’s ORM we can handle this quickly and easily.</p>
-<p>Run our tests and they should still fail:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Note that <code>tags</code> is a <code>ManyToManyField</code>, and we pass through the model we wish to use, much like we did with the categories. The difference is that one tag can be applied to many posts and a post can have many tags, so we need an intermediate database table to handle the relationship between the two. With Django’s ORM we can handle this quickly and easily.</p><p>Run our tests and they should still fail:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .EE.EF.EE.EE......
 ======================================================================
@@ -1921,13 +1760,9 @@ Ran <span class="hljs-number">18</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>, errors=<span class="hljs-number">7</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Again, we can easily see why they failed - the <code>blogengine_tag</code> table is not in place. So let’s create and run our migrations to fix that:</p>
-<pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
+</code></pre><p>Again, we can easily see why they failed - the <code>blogengine_tag</code> table is not in place. So let’s create and run our migrations to fix that:</p><pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
 $ python manage.py migrate
-</code></pre>
-<p>Now, we run our tests again:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Now, we run our tests again:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .....F..F..F......
 ======================================================================
@@ -1959,9 +1794,7 @@ Ran <span class="hljs-number">18</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">3</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>We can’t yet amend our tags in the admin, because we haven’t registered them. So we do that next:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
+</code></pre><p>We can’t yet amend our tags in the admin, because we haven’t registered them. So we do that next:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
 <span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
 
@@ -1976,9 +1809,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 admin.site.register(models.Category)
 admin.site.register(models.Tag)
 admin.site.register(models.Post, PostAdmin)
-</code></pre>
-<p>Now, if we run our tests, they should pass:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Now, if we run our tests, they should pass:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..................
 ----------------------------------------------------------------------
@@ -1986,13 +1817,9 @@ Ran <span class="hljs-number">18</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Time to commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/
+</code></pre><p>Time to commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/
 $ git commit -m <span class="hljs-string">'Implemented tags'</span>
-</code></pre>
-<p>Now, like with the categories beforehand, we want to be able to show the tags applied to a post at the base of it, and list all posts for a specific tag. So, first of all, we’ll amend our <code>PostViewTest</code> class to check for the tags:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>Now, like with the categories beforehand, we want to be able to show the tags applied to a post at the base of it, and list all posts for a specific tag. So, first of all, we’ll amend our <code>PostViewTest</code> class to check for the tags:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_index</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
@@ -2126,10 +1953,7 @@ $ git commit -m <span class="hljs-string">'Implemented tags'</span>
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>We create a tag near the top, and check for the text in the page (note that to avoid false positives from the categories, we set the name of the tags to something different). We do this on both the index and post pages.</p>
-<p>We also need to put a test in place for the tag-specific page:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_tag_page</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><p>We create a tag near the top, and check for the text in the page (note that to avoid false positives from the categories, we set the name of the tags to something different). We do this on both the index and post pages.</p><p>We also need to put a test in place for the tag-specific page:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_tag_page</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the tag</span>
         tag = Tag()
         tag.name = <span class="hljs-string">'python'</span>
@@ -2183,9 +2007,7 @@ $ git commit -m <span class="hljs-string">'Implemented tags'</span>
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>Again, this is virtually identical to the category page, adjusted to allow for the fact that we need to get a specific tag. If we now run our tests, they should fail as expected:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Again, this is virtually identical to the category page, adjusted to allow for the fact that we need to get a specific tag. If we now run our tests, they should fail as expected:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ................FFF
 ======================================================================
@@ -2217,15 +2039,7 @@ Ran <span class="hljs-number">19</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">3</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>So, we need to implement the following things:</p>
-<ul>
-<li>Show tags on the index page</li>
-<li>Show tags on the post pages</li>
-<li>Create a page listing the posts with a specific tag</li>
-</ul>
-<p>As we have seen already with the categories, this is actually quite simple. First, we’ll sort out the tags on the index page:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>So, we need to implement the following things:</p><ul><li>Show tags on the index page</li><li>Show tags on the post pages</li><li>Create a page listing the posts with a specific tag</li></ul><p>As we have seen already with the categories, this is actually quite simple. First, we’ll sort out the tags on the index page:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -2250,9 +2064,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>This is quite simple. We retrieve all the tags with <code>post.tags.all</code> and loop through them. We then do basically the same for the individual post pages:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>This is quite simple. We retrieve all the tags with <code>post.tags.all</code> and loop through them. We then do basically the same for the individual post pages:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -2272,9 +2084,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>This should resolve two of our outstanding tests:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>This should resolve two of our outstanding tests:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..................F
 ======================================================================
@@ -2290,9 +2100,7 @@ Ran <span class="hljs-number">19</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>The final test is for the tag pages. As we saw with the categories, we can limit our querysets on specific pages. So we’ll extend the <code>ListView</code> generic view again to handle tags:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
+</code></pre><p>The final test is for the tag pages. As we saw with the categories, we can limit our querysets on specific pages. So we’ll extend the <code>ListView</code> generic view again to handle tags:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Category, Post, Tag
 
@@ -2315,9 +2123,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
             <span class="hljs-keyword">return</span> tag.post_set.all()
         <span class="hljs-keyword">except</span> Tag.DoesNotExist:
             <span class="hljs-keyword">return</span> Post.objects.none()
-</code></pre>
-<p>Note that here, <code>Tag</code> objects have access to their assigned <code>Post</code> objects - we just use <code>post_set</code> to refer to them and get all of the posts associated with that tag. Next we’ll add the URLconfs:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><p>Note that here, <code>Tag</code> objects have access to their assigned <code>Post</code> objects - we just use <code>post_set</code> to refer to them and get all of the posts associated with that tag. Next we’ll add the URLconfs:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category, Tag
 <span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView, TagListView
@@ -2346,10 +2152,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         model=Tag,
         )),
 )
-</code></pre>
-<p>We import the <code>Tag</code> model and the <code>TagListView</code> view, and use them to set up the tag page.</p>
-<p>If we now run our tests again, they should pass:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>We import the <code>Tag</code> model and the <code>TagListView</code> view, and use them to set up the tag page.</p><p>If we now run our tests again, they should pass:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ...................
 ----------------------------------------------------------------------
@@ -2357,24 +2160,12 @@ Ran <span class="hljs-number">19</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Well done! Time to commit:</p>
-<pre><code class="hljs lang-bash">$ git add templates/ blogengine/
+</code></pre><p>Well done! Time to commit:</p><pre><code class="hljs lang-bash">$ git add templates/ blogengine/
 $ git commit -m <span class="hljs-string">'Tags are now shown'</span>
-</code></pre>
-<h2 id="rss-feed">RSS Feed</h2>
-<p>For the final task today, we’ll implement an RSS feed for our posts. Django ships with a handy syndication framework that makes it easy to implement this kind of functionality.</p>
-<p>As usual, we’ll create some tests first. In this case, we won’t be adding any new models, so we don’t need to test them. Instead we can jump straight into creating acceptance tests for our feed. For now we’ll just create one type of feed: a feed of all the blog posts. In a later instalment we’ll add feeds for categories and tags.</p>
-<p>First of all, we’ll implement our test. Now, in order to test our feed, we need to have a solution in place for parsing an RSS feed. Django won’t do this natively, so we’ll install the <code>feedparser</code> Python module. Run the following commands:</p>
-<pre><code class="hljs lang-bash">$ pip install feedparser
+</code></pre><h2 id="rss-feed">RSS Feed</h2><p>For the final task today, we’ll implement an RSS feed for our posts. Django ships with a handy syndication framework that makes it easy to implement this kind of functionality.</p><p>As usual, we’ll create some tests first. In this case, we won’t be adding any new models, so we don’t need to test them. Instead we can jump straight into creating acceptance tests for our feed. For now we’ll just create one type of feed: a feed of all the blog posts. In a later instalment we’ll add feeds for categories and tags.</p><p>First of all, we’ll implement our test. Now, in order to test our feed, we need to have a solution in place for parsing an RSS feed. Django won’t do this natively, so we’ll install the <code>feedparser</code> Python module. Run the following commands:</p><pre><code class="hljs lang-bash">$ pip install feedparser
 $ pip freeze &gt; requirements.txt
-</code></pre>
-<p>Once that’s done, feedparser should be available. You may wish to refer to the <a href="http://pythonhosted.org/feedparser/">documentation</a> as we go to help.</p>
-<p>Let’s write our test for the RSS feed. First, we import feedparser near the top of the file:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> feedparser
-</code></pre>
-<p>Then we define a new class for our feed tests. Put this towards the end of the file - I put it just before the flat page tests:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
+</code></pre><p>Once that’s done, feedparser should be available. You may wish to refer to the <a href="http://pythonhosted.org/feedparser/">documentation</a> as we go to help.</p><p>Let’s write our test for the RSS feed. First, we import feedparser near the top of the file:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> feedparser
+</code></pre><p>Then we define a new class for our feed tests. Put this towards the end of the file - I put it just before the flat page tests:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_all_post_feed</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the category</span>
         category = Category()
@@ -2435,9 +2226,7 @@ $ pip freeze &gt; requirements.txt
         feed_post = feed.entries[<span class="hljs-number">0</span>]
         self.assertEquals(feed_post.title, post.title)
         self.assertEquals(feed_post.description, post.text)
-</code></pre>
-<p>Run the tests and you’ll see something like this:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>Run the tests and you’ll see something like this:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ..............F.....
 ======================================================================
@@ -2453,22 +2242,12 @@ Ran <span class="hljs-number">20</span> tests <span class="hljs-keyword">in</spa
 
 FAILED (failures=<span class="hljs-number">1</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>We’re getting a 404 error because the post feed isn’t implemented. So let’s implement it. We’re going to use Django’s syndication framework, which will make it easy, but we need to enable it. Open up <code>django_tutorial_blog_ng/settings/py</code> and add the following under <code>INSTALLED_APPS</code>:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-string">'django.contrib.syndication'</span>,
-</code></pre>
-<p>Next, we need to enable the URLconf for this RSS feed. Open up <code>blogengine/urls.py and amend the import from</code>blogengine.views` near the top:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView, TagListView, PostsFeed
-</code></pre>
-<p>Further down, add in the following code to define the URL for the feed:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-comment"># Post RSS feed</span>
+</code></pre><p>We’re getting a 404 error because the post feed isn’t implemented. So let’s implement it. We’re going to use Django’s syndication framework, which will make it easy, but we need to enable it. Open up <code>django_tutorial_blog_ng/settings/py</code> and add the following under <code>INSTALLED_APPS</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-string">'django.contrib.syndication'</span>,
+</code></pre><p>Next, we need to enable the URLconf for this RSS feed. Open up <code>blogengine/urls.py and amend the import from</code>blogengine.views` near the top:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.views <span class="hljs-keyword">import</span> CategoryListView, TagListView, PostsFeed
+</code></pre><p>Further down, add in the following code to define the URL for the feed:</p><pre><code class="hljs lang-python">    <span class="hljs-comment"># Post RSS feed</span>
     url(<span class="hljs-string">r'^feeds/posts/$'</span>, PostsFeed()),
-</code></pre>
-<p>Note that we imported the PostsFeed class, but that hasn’t yet been defined. So we need to do that. First of all, add this line near the top:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.syndication.views <span class="hljs-keyword">import</span> Feed
-</code></pre>
-<p>This imports the syndication views - yes, they’re another generic view! Our <code>PostsFeed</code> class is going to inherit from <code>Feed</code>. Next, we define the class:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostsFeed</span><span class="hljs-params">(Feed)</span>:</span>
+</code></pre><p>Note that we imported the PostsFeed class, but that hasn’t yet been defined. So we need to do that. First of all, add this line near the top:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.syndication.views <span class="hljs-keyword">import</span> Feed
+</code></pre><p>This imports the syndication views - yes, they’re another generic view! Our <code>PostsFeed</code> class is going to inherit from <code>Feed</code>. Next, we define the class:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostsFeed</span><span class="hljs-params">(Feed)</span>:</span>
     title = <span class="hljs-string">"RSS feed - posts"</span>
     link = <span class="hljs-string">"feeds/posts/"</span>
     description = <span class="hljs-string">"RSS feed - blog posts"</span>
@@ -2481,10 +2260,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">item_description</span><span class="hljs-params">(self, item)</span>:</span>
         <span class="hljs-keyword">return</span> item.text
-</code></pre>
-<p>This is fairly straightforward. We define our title, link, and description for the feed inside the class definition. We define the <code>items</code> method which sets what items are returned by the RSS feed. We also define the <code>item_title</code> and <code>item_description</code> methods.</p>
-<p>Now, if we run our tests, they should pass:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>This is fairly straightforward. We define our title, link, and description for the feed inside the class definition. We define the <code>items</code> method which sets what items are returned by the RSS feed. We also define the <code>item_title</code> and <code>item_description</code> methods.</p><p>Now, if we run our tests, they should pass:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ....................
 ----------------------------------------------------------------------
@@ -2492,76 +2268,13 @@ Ran <span class="hljs-number">20</span> tests <span class="hljs-keyword">in</spa
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/ django_tutorial_blog_ng/ requirements.txt
+</code></pre><p>Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/ django_tutorial_blog_ng/ requirements.txt
 $ git commit -m <span class="hljs-string">'RSS feed implemented'</span>
-</code></pre>
-<p>And that’s enough for now. Don’t forget, you can get the code for this lesson by cloning the repository from <a href="https://github.com/matthewbdaly/django_tutorial_blog_ng">Github</a> and running <code>git checkout lesson-4</code> to switch to this lesson.</p>
-<p>Next time we’ll:</p>
-<ul>
-<li>Implement a search system</li>
-<li>Add feeds for categories and posts</li>
-<li>Tidy up the user interface</li>
-</ul>
-<p>Hope to see you then!</p>
-
-                <ul class="categorylist"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul>
-                <div class="addthis_sharing_toolbox"></div>
-              <section class="comments">
-                  <div id="disqus_thread"></div>
-                  <script type="text/javascript">
-                    window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/";
+</code></pre><p>And that’s enough for now. Don’t forget, you can get the code for this lesson by cloning the repository from <a href="https://github.com/matthewbdaly/django_tutorial_blog_ng">Github</a> and running <code>git checkout lesson-4</code> to switch to this lesson.</p><p>Next time we’ll:</p><ul><li>Implement a search system</li><li>Add feeds for categories and posts</li><li>Tidy up the user interface</li></ul><p>Hope to see you then!</p><ul class="categorylist"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul><div class="addthis_sharing_toolbox"></div><section class="comments"><div id="disqus_thread"></div><script type="text/javascript">window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/";
                     window.disqus_url="http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/";
-                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 4";
-                  </script>
-                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
-                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
-              </section>
-            </article>
-        </div>
-        <div class="col-md-4">
-            <h1>Recent Posts</h1>
-            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
-            <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
-            <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
-            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
-            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <section id="github-profile">
-            </section>
-            <h4>My GitHub repositories</h4>
-            <ul id="github-repos">
-                <li>Loading repositories...</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="pager">
-                <li><a href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/">Django Blog Tutorial - the Next Generation - Part 5</a></li>
-                <li><a href="/blog/2014/01/25/my-first-yeoman-generator/">My First Yeoman Generator</a></li>
-            </ul>
-        </div>
-    </div>
-
-</div>
-
-        <footer>
-            <div class="container">
-                <div class="col-md-12">
-                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
-                </div>
-            </div>
-        </footer>
-        <script type="text/javascript" src="/static/js/all.min.js"></script>
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 4";</script><script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script><noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript></section></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p><p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/blog/2014/05/24/django-blog-tutorial-the-next-generation-part-5/">Django Blog Tutorial - the Next Generation - Part 5</a></li><li><a href="/blog/2014/01/25/my-first-yeoman-generator/">My First Yeoman Generator</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-17043630-1');ga('send','pageview');
-        </script>
-    </body>
-</html>
+            ga('create','UA-17043630-1');ga('send','pageview');</script></body></html>

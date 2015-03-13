@@ -1,103 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-        <meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog...">
-        
-        <link href='http://fonts.googleapis.com/css?family=PT+Serif' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all" />
-        <link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml" />
-        <title>Django Blog Tutorial - the Next Generation - Part 2 - Matthew Daly&#x27;s Blog</title>
-    </head>
-    <body>
-
-        <!-- Go to www.addthis.com/dashboard to customize your tools -->
-        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script>
-
-        <header>
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav">
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="header-nav">
-                            <ul class="nav navbar-nav">
-                                <li><a href="/">Home</a></li>
-                                <li><a href="/blog/archives/">Archives</a></li>
-                                <li><a href="/about/">About</a></li>
-                                <li><a href="/atom.xml">RSS</a></li>
-                            </ul>
-                            <form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right">
-                                <div class="form-group">
-                                    <input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control">
-                                </div>
-                                <input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk" />
-                                <input type="submit" class="btn btn-default">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container">
-                <div class="page-header">
-                    <h1><a href="/">Matthew Daly&#x27;s Blog</a></h1>
-                    <h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2>
-                </div>
-            </div>
-        </header>
-
-<div class="container">
-
-
-    <div class="row">
-        <div class="col-md-8">
-            <article class="post">
-                <p class="date">2nd January 2014 11:28 am</p>
-                <h1>Django Blog Tutorial - the Next Generation - Part 2</h1>
-                <p>Welcome back! In this lesson, we’ll use Twitter Bootstrap to make our blog look nicer, and we’ll implement individual pages for each post.</p>
-<p>Now, before we get started, don’t forget to switch into your virtualenv. From within the directory for the project, run the following command:</p>
-<pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
-</code></pre>
-<p>If you haven’t used Bootstrap before, you’re in for a treat. With Bootstrap, it’s easy to make a good-looking website quickly that’s responsive and mobile-friendly. We’ll also use HTML5 Boilerplate to get a basic HTML template in place.</p>
-<p>Now, to install these easily, we’ll use Bower, which requires <a href="http://nodejs.org/">Node.js</a>. Install Node.js first. On most Linux distros, you’ll also need to set <code>NODE_PATH</code>, which can be done by pasting the following into your <code>.bashrc</code>:</p>
-<pre><code class="hljs lang-bash">NODE_PATH=<span class="hljs-string">"/usr/local/lib/node_modules"</span>
-</code></pre>
-<p>With that done, run the following command to install Bower:</p>
-<pre><code class="hljs lang-bash">$ sudo npm install -g bower
-</code></pre>
-<p>Next we need to create a Bower config. First, create the folder <code>blogengine/static</code>. Then create a new file called <code>.bowerrc</code> and paste in the following content:</p>
-<pre><code class="hljs lang-json">{
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Django Blog Tutorial - the Next Generation - Part 2 - Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container-fluid"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"></div><input id="site" name="q" type="hidden" value="site:matthewdaly.co.uk"> <input type="submit" class="btn btn-default"></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd January 2014 11:28 am</p><h1>Django Blog Tutorial - the Next Generation - Part 2</h1><p>Welcome back! In this lesson, we’ll use Twitter Bootstrap to make our blog look nicer, and we’ll implement individual pages for each post.</p><p>Now, before we get started, don’t forget to switch into your virtualenv. From within the directory for the project, run the following command:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
+</code></pre><p>If you haven’t used Bootstrap before, you’re in for a treat. With Bootstrap, it’s easy to make a good-looking website quickly that’s responsive and mobile-friendly. We’ll also use HTML5 Boilerplate to get a basic HTML template in place.</p><p>Now, to install these easily, we’ll use Bower, which requires <a href="http://nodejs.org/">Node.js</a>. Install Node.js first. On most Linux distros, you’ll also need to set <code>NODE_PATH</code>, which can be done by pasting the following into your <code>.bashrc</code>:</p><pre><code class="hljs lang-bash">NODE_PATH=<span class="hljs-string">"/usr/local/lib/node_modules"</span>
+</code></pre><p>With that done, run the following command to install Bower:</p><pre><code class="hljs lang-bash">$ sudo npm install -g bower
+</code></pre><p>Next we need to create a Bower config. First, create the folder <code>blogengine/static</code>. Then create a new file called <code>.bowerrc</code> and paste in the following content:</p><pre><code class="hljs lang-json">{
     "<span class="hljs-attribute">directory</span>": <span class="hljs-value"><span class="hljs-string">"blogengine/static/bower_components"</span>
 </span>}
-</code></pre>
-<p>This tells Bower where it should put downloaded libraries. Next, run the following command to gener Bower:</p>
-<pre><code class="hljs lang-bash">$ bower init
-</code></pre>
-<p>Answer all the questions it asks you - for those with defaults, these should be fine, and everything else should be easy enough. Next, run the following command to install Bootstrap and HTML5 Boilerplate:</p>
-<pre><code class="hljs lang-bash">$ bower install bootstrap html5-boilerplate --save
-</code></pre>
-<p>Note that as jQuery is a dependency of Bootstrap, it will also be installed automatically. Now, we need to keep our Bower-installed files out of version control - the <code>bower.json</code> file keeps track of them for us. So add the following to your .gitignore file:</p>
-<pre><code class="hljs lang-bash">blogengine/static/bower_components/
-</code></pre>
-<p>All done? Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add .gitignore .bowerrc bower.json
+</code></pre><p>This tells Bower where it should put downloaded libraries. Next, run the following command to gener Bower:</p><pre><code class="hljs lang-bash">$ bower init
+</code></pre><p>Answer all the questions it asks you - for those with defaults, these should be fine, and everything else should be easy enough. Next, run the following command to install Bootstrap and HTML5 Boilerplate:</p><pre><code class="hljs lang-bash">$ bower install bootstrap html5-boilerplate --save
+</code></pre><p>Note that as jQuery is a dependency of Bootstrap, it will also be installed automatically. Now, we need to keep our Bower-installed files out of version control - the <code>bower.json</code> file keeps track of them for us. So add the following to your .gitignore file:</p><pre><code class="hljs lang-bash">blogengine/static/bower_components/
+</code></pre><p>All done? Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add .gitignore .bowerrc bower.json
 $ git commit -m <span class="hljs-string">'Added Bower config'</span>
-</code></pre>
-<p>Now, let’s make our template nicer. Django’s templating system is very powerful and lets one template inherit from another. We’re going to create a base template, using HTML5 Boilerplate as a starting point, that all of our web-facing pages will use. First, create a directory to hold the base template:</p>
-<pre><code class="hljs lang-bash">$ mkdir templates/blogengine/includes
-</code></pre>
-<p>Then copy the <code>index.html</code> file from HTML5 Boilerplate to this directory as <code>base.html</code>:</p>
-<pre><code class="hljs lang-bash">$ cp blogengine/static/bower_components/html5-boilerplate/index.html templates/blogengine/includes/base.html
-</code></pre>
-<p>Now amend this file to look like this:</p>
-<pre><code class="hljs lang-django"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
+</code></pre><p>Now, let’s make our template nicer. Django’s templating system is very powerful and lets one template inherit from another. We’re going to create a base template, using HTML5 Boilerplate as a starting point, that all of our web-facing pages will use. First, create a directory to hold the base template:</p><pre><code class="hljs lang-bash">$ mkdir templates/blogengine/includes
+</code></pre><p>Then copy the <code>index.html</code> file from HTML5 Boilerplate to this directory as <code>base.html</code>:</p><pre><code class="hljs lang-bash">$ cp blogengine/static/bower_components/html5-boilerplate/index.html templates/blogengine/includes/base.html
+</code></pre><p>Now amend this file to look like this:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -142,16 +56,7 @@ $ git commit -m <span class="hljs-string">'Added Bower config'</span>
         </span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span>
-</code></pre>
-<p>Note the following:</p>
-<ul>
-<li>We need to use <code>{% load staticfiles %}</code> to be able to load any static files.</li>
-<li>We use the <code>{% static %}</code> template tag to load static files such as CSS and HTML</li>
-<li>We define blocks called <code>title</code> and <code>content</code>. Any template that extends this one can override whatever is inside this template.</li>
-</ul>
-<p>Please note that HTML5 Boilerplate may conceivable change in future, so bear in mind that all you really need to do is load the staticfiles app, use the <code>static</code> tag for any static files that need to be loaded, and define the blocks in the appropriate places.</p>
-<p>Next, let’s amend our existing template to inherit from this one:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Note the following:</p><ul><li>We need to use <code>{% load staticfiles %}</code> to be able to load any static files.</li><li>We use the <code>{% static %}</code> template tag to load static files such as CSS and HTML</li><li>We define blocks called <code>title</code> and <code>content</code>. Any template that extends this one can override whatever is inside this template.</li></ul><p>Please note that HTML5 Boilerplate may conceivable change in future, so bear in mind that all you really need to do is load the staticfiles app, use the <code>static</code> tag for any static files that need to be loaded, and define the blocks in the appropriate places.</p><p>Next, let’s amend our existing template to inherit from this one:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
@@ -160,13 +65,9 @@ $ git commit -m <span class="hljs-string">'Added Bower config'</span>
         </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Now fire up the server with <code>python manage.py runserver</code> and check everything is working OK. You should see that your new base template is now in use and the CSS and JS files are being loaded correctly. Let’s commit again:</p>
-<pre><code class="hljs lang-bash">$ git add templates/
+</code></pre><p>Now fire up the server with <code>python manage.py runserver</code> and check everything is working OK. You should see that your new base template is now in use and the CSS and JS files are being loaded correctly. Let’s commit again:</p><pre><code class="hljs lang-bash">$ git add templates/
 $ git commit -m <span class="hljs-string">'Now use Bootstrap and HTML5 Boilerplate for templates'</span>
-</code></pre>
-<p>Now, let’s use Bootstrap to style our blog a little. First we’ll add a navigation bar at the top of our blog. Edit the base template as follows:</p>
-<pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
+</code></pre><p>Now, let’s use Bootstrap to style our blog a little. First we’ll add a navigation bar at the top of our blog. Edit the base template as follows:</p><pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-static-top navbar-inverse"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-inner"</span>&gt;</span>
                 <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
                     <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"btn btn-navbar"</span> <span class="hljs-attribute">data-toggle</span>=<span class="hljs-value">"collapse"</span> <span class="hljs-attribute">data-target</span>=<span class="hljs-value">".nav-collapse"</span>&gt;</span>
@@ -200,10 +101,7 @@ $ git commit -m <span class="hljs-string">'Now use Bootstrap and HTML5 Boilerpla
                 <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
             <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span></span>
-</code></pre>
-<p>Note the footer copyright section. Here we output the current year using <code>now</code>. Also note the addition of the header block. This will let us override the page header if necessary.</p>
-<p>We’ll also wrap the posts in a div:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Note the footer copyright section. Here we output the current year using <code>now</code>. Also note the addition of the header block. This will let us override the page header if necessary.</p><p>We’ll also wrap the posts in a div:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">block</span> content %}</span><span class="xml">
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> object_list %}</span><span class="xml">
@@ -214,20 +112,11 @@ $ git commit -m <span class="hljs-string">'Now use Bootstrap and HTML5 Boilerpla
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add templates/
+</code></pre><p>Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add templates/
 $ git commit -m <span class="hljs-string">'Amended templates'</span>
-</code></pre>
-<h2 id="formatting-our-content">Formatting our content</h2>
-<p>As it stands right now, we can’t do much to format our posts. It is possible to include HTML in our posts with Django, but by default it will strip it out. Also, we don’t want users to have to write HTML manually - we want to make our blog user friendly!</p>
-<p>There are two possible approaches. One is to embed a rich text editor like TinyMCE in the admin and use that for editing the files, but I’ve found things like that to be cumbersome. The alternative is to use some other form of lightweight markup, and that’s the approach we’ll take here. We’re going to use Markdown for editing our posts.</p>
-<p>Django has actually dropped support for Markdown, but it’s not hard to implement your own version. First, install Markdown and add it to your <code>requirements.txt</code>:</p>
-<pre><code class="hljs lang-bash">$ pip install markdown
+</code></pre><h2 id="formatting-our-content">Formatting our content</h2><p>As it stands right now, we can’t do much to format our posts. It is possible to include HTML in our posts with Django, but by default it will strip it out. Also, we don’t want users to have to write HTML manually - we want to make our blog user friendly!</p><p>There are two possible approaches. One is to embed a rich text editor like TinyMCE in the admin and use that for editing the files, but I’ve found things like that to be cumbersome. The alternative is to use some other form of lightweight markup, and that’s the approach we’ll take here. We’re going to use Markdown for editing our posts.</p><p>Django has actually dropped support for Markdown, but it’s not hard to implement your own version. First, install Markdown and add it to your <code>requirements.txt</code>:</p><pre><code class="hljs lang-bash">$ pip install markdown
 $ pip freeze &gt; requirements.txt
-</code></pre>
-<p>Now, we shouldn’t write any production code before writing a test, so let’s amend our existing post test to check to see that Markdown is working as expected:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
+</code></pre><p>Now, we shouldn’t write any production code before writing a test, so let’s amend our existing post test to check to see that Markdown is working as expected:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setUp</span><span class="hljs-params">(self)</span>:</span>
         self.client = Client()
 
@@ -260,18 +149,10 @@ $ pip freeze &gt; requirements.txt
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>You’ll also need to add the following at the top:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown
-</code></pre>
-<p>What we do here is we convert our post text to include a link using Markdown. We also need to render that post in markdown within the test so that what we have in the test matches what will be produced - otherwise our test will be broken. We also check that the link is marked up correctly.</p>
-<p>Save the file and run the tests - they should fail. Now, create the following directory and file:</p>
-<pre><code class="hljs lang-bash">$ mkdir blogengine/templatetags
+</code></pre><p>You’ll also need to add the following at the top:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown
+</code></pre><p>What we do here is we convert our post text to include a link using Markdown. We also need to render that post in markdown within the test so that what we have in the test matches what will be produced - otherwise our test will be broken. We also check that the link is marked up correctly.</p><p>Save the file and run the tests - they should fail. Now, create the following directory and file:</p><pre><code class="hljs lang-bash">$ mkdir blogengine/templatetags
 $ touch blogengine/templatetags/__init__.py
-</code></pre>
-<p>Note that the <code>__init__.py</code> file is meant to be blank.</p>
-<p>Then create the following file and edit it to look like this:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown
+</code></pre><p>Note that the <code>__init__.py</code> file is meant to be blank.</p><p>Then create the following file and edit it to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> markdown
 
 <span class="hljs-keyword">from</span> django <span class="hljs-keyword">import</span> template
 <span class="hljs-keyword">from</span> django.template.defaultfilters <span class="hljs-keyword">import</span> stringfilter
@@ -289,9 +170,7 @@ register = template.Library()
                                        extensions,
                                        safe_mode=<span class="hljs-keyword">True</span>,
                                        enable_attributes=<span class="hljs-keyword">False</span>))
-</code></pre>
-<p>Then just amend the post list template to use it:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Then just amend the post list template to use it:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -304,15 +183,9 @@ register = template.Library()
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>It’s that easy to use a custom markup system with your blog!</p>
-<p>Let’s commit the changes:</p>
-<pre><code class="hljs lang-bash">$ git add requirements.txt templates/ blogengine/
+</code></pre><p>It’s that easy to use a custom markup system with your blog!</p><p>Let’s commit the changes:</p><pre><code class="hljs lang-bash">$ git add requirements.txt templates/ blogengine/
 $ git commit -m <span class="hljs-string">'Added Markdown support'</span>
-</code></pre>
-<h2 id="pagination">Pagination</h2>
-<p>As at right now, all of our posts are displayed on the index page. We want to fix that by implementing pagination. Fortunately, that’s very easy for us because we’re using Django’s generic views. Go into <code>blogengine/urls.py</code> and amend it as follows:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><h2 id="pagination">Pagination</h2><p>As at right now, all of our posts are displayed on the index page. We want to fix that by implementing pagination. Fortunately, that’s very easy for us because we’re using Django’s generic views. Go into <code>blogengine/urls.py</code> and amend it as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
 
@@ -323,9 +196,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         paginate_by=<span class="hljs-number">5</span>,
         )),
 )
-</code></pre>
-<p>That will automatically paginate our posts by 5 - feel free to change the value of <code>paginate_by</code> if you wish. However, we need to place the links in our template as well:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>That will automatically paginate our posts by 5 - feel free to change the value of <code>paginate_by</code> if you wish. However, we need to place the links in our template as well:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -346,9 +217,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>Try adding a few more blog posts, and you’ll see the pagination links. But give them a try, and they won’t work. Why not? Well, as it turns out there was a bug in the project-wide <code>urls.py</code> file (my bad!). Let’s fix that:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, include, url
+</code></pre><p>Try adding a few more blog posts, and you’ll see the pagination links. But give them a try, and they won’t work. Why not? Well, as it turns out there was a bug in the project-wide <code>urls.py</code> file (my bad!). Let’s fix that:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, include, url
 
 <span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
 admin.autodiscover()
@@ -363,15 +232,9 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
     <span class="hljs-comment"># Blog URLs</span>
     url(<span class="hljs-string">r''</span>, include(<span class="hljs-string">'blogengine.urls'</span>)),
 )
-</code></pre>
-<p>If you try again, you’ll see that the <code>blogengine</code> app now happily deals with the paginated posts. Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/ django_tutorial_blog_ng/ templates/
+</code></pre><p>If you try again, you’ll see that the <code>blogengine</code> app now happily deals with the paginated posts. Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/ django_tutorial_blog_ng/ templates/
 $ git commit -m <span class="hljs-string">'Implemented pagination'</span>
-</code></pre>
-<h2 id="viewing-individual-posts">Viewing individual posts</h2>
-<p>As our last task for today, we’ll implement individual pages for each post. We want each post to have a nice, friendly URL that is as human-readable as possible, and also includes the date the post was created.</p>
-<p>First of all, we’ll implement our test for it, however:</p>
-<pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_post_page</span><span class="hljs-params">(self)</span>:</span>
+</code></pre><h2 id="viewing-individual-posts">Viewing individual posts</h2><p>As our last task for today, we’ll implement individual pages for each post. We want each post to have a nice, friendly URL that is as human-readable as possible, and also includes the date the post was created.</p><p>First of all, we’ll implement our test for it, however:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_post_page</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the post</span>
         post = Post()
         post.title = <span class="hljs-string">'My first post'</span>
@@ -405,10 +268,7 @@ $ git commit -m <span class="hljs-string">'Implemented pagination'</span>
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>Add this method to the <code>PostViewTest</code> class, after <code>test_index</code>. It’s very similar to <code>test_index</code>, since it’s testing much the same content. However, not that we fetch the post-specific URL using the method <code>get_absolute_url</code>, and we then fetch that page.</p>
-<p>Now, if you run the test, it will fail because <code>get_absolute_url</code> isn’t implemented. It’s often a good idea to have a <code>get_absolute_url</code> method for your models, which defines a single URL scheme for that type of object. So let’s create one. However, to implement our URL scheme we need to make some changes. Right now we have the date, but we don’t have a text string we can use, known in Django as a <em>slug</em>. So we’ll add a slug field, which will be prepopulated based on the post title. Edit your model as follows:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+</code></pre><p>Add this method to the <code>PostViewTest</code> class, after <code>test_index</code>. It’s very similar to <code>test_index</code>, since it’s testing much the same content. However, not that we fetch the post-specific URL using the method <code>get_absolute_url</code>, and we then fetch that page.</p><p>Now, if you run the test, it will fail because <code>get_absolute_url</code> isn’t implemented. It’s often a good idea to have a <code>get_absolute_url</code> method for your models, which defines a single URL scheme for that type of object. So let’s create one. However, to implement our URL scheme we need to make some changes. Right now we have the date, but we don’t have a text string we can use, known in Django as a <em>slug</em>. So we’ll add a slug field, which will be prepopulated based on the post title. Edit your model as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
 
 <span class="hljs-comment"># Create your models here.</span>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
@@ -425,27 +285,16 @@ $ git commit -m <span class="hljs-string">'Implemented pagination'</span>
 
     <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
         ordering = [<span class="hljs-string">"-pub_date"</span>]
-</code></pre>
-<p>Here we’ve added a slug field to the model, as well as implementing our <code>get_absolute_url</code> method. Note we’ve limited the date to year and month, but you can include days if you wish.</p>
-<p>While we’re in here, we’ve also implemented the <code>__unicode__</code> method. Essentially, this sets how Django describes the object in the admin - in this case, the post title is a logical way of describing that <code>Post</code> object, so it returns the post title.</p>
-<p>We’ve also added the class Meta, with the ordering field. This tells Django that by default any list of posts should return them ordered by <code>pub_date</code> in reverse - in other words, latest first.</p>
-<p>To have the slug filled in automatically, we need to customise the admin interface a little as well:</p>
-<pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
+</code></pre><p>Here we’ve added a slug field to the model, as well as implementing our <code>get_absolute_url</code> method. Note we’ve limited the date to year and month, but you can include days if you wish.</p><p>While we’re in here, we’ve also implemented the <code>__unicode__</code> method. Essentially, this sets how Django describes the object in the admin - in this case, the post title is a logical way of describing that <code>Post</code> object, so it returns the post title.</p><p>We’ve also added the class Meta, with the ordering field. This tells Django that by default any list of posts should return them ordered by <code>pub_date</code> in reverse - in other words, latest first.</p><p>To have the slug filled in automatically, we need to customise the admin interface a little as well:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
 <span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostAdmin</span><span class="hljs-params">(admin.ModelAdmin)</span>:</span>
     prepopulated_fields = {<span class="hljs-string">"slug"</span>: (<span class="hljs-string">"title"</span>,)}
 
 admin.site.register(models.Post, PostAdmin)
-</code></pre>
-<p>Now, I recommend at this stage going into the admin and deleting all of your posts, because otherwise you’ll have problems in migrating them. The issue is that each slug is compulsory and must be unique, and it’s not practical to use South to automatically generate new slugs from the title on the fly, so by deleting them at this stage you’ll avoid problems. Once that’s done, run this command:</p>
-<pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
-</code></pre>
-<p>You’ll be prompted to specify a one-off default value - enter any string you like, such as “blah”. Then run the migration:</p>
-<pre><code class="hljs lang-bash">$ python manage.py migrate
-</code></pre>
-<p>Let’s run our tests now:</p>
-<pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span>
+</code></pre><p>Now, I recommend at this stage going into the admin and deleting all of your posts, because otherwise you’ll have problems in migrating them. The issue is that each slug is compulsory and must be unique, and it’s not practical to use South to automatically generate new slugs from the title on the fly, so by deleting them at this stage you’ll avoid problems. Once that’s done, run this command:</p><pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
+</code></pre><p>You’ll be prompted to specify a one-off default value - enter any string you like, such as “blah”. Then run the migration:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+</code></pre><p>Let’s run our tests now:</p><pre><code class="hljs lang-bash">(venv)Smith:django_tutorial_blog_ng matthewdaly$ python manage.py <span class="hljs-built_in">test</span>
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .F.F...F
 ======================================================================
@@ -477,10 +326,7 @@ Ran <span class="hljs-number">8</span> tests <span class="hljs-keyword">in</span
 
 FAILED (failures=<span class="hljs-number">3</span>)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre>
-<p>Whoops! Our tests are broken, because the slug field isn’t being filled in. If you take a look at the page for adding a post, you’ll notice that the slug is filled in using JavaScript, so our test fails because the test client doesn’t interpret JavaScript. So in the tests we have to fill in the slug field manually.</p>
-<p>Also, for the unit tests, the slug attribute isn’t being created at all, so it can’t be saved. Let’s remedy that. First, edit the <code>test_create_post</code> method of <code>PostTest</code>:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostTest</span><span class="hljs-params">(TestCase)</span>:</span>
+</code></pre><p>Whoops! Our tests are broken, because the slug field isn’t being filled in. If you take a look at the page for adding a post, you’ll notice that the slug is filled in using JavaScript, so our test fails because the test client doesn’t interpret JavaScript. So in the tests we have to fill in the slug field manually.</p><p>Also, for the unit tests, the slug attribute isn’t being created at all, so it can’t be saved. Let’s remedy that. First, edit the <code>test_create_post</code> method of <code>PostTest</code>:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostTest</span><span class="hljs-params">(TestCase)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_post</span><span class="hljs-params">(self)</span>:</span>
         <span class="hljs-comment"># Create the post</span>
         post = Post()
@@ -510,9 +356,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         self.assertEquals(only_post.pub_date.hour, post.pub_date.hour)
         self.assertEquals(only_post.pub_date.minute, post.pub_date.minute)
         self.assertEquals(only_post.pub_date.second, post.pub_date.second)
-</code></pre>
-<p>Next, let’s amend <code>AdminTest</code>:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdminTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
+</code></pre><p>Next, let’s amend <code>AdminTest</code>:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AdminTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
     fixtures = [<span class="hljs-string">'users.json'</span>]
 
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setUp</span><span class="hljs-params">(self)</span>:</span>
@@ -648,9 +492,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-comment"># Check post amended</span>
         all_posts = Post.objects.all()
         self.assertEquals(len(all_posts), <span class="hljs-number">0</span>)
-</code></pre>
-<p>And <code>PostViewTest</code>:</p>
-<pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
+</code></pre><p>And <code>PostViewTest</code>:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostViewTest</span><span class="hljs-params">(LiveServerTestCase)</span>:</span>
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setUp</span><span class="hljs-params">(self)</span>:</span>
         self.client = Client()
 
@@ -720,10 +562,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
         <span class="hljs-comment"># Check the link is marked up properly</span>
         self.assertTrue(<span class="hljs-string">'&lt;a href="http://127.0.0.1:8000/"&gt;my first blog post&lt;/a&gt;'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre>
-<p>What we’re doing here is that every time we create a Post object programmatically, we add the <code>post.slug</code> atttribute to it. Also, when submitting a post via the admin, we pass the <code>slug</code> parameter via HTTP POST, thus emulating how a form would submit this data.</p>
-<p>If you run the tests again, you’ll see that <code>test_post_page</code> still fails. This is because we haven’t yet up the URLs, templates and views to do so. Let’s fix that. We’ll use another generic view, called a DetailView, to display the posts. Amend <code>blogengine/urls.py</code> as follows:</p>
-<pre><code class="hljs lang-python">rom django.conf.urls <span class="hljs-keyword">import</span> patterns, url
+</code></pre><p>What we’re doing here is that every time we create a Post object programmatically, we add the <code>post.slug</code> atttribute to it. Also, when submitting a post via the admin, we pass the <code>slug</code> parameter via HTTP POST, thus emulating how a form would submit this data.</p><p>If you run the tests again, you’ll see that <code>test_post_page</code> still fails. This is because we haven’t yet up the URLs, templates and views to do so. Let’s fix that. We’ll use another generic view, called a DetailView, to display the posts. Amend <code>blogengine/urls.py</code> as follows:</p><pre><code class="hljs lang-python">rom django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
 
@@ -739,9 +578,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         model=Post,
         )),
 )
-</code></pre>
-<p>Running our tests again will still fail, but now because the template <code>post_detail.html</code> has not been found. So let’s create it:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Running our tests again will still fail, but now because the template <code>post_detail.html</code> has not been found. So let’s create it:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -753,9 +590,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
 
 </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>If you run your tests again, they should now pass. However, we still need to provide a hyperlink from each post in the index to the post page, so let’s do that:</p>
-<pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>If you run your tests again, they should now pass. However, we still need to provide a hyperlink from each post in the index to the post page, so let’s do that:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template_tag">{% <span class="hljs-keyword">extends</span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">load</span> custom_markdown %}</span><span class="xml">
 
@@ -776,70 +611,13 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
         </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endif</span> %}</span><span class="xml">
 
     </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endblock</span> %}</span><span class="xml"></span>
-</code></pre>
-<p>And that’s all for today! We now have individual post pages, we’ve styled our blog a bit, and we’ve implemented Markdown support. All that remains is to commit our changes:</p>
-<pre><code class="hljs lang-bash">$ git add blogengine/ templates/
+</code></pre><p>And that’s all for today! We now have individual post pages, we’ve styled our blog a bit, and we’ve implemented Markdown support. All that remains is to commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/ templates/
 $ git commit -m <span class="hljs-string">'Implemented post pages'</span>
-</code></pre>
-<p>As before, I’ve tagged the final commit with ‘lesson-2’, so if you’re following along, you can switch to this point with <code>git checkout lesson-2</code>.</p>
-<p>Next time we’ll add support for flat pages and multiple authors, as well as adding support for comments via a third-party commenting system.</p>
-
-                <ul class="categorylist"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul>
-                <div class="addthis_sharing_toolbox"></div>
-              <section class="comments">
-                  <div id="disqus_thread"></div>
-                  <script type="text/javascript">
-                    window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/";
+</code></pre><p>As before, I’ve tagged the final commit with ‘lesson-2’, so if you’re following along, you can switch to this point with <code>git checkout lesson-2</code>.</p><p>Next time we’ll add support for flat pages and multiple authors, as well as adding support for comments via a third-party commenting system.</p><ul class="categorylist"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul><div class="addthis_sharing_toolbox"></div><section class="comments"><div id="disqus_thread"></div><script type="text/javascript">window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/";
                     window.disqus_url="http://matthewdaly.co.uk/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/";
-                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 2";
-                  </script>
-                  <script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script>
-                  <noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript>
-              </section>
-            </article>
-        </div>
-        <div class="col-md-4">
-            <h1>Recent Posts</h1>
-            <p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p>
-            <p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p>
-            <p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p>
-            <p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p>
-            <p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p>
-            <section id="github-profile">
-            </section>
-            <h4>My GitHub repositories</h4>
-            <ul id="github-repos">
-                <li>Loading repositories...</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="pager">
-                <li><a href="/blog/2014/01/03/django-blog-tutorial-the-next-generation-part-3/">Django Blog Tutorial - the Next Generation - Part 3</a></li>
-                <li><a href="/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/">Django Blog Tutorial - the Next Generation - Part 1</a></li>
-            </ul>
-        </div>
-    </div>
-
-</div>
-
-        <footer>
-            <div class="container">
-                <div class="col-md-12">
-                    <p class="copyright">Copyright &copy; Matthew Daly 2015.</p>
-                </div>
-            </div>
-        </footer>
-        <script type="text/javascript" src="/static/js/all.min.js"></script>
-        <script>
-            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+                    window.disqus_title="Django Blog Tutorial - the Next Generation - Part 2";</script><script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script><noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript></section></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p><p><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/blog/2014/01/03/django-blog-tutorial-the-next-generation-part-3/">Django Blog Tutorial - the Next Generation - Part 3</a></li><li><a href="/blog/2013/12/28/django-blog-tutorial-the-next-generation-part-1/">Django Blog Tutorial - the Next Generation - Part 1</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];
             e.src='//www.google-analytics.com/analytics.js';
             r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-            ga('create','UA-17043630-1');ga('send','pageview');
-        </script>
-    </body>
-</html>
+            ga('create','UA-17043630-1');ga('send','pageview');</script></body></html>
