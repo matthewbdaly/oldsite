@@ -120,6 +120,14 @@ module.exports = function (grunt) {
                     'robots.txt'
                 ],
                 dest: 'www/'
+            },
+            lunr: {
+                cwd: 'blogbuilderoutput/',
+                expand: true,
+                src: [
+                    'lunr.json'
+                ],
+                dest: 'www/'
             }
         },
         clean: [
@@ -137,7 +145,8 @@ module.exports = function (grunt) {
                     'content/pages/*.markdown',
                     'content/posts/*.md',
                     'content/posts/*.markdown',
-                    'app/sass/style.scss'
+                    'app/sass/style.scss',
+                    'app/js/main.js'
                 ],
                 tasks: ['default'],
                 options: {
