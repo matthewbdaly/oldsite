@@ -36,8 +36,7 @@ I've worked extensively with the following technologies:
   * Generating documentation with ApiGen
 * SQL (primarily MySQL and SQLite, but with some use of PostgreSQL), as well as some limited use of MongoDB and Redis for personal projects
 * Some knowledge of Ruby, including use of Cucumber for testing purposes
-* Linux/Unix, including some experience of shell scripting, sed, awk, Ansible, Vagrant, Apache, Nginx and Postfix configuration, and general systems administration. Have predominantly used Debian and Ubuntu
-
+* Linux and Unix, including experience of shell scripting, sed, awk, Ansible, Vagrant, Apache, Nginx and Postfix configuration, and general systems administration. Have predominantly used Debian and Ubuntu
 * Version control (some experience with Subversion, but I primarily use Git)
 * Using Jenkins and Travis CI, together with Coveralls, for continuous integration
 
