@@ -36,20 +36,6 @@ $(document).ready(function () {
             }
         });
     });
-
-    // Override search to work properly
-    $('form#searchForm').on('submit', function (event) {
-        // Prevent default behaviour
-        event.preventDefault();
-
-        // Get parameters
-        var site, search;
-        site = $('input#site').val();
-        search = $('input#search').val();
-
-        // Load the required page
-        window.location = 'http://www.google.com/search?q=' + encodeURIComponent(site + ' ' + search);
-    });
     
     // Get GitHub repos
     $.get('https://api.github.com/users/matthewbdaly/repos?type=owner', function (response) {
