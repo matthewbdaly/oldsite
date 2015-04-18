@@ -1,4 +1,77 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"><ul class="searchresults"></ul></div></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th April 2015 1:47 am</p><h1><a href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/">Adding a New Search Engine to My Site</a></h1><p>I’ve just finished implementing a new search engine for this site. Obviously, with it using a static site generator, searching a relational database isn’t an option. For a long while I’d just been getting by with Google’s site-specific search, which worked, but meant leaving the site to view the search results.</p><p>Now, I’ve implemented a client-side search system using <a href="http://lunrjs.com/">Lunr.js</a>. It wasn’t too time consuming, and as the index is generated with the rest of the site and loaded with the page, the response is almost instantaneous. I may write a future blog post on how to integrate Lunr.js with your site, as it’s very handy and is an ideal solution for implementing search on a static site.</p></article><article class="post"><p class="date">2nd March 2015 11:25 pm</p><h1><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></h1><p>Just thought I’d share a little trick I picked up recently. As you may know, GitHub flavoured Markdown (which I use for this blog) supports fenced code blocks, allowing you to specify a language for a block of code in a Markdown file.</p><p>If you put the following code in your <code>.vimrc</code>, you can get syntax highlighting in those code blocks when you open up a Markdown file in Vim:</p><pre><code class="hljs lang-viml"><span class="hljs-string">"Syntax highlighting in Markdown
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/atom.xml"><title>Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><nav class="navbar navbar-inverse navbar-static-top"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/atom.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"><ul class="searchresults"></ul></div></form></div></div></div></nav><div class="container"><div class="page-header"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th April 2015 3:05 pm</p><h1><a href="/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/">How I Added Search to My Site With Lunr.js</a></h1><p>As I mentioned a while back, I recently switched the search on my site from Google’s site-specific search to <a href="http://lunrjs.com/">Lunr.js</a>. Since my site is built with a static site generator, I can’t implement search using database queries, and I was keen to have an integrated search method that would be fast and not require server-side scripting, and Lunr.js seemed to fit the bill.</p><p>The first task in implementing it was to generate the index. As I wrote the Grunt task that generates the blog, I amended that task to generate an index at the same time as I generated the posts. I installed Lunr.js with the following command:</p><pre><code class="hljs lang-bash">npm install lunr --save
+</code></pre><p>I then imported it in the task, and set up the field names:</p><pre><code class="hljs lang-javascript">    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);
+
+    searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { boost: <span class="hljs-number">10</span> });
+        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);
+        <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);
+    });
+</code></pre><p>This defined fields for the title, body, and hyperlink, and set the hyperlink as the reference. The variable <code>searchIndex</code> represents the Lunr index.</p><p>Next, I looped through the posts, and passed the appropriate details to be added to the index:</p><pre><code class="hljs lang-javascript">    <span class="hljs-keyword">for</span> (post <span class="hljs-keyword">in</span> post_items) {
+        <span class="hljs-keyword">var</span> doc = {
+            <span class="hljs-string">'title'</span>: post_items[post].meta.title,
+            <span class="hljs-string">'body'</span>: post_items[post].post.rawcontent,
+            <span class="hljs-string">'href'</span>: post_items[post].path
+        };
+        store[doc.href] = {
+            <span class="hljs-string">'title'</span>: doc.title
+        };
+        searchIndex.add(doc);
+    }
+</code></pre><p>At this point, <code>post_items</code> represents an array of objects, with each object representing a blog post. Note that the <code>body</code> field is set to the value of the item’s attribute <code>post.rawcontent</code>, which represents the raw Markdown rather than the compiled HTML.</p><p>I then store the title in the <code>store</code> object, so that it can be accessed using the <code>href</code> field as a key.</p><p>I then do the same thing when generating the pages:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Add them to the index</span>
+    <span class="hljs-keyword">var</span> doc = {
+        <span class="hljs-string">'title'</span>: data.meta.title,
+        <span class="hljs-string">'body'</span>: data.post.rawcontent,
+        <span class="hljs-string">'href'</span>: permalink + <span class="hljs-string">'/'</span>
+    };
+    store[doc.href] = {
+        <span class="hljs-string">'title'</span>: data.meta.title
+    };
+    searchIndex.add(doc);
+</code></pre><p>Note that this is already inside the loop that generates the pages, so I don’t include that.</p><p>We then write the index to a file:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Write index</span>
+    grunt.file.write(options.www.dest + <span class="hljs-string">'/lunr.json'</span>, <span class="hljs-built_in">JSON</span>.stringify({
+        index: searchIndex.toJSON(),
+        store: store
+    }));
+</code></pre><p>That takes care of generating our index, but we need to implement some client-side code to handle the search. We need to include Lunr.js on the client side as well, (I recommend using Bower to do so), alongside jQuery. If you include both, the following code should do the trick:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="hljs-pi">    'use strict'</span>;
+
+    <span class="hljs-comment">// Set up search</span>
+    <span class="hljs-keyword">var</span> index, store;
+    $.getJSON(<span class="hljs-string">'/lunr.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(response)</span> </span>{
+
+        <span class="hljs-comment">// Create index</span>
+        index = lunr.Index.load(response.index);
+
+        <span class="hljs-comment">// Create store</span>
+        store = response.store;
+
+        <span class="hljs-comment">// Handle search</span>
+        $(<span class="hljs-string">'input#search'</span>).on(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <span class="hljs-comment">// Get query</span>
+            <span class="hljs-keyword">var</span> query = $(<span class="hljs-keyword">this</span>).val();
+
+            <span class="hljs-comment">// Search for it</span>
+            <span class="hljs-keyword">var</span> result = index.search(query);
+
+            <span class="hljs-comment">// Output it</span>
+            <span class="hljs-keyword">var</span> resultdiv = $(<span class="hljs-string">'ul.searchresults'</span>);
+            <span class="hljs-keyword">if</span> (result.length === <span class="hljs-number">0</span>) {
+                <span class="hljs-comment">// Hide results</span>
+                resultdiv.hide();
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// Show results</span>
+                resultdiv.empty();
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> item <span class="hljs-keyword">in</span> result) {
+                    <span class="hljs-keyword">var</span> ref = result[item].ref;
+                    <span class="hljs-keyword">var</span> searchitem = <span class="hljs-string">'&lt;li&gt;&lt;a href="'</span> + ref + <span class="hljs-string">'"&gt;'</span> + store[ref].title + <span class="hljs-string">'&lt;/a&gt;&lt;/li&gt;'</span>;
+                    resultdiv.append(searchitem);
+                }
+                resultdiv.show();
+            }
+        });
+    });
+});
+</code></pre><p>This should be easy to understand. On load, we fetch and parse the <code>lunr.json</code> file from the server, and load the index. We then set up an event handler for the <code>keyup</code> event on an input with the ID of <code>search</code>. We get the value of the input, and query our index, and we loop through our results and display them.</p><p>I was pleased with how straightforward it was to implement search with Lunr.js, and it works well. It’s also a lot faster than any server-side solution since the index is generated during the build process, and is loaded with the test of the site, so the only factor in the speed of the response is how quick your browser executes JavaScript. You could probably also use it with a Node.js application by generating the index dynamically, although you’d probably want to cache it to some extent.</p></article><article class="post"><p class="date">4th April 2015 1:47 am</p><h1><a href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/">Adding a New Search Engine to My Site</a></h1><p>I’ve just finished implementing a new search engine for this site. Obviously, with it using a static site generator, searching a relational database isn’t an option. For a long while I’d just been getting by with Google’s site-specific search, which worked, but meant leaving the site to view the search results.</p><p>Now, I’ve implemented a client-side search system using <a href="http://lunrjs.com/">Lunr.js</a>. It wasn’t too time consuming, and as the index is generated with the rest of the site and loaded with the page, the response is almost instantaneous. I may write a future blog post on how to integrate Lunr.js with your site, as it’s very handy and is an ideal solution for implementing search on a static site.</p></article><article class="post"><p class="date">2nd March 2015 11:25 pm</p><h1><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></h1><p>Just thought I’d share a little trick I picked up recently. As you may know, GitHub flavoured Markdown (which I use for this blog) supports fenced code blocks, allowing you to specify a language for a block of code in a Markdown file.</p><p>If you put the following code in your <code>.vimrc</code>, you can get syntax highlighting in those code blocks when you open up a Markdown file in Vim:</p><pre><code class="hljs lang-viml"><span class="hljs-string">"Syntax highlighting in Markdown
 </span><span class="hljs-keyword">au</span> BufNewFile,BufReadPost *.md <span class="hljs-keyword">set</span> <span class="hljs-keyword">filetype</span>=markdown
 <span class="hljs-keyword">let</span> <span class="hljs-variable">g:markdown_fenced_languages</span> = [<span class="hljs-string">'bash=sh'</span>, <span class="hljs-string">'css'</span>, <span class="hljs-string">'django'</span>, <span class="hljs-string">'handlebars'</span>, <span class="hljs-string">'javascript'</span>, <span class="hljs-string">'js=javascript'</span>, <span class="hljs-string">'json=javascript'</span>, <span class="hljs-string">'perl'</span>, <span class="hljs-string">'php'</span>, <span class="hljs-string">'python'</span>, <span class="hljs-string">'ruby'</span>, <span class="hljs-string">'sass'</span>, <span class="hljs-string">'xml'</span>, <span class="hljs-string">'html'</span>]
 </code></pre><p>This does depend on having the appropriate syntax files installed. However, you can easily add in syntax files for many other languages that Vim supports, and there are third-party ones available to install - in my case, I’ve got the <code>handlebars</code> one installed, which doesn’t come with Vim.</p></article><article class="post"><p class="date">2nd March 2015 11:03 pm</p><h1><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></h1><p>In this tutorial, we’re going to extend the chat system we built in <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">the first tutorial</a> to include the following functionality:</p><ul><li>Persisting the data</li><li>Prompting users to sign in and storing their details in a Redis-backed session</li></ul><p>In the process, we’ll pick up a bit more about using Redis.</p><h2 id="persistence">Persistence</h2><p>Our first task is to make our messages persist when the session ends. Now, in order to do this, we’re going to use a list. A list in Redis can be thought of as equivalent to an array or list in most programming languages, and can be retrieved by passing the key in a similar fashion to how you would retrieve a string.</p><p>As usual, we will write our test first. Open up <code>test/test.js</code> and replace the test for sending a message with this:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test sending a message</span>
@@ -1181,492 +1254,7 @@ io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-f
         <span class="hljs-comment">// Persist it to a Redis list</span>
         client.rpush(<span class="hljs-string">'chat:messages'</span>, message);
     });
-</code></pre><p>Here we use a regex to strip out any HTML tags from the message - this will prevent anyone injecting JavaScript into our chat client.</p><p>And that’s all, folks! If you want to check out the source for this lesson it’s in the repository on GitHub, tagged <code>lesson-2</code>. If you want to carry on working on this on your own, there’s still plenty you can do, such as:</p><ul><li>Adding support for multiple rooms</li><li>Using Passport.js to allow logging in using third-party services such as Twitter or Facebook</li><li>Adding formatting for messages, either by using something like Markdown, or a client-side rich text editor</li></ul><p>As you can see, it’s surprising how much you can accomplish using only Redis, and under certain circumstances it offers a lot of advantages over a relational database. It’s always worth thinking about whether Redis can be used for your project.</p></article><article class="post"><p class="date">15th February 2015 6:11 pm</p><h1><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></h1><p>As you may have seen if you’re visiting the site, I’ve finally switched over from Octopress to the static site generator I’ve been working on for the last few months. Apologies if you’re seeing lots of old posts in your RSS reader - there must have been an inconsistency between the RSS feed for this and that for Octopress.</p><p>I actually still really like Octopress, however I’m not and have never been a big fan of Ruby. Python and JavaScript are my two main go-to languages (although I do a lot of work professionally with PHP as well), so I wanted a solution in one of those languages, but I wanted something that was very similar to Octopress in every other way. I also wanted the facility to easily concatenate and minify static files as part of my deployment process to make the whole thing as lean as possible, so it made sense to build it as a Grunt plugin and create a Yeoman generator for building the boilerplate for the blog. Also, it’s always easier to work with your own code, and so using templates I wrote myself should make it quicker and easier for me to customise the blog how I want.</p><p>While deploying it did throw up a few errors that I’ve had to fix, it’s gone fairly smoothly and I’m pretty happy with it, although I will no doubt spend some time tweaking it over the next few weeks. It’s built with GitHub Pages in mind, but the fact that it’s built using Grunt should make it straightforward to switch to a different deployment method - during development I’ve actually used <code>grunt-rsync</code> to deploy to my Raspberry Pi and <code>grunt-bitbucket-pages</code> to deploy to Bitbucket in order to test it and both work absolutely fine. There are also Grunt plugins for deploying via FTP around, so if you want to check it out, then as long as you have at least some familiarity with Grunt you should be able to deploy it however you wish. The generator is meant to be only a starting point for your own site, so by all means check it out, tinker with the styling and templates, and make it your own. I will be very happy indeed if I see someone else using it in the wild.</p><p>Static site generators are generally somewhat harder to use than a CMS like WordPress, but they have many advantages:</p><ul><li>Lighter - you can quite easily host a static site with just Nginx on a Raspberry Pi</li><li>Faster - with no database or actual dynamic content on the server, just flat HTML, your site will be far quicker to load than a WordPress blog</li><li>Cheaper to host</li><li>Easy to deploy - if your workflow is very command-line based like mine is, it’s very quick and easy to get blogging</li></ul><p>If you can get away with using a static site generator rather than a database-driven blogging system, then it’s well worth doing so.</p></article><article class="post"><p class="date">31st December 2014 2:10 pm</p><h1><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></h1><p>One of the more interesting capabilities Redis offers is its support for Pub/Sub. This allows you to subscribe to a specific channel, and then react when some content is published to that channel. In this tutorial, we’ll build a very simple web-based chat system that demonstrates Redis’s Pub/Sub support in action. Chat systems are pretty much synonymous with Node.js - it’s widely considered the “Hello, World!” of Node.js. Since we already used Node with the prior Redis tutorial, then it also makes sense to stick with it for this project too.</p><h2 id="installing-node-js">Installing Node.js</h2><p>Since the last tutorial, I’ve discovered <a href="https://github.com/creationix/nvm">NVM</a>, and if you’re using any flavour of Unix, I highly recommend using it. It’s not an option if you’re using Windows, however Redis doesn’t officially support Windows anyway, so if you want to follow along on a Windows machine I’d recommend using a VM.</p><p>If you followed the URL shortener tutorial, you should already have everything you need, though I’d still recommend switching to NVM as it’s very convenient. We’ll be using Grunt again, so you’ll need to make sure you have <code>grunt-cli</code> installed with the following command:</p><pre><code class="hljs lang-bash">$ npm install -g grunt-cli
-</code></pre><p>This assumes you used NVM to install Node - if it’s installed globally, you may need to use <code>sudo</code>.</p><h2 id="installing-dependencies">Installing dependencies</h2><p>As usual with a Node.js project, our first step is to create our <code>package.json</code> file:</p><pre><code class="hljs lang-bash">$ npm init
-</code></pre><p>Answer the questions so you end up with something like this (or just paste this into <code>package.json</code> and amend it as you see fit):</p><pre><code class="hljs lang-json">{
-  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"babblr"</span></span>,
-  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
-  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"Chat client"</span></span>,
-  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
-  "<span class="hljs-attribute">scripts</span>": <span class="hljs-value">{
-    "<span class="hljs-attribute">test</span>": <span class="hljs-value"><span class="hljs-string">"grunt test --verbose"</span>
-  </span>}</span>,
-  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
-    <span class="hljs-string">"chat"</span>
-  ]</span>,
-  "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
-  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
-</span>}
-</code></pre><p>Now let’s install our dependencies:</p><pre><code class="hljs lang-bash">$ npm install express hbs redis hiredis socket.io socket.io-client --save
-$ npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
-</code></pre><p>These two commands will install our dependencies.</p><p>Now, if you followed on with the URL shortener tutorial, you’ll notice that we aren’t using Jade - instead we’re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We’ll also use Socket.IO extensively on this project.</p><h2 id="support-files">Support files</h2><p>As before, we’ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We’ll need a Grunt configuration for that, so here it is:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
-<span class="hljs-pi">    'use strict'</span>;
-
-    grunt.initConfig({
-        jshint: {
-            all: [
-                <span class="hljs-string">'test/*.js'</span>,
-                <span class="hljs-string">'index.js'</span>
-            ]
-        },
-        mocha_istanbul: {
-            coverage: {
-                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
-                options: {
-                    mask: <span class="hljs-string">'*.js'</span>,
-                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>, <span class="hljs-string">'lcovonly'</span>]
-                }
-            }
-        },
-        coveralls: {
-            options: {
-                src: <span class="hljs-string">'coverage/lcov.info'</span>,
-                force: <span class="hljs-literal">false</span>
-            },
-            app: {
-                src: <span class="hljs-string">'coverage/lcov.info'</span>
-            }
-        }
-    });
-
-    <span class="hljs-comment">// Load tasks</span>
-    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
-    grunt.loadNpmTasks(<span class="hljs-string">'grunt-coveralls'</span>);
-    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
-
-    <span class="hljs-comment">// Register tasks</span>
-    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>, <span class="hljs-string">'coveralls'</span>]);
-};
-</code></pre><p>We also need a <code>.bowerrc</code>:</p><pre><code class="hljs lang-json">{
-    "<span class="hljs-attribute">directory</span>": <span class="hljs-value"><span class="hljs-string">"static/bower_components"</span>
-</span>}
-</code></pre><p>And a <code>bower.json</code>:</p><pre><code class="hljs lang-json">{
-  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"babblr"</span></span>,
-  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
-  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
-  "<span class="hljs-attribute">authors</span>": <span class="hljs-value">[
-    <span class="hljs-string">"Matthew Daly &lt;matthewbdaly@gmail.com&gt;"</span>
-  ]</span>,
-  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A simple chat server"</span></span>,
-  "<span class="hljs-attribute">moduleType</span>": <span class="hljs-value">[
-    <span class="hljs-string">"node"</span>
-  ]</span>,
-  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
-    <span class="hljs-string">"chat"</span>
-  ]</span>,
-  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span></span>,
-  "<span class="hljs-attribute">homepage</span>": <span class="hljs-value"><span class="hljs-string">"http://www.matthewdaly.co.uk"</span></span>,
-  "<span class="hljs-attribute">private</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
-  "<span class="hljs-attribute">ignore</span>": <span class="hljs-value">[
-    <span class="hljs-string">"**/.*"</span>,
-    <span class="hljs-string">"node_modules"</span>,
-    <span class="hljs-string">"bower_components"</span>,
-    <span class="hljs-string">"test"</span>,
-    <span class="hljs-string">"tests"</span>
-  ]</span>,
-  "<span class="hljs-attribute">dependencies</span>": <span class="hljs-value">{
-    "<span class="hljs-attribute">html5-boilerplate</span>": <span class="hljs-value"><span class="hljs-string">"~4.3.0"</span></span>,
-    "<span class="hljs-attribute">jquery</span>": <span class="hljs-value"><span class="hljs-string">"~2.1.1"</span></span>,
-    "<span class="hljs-attribute">bootstrap</span>": <span class="hljs-value"><span class="hljs-string">"~3.3.1"</span>
-  </span>}
-</span>}
-</code></pre><p>Then install the Bower dependencies:</p><pre><code class="hljs lang-bash">$ bower install
-</code></pre><p>We also need a <code>Procfile</code> so we can run it on Heroku:</p><pre><code class="hljs lang-bash">web: node index.js
-</code></pre><p>Now, let’s create the main file:</p><pre><code class="hljs lang-bash">$ touch index.js
-</code></pre><p>And our test file:</p><pre><code class="hljs lang-bash">$ mkdir <span class="hljs-built_in">test</span>
-$ touch <span class="hljs-built_in">test</span>/test.js
-</code></pre><h2 id="implementing-the-chat-server">Implementing the chat server</h2><p>Next, let’s implement our first test. First of all, we’ll verify that the index route works:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
-<span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
-<span class="hljs-pi">"use strict"</span>;
-
-<span class="hljs-comment">// Declare the variables used</span>
-<span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
-    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
-    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
-    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
-    io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>),
-    client;
-client = redis.createClient();
-
-<span class="hljs-comment">// Server tasks</span>
-describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-
-    <span class="hljs-comment">// Beforehand, start the server</span>
-    before(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
-        done();
-    });
-
-    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
-    after(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
-        client.flushdb();
-        done();
-    });
-
-    <span class="hljs-comment">// Test the index route</span>
-    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-        it(<span class="hljs-string">'should return a page with the title Babblr'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-            request.get({ url: <span class="hljs-string">'http://localhost:5000/'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
-                expect(body).to.include(<span class="hljs-string">'Babblr'</span>);
-                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
-                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
-                done();
-            });
-        });
-    });
-});
-</code></pre><p>Note that this is very similar to the first test for the URL shortener, because it’s doing basically the same thing.</p><p>Now, run the test and make sure it fails:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
-Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-&gt;&gt; <span class="hljs-number">2</span> files lint free.
-
-Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-
-
-  server
-Starting the server
-    Test the index route
-      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> a page with the title Babblr
-Stopping the server
-
-
-  <span class="hljs-number">0</span> passing (<span class="hljs-number">873</span>ms)
-  <span class="hljs-number">1</span> failing
-
-  <span class="hljs-number">1</span>) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Babblr:
-     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Babblr'</span>
-      at Request._callback (/Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">34</span>:<span class="hljs-number">33</span>)
-      at self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:<span class="hljs-number">373</span>:<span class="hljs-number">22</span>)
-      at Request.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-      at Request.onRequestError (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:<span class="hljs-number">971</span>:<span class="hljs-number">8</span>)
-      at ClientRequest.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-      at Socket.socketErrorListener (http.js:<span class="hljs-number">1552</span>:<span class="hljs-number">9</span>)
-      at Socket.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-      at net.js:<span class="hljs-number">441</span>:<span class="hljs-number">14</span>
-      at process._tickCallback (node.js:<span class="hljs-number">442</span>:<span class="hljs-number">13</span>)
-
-
-
-=============================================================================
-Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
-Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
-=============================================================================
-
-=============================== Coverage summary ===============================
-Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-================================================================================
-&gt;&gt;
-Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
-
-Aborted due to warnings.
-</code></pre><p>With that confirmed, we can start writing code to make the test pass:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
-<span class="hljs-pi">'use strict'</span>;
-
-<span class="hljs-comment">// Declare variables used</span>
-<span class="hljs-keyword">var</span> app, base_url, client, express, hbs, io, port, rtg, subscribe;
-
-<span class="hljs-comment">// Define values</span>
-express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
-app = express();
-port = process.env.PORT || <span class="hljs-number">5000</span>;
-base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
-hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
-
-<span class="hljs-comment">// Set up connection to Redis</span>
-<span class="hljs-comment">/* istanbul ignore if */</span>
-<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
-    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
-    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
-    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
-    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
-    subscribe.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
-} <span class="hljs-keyword">else</span> {
-    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
-    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
-}
-
-<span class="hljs-comment">// Set up templating</span>
-app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
-app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"hbs"</span>);
-app.engine(<span class="hljs-string">'hbs'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>).__express);
-
-<span class="hljs-comment">// Register partials</span>
-hbs.registerPartials(__dirname + <span class="hljs-string">'/views/partials'</span>);
-
-<span class="hljs-comment">// Set URL</span>
-app.set(<span class="hljs-string">'base_url'</span>, base_url);
-
-<span class="hljs-comment">// Define index route</span>
-app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
-    res.render(<span class="hljs-string">'index'</span>);
-});
-
-<span class="hljs-comment">// Serve static files</span>
-app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
-
-<span class="hljs-comment">// Listen</span>
-io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)({
-}).listen(app.listen(port));
-<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Listening on port "</span> + port);
-</code></pre><p>If you compare this to the code for the URL shortener, you’ll notice a few fairly substantial differences. For one thing, we set up two Redis connections, not one - that’s because we need to do so when using Pub/Sub with Redis. You’ll also notice that we register Handlebars (<code>hbs</code>) rather than Jade, and define not just a directory for views, but another directory inside it for partials. Finally, setting it up to listen at the end is a bit more involved because we’ll be using Socket.IO.</p><p>Now, you can run your tests again at this point, but they won’t pass because we haven’t created our views. So let’s do that. Create the directory <code>views</code> and the subdirectory <code>partials</code> inside it. Then add the following content to <code>views/index.hbs</code>:</p><pre><code class="hljs lang-hbs"><span class="xml"></span><span class="hljs-expression">{{&gt; <span class="hljs-variable">header</span> }}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"row"</span>&gt;</span>
-                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-8"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"conversation"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"col-md-4"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;<span class="hljs-title">form</span>&gt;</span>
-                        <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"form-group"</span>&gt;</span>
-                            <span class="hljs-tag">&lt;<span class="hljs-title">label</span> <span class="hljs-attribute">for</span>=<span class="hljs-value">"message"</span>&gt;</span>Message<span class="hljs-tag">&lt;/<span class="hljs-title">label</span>&gt;</span>
-                            <span class="hljs-tag">&lt;<span class="hljs-title">textarea</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"form-control"</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"message"</span> <span class="hljs-attribute">rows</span>=<span class="hljs-value">"20"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">textarea</span>&gt;</span>
-                            <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">id</span>=<span class="hljs-value">"submitbutton"</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"btn btn-primary form-control"</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
-                        <span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-                    <span class="hljs-tag">&lt;/<span class="hljs-title">form</span>&gt;</span>
-                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-</span><span class="hljs-expression">{{&gt; <span class="hljs-variable">footer</span> }}</span><span class="xml"></span>
-</code></pre><p>Add this to <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-hbs"><span class="hljs-doctype">&lt;!DOCTYPE html&gt;</span>
-<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
-<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
-<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
-<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-title">html</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">charset</span>=<span class="hljs-value">"utf-8"</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">http-equiv</span>=<span class="hljs-value">"X-UA-Compatible"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"IE=edge"</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"description"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">""</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">meta</span> <span class="hljs-attribute">name</span>=<span class="hljs-value">"viewport"</span> <span class="hljs-attribute">content</span>=<span class="hljs-value">"width=device-width, initial-scale=1"</span>&gt;</span>
-
-        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
-
-        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/css/bootstrap.min.css"</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/css/bootstrap-theme.min.css"</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">link</span> <span class="hljs-attribute">rel</span>=<span class="hljs-value">"stylesheet"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"/css/style.css"</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
-        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
-            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
-        &lt;![endif]--&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">nav</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar navbar-inverse navbar-static-top"</span> <span class="hljs-attribute">role</span>=<span class="hljs-value">"navigation"</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"container"</span>&gt;</span>
-                <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-header"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;<span class="hljs-title">a</span> <span class="hljs-attribute">class</span>=<span class="hljs-value">"navbar-brand"</span> <span class="hljs-attribute">href</span>=<span class="hljs-value">"#"</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-title">a</span>&gt;</span>
-                <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-            <span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-title">nav</span>&gt;</span>
-</code></pre><p>And add this to <code>views/partials/footer.hbs</code>:</p><pre><code class="hljs lang-hbs">
-        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/jquery/dist/jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/bower_components/bootstrap/dist/js/bootstrap.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/socket.io/socket.io.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-title">script</span> <span class="hljs-attribute">src</span>=<span class="hljs-value">"/js/main.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-title">script</span>&gt;</span>
-
-    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span>
-</code></pre><p>You’ll also want to create placeholder CSS and JavaScript files:</p><pre><code class="hljs lang-bash">$ mkdir static/js
-$ mkdir static/css
-$ touch static/js/main.js
-$ touch static/css/style.css
-</code></pre><p>The test should now pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
-Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-&gt;&gt; <span class="hljs-number">2</span> files lint free.
-
-Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-Listening on port <span class="hljs-number">5000</span>
-
-
-  server
-Starting the server
-    Test the index route
-      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">41</span>ms)
-Stopping the server
-
-
-  <span class="hljs-number">1</span> passing (<span class="hljs-number">54</span>ms)
-
-=============================================================================
-Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
-Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
-=============================================================================
-
-=============================== Coverage summary ===============================
-Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> ), <span class="hljs-number">5</span> ignored
-Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
-Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> )
-================================================================================
-&gt;&gt; Done. Check coverage folder.
-
-Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
-&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: <span class="hljs-number">422</span> {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
-&gt;&gt; Failed to submit coverage results to coveralls
-Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
-
-Aborted due to warnings.
-</code></pre><p>Don’t worry about the coveralls task failing, as that only needs to pass when it runs on Travis CI.</p><p>So we now have our main route in place. The next step is to actually implement the chat functionality. Add this code to the test file:</p><pre><code class="hljs lang-javascript">
-    <span class="hljs-comment">// Test sending a message</span>
-    describe(<span class="hljs-string">'Test sending a message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-        it(<span class="hljs-string">"should return 'Message received'"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-            <span class="hljs-comment">// Connect to server</span>
-            <span class="hljs-keyword">var</span> socket = io.connect(<span class="hljs-string">'http://localhost:5000'</span>, {
-                <span class="hljs-string">'reconnection delay'</span> : <span class="hljs-number">0</span>,
-                <span class="hljs-string">'reopen delay'</span> : <span class="hljs-number">0</span>,
-                <span class="hljs-string">'force new connection'</span> : <span class="hljs-literal">true</span>
-            });
-
-            <span class="hljs-comment">// Handle the message being received</span>
-            socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
-                expect(data).to.include(<span class="hljs-string">'Message received'</span>);
-                socket.disconnect();
-                done();
-            });
-
-            <span class="hljs-comment">// Send the message</span>
-            socket.emit(<span class="hljs-string">'send'</span>, { message: <span class="hljs-string">'Message received'</span> });
-        });
-    });
-</code></pre><p>This code should be fairly straightforward to understand. First, we connect to the server. Then, we set up a handler to verify the content of the message when it gets sent. Finally, we send the message. Let’s run the tests to make sure we get the expected result:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
-Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-&gt;&gt; <span class="hljs-number">2</span> files lint free.
-
-Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-Listening on port <span class="hljs-number">5000</span>
-
-
-  server
-Starting the server
-    Test the index route
-      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">337</span>ms)
-    Test sending a message
-      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>
-Stopping the server
-
-
-  <span class="hljs-number">1</span> passing (<span class="hljs-number">2</span>s)
-  <span class="hljs-number">1</span> failing
-
-  <span class="hljs-number">1</span>) server Test sending a message should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>:
-     Error: timeout of <span class="hljs-number">2000</span>ms exceeded
-      at null.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/mocha/lib/runnable.js:<span class="hljs-number">159</span>:<span class="hljs-number">19</span>)
-      at Timer.listOnTimeout [as ontimeout] (timers.js:<span class="hljs-number">112</span>:<span class="hljs-number">15</span>)
-
-
-
-=============================================================================
-Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
-Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
-=============================================================================
-
-=============================== Coverage summary ===============================
-Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> ), <span class="hljs-number">5</span> ignored
-Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
-Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">24</span>/<span class="hljs-number">24</span> )
-================================================================================
-&gt;&gt;
-Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
-
-Aborted due to warnings.
-</code></pre><p>Now, let’s implement this functionality. Add this at the end of <code>index.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Handle new messages</span>
-io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(socket)</span> </span>{
-    <span class="hljs-comment">// Subscribe to the Redis channel</span>
-    subscribe.subscribe(<span class="hljs-string">'ChatChannel'</span>);
-
-    <span class="hljs-comment">// Handle incoming messages</span>
-    socket.on(<span class="hljs-string">'send'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
-        <span class="hljs-comment">// Publish it</span>
-        client.publish(<span class="hljs-string">'ChatChannel'</span>, data.message);
-    });
-
-    <span class="hljs-comment">// Handle receiving messages</span>
-    <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(channel, data)</span> </span>{
-        socket.emit(<span class="hljs-string">'message'</span>, data);
-    };
-    subscribe.on(<span class="hljs-string">'message'</span>, callback);
-
-    <span class="hljs-comment">// Handle disconnect</span>
-    socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-        subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
-    });
-});
-</code></pre><p>We’ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p><p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p><p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p><p>We’ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="hljs-pi">    'use strict'</span>;
-
-    <span class="hljs-comment">// Set up the connection</span>
-    <span class="hljs-keyword">var</span> field, socket, output;
-    socket = io.connect(<span class="hljs-built_in">window</span>.location.href);
-
-    <span class="hljs-comment">// Get a reference to the input</span>
-    field = $(<span class="hljs-string">'textarea#message'</span>);
-
-    <span class="hljs-comment">// Get a reference to the output</span>
-    output = $(<span class="hljs-string">'div.conversation'</span>);
-
-    <span class="hljs-comment">// Handle message submit</span>
-    $(<span class="hljs-string">'a#submitbutton'</span>).on(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-        <span class="hljs-comment">// Create the message</span>
-        <span class="hljs-keyword">var</span> msg;
-        msg = field.val();
-        socket.emit(<span class="hljs-string">'send'</span>, { message: msg });
-        field.val(<span class="hljs-string">''</span>);
-    });
-
-    <span class="hljs-comment">// Handle incoming messages</span>
-    socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(data)</span> </span>{
-        <span class="hljs-comment">// Insert the message</span>
-        output.append(<span class="hljs-string">'&lt;p&gt;Anonymous Coward : '</span> + data + <span class="hljs-string">'&lt;/p&gt;'</span>);
-    });
-});
-</code></pre><p>Here we have one callback that handles sending messages, and another that handles receiving messages. Note that every message will be preceded with Anonymous Coward - we won’t implement user names at this point (though I plan it for a future instalment).</p><p>We’ll also add a little bit of additional styling:</p><pre><code class="hljs lang-css"><span class="hljs-tag">div</span><span class="hljs-class">.conversation</span> <span class="hljs-rules">{
-    <span class="hljs-rule"><span class="hljs-attribute">height</span>:<span class="hljs-value"> <span class="hljs-number">500px</span></span></span>;
-    <span class="hljs-rule"><span class="hljs-attribute">overflow-y</span>:<span class="hljs-value"> scroll</span></span>;
-    <span class="hljs-rule"><span class="hljs-attribute">border</span>:<span class="hljs-value"> <span class="hljs-number">1px</span> solid <span class="hljs-hexcolor">#000</span></span></span>;
-    <span class="hljs-rule"><span class="hljs-attribute">padding</span>:<span class="hljs-value"> <span class="hljs-number">10px</span></span></span>;
-}</span>
-</code></pre><p>Now, if you run your tests, they should pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
-Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-&gt;&gt; <span class="hljs-number">2</span> files lint free.
-
-Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-Listening on port <span class="hljs-number">5000</span>
-
-
-  server
-Starting the server
-    Test the index route
-      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (<span class="hljs-number">40</span>ms)
-    Test sending a message
-      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (<span class="hljs-number">45</span>ms)
-Stopping the server
-
-
-  <span class="hljs-number">2</span> passing (<span class="hljs-number">101</span>ms)
-
-=============================================================================
-Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
-Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
-=============================================================================
-
-=============================== Coverage summary ===============================
-Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">33</span>/<span class="hljs-number">33</span> ), <span class="hljs-number">5</span> ignored
-Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">5</span> )
-Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">33</span>/<span class="hljs-number">33</span> )
-================================================================================
-&gt;&gt; Done. Check coverage folder.
-
-Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
-&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: <span class="hljs-number">422</span> {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
-&gt;&gt; Failed to submit coverage results to coveralls
-Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
-
-Aborted due to warnings.
-</code></pre><p>If you now run the following command:</p><pre><code class="hljs lang-bash">$ node index.js
-</code></pre><p>Then visit <code>http://localhost:5000</code>, you should be able to create new messages. If you then open it up in a second tab, you can see messages added in one tab appear in another. Deploying to Heroku using Redis To Go will be straightforward, and you can then access it from multiple devices and see new chat messages appear in real time.</p><h2 id="wrapping-up">Wrapping up</h2><p>This illustrates just how straightforward it is to use Redis’s Pub/Sub capability. The chat system is still quite limited, so in a future instalment we’ll develop it further. You can get the source code from the <a href="https://github.com/matthewbdaly/babblr">Github repository</a> - just switch to the <code>lesson-1</code> tag.</p></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/">Adding a New Search Engine to My Site</a></p><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><p><a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">Building a Chat Server With Node.js and Redis</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/posts/2/">Older</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+</code></pre><p>Here we use a regex to strip out any HTML tags from the message - this will prevent anyone injecting JavaScript into our chat client.</p><p>And that’s all, folks! If you want to check out the source for this lesson it’s in the repository on GitHub, tagged <code>lesson-2</code>. If you want to carry on working on this on your own, there’s still plenty you can do, such as:</p><ul><li>Adding support for multiple rooms</li><li>Using Passport.js to allow logging in using third-party services such as Twitter or Facebook</li><li>Adding formatting for messages, either by using something like Markdown, or a client-side rich text editor</li></ul><p>As you can see, it’s surprising how much you can accomplish using only Redis, and under certain circumstances it offers a lot of advantages over a relational database. It’s always worth thinking about whether Redis can be used for your project.</p></article><article class="post"><p class="date">15th February 2015 6:11 pm</p><h1><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></h1><p>As you may have seen if you’re visiting the site, I’ve finally switched over from Octopress to the static site generator I’ve been working on for the last few months. Apologies if you’re seeing lots of old posts in your RSS reader - there must have been an inconsistency between the RSS feed for this and that for Octopress.</p><p>I actually still really like Octopress, however I’m not and have never been a big fan of Ruby. Python and JavaScript are my two main go-to languages (although I do a lot of work professionally with PHP as well), so I wanted a solution in one of those languages, but I wanted something that was very similar to Octopress in every other way. I also wanted the facility to easily concatenate and minify static files as part of my deployment process to make the whole thing as lean as possible, so it made sense to build it as a Grunt plugin and create a Yeoman generator for building the boilerplate for the blog. Also, it’s always easier to work with your own code, and so using templates I wrote myself should make it quicker and easier for me to customise the blog how I want.</p><p>While deploying it did throw up a few errors that I’ve had to fix, it’s gone fairly smoothly and I’m pretty happy with it, although I will no doubt spend some time tweaking it over the next few weeks. It’s built with GitHub Pages in mind, but the fact that it’s built using Grunt should make it straightforward to switch to a different deployment method - during development I’ve actually used <code>grunt-rsync</code> to deploy to my Raspberry Pi and <code>grunt-bitbucket-pages</code> to deploy to Bitbucket in order to test it and both work absolutely fine. There are also Grunt plugins for deploying via FTP around, so if you want to check it out, then as long as you have at least some familiarity with Grunt you should be able to deploy it however you wish. The generator is meant to be only a starting point for your own site, so by all means check it out, tinker with the styling and templates, and make it your own. I will be very happy indeed if I see someone else using it in the wild.</p><p>Static site generators are generally somewhat harder to use than a CMS like WordPress, but they have many advantages:</p><ul><li>Lighter - you can quite easily host a static site with just Nginx on a Raspberry Pi</li><li>Faster - with no database or actual dynamic content on the server, just flat HTML, your site will be far quicker to load than a WordPress blog</li><li>Cheaper to host</li><li>Easy to deploy - if your workflow is very command-line based like mine is, it’s very quick and easy to get blogging</li></ul><p>If you can get away with using a static site generator rather than a database-driven blogging system, then it’s well worth doing so.</p></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/">How I Added Search to My Site With Lunr.js</a></p><p><a href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/">Adding a New Search Engine to My Site</a></p><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><p><a href="/blog/2015/02/15/switching-to-my-own-static-site-generator/">Switching to My Own Static Site Generator</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/posts/2/">Older</a></li></ul></div></div></div><footer><div class="container"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
             e=o.createElement(i);r=o.getElementsByTagName(i)[0];
             e.src='//www.google-analytics.com/analytics.js';
