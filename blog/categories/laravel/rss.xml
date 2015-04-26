@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[Laravel | Matthew Daly's Blog]]></title>
+        <description><![CDATA[Laravel | I'm a web developer in Norfolk. This is my blog...]]></description>
+        <link>http://github.com/dylang/node-rss</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Sun, 26 Apr 2015 23:04:04 GMT</lastBuildDate>
+        <item>
+            <title><![CDATA[Running the PHP development server with Laravel]]></title>
+            <description><![CDATA[<p>One thing that I’ve really never liked about PHP is the requirement to install a full-blown web server, so I was pleased when PHP 5.4 shipped with a built-in development server. However, it seems like no PHP framework has yet embraced this to the extent that their counterparts for languages like Python have.</p>
+<p>I’ve recently decided that CodeIgniter is no longer fulfilling what I need from my main go-to PHP framework, and I’ve been looking at Laravel as a likely replacement. It occurred to me that I could create an Artisan task to run the development server quite easily, and after a little tinkering, I put this together, which worked well:</p>
+<pre><code class="hljs lang-php"><span class="hljs-preprocessor">&lt;?php</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Runserver_Task</span> </span>{
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">(<span class="hljs-variable">$arguments</span>)</span>
+    </span>{   
+        <span class="hljs-variable">$port</span> = !<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$arguments</span>[<span class="hljs-number">0</span>]) ? <span class="hljs-number">8000</span>: <span class="hljs-variable">$arguments</span>[<span class="hljs-number">0</span>];
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'Running PHP development server on port '</span>.<span class="hljs-variable">$port</span>.<span class="hljs-string">'...'</span>;
+        passthru(<span class="hljs-string">'php -S localhost:'</span>.<span class="hljs-variable">$port</span>.<span class="hljs-string">' -t '</span>.getcwd().<span class="hljs-string">'/public'</span>);
+    }   
+}
+<span class="hljs-preprocessor">?&gt;</span>
+</code></pre>
+<p>Once this is in place, you can just run <code>php artisan runserver</code> to run the development server, and hit Ctrl-C to stop it, giving you an experience much like that with Django. Note this requires PHP 5.4 or greater. You also have the option of specifying a different port eg <code>php artisan runserver 7000</code> for port 7000.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2012/12/15/running-the-php-development-server-with-laravel/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2012/12/15/running-the-php-development-server-with-laravel/</guid>
+            <pubDate>Sat, 15 Dec 2012 00:26:00 GMT</pubDate>
+        </item>
+    </channel>
+</rss>

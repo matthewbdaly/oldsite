@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[yeoman | Matthew Daly's Blog]]></title>
+        <description><![CDATA[yeoman | I'm a web developer in Norfolk. This is my blog...]]></description>
+        <link>http://github.com/dylang/node-rss</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Sun, 26 Apr 2015 23:04:03 GMT</lastBuildDate>
+        <item>
+            <title><![CDATA[Adding a new search engine to my site]]></title>
+            <description><![CDATA[<p>I’ve just finished implementing a new search engine for this site. Obviously, with it using a static site generator, searching a relational database isn’t an option. For a long while I’d just been getting by with Google’s site-specific search, which worked, but meant leaving the site to view the search results.</p>
+<p>Now, I’ve implemented a client-side search system using <a href="http://lunrjs.com/">Lunr.js</a>. It wasn’t too time consuming, and as the index is generated with the rest of the site and loaded with the page, the response is almost instantaneous. I may write a future blog post on how to integrate Lunr.js with your site, as it’s very handy and is an ideal solution for implementing search on a static site.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2015/04/04/adding-a-new-search-engine-to-my-site/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/04/04/adding-a-new-search-engine-to-my-site/</guid>
+            <pubDate>Sat, 04 Apr 2015 00:47:43 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Switching to my own static site generator]]></title>
+            <description><![CDATA[<p>As you may have seen if you’re visiting the site, I’ve finally switched over from Octopress to the static site generator I’ve been working on for the last few months. Apologies if you’re seeing lots of old posts in your RSS reader - there must have been an inconsistency between the RSS feed for this and that for Octopress.</p>
+<p>I actually still really like Octopress, however I’m not and have never been a big fan of Ruby. Python and JavaScript are my two main go-to languages (although I do a lot of work professionally with PHP as well), so I wanted a solution in one of those languages, but I wanted something that was very similar to Octopress in every other way. I also wanted the facility to easily concatenate and minify static files as part of my deployment process to make the whole thing as lean as possible, so it made sense to build it as a Grunt plugin and create a Yeoman generator for building the boilerplate for the blog. Also, it’s always easier to work with your own code, and so using templates I wrote myself should make it quicker and easier for me to customise the blog how I want.</p>
+<p>While deploying it did throw up a few errors that I’ve had to fix, it’s gone fairly smoothly and I’m pretty happy with it, although I will no doubt spend some time tweaking it over the next few weeks. It’s built with GitHub Pages in mind, but the fact that it’s built using Grunt should make it straightforward to switch to a different deployment method - during development I’ve actually used <code>grunt-rsync</code> to deploy to my Raspberry Pi and <code>grunt-bitbucket-pages</code> to deploy to Bitbucket in order to test it and both work absolutely fine. There are also Grunt plugins for deploying via FTP around, so if you want to check it out, then as long as you have at least some familiarity with Grunt you should be able to deploy it however you wish. The generator is meant to be only a starting point for your own site, so by all means check it out, tinker with the styling and templates, and make it your own. I will be very happy indeed if I see someone else using it in the wild.</p>
+<p>Static site generators are generally somewhat harder to use than a CMS like WordPress, but they have many advantages:</p>
+<ul>
+<li>Lighter - you can quite easily host a static site with just Nginx on a Raspberry Pi</li>
+<li>Faster - with no database or actual dynamic content on the server, just flat HTML, your site will be far quicker to load than a WordPress blog</li>
+<li>Cheaper to host</li>
+<li>Easy to deploy - if your workflow is very command-line based like mine is, it’s very quick and easy to get blogging</li>
+</ul>
+<p>If you can get away with using a static site generator rather than a database-driven blogging system, then it’s well worth doing so.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</guid>
+            <pubDate>Sun, 15 Feb 2015 18:11:22 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[My first Grunt plugin]]></title>
+            <description><![CDATA[<p>A while back, I mentioned that I’d written a Yeoman generator for creating a flat HTML blog, called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>. For this, I’d used the first Grunt plugin I could find for the purpose, which was <a href="https://github.com/testdouble/grunt-markdown-blog">grunt-markdown-blog</a>. This worked, but I wasn’t really very happy with it.</p>
+<p>The ideal Grunt plugin I had in mind was as follows:</p>
+<ul>
+<li>Used Handlebars for templating</li>
+<li>Generated posts from Markdown files</li>
+<li>Saved files in named folders with a single <code>index.html</code> file in each one (like Octopress does) so that no file extension is visible on a page</li>
+<li>Generated index pages, rather than just showing the latest post as the first page</li>
+</ul>
+<p>Unfortunately, <code>grunt-markdown-blog</code> only fulfilled the second criteria, so it was never going to be something I stuck with long-term. However, I couldn’t find anything else that would do the trick, so it looked like my only option was to write a suitable plugin myself.</p>
+<p>I started a new Git repository a while back, but didn’t make much progress. Then, on Christmas Eve, I suddenly got the urge to start working on this again, and in a matter of a few hours I’d gotten a working Grunt plugin that ticked all of these boxes. I had to delay getting it integrated into the generator due to Christmas day, and then an unfortunate bout of flu, but I’ve now published it as <a href="https://github.com/matthewbdaly/grunt-blogbuilder">grunt-blogbuilder</a> and amended the Yeoman generator to use it instead.</p>
+<p>I’m really pleased with the outcome, and while I’m still not yet ready to migrate over to it from Octopress, it’s a massive step forward, and building a Grunt plugin has been an interesting experience.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</guid>
+            <pubDate>Sun, 28 Dec 2014 17:04:41 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Introducing generator-simple-static-blog]]></title>
+            <description><![CDATA[<p>I’m a big fan of static site generators. I ditched WordPress for Octopress over two years ago because it was free to host on GitHub Pages and much faster, had much better syntax highlighting, and I liked being able to write posts in Vim, and I’ve never looked back since.</p>
+<p>That said, Octopress is written in Ruby, a language I’ve never been that keen on. Ideally I’d prefer to use Python or JavaScript, but none of the solutions I’ve found have been to my liking. Recently I’ve been using Grunt and Yeoman to some extent, and I’ve wondered about the idea of creating a Yeoman generator to build a static blogging engine. After discovering <code>grunt-markdown-blog</code>, I took the plunge and have built a simple blog generator called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>.</p>
+<p>I’ve published it to NPM, so feel free to check it out. It includes code highlighting with the Zenburn colour scheme by default (although highlight.js includes many other themes, so just switch to another one if you want), and it should be easy to edit the templates. I’ve also included the ability to deploy automatically to GitHub Pages using Grunt.</p>
+<p>I don’t anticipate moving over to this from Octopress for the foreseeable future, but it’s been an interesting project for the weekend.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</guid>
+            <pubDate>Sun, 05 Oct 2014 18:56:46 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[My first Yeoman generator]]></title>
+            <description><![CDATA[<p>At work I use the <a href="http://www.getskeleton.com/">Skeleton boilerplate</a> a lot - my boss, who handles most of the design work, likes it and generally uses it for his designs. I’ve also been using <a href="http://gruntjs.com/">Grunt</a> a lot lately, so it was inevitable that I’d probably start to look for a <a href="http://yeoman.io/">Yeoman</a> generator for working with it.</p>
+<p>There was an existing Yeoman generator for Skeleton, but it didn’t really do what I wanted. I wanted something that:</p>
+<ul>
+<li>Included jQuery and Modernizr</li>
+<li>Automatically concatenates and minifies all the JavaScript and CSS</li>
+<li>Will automatically rebuild on changes</li>
+<li>Includes LiveReload and a development server</li>
+<li>Includes automatic deployment via FTP</li>
+</ul>
+<p>After looking through the documentation for Yeoman, it was actually quick and easy to throw together my own generator and put it up. It’s available <a href="https://npmjs.org/package/generator-skellington">here</a>, and the GitHub repository is <a href="https://github.com/matthewbdaly/generator-skellington">here</a>.</p>
+<p>Future plans for it include:</p>
+<ul>
+<li>Adding auto-prefixing for CSS</li>
+<li>Removing redundant CSS rules automatically</li>
+<li>Possibly, alternate deployment methods</li>
+</ul>
+<p>Frustratingly, NPM seems to be playing up at present - it’s not picking up the README file, and the Yeoman site isn’t pulling it in. Any idea why, anyone?</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</guid>
+            <pubDate>Sat, 25 Jan 2014 11:38:40 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
