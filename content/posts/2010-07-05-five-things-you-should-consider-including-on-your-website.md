@@ -6,7 +6,7 @@ status: publish
 title: Five things you should consider including on your website
 wordpress_id: '510'
 categories:
-- web development
+- webdevelopment
 ---
 
 If you're creating your first website, it's tempting to think that once you've got the site looking the way you want it, and added some content, then that's all you need to do. In reality, it's extremely unlikely that this is the case. It's fairly obvious with something like a blog that it needs regular care and attention, but even a static brochure site may need some additional resources to get the best out of it. Nowadays, there are loads of great resources around that you can use to enhance your websites, either for yourself or your readers (or both!) and knowing how to make the most of them can really make a difference in how well your site fulfills its intended role.

@@ -13,4 +13,4 @@ I've made the tough decision to abandon Blogger and move my blog to Wordpress. F
 
 The new blog will have a somewhat different emphasis than my old one. Rather than being a bit of a free-for-all covering Linux, programming, new websites and anything else that I think of, this blog is going to be much more focused, with web development as the main subject. That said, we'll have to see how things work out.
 
-I'm considering another move in a few months time, with my site at [http://www.matthewdaly.co.uk/](http://www.matthewdaly.co.uk/) becoming the new location of the blog, but that would require paid hosting, so I'm going to give Wordpress a good try first before I commit to using it.
+I'm considering another move in a few months time, with my site at [http://matthewdaly.co.uk/](http://matthewdaly.co.uk/) becoming the new location of the blog, but that would require paid hosting, so I'm going to give Wordpress a good try first before I commit to using it.

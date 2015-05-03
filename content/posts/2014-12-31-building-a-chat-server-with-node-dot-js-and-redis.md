@@ -134,7 +134,7 @@ And a `bower.json`:
     "chat"
   ],
   "license": "GPLv2",
-  "homepage": "http://www.matthewdaly.co.uk",
+  "homepage": "http://matthewdaly.co.uk",
   "private": true,
   "ignore": [
     "**/.*",

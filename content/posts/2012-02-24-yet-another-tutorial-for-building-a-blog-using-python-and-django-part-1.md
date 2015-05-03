@@ -9,7 +9,7 @@ categories:
 - django
 - programming
 - python
-- web development
+- webdevelopment
 ---
 
 While I'm extremely fond of Perl for quick hacks and scripts, and have used PHP a fair amount for web development purposes (both on its own and with the CodeIgniter framework), there is one language I love above all others, and that's Python. I've found that, when compared to PHP or Perl, at least for me, it's a lot easier to "get into the zone" when programming in Python, the code I produce tends to be a lot more readable and easier to follow, and the interactive interpreter makes it really easy to figure out what's going on in a way that just isn't possible with PHP or Perl. Also, Python was always designed to be an object-oriented language, and IMHO has a better object model than either Perl or PHP.

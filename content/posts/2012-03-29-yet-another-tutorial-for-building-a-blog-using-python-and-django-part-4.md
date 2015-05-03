@@ -8,7 +8,7 @@ wordpress_id: '780'
 categories:
 - django
 - python
-- web development
+- webdevelopment
 ---
 
 Welcome back! In this tutorial we'll continue extending our Django-powered blogging engine. We'll add the capability to assign blog posts to categories, and comment on posts. We'll also generate an RSS feed for our blog posts.

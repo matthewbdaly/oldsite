@@ -6,7 +6,7 @@ status: publish
 title: Why is Chrome so popular all of a sudden?
 wordpress_id: '476'
 categories:
-- web development
+- webdevelopment
 ---
 
 I don't know how or when it happened, but suddenly I've noticed that a hell of a lot of people I wouldn't normally expect to pay much attention when someone nags them to update their web browser are using Google Chrome. Non computer-savvy work colleagues are using it, and even my father has dumped Internet Explorer 8 in favour of Chrome - yet he wouldn't consider Firefox despite my years of virtually begging him to switch!

@@ -1,10 +1,7 @@
 ---
 date: '2010-05-03 18:23:39'
 layout: post
-slug: passcrunch
-status: publish
-title: PassCrunch
-wordpress_id: '406'
+title: "PassCrunch"
 categories:
 - javascript
 ---
