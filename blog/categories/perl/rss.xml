@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[perl | Matthew Daly's Blog]]></title>
+        <description><![CDATA[perl | I'm a web developer in Norfolk. This is my blog...]]></description>
+        <link>http://github.com/dylang/node-rss</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Sun, 03 May 2015 15:42:45 GMT</lastBuildDate>
+        <item>
+            <title><![CDATA[Deleting unwanted Vim swap files using Perl]]></title>
+            <description><![CDATA[<p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I’d written between several computers, and it would be a good idea to clear them up. I didn’t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p>
+<p>I came up with the following:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
+
+<span class="hljs-keyword">use</span> strict;
+<span class="hljs-keyword">use</span> Cwd;
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> searchDir
+{</span>
+    <span class="hljs-comment"># Subroutine to scan a directory looking for Vim swap files</span>
+    <span class="hljs-comment"># Get directory to read and current directory</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$readdir</span> = <span class="hljs-keyword">shift</span>;
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$startdir</span> = cwd();
+
+    <span class="hljs-comment"># Change directory to the target one</span>
+    <span class="hljs-keyword">chdir</span>(<span class="hljs-variable">$readdir</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open <span class="hljs-variable">$readdir</span>! <span class="hljs-variable">$!</span>\n"</span>;
+    <span class="hljs-keyword">print</span> <span class="hljs-string">"Scanning contents of directory <span class="hljs-variable">$startdir</span>\n"</span>;
+
+    <span class="hljs-comment"># Open the directory and grab the names of all the files and folders in it</span>
+    <span class="hljs-keyword">opendir</span>(DIR, <span class="hljs-string">"."</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open current directory! <span class="hljs-variable">$!</span>\n"</span>;
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">@entries</span> = <span class="hljs-keyword">readdir</span>(DIR) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to read directory! <span class="hljs-variable">$!</span>\n"</span>;
+    closedir(DIR);
+
+    <span class="hljs-comment"># Loop through the files and folders in the directory</span>
+    <span class="hljs-keyword">foreach</span> <span class="hljs-keyword">my</span> <span class="hljs-variable">$entry</span> (<span class="hljs-variable">@entries</span>)
+    {
+        <span class="hljs-comment"># Skip this one and the one above it in the filesystem hierarchy</span>
+        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> eq <span class="hljs-string">"."</span>);
+        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> eq <span class="hljs-string">".."</span>);
+
+        <span class="hljs-comment"># If a file is a directory, call the searchDir subroutine recursively in order to scan it</span>
+        <span class="hljs-keyword">if</span>(-d <span class="hljs-variable">$entry</span>)
+        {
+            searchDir(<span class="hljs-variable">$entry</span>);
+            <span class="hljs-keyword">next</span>;
+        }
+
+        <span class="hljs-comment"># Use a regular expression to check to see if the current file starts with a period, and ends with .swp - if it does, it's a Vim swap file</span>
+        <span class="hljs-keyword">if</span>(<span class="hljs-variable">$entry</span> =~ <span class="hljs-regexp">m/^\..*\.swp$/</span>)
+        {
+            <span class="hljs-comment"># Inform the user that a Vim swap file has been found and print out the path to it</span>
+            <span class="hljs-keyword">print</span> <span class="hljs-string">"Found a Vim swap file!\n"</span>;
+            <span class="hljs-keyword">my</span> <span class="hljs-variable">$swppath</span> = cwd();
+            <span class="hljs-keyword">print</span> <span class="hljs-string">"It's the file <span class="hljs-variable">$entry</span> in <span class="hljs-variable">$swppath</span>.\n"</span>;
+            <span class="hljs-keyword">my</span> <span class="hljs-variable">$fullpath</span> = <span class="hljs-variable">$swppath</span> . <span class="hljs-string">"/"</span> . <span class="hljs-variable">$entry</span>;
+            <span class="hljs-keyword">print</span> <span class="hljs-string">"The full path is <span class="hljs-variable">$fullpath</span>.\n"</span>;
+
+            <span class="hljs-comment"># Prompt the user to delete the file</span>
+            <span class="hljs-keyword">print</span> <span class="hljs-string">"Do you wish to delete this file? (Y/N)\t"</span>;
+            <span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">$reply</span> = );
+            <span class="hljs-keyword">if</span>(<span class="hljs-variable">$reply</span> =~ <span class="hljs-regexp">m/y/i</span>)
+            {
+                <span class="hljs-keyword">print</span> <span class="hljs-string">"Deleting <span class="hljs-variable">$fullpath</span>...\n"</span>;
+                <span class="hljs-keyword">unlink</span>(<span class="hljs-variable">$fullpath</span>);
+            }
+        }
+    }
+
+    <span class="hljs-keyword">chdir</span>(<span class="hljs-variable">$startdir</span>);
+}
+
+<span class="hljs-comment"># Get directory to begin the search</span>
+<span class="hljs-keyword">print</span> <span class="hljs-string">"Enter directory to start search: "</span>;
+<span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">$beginSearch</span> = );
+
+<span class="hljs-comment"># call searchDir to start the search</span>
+searchDir(<span class="hljs-variable">$beginSearch</span>);
+</code></pre>
+<p>Thankfully, I’ve now discovered the <a href="https://wordpress.org/extend/plugins/preserve-code-formatting/">Preserve Code Formatting plugin</a> for WordPress, which seems to do a good job at making the code look presentable!</p>
+<p>This isn’t perfect - it uses recursion to examine subdirectories, and when I ran it on my /home folder it somehow wound up in /sys on my Ubuntu machine and I ended up getting a deep recursion warning (a little research suggests this happens when it goes over 100 directories in). However, it seems to work fine for scanning individual folders in my /home directory, and that’s all I really wanted anyway.</p>
+<p>I love how Perl makes writing this kind of simple script so easy. It’s a great language for that kind of systems administration task.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/</guid>
+            <pubDate>Fri, 29 Oct 2010 19:49:49 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[A couple of things I love about Perl]]></title>
+            <description><![CDATA[<p>In the time that I’ve been learning Perl, I’ve slowly grown to appreciate the strengths of the language more and more. There’s two things in particular that I like about Perl. Once that I really don’t think anyone is going to be surprised by is CPAN. It’s a fantastic resource - there are a huge quantity of Perl modules available for virtually any task under the sun, and they’re incredibly useful.</p>
+<p>The other is just how good the documentation is - I’ve never considered myself to be someone who learns terribly well from Unix man pages, but perldoc seems to have very good documentation indeed, including that for CPAN modules. Also, it helps that if you don’t do well with the man page format, you have the option of running podwebserver and getting the documentation formatted as web pages.</p>
+<p>To give an example, I’m particularly interested in all kinds of network programming, be it web development, IRC, Jabber or whatever, and I’d heard of the Net::IRC module so I decided to start using it to create a simple IRC bot (yes, I know I should really be using POE::Component::IRC instead!). Using the information gleaned from perldoc Net::IRC it was easy to get started writing a bot, and I’ve now come up with the following simple bot:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
+
+<span class="hljs-keyword">use</span> strict;
+<span class="hljs-keyword">use</span> Net::IRC;
+
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$irc</span> = new Net::IRC;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$nick</span> = <span class="hljs-string">"mattsbot"</span>;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$server</span> = <span class="hljs-string">"irc.freenode.net"</span>;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$channel</span> = <span class="hljs-string">"#botpark"</span>;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$port</span> = <span class="hljs-number">6667</span>;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$ircname</span> = <span class="hljs-string">"My wonderful bot"</span>;
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$owner</span> = <span class="hljs-string">"mattbd"</span>; 
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_connect
+{</span>
+   <span class="hljs-keyword">my</span> <span class="hljs-variable">$self</span> = <span class="hljs-keyword">shift</span>;
+
+   <span class="hljs-keyword">print</span> <span class="hljs-string">"Joining <span class="hljs-variable">$channel</span>\n"</span>;
+   <span class="hljs-variable">$self</span>-&gt;<span class="hljs-keyword">join</span>(<span class="hljs-variable">$channel</span>);
+   <span class="hljs-variable">$self</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>,<span class="hljs-string">"Ready to go!"</span>);
+}
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_disconnect
+{</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$self</span> = <span class="hljs-keyword">shift</span>;
+    <span class="hljs-variable">$self</span>-&gt;<span class="hljs-keyword">join</span>(<span class="hljs-variable">$channel</span>);
+    <span class="hljs-variable">$self</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Sorry about that - dropped out for a sec."</span>);
+} 
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_join
+{</span>
+    <span class="hljs-comment"># Get the connection and event objects</span>
+    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
+
+    <span class="hljs-comment"># Get the nick that just joined</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$newnick</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
+
+    <span class="hljs-comment"># Greet the new nick</span>
+    <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Hello, <span class="hljs-variable">$newnick</span>! I'm a greeting bot!"</span>);
+}
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_msg
+{</span>
+    <span class="hljs-comment"># Get the connection and event objects</span>
+    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
+
+    <span class="hljs-comment"># Get nick of messaging user</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$messager</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
+
+    <span class="hljs-comment"># Respond negatively</span>
+    <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$messager</span>, <span class="hljs-string">"Sorry, I'm just a bot. Please don't message me!"</span>);
+}
+
+<span class="hljs-sub"><span class="hljs-keyword">sub</span> on_public
+{</span>
+    <span class="hljs-comment"># Get the connection and event objects</span>
+    <span class="hljs-keyword">my</span> (<span class="hljs-variable">$conn</span>, <span class="hljs-variable">$event</span>) = <span class="hljs-variable">@_</span>;
+
+    <span class="hljs-comment"># Get nick of messaging user</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$messager</span> = <span class="hljs-variable">$event</span>-&gt;{nick};
+
+    <span class="hljs-comment"># Get text of message</span>
+    <span class="hljs-keyword">my</span> <span class="hljs-variable">$text</span> = <span class="hljs-variable">$event</span>-&gt;{args}[<span class="hljs-number">0</span>];
+
+    <span class="hljs-comment"># Check to see if text contains name of bot - if so message the user negatively</span>
+    <span class="hljs-keyword">if</span>(<span class="hljs-variable">$text</span> =~ <span class="hljs-regexp">m/$nick/</span>)
+    {
+        <span class="hljs-variable">$conn</span>-&gt;privmsg(<span class="hljs-variable">$channel</span>, <span class="hljs-string">"Sorry, <span class="hljs-variable">$messager</span>,I'm just a simple bot!"</span>);
+    }
+}
+
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$conn</span> = <span class="hljs-variable">$irc</span>-&gt;newconn(<span class="hljs-string">Nick =&gt;</span><span class="hljs-variable">$nick</span>,<span class="hljs-string">Server=&gt;</span><span class="hljs-variable">$server</span>,<span class="hljs-string">Port=&gt;</span><span class="hljs-variable">$port</span>,<span class="hljs-string">Ircname=&gt;</span><span class="hljs-variable">$ircname</span>);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'376'</span>, \&amp;on;_connect);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'disconnect'</span>, \&amp;on;_disconnect);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'msg'</span>, \&amp;on;_msg);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'join'</span>, \&amp;on;_join);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'msg'</span>, \&amp;on;_msg);
+<span class="hljs-variable">$conn</span>-&gt;add_global_handler(<span class="hljs-string">'public'</span>, \&amp;on;_public);
+<span class="hljs-variable">$irc</span>-&gt;start();
+</code></pre>
+<p>Now, this bot isn’t exactly hugely capable - all it does is greet new joiners, and tell you to leave it alone if you try to talk to it, but it was pretty easy to code it, thanks to the documentation, and it’s a good base to build on. From here, it’s easy to extend the on_public and on_msg subroutines to deal with other messages - for instance, I could use a regular expression to look for “!respond” in the text of the message and if it’s found, respond with any appropriate text.</p>
+<p>I’ve hard-coded the appropriate details into the script in this case to make it quicker and easier to test it, but it would be trivial to change it to either accept settings passed as arguments from the command line, or have it grab these from a separate text file.</p>
+<p>My initial doubts about Perl are really wearing off. It’s a powerful language and one that, now I’ve picked up the basic syntax, I’m having little trouble getting work done with. </p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/10/27/a-couple-of-things-i-love-about-perl/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/10/27/a-couple-of-things-i-love-about-perl/</guid>
+            <pubDate>Tue, 26 Oct 2010 23:15:33 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[I passed!]]></title>
+            <description><![CDATA[<p>Just a short post to say that today I did my CIW Perl Fundamentals exam, and passed it. Glad that’s out of the way!</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/10/19/i-passed/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/10/19/i-passed/</guid>
+            <pubDate>Tue, 19 Oct 2010 13:52:55 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Another Perl snippet...]]></title>
+            <description><![CDATA[<p>Here’s another simple Perl program I thought I’d share. It’s a very simple app for recording notes from the shell. As pasting the last one into WordPress didn’t work too well, <a href="http://dl.dropbox.com/u/5031/notable.pl">it’s on my Dropbox account</a> instead. I’ve used SQLite as the backend for the database (a no-brainer - I really like SQLite for little quick-and-dirty scripts like this) and it works pretty well.</p>
+<p>At some point I may go back to this basic concept and expand on it a little - it would make sense to add a GUI to it, either by using a graphical toolkit such as Tk or turning it into a web app. I also like the idea of adapting it to use a non-relational database - something like CouchDB perhaps.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/10/16/another-perl-snippet/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/10/16/another-perl-snippet/</guid>
+            <pubDate>Sat, 16 Oct 2010 20:11:10 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Getting work done with Perl]]></title>
+            <description><![CDATA[<p>After my initial struggles with Perl, I now think I’m really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.</p>
+<p>As one of the exercises for my studies I had to open a database connection to a Microsoft Access database, but I wanted to do the exercise in Ubuntu (I’ve always preferred using Unix-like operating systems for programming, and thanks to apt-get it’s a lot less grief installing additional libraries and modules as you need them) and couldn’t get Perl to connect to the database properly, so I resolved to export it to either MySQL or SQLite.</p>
+<p>I was able to export it to MySQL in the end using mdbtools, but I wasn’t entirely happy with the end result. I resorted to re-exporting the data as a CSV file, then resolved to write a small Perl script to read the file, parse it using a regular expression to obtain the necessary information, then insert it into a new SQLite database.</p>
+<p>Here’s what I came up with:</p>
+<pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
+
+<span class="hljs-keyword">use</span> strict;
+<span class="hljs-keyword">use</span> DBI;
+
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$db</span> = <span class="hljs-string">"dbi:SQLite:backend.db"</span>;
+
+<span class="hljs-keyword">if</span> (!(-e <span class="hljs-string">"backend.db"</span>))
+{
+   <span class="hljs-keyword">print</span> <span class="hljs-string">"Database does not exist. Creating it..."</span>;
+
+   <span class="hljs-comment"># Create the database</span>
+   <span class="hljs-keyword">my</span> <span class="hljs-variable">$dbh</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! <span class="hljs-variable">$DBI::errstr</span>"</span>;
+   <span class="hljs-keyword">my</span> <span class="hljs-variable">$createdb</span> = <span class="hljs-variable">$dbh</span>-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"CREATE TABLE CARS( ID INTEGER PRIMARY KEY, YEAR INTEGER, MAKE VARCHAR(30), MODEL VARCHAR(30), COLOR VARCHAR(30), PRICE INTEGER);"</span>);
+   <span class="hljs-variable">$dbh</span>-&gt;disconnect();
+}
+
+<span class="hljs-keyword">open</span>(READFILE, <span class="hljs-string">"cartable.csv"</span>);
+
+<span class="hljs-keyword">while</span>()
+{
+   <span class="hljs-keyword">unless</span>(<span class="hljs-variable">$_</span> =~ <span class="hljs-regexp">m/id,/</span>)
+   {
+      <span class="hljs-regexp">m/\d+\,(\d{4})\,\"(\w+)\"\,\"(\w+)\"\,\"(\w+)\"\,\"(\d+)\"/</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$year</span> = <span class="hljs-variable">$1</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$make</span> = <span class="hljs-variable">$2</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$model</span> = <span class="hljs-variable">$3</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$color</span> = <span class="hljs-variable">$4</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$price</span> = <span class="hljs-variable">$5</span>;
+
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$dbh2</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! <span class="hljs-variable">$DBI::errstr</span>"</span>;
+      <span class="hljs-keyword">my</span> <span class="hljs-variable">$insertdb</span> = <span class="hljs-variable">$dbh2</span>-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"INSERT INTO CARS (YEAR, MAKE, MODEL, COLOR, PRICE) VALUES (\"<span class="hljs-variable">$year</span>\", \"<span class="hljs-variable">$make</span>\", \"<span class="hljs-variable">$model</span>\", \"<span class="hljs-variable">$color</span>\", \"<span class="hljs-variable">$price</span>\");"</span>);
+      <span class="hljs-variable">$dbh2</span>-&gt;disconnect;
+   }
+}
+<span class="hljs-keyword">close</span>(READFILE);
+
+<span class="hljs-keyword">print</span> <span class="hljs-string">"Write completed!\n"</span>;
+<span class="hljs-keyword">print</span> <span class="hljs-string">"To demonstrate it works, we'll run a SELECT query against the database...\n"</span>;
+
+<span class="hljs-comment"># Read the database</span>
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$readdb</span> = DBI-&gt;<span class="hljs-keyword">connect</span>(<span class="hljs-variable">$db</span>);
+<span class="hljs-keyword">my</span> <span class="hljs-variable">$dbselect</span> = <span class="hljs-variable">$readdb</span>-&gt;prepare(<span class="hljs-string">"SELECT * FROM CARS;"</span>);
+<span class="hljs-variable">$dbselect</span>-&gt;execute;
+
+<span class="hljs-comment"># Print the results</span>
+<span class="hljs-keyword">print</span> <span class="hljs-string">"ID\tYear\tMake\tModel\tColor\tPrice\n"</span>;
+<span class="hljs-keyword">while</span>(<span class="hljs-keyword">my</span> <span class="hljs-variable">@row</span> = <span class="hljs-variable">$dbselect</span>-&gt;fetchrow_array)
+{
+   <span class="hljs-keyword">print</span> <span class="hljs-string">"<span class="hljs-variable">$row</span>[0]\t<span class="hljs-variable">$row</span>[1]\t<span class="hljs-variable">$row</span>[2]\t<span class="hljs-variable">$row</span>[3]\t<span class="hljs-variable">$row</span>[4]\t<span class="hljs-variable">$row</span>[5]\n"</span>;
+}
+
+<span class="hljs-comment"># Close the connection</span>
+<span class="hljs-variable">$readdb</span>-&gt;disconnect;
+</code></pre>
+<p>Apologies for the fact that the indentation doesn’t seem to have copied across from Vim very well (can anyone recommend a good WordPress plugin for displaying code, none of the ones I’ve tried seem to be any good?). It works well, and it’s also helped me grasp Perl’s database API better.</p>
+<p>I think I’ve got a better idea now of what Python and Perl are best at and when to use each. Perl is a great language, but the fact that a lot of it is implicit makes it a little harder to pick up at first than Python - for instance, the default variable, which is quite a good idea, but takes a little getting used to. Its regex support is great, and I like the database API, but I would find it a lot harder to do any object-oriented programming in Perl than in Python (which I guess is why <a href="http://www.iinteractive.com/moose/">Moose</a> exists). I’ve found Perl very useful for quick and dirty scripts and as a glue language, but for longer scripts Python seems the better choice.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/10/15/getting-work-done-with-perl/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/10/15/getting-work-done-with-perl/</guid>
+            <pubDate>Fri, 15 Oct 2010 19:39:10 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Perl after Python]]></title>
+            <description><![CDATA[<p>I’m currently studying for the CIW Web Developer qualification, and having passed the exams for database design and JavaScript, I’m now on to the third component, Perl. I figured that having already picked up a reasonable grasp of another scripting language (namely Python), that I would have no trouble picking up Perl quickly, as happened when I learned JavaScript.</p>
+<p>Unfortunately, it hasn’t quite worked out as well as I’d hoped so far, and in a number of ways. First of all, it doesn’t seem to “fit your brain” quite as easily as Python does - I find that the significant number of non-alphanumeric characters used makes it less intuitive than Python, at least for me. I’m also not a great fan of the syntax - in particular, I really am not keen on the syntax used for object-oriented programming. In general I’m finding it a struggle to pick up many things I learned quite quickly in Python.</p>
+<p>That said, Perl has plenty of awesome features. CPAN has a staggering number of modules available, and makes it very easy to install them. And of course, its support for regular expressions is second to none. Don’t get me wrong, it’s a language I really want to know better and be able to use well, but I am finding it quite hard going compared to Python.</p>
+<p>I strongly suspect, however, that it may well be, at least in part, because I learned Python first and my brain is used to the Pythonic way of doing things, therefore I’m having to unlearn those habits for Perl. Has anyone else learned Python first and then struggled to pick up Perl, or is it just me? Does learning Python first predispose you to finding Perl more difficult?</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/08/16/perl-after-python/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/08/16/perl-after-python/</guid>
+            <pubDate>Mon, 16 Aug 2010 20:50:57 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Moving on to Perl]]></title>
+            <description><![CDATA[<p>I’m glad to report that today I passed my CIW JavaScript Fundamentals exam with 98%! I was a bit concerned about this as some of the questions on the practice exam were downright wrong (as in the supposedly correct answers were in fact wrong), but thankfully this turned out not to be the case for the actual exam.</p>
+<p>Next step is learning Perl. I’m particularly interested to learn more about Perl because it’s something you can get a lot of use out of - it can be used for regular expressions, general Unix scripting and web development, and I’m interested to see how it compares to Python.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</guid>
+            <pubDate>Wed, 23 Jun 2010 12:41:29 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
