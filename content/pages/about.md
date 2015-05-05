@@ -19,7 +19,7 @@ I've worked extensively with the following technologies:
   * Extensive use of client-side JavaScript MVC frameworks, primarily Angular.js, Knockout.js and Backbone.js
   * Extensive use of JavaScript templating libraries, primarily Underscore.js and Handlebars.js
   * Extensive use of Phonegap to build mobile applications using JavaScript for both iOS and Android
-  * Unit testing JavaScript applications using QUnit, Jasmine, Mocha and Chai
+  * Unit testing JavaScript applications using Istanbul, QUnit, nodeunit, Jasmine, Mocha and Chai
   * Using Node.js to build real-time web applications, including use of the Express framework and the Socket.IO library
   * Extensive use of Grunt to improve workflow when building web apps
   * Some use of Yeoman to generate boilerplate for projects
@@ -32,7 +32,7 @@ I've worked extensively with the following technologies:
 * PHP, including:
   * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
   * Building WordPress themes and plugins, and setting up and administering WordPress
-  * Some unit testing with PHPUnit
+  * Some unit testing with PHPUnit and Mockery
   * Generating documentation with ApiGen
 * SQL (primarily MySQL and SQLite, but with some use of PostgreSQL), as well as some limited use of MongoDB and Redis for personal projects
 * Some knowledge of Ruby, including use of Cucumber for testing purposes
