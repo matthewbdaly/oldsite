@@ -284,7 +284,7 @@ module.exports = function (grunt) {
     // Register tasks
     grunt.registerTask('default', [
         'clean',
-        'jshint',
+        'newer:jshint',
         'bower_concat',
         'blogbuilder',
         'sitemap',
