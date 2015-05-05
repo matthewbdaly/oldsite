@@ -3,6 +3,12 @@ module.exports = function (grunt) {
     'use strict';
 
     grunt.initConfig({
+        jshint: {
+            all: [
+                'Gruntfile.js',
+                'app/js/*.js'
+            ]
+        },
         src: {
             posts: 'content/posts/',
             pages: 'content/pages/'
@@ -273,10 +279,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-sitemap');
     grunt.loadNpmTasks('grunt-contrib-imagemin');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // Register tasks
     grunt.registerTask('default', [
         'clean',
+        'jshint',
         'bower_concat',
         'blogbuilder',
         'sitemap',
