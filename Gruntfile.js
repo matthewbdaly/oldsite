@@ -77,6 +77,15 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/static/'
             },
+            favicon: {
+                expand: true,
+                cwd: 'static/',
+                src: [
+                    'favicon.ico'
+                ],
+                dest: 'www/'
+
+            },
             css: {
                 expand: true,
                 cwd: 'build/css/',
@@ -249,6 +258,7 @@ module.exports = function (grunt) {
     });
 
     // Load tasks
+    grunt.loadNpmTasks('grunt-newer');
     grunt.loadNpmTasks('grunt-blogbuilder');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
