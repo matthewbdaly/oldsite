@@ -38,7 +38,8 @@ module.exports = function (grunt) {
                 disqus: "matthewdaly",
                 github: "matthewbdaly",
                 title: "Matthew Daly's Blog",
-                description: "I'm a web developer in Norfolk. This is my blog..."
+                description: "I'm a web developer in Norfolk. This is my blog...",
+                linenos: true
               },
               template: {
                 post: 'app/templates/post.hbs',
