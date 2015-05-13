@@ -5,7 +5,7 @@
         <description><![CDATA[programming | I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Wed, 13 May 2015 00:01:27 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 13 May 2015 00:07:17 GMT</lastBuildDate>
         <item>
             <title><![CDATA[Yet another tutorial for building a blog using Python and Django - Part 1]]></title>
             <description><![CDATA[<p>While I’m extremely fond of Perl for quick hacks and scripts, and have used PHP a fair amount for web development purposes (both on its own and with the CodeIgniter framework), there is one language I love above all others, and that’s Python. I’ve found that, when compared to PHP or Perl, at least for me, it’s a lot easier to “get into the zone” when programming in Python, the code I produce tends to be a lot more readable and easier to follow, and the interactive interpreter makes it really easy to figure out what’s going on in a way that just isn’t possible with PHP or Perl. Also, Python was always designed to be an object-oriented language, and IMHO has a better object model than either Perl or PHP.</p>
@@ -38,83 +38,83 @@
 <p>If you haven’t used an MVC framework before, then you’ll need this explaining. MVC stands for Model-View-Controller, and it describes a method of logically separating out code for a web application to make it easier to work with. Models represent the data held by the application, views represent what end-users see of the application, and controllers represent the logic that ties the two together.</p>
 <p>Django uses a slightly unusual interpretation of MVC. The models work exactly the same as they do in other frameworks, but the logic is handled by the view, and the presentation is handled by templates. Compared to more conventional MVC frameworks such as CodeIgniter, Django’s views are more like controllers, and its templates are more like views. Django is therefore often described as an MTV framework (Model-Template-View), instead of an MVC one.</p>
 <p>So, to create our blog, we first need to create a model to describe the data. Edit models.py so it looks like the following:</p>
-<pre><code class="hljs lang-python"><span class="linenos">1</span>	<span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
-<span class="linenos">2</span>	
-<span class="linenos">3</span>	<span class="hljs-comment"># Create your models here.</span>
-<span class="linenos">4</span>	<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
-<span class="linenos">5</span>	    title = models.CharField(max_length=<span class="hljs-number">200</span>)
-<span class="linenos">6</span>	    pub_date = models.DateTimeField()
-<span class="linenos">7</span>	    text = models.TextField()
-<span class="linenos">8</span>	
-<span class="linenos">9</span>	    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
-<span class="linenos">10</span>	        <span class="hljs-keyword">return</span> self.title</code></pre>
+<pre><code class="hljs lang-python"><span class="linenos">1</span><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="hljs-comment"># Create your models here.</span>
+<span class="linenos">4</span><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
+<span class="linenos">5</span>    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+<span class="linenos">6</span>    pub_date = models.DateTimeField()
+<span class="linenos">7</span>    text = models.TextField()
+<span class="linenos">8</span>
+<span class="linenos">9</span>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
+<span class="linenos">10</span>        <span class="hljs-keyword">return</span> self.title</code></pre>
 <p>To activate our new app, we also need to include it under INSTALLED_APPS in settings.py:</p>
 <pre><code class="hljs lang-python singleline">    <span class="hljs-string">'blogengine'</span>,</code></pre>
 <p>In Django, you create your models as Python classes, which makes it very easy to grasp. Here, a blog post is an object, and it has a title, a publication date, and some text. Note that Post here inherits from models.Model, and has specific types of field that map to field types in the database table. For instance, models.CharField obviously maps to a VARCHAR field in the database, and TextField maps to a TEXT field. You can actually see the SQL that will generate the database table for this model by returning to the project’s main directory and running python manage.py sqlall blogengine:</p>
-<pre><code class="hljs lang-sql"><span class="linenos">1</span>	<span class="hljs-operator"><span class="hljs-keyword">BEGIN</span>;</span>
-<span class="linenos">2</span>	<span class="hljs-operator"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">"blogengine_post"</span> (
-<span class="linenos">3</span>	    <span class="hljs-string">"id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">KEY</span>,
-<span class="linenos">4</span>	    <span class="hljs-string">"title"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">200</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-<span class="linenos">5</span>	    <span class="hljs-string">"pub_date"</span> datetime <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-<span class="linenos">6</span>	    <span class="hljs-string">"text"</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>
-<span class="linenos">7</span>	)
-<span class="linenos">8</span>	;</span>
-<span class="linenos">9</span>	<span class="hljs-operator"><span class="hljs-keyword">COMMIT</span>;</span></code></pre>
+<pre><code class="hljs lang-sql"><span class="linenos">1</span><span class="hljs-operator"><span class="hljs-keyword">BEGIN</span>;</span>
+<span class="linenos">2</span><span class="hljs-operator"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">"blogengine_post"</span> (
+<span class="linenos">3</span>    <span class="hljs-string">"id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">PRIMARY</span> <span class="hljs-keyword">KEY</span>,
+<span class="linenos">4</span>    <span class="hljs-string">"title"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">200</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+<span class="linenos">5</span>    <span class="hljs-string">"pub_date"</span> datetime <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
+<span class="linenos">6</span>    <span class="hljs-string">"text"</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>
+<span class="linenos">7</span>)
+<span class="linenos">8</span>;</span>
+<span class="linenos">9</span><span class="hljs-operator"><span class="hljs-keyword">COMMIT</span>;</span></code></pre>
 <p>Note the “id” field. You didn’t add this - by default, Django will create an id field in any new table, and will make this the primary key in that database table. You can, however, override this behaviour if you wish. Here it’s exactly what we want so we’ll stick with it for now.</p>
 <p>Also note the <strong>unicode</strong> method. This represents a string that describes that object. Here the title of a blog post seems the most logical way of describing it, so we return the object’s title.</p>
 <p>Now that we’ve got our model set up, how do we get the information into it? For a blog post, all of the information will be submitted by the user, so we need to set up some kind of administrative interface. Fortunately, one of Django’s killer features is the admin interface that ships with it. This makes it really quick and easy to get certain kinds of sites up and running.</p>
 <p>First of all, we need to activate the admin application. Head up to settings.py and uncomment the line that reads:</p>
 <pre><code class="hljs lang-python singleline">    <span class="hljs-string">'django.contrib.admin'</span>,</code></pre>
 <p>Save it, then head for urls.py and uncomment the following lines:</p>
-<pre><code class="hljs lang-python"><span class="linenos">1</span>	<span class="hljs-comment"># from django.contrib import admin</span>
-<span class="linenos">2</span>	<span class="hljs-comment"># admin.autodiscover()</span></code></pre>
+<pre><code class="hljs lang-python"><span class="linenos">1</span><span class="hljs-comment"># from django.contrib import admin</span>
+<span class="linenos">2</span><span class="hljs-comment"># admin.autodiscover()</span></code></pre>
 <p>And:</p>
 <pre><code class="hljs lang-python singleline">   <span class="hljs-comment"># url(r'^admin/', include(admin.site.urls)),</span></code></pre>
 <p>Now, in order for the admin interface to be able to set up new blog posts, you need to also register it. In the blogengine directory containing your app, create a new file called admin.py, and fill it out with the following code:</p>
-<pre><code class="hljs lang-python"><span class="linenos">1</span>	<span class="hljs-keyword">import</span> models
-<span class="linenos">2</span>	<span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
-<span class="linenos">3</span>	
-<span class="linenos">4</span>	admin.site.register(models.Post)</code></pre>
+<pre><code class="hljs lang-python"><span class="linenos">1</span><span class="hljs-keyword">import</span> models
+<span class="linenos">2</span><span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
+<span class="linenos">3</span>
+<span class="linenos">4</span>admin.site.register(models.Post)</code></pre>
 <p>Once that’s done, return to the project directory and run this command to create the database tables you need:</p>
 <pre><code class="hljs lang-bash singleline">python manage.py syncdb</code></pre>
 <p>You’ll get asked for some information to set up your user account - remember it as you’ll need it to log into the admin interface. Once that’s done, run python manage.py runserver again, and return to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> again. You should be confronted with a 404 page - that’s fine, that’s exactly what we should be seeing. You’ll note that the message states that Django tried the ^admin/ path without success - what this means is that this is the only URL pattern in urls.py at the moment, and the path you entered didn’t match this.</p>
 <p>If you change the URL in the browser to <a href="http://127.0.0.1:8000/admin">http://127.0.0.1:8000/admin</a>, you should get a login screen. Enter the username and password you set when you ran syncdb and click Log in. You should now see Django’s admin interface, with Posts available, and an Add and Change dialogue visible next to it. If you want to add a few blog posts, just to have some data to work with, go ahead. Note that for the Date and Time dialogues, Django automatically adds the Today and Now shortcuts.</p>
 <p>So, our model is now sorted and we have some data in the web app. The next step is to write our views. You’ll notice that the blogengine app contains a file called views.py - open this up and enter the following code:</p>
-<pre><code class="hljs lang-python"><span class="linenos">1</span>	<span class="hljs-comment"># Create your views here.</span>
-<span class="linenos">2</span>	<span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
-<span class="linenos">3</span>	<span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
-<span class="linenos">4</span>	
-<span class="linenos">5</span>	<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getRecentPosts</span><span class="hljs-params">(request)</span>:</span>
-<span class="linenos">6</span>	    <span class="hljs-comment"># Get all blog posts</span>
-<span class="linenos">7</span>	    posts = Post.objects.all()
-<span class="linenos">8</span>	
-<span class="linenos">9</span>	    <span class="hljs-comment"># Sort posts into chronological order</span>
-<span class="linenos">10</span>	    sorted_posts = posts.order_by(<span class="hljs-string">'-pub_date'</span>)
-<span class="linenos">11</span>	
-<span class="linenos">12</span>	    <span class="hljs-comment"># Display all the posts</span>
-<span class="linenos">13</span>	    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:sorted_posts})</code></pre>
+<pre><code class="hljs lang-python"><span class="linenos">1</span><span class="hljs-comment"># Create your views here.</span>
+<span class="linenos">2</span><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="linenos">3</span><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getRecentPosts</span><span class="hljs-params">(request)</span>:</span>
+<span class="linenos">6</span>    <span class="hljs-comment"># Get all blog posts</span>
+<span class="linenos">7</span>    posts = Post.objects.all()
+<span class="linenos">8</span>
+<span class="linenos">9</span>    <span class="hljs-comment"># Sort posts into chronological order</span>
+<span class="linenos">10</span>    sorted_posts = posts.order_by(<span class="hljs-string">'-pub_date'</span>)
+<span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="hljs-comment"># Display all the posts</span>
+<span class="linenos">13</span>    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'posts.html'</span>, { <span class="hljs-string">'posts'</span>:sorted_posts})</code></pre>
 <p>Let’s go through this code. The first line imports the render_to_response method, which is used to render a template. The second line imports the Post model.</p>
 <p>Next, we define the getRecentPosts view. For simplicity’s sake, we aren’t going to bother about pagination for the moment, so we’ll just get all the posts. The view is written as a Python function, and we pass it the request object as the sole parameter.</p>
 <p>Next, we get all of the Post objects, using Post.objects.all(), and assign it to a list called posts. As we want these to be in reverse chronological order, we then reorder them by pub_date (note the - sign at the beginning to denote reverse order) and assign the result to sorted_posts. Finally, we load the posts.html template and pass through sorted_posts as the value in a dictionary called posts.</p>
 <p>With our view done, we now need to produce a template for it. Head back up to your main project directory and create a new folder called templates. Then, go into settings.py and find the line marked TEMPLATE_DIRS. Inside the brackets, underneath the comments, add the full, absolute path to the new templates folder, as in this example:</p>
 <pre><code class="hljs lang-bash singleline">  <span class="hljs-string">"/Users/matthewdaly/Development/Python/Django/blog/templates"</span></code></pre>
 <p>You’ll have to change this to the full, absolute path on your machine. This will tell Django to look for the templates in that folder. Now, go into templates, and create a new file called posts.html. Enter the following text into it:</p>
-<pre><code class="hljs lang-django"><span class="linenos">1</span>	<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
-<span class="linenos">2</span>	    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
-<span class="linenos">3</span>	        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
-<span class="linenos">4</span>	    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
-<span class="linenos">5</span>	    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
-<span class="linenos">6</span>	        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
-<span class="linenos">7</span>	        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
-<span class="linenos">8</span>	        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
-<span class="linenos">9</span>	        </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
-<span class="linenos">10</span>	        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
-<span class="linenos">11</span>	    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
-<span class="linenos">12</span>	<span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span></code></pre>
+<pre><code class="hljs lang-django"><span class="linenos">1</span><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">html</span>&gt;</span>
+<span class="linenos">2</span>    <span class="hljs-tag">&lt;<span class="hljs-title">head</span>&gt;</span>
+<span class="linenos">3</span>        <span class="hljs-tag">&lt;<span class="hljs-title">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-title">title</span>&gt;</span>
+<span class="linenos">4</span>    <span class="hljs-tag">&lt;/<span class="hljs-title">head</span>&gt;</span>
+<span class="linenos">5</span>    <span class="hljs-tag">&lt;<span class="hljs-title">body</span>&gt;</span>
+<span class="linenos">6</span>        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">for</span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
+<span class="linenos">7</span>        <span class="hljs-tag">&lt;<span class="hljs-title">h1</span>&gt;</span></span><span class="hljs-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h1</span>&gt;</span>
+<span class="linenos">8</span>        <span class="hljs-tag">&lt;<span class="hljs-title">h3</span>&gt;</span></span><span class="hljs-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-title">h3</span>&gt;</span>
+<span class="linenos">9</span>        </span><span class="hljs-variable">{{ post.text }}</span><span class="xml">
+<span class="linenos">10</span>        </span><span class="hljs-template_tag">{% <span class="hljs-keyword">endfor</span> %}</span><span class="xml">
+<span class="linenos">11</span>    <span class="hljs-tag">&lt;/<span class="hljs-title">body</span>&gt;</span>
+<span class="linenos">12</span><span class="hljs-tag">&lt;/<span class="hljs-title">html</span>&gt;</span></span></code></pre>
 <p>Most of this is just plain old HTML, but you’ll notice that {% %} denotes tags that can include some logic (such as a for loop in this case), and {{ }} denotes a variable. Remember that in the view we passed through a dictionary containing all of the Post objects, and here we’re iterating through all of those post objects, outputting their title, publication date and text content.</p>
 <p>With this done, we need to configure the routes to call the getRecentPosts view when someone visits the home page. Open urls.py again and add the following code underneath where you enabled the admin, but still inside the parentheses:</p>
-<pre><code class="hljs lang-python"><span class="linenos">1</span>	    <span class="hljs-comment"># Home page</span>
-<span class="linenos">2</span>	    url(<span class="hljs-string">r''</span>, <span class="hljs-string">'blogengine.views.getRecentPosts'</span>),</code></pre>
+<pre><code class="hljs lang-python"><span class="linenos">1</span>    <span class="hljs-comment"># Home page</span>
+<span class="linenos">2</span>    url(<span class="hljs-string">r''</span>, <span class="hljs-string">'blogengine.views.getRecentPosts'</span>),</code></pre>
 <p>Now, this is a very simple regular expression. Here, this is our default page, so we leave the single quotes after the r empty. We then specify that this URL should be handled by the getRecentPosts function, inside views.py, in the blogengine application.</p>
 <p>Save that, and start up the development server again with python manage.py runserver. Then, if you haven’t already added a few test posts, do so via the admin interface. Then open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, and you should see your blog posts.</p>
 <p>So, we now have the beginnings of a blogging application! We’ll leave it here for now, and will go on to add functionality like viewing individual posts and pagination later. We’ll also look into adding further functionality to our blog, such as supporting multiple authors, tagging posts, and adding flat pages.</p>
@@ -135,32 +135,32 @@
 </blockquote>
 <p>While I would hesitate to call myself a Perl guru (at best I would call myself intermediate with Perl), I would say I know enough about regular expressions that I can generally get useful work done with them.</p>
 <p>Take the following example in Perl (edited somewhat as it didn’t play nice with TinyMCE):</p>
-<pre><code class="hljs lang-perl"><span class="linenos">1</span>	<span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
-<span class="linenos">2</span>	<span class="hljs-keyword">print</span> <span class="hljs-variable">$fruit</span>;
-<span class="linenos">3</span>	<span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/,/</span>,<span class="hljs-variable">$fruit</span>);
-<span class="linenos">4</span>	<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">@fruit</span>)
-<span class="linenos">5</span>	{
-<span class="linenos">6</span>	    <span class="hljs-keyword">print</span> <span class="hljs-variable">$_</span>.<span class="hljs-string">"\n"</span>;
-<span class="linenos">7</span>	}
-<span class="linenos">8</span>	apple,banana,cherry
-<span class="linenos">9</span>	apple
-<span class="linenos">10</span>	banana
-<span class="linenos">11</span>	cherry</code></pre>
+<pre><code class="hljs lang-perl"><span class="linenos">1</span><span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="linenos">2</span><span class="hljs-keyword">print</span> <span class="hljs-variable">$fruit</span>;
+<span class="linenos">3</span><span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/,/</span>,<span class="hljs-variable">$fruit</span>);
+<span class="linenos">4</span><span class="hljs-keyword">foreach</span>(<span class="hljs-variable">@fruit</span>)
+<span class="linenos">5</span>{
+<span class="linenos">6</span>    <span class="hljs-keyword">print</span> <span class="hljs-variable">$_</span>.<span class="hljs-string">"\n"</span>;
+<span class="linenos">7</span>}
+<span class="linenos">8</span>apple,banana,cherry
+<span class="linenos">9</span>apple
+<span class="linenos">10</span>banana
+<span class="linenos">11</span>cherry</code></pre>
 <p>Now, this code should be fairly easy to understand, even if you don’t really know Perl. $fruit is a string containing “apple,banana,cherry”. The split() function takes two arguments, a regular expression defining the character(s) that are used to separate the parts of the string you want to put into an array, and the string you want to split. This returns the array @fruit, which consists of three strings, “apple’, “banana”, and “cherry”.</p>
 <p>In PHP, you can do pretty much the same thing, using the explode() function:</p>
-<pre><code class="hljs lang-php"><span class="linenos">1</span>	<span class="hljs-preprocessor">&lt;?php</span>
-<span class="linenos">2</span>	<span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
-<span class="linenos">3</span>	<span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
-<span class="linenos">4</span>	<span class="hljs-variable">$fruitArray</span> = explode(<span class="hljs-string">","</span>,<span class="hljs-variable">$fruit</span>);
-<span class="linenos">5</span>	<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
-<span class="linenos">6</span>	{
-<span class="linenos">7</span>	    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
-<span class="linenos">8</span>	}
-<span class="linenos">9</span>	<span class="hljs-preprocessor">?&gt;</span>
-<span class="linenos">10</span>	apple,banana,cherry
-<span class="linenos">11</span>	apple
-<span class="linenos">12</span>	banana
-<span class="linenos">13</span>	cherry</code></pre>
+<pre><code class="hljs lang-php"><span class="linenos">1</span><span class="hljs-preprocessor">&lt;?php</span>
+<span class="linenos">2</span><span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="linenos">3</span><span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
+<span class="linenos">4</span><span class="hljs-variable">$fruitArray</span> = explode(<span class="hljs-string">","</span>,<span class="hljs-variable">$fruit</span>);
+<span class="linenos">5</span><span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
+<span class="linenos">6</span>{
+<span class="linenos">7</span>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
+<span class="linenos">8</span>}
+<span class="linenos">9</span><span class="hljs-preprocessor">?&gt;</span>
+<span class="linenos">10</span>apple,banana,cherry
+<span class="linenos">11</span>apple
+<span class="linenos">12</span>banana
+<span class="linenos">13</span>cherry</code></pre>
 <p>As you can see, they work in pretty much the same way here. Both return basically the same output, and the syntax for using the appropriate functions for splitting the strings is virtually identical.</p>
 <p>However, it’s once things get a bit more difficult that it becomes obvious how much more powerful regular expressions are. Say you’re dealing with a string that’s similar to that above, but may use different characters to separate the elements. For instance, say you’ve obtained the data that you want to pass through into an array from a text file and it’s somewhat inconsistent - perhaps the information you want is separated by differing amounts and types of whitespace, or different characters. The explode() function simply won’t handle that (at least, not without a lot of pain). But with Perl’s split() function, that’s no problem. Here’s how you might deal with input that had different types and quantities of whitespace as a separator:</p>
 <pre><code class="hljs lang-perl singleline"><span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/\s+/</span>,<span class="hljs-variable">$fruit</span>);</code></pre>
@@ -169,32 +169,32 @@
 <pre><code class="hljs lang-perl singleline"><span class="hljs-variable">@fruit</span> = <span class="hljs-keyword">split</span>(<span class="hljs-regexp">/\W+/</span>,<span class="hljs-variable">$fruit</span>);</code></pre>
 <p>The \W metacharacter matches any non-word character (ie anything other than a-z, A-Z or 0-9), and again the + modifier means that it will match one or more times.</p>
 <p>And of course, regular expressions are useful for many more tasks than this that, while possible with most language’s existing string functions, can get very nasty quite quickly. Say you want to match a UK postcode to check that it’s valid (note that for the sake of simplicity, I’m going to ignore BFPO and GIR postcodes). These use a format of one or two letters, followed by one digit, then may have an additional digit or letter, then a space, then a digit, then two letters. This would be a nightmare to check using most language’s native string functions, but with a regex in Perl, it’s relatively simple:</p>
-<pre><code class="hljs lang-perl"><span class="linenos">1</span>	<span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
-<span class="linenos">2</span>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">m/^[a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1})(|\s+)\d{1}\w{2}$/</span>)
-<span class="linenos">3</span>	{
-<span class="linenos">4</span>	    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched!\n"</span>;
-<span class="linenos">5</span>	}</code></pre>
+<pre><code class="hljs lang-perl"><span class="linenos">1</span><span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
+<span class="linenos">2</span><span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">m/^[a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1})(|\s+)\d{1}\w{2}$/</span>)
+<span class="linenos">3</span>{
+<span class="linenos">4</span>    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched!\n"</span>;
+<span class="linenos">5</span>}</code></pre>
 <p>And if you wanted to return the first part of the postcode if it matched as well, that’s simple too:</p>
-<pre><code class="hljs lang-perl"><span class="linenos">1</span>	<span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
-<span class="linenos">2</span>	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">s/^([a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1}))(|\s+)\d{1}\w{2}$/$1/</span>)
-<span class="linenos">3</span>	{
-<span class="linenos">4</span>	    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched! <span class="hljs-variable">$postcode</span>\n"</span>;
-<span class="linenos">5</span>	}</code></pre>
+<pre><code class="hljs lang-perl"><span class="linenos">1</span><span class="hljs-keyword">my</span> <span class="hljs-variable">$postcode</span> = <span class="hljs-string">"NR1 1NP"</span>;
+<span class="linenos">2</span><span class="hljs-keyword">if</span>(<span class="hljs-variable">$postcode</span> =~ <span class="hljs-regexp">s/^([a-zA-Z]{1,2}\d{1}(|[a-zA-Z0-9]{1}))(|\s+)\d{1}\w{2}$/$1/</span>)
+<span class="linenos">3</span>{
+<span class="linenos">4</span>    <span class="hljs-keyword">print</span> <span class="hljs-string">"It matched! <span class="hljs-variable">$postcode</span>\n"</span>;
+<span class="linenos">5</span>}</code></pre>
 <p>Now, you may say “But that’s in Perl! I’m using PHP!’. Well, regular expressions are an extremely powerful part of PHP that are very useful, they’re just not as central to the language as they are in Perl. PHP actually has two distinct types of regular expressions - POSIX-extended regular expressions, and Perl-compatible regular expressions (or PCRE). However, POSIX-extended regular expressions were deprecated from PHP 5.3 onwards, so it’s not really worth taking the time to learn them when PCRE will do exactly the same thing and is going to be around for the future. Furthermore, most other programming languages also support Perl-compatible regular expressions, so they’re fairly portable between languages, and once you’ve learned them in one language, you can easily use them in another. In other words, if you learn how to work with regular expressions in Perl, you can very easily transfer that knowledge to most other programming languages that support regular expressions.</p>
 <p>In the first example given above, we can replace explode() with preg_split, and the syntax is virtually identical to split() in Perl, with the only difference being the name of the function and that the pattern to match is wrapped in double quotes:</p>
-<pre><code class="hljs lang-php"><span class="linenos">1</span>	<span class="hljs-preprocessor">&lt;?php</span>
-<span class="linenos">2</span>	<span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
-<span class="linenos">3</span>	<span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
-<span class="linenos">4</span>	<span class="hljs-variable">$fruitArray</span> = preg_split(<span class="hljs-string">"/,/"</span>,<span class="hljs-variable">$fruit</span>);
-<span class="linenos">5</span>	<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
-<span class="linenos">6</span>	{
-<span class="linenos">7</span>	    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
-<span class="linenos">8</span>	}
-<span class="linenos">9</span>	<span class="hljs-preprocessor">?&gt;</span>
-<span class="linenos">10</span>	apple,banana,cherry
-<span class="linenos">11</span>	apple
-<span class="linenos">12</span>	banana
-<span class="linenos">13</span>	cherry</code></pre>
+<pre><code class="hljs lang-php"><span class="linenos">1</span><span class="hljs-preprocessor">&lt;?php</span>
+<span class="linenos">2</span><span class="hljs-variable">$fruit</span> = <span class="hljs-string">"apple,banana,cherry"</span>;
+<span class="linenos">3</span><span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruit</span>.<span class="hljs-string">"\n"</span>;
+<span class="linenos">4</span><span class="hljs-variable">$fruitArray</span> = preg_split(<span class="hljs-string">"/,/"</span>,<span class="hljs-variable">$fruit</span>);
+<span class="linenos">5</span><span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$fruitArray</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$fruitArrayItem</span>)
+<span class="linenos">6</span>{
+<span class="linenos">7</span>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$fruitArrayItem</span>.<span class="hljs-string">"\n"</span>;
+<span class="linenos">8</span>}
+<span class="linenos">9</span><span class="hljs-preprocessor">?&gt;</span>
+<span class="linenos">10</span>apple,banana,cherry
+<span class="linenos">11</span>apple
+<span class="linenos">12</span>banana
+<span class="linenos">13</span>cherry</code></pre>
 <p>Along similar lines, if we want to check if a string matches a pattern, we can use preg_match(), and if we want to search and replace, we can use preg_replace(). PHP’s regular expression support is not appreciably poorer than Perl’s, even if it’s less central to the language as a whole.</p>
 <blockquote>
 <p>But regular expressions are slower than PHP’s string functions!</p>
@@ -204,14 +204,14 @@
 <p>The cow jumped over the moon</p>
 </blockquote>
 <p>You could use something like this:</p>
-<pre><code class="hljs lang-php"><span class="linenos">1</span>	<span class="hljs-preprocessor">&lt;?php</span>
-<span class="linenos">2</span>	<span class="hljs-variable">$text</span> = <span class="hljs-string">"The cow jumped over the moon"</span>;
-<span class="linenos">3</span>	<span class="hljs-variable">$text</span> = preg_replace(<span class="hljs-string">"/cow/"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
-<span class="linenos">4</span>	<span class="hljs-preprocessor">?&gt;</span></code></pre>
+<pre><code class="hljs lang-php"><span class="linenos">1</span><span class="hljs-preprocessor">&lt;?php</span>
+<span class="linenos">2</span><span class="hljs-variable">$text</span> = <span class="hljs-string">"The cow jumped over the moon"</span>;
+<span class="linenos">3</span><span class="hljs-variable">$text</span> = preg_replace(<span class="hljs-string">"/cow/"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
+<span class="linenos">4</span><span class="hljs-preprocessor">?&gt;</span></code></pre>
 <p>However, because here you are only looking to match literal characters, you don’t need to use a regular expression. Just use the following:</p>
-<pre><code class="hljs lang-php"><span class="linenos">1</span>	<span class="hljs-preprocessor">&lt;?php</span>
-<span class="linenos">2</span>	<span class="hljs-variable">$text</span> = str_replace(<span class="hljs-string">"cow"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
-<span class="linenos">3</span>	<span class="hljs-preprocessor">?&gt;</span></code></pre>
+<pre><code class="hljs lang-php"><span class="linenos">1</span><span class="hljs-preprocessor">&lt;?php</span>
+<span class="linenos">2</span><span class="hljs-variable">$text</span> = str_replace(<span class="hljs-string">"cow"</span>,<span class="hljs-string">"sheep"</span>,<span class="hljs-variable">$text</span>);
+<span class="linenos">3</span><span class="hljs-preprocessor">?&gt;</span></code></pre>
 <p>But, if you have to do some more complex pattern matching, you have to start using strpos to get the location of specific characters and returning substrings between those characters, and it gets very messy, very quickly indeed. In those cases, while I haven’t done any kind of benchmarking on it, it stands to reason that quite quickly you’ll reach a point where a regex would be faster.</p>
 <p>However, for a number of common tasks, such as validating email addresses and URLs, there’s another way and you don’t need to resort to regular expressions, or faffing about with loads of string functions. The filter_var() function can be used for validating or sanitising email addresses and URLs, among other things, so this is worth using instead of writing a regex. If you’re using a framework such as CodeIgniter, you may have access to its native functions for validating this kind of thing, so you should use those instead.</p>
 <blockquote>
