@@ -5,7 +5,7 @@
         <description><![CDATA[grunt | I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Tue, 12 May 2015 23:54:50 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 13 May 2015 00:01:27 GMT</lastBuildDate>
         <item>
             <title><![CDATA[My static site generator post on Sitepoint]]></title>
             <description><![CDATA[<p>I wrote an article for Sitepoint recently about creating a static site generator as a Grunt plugin, similar to the one for this site. You can find it <a href="http://www.sitepoint.com/building-static-site-generator-grunt-plugin/">here</a>.</p>
@@ -20,86 +20,86 @@
 <p>The first task in implementing it was to generate the index. As I wrote the Grunt task that generates the blog, I amended that task to generate an index at the same time as I generated the posts. I installed Lunr.js with the following command:</p>
 <pre><code class="hljs lang-bash singleline">npm install lunr --save</code></pre>
 <p>I then imported it in the task, and set up the field names:</p>
-<pre><code class="hljs lang-javascript"><span class="linenos">1</span>    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);
-<span class="linenos">2</span>
-<span class="linenos">3</span>    searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">4</span>        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { boost: <span class="hljs-number">10</span> });
-<span class="linenos">5</span>        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);
-<span class="linenos">6</span>        <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);
-<span class="linenos">7</span>    });</code></pre>
+<pre><code class="hljs lang-javascript"><span class="linenos">1</span>	    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);
+<span class="linenos">2</span>	
+<span class="linenos">3</span>	    searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">4</span>	        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { boost: <span class="hljs-number">10</span> });
+<span class="linenos">5</span>	        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);
+<span class="linenos">6</span>	        <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);
+<span class="linenos">7</span>	    });</code></pre>
 <p>This defined fields for the title, body, and hyperlink, and set the hyperlink as the reference. The variable <code>searchIndex</code> represents the Lunr index.</p>
 <p>Next, I looped through the posts, and passed the appropriate details to be added to the index:</p>
-<pre><code class="hljs lang-javascript"><span class="linenos">1</span>    <span class="hljs-keyword">for</span> (post <span class="hljs-keyword">in</span> post_items) {
-<span class="linenos">2</span>        <span class="hljs-keyword">var</span> doc = {
-<span class="linenos">3</span>            <span class="hljs-string">'title'</span>: post_items[post].meta.title,
-<span class="linenos">4</span>            <span class="hljs-string">'body'</span>: post_items[post].post.rawcontent,
-<span class="linenos">5</span>            <span class="hljs-string">'href'</span>: post_items[post].path
-<span class="linenos">6</span>        };
-<span class="linenos">7</span>        store[doc.href] = {
-<span class="linenos">8</span>            <span class="hljs-string">'title'</span>: doc.title
-<span class="linenos">9</span>        };
-<span class="linenos">10</span>        searchIndex.add(doc);
-<span class="linenos">11</span>    }</code></pre>
+<pre><code class="hljs lang-javascript"><span class="linenos">1</span>	    <span class="hljs-keyword">for</span> (post <span class="hljs-keyword">in</span> post_items) {
+<span class="linenos">2</span>	        <span class="hljs-keyword">var</span> doc = {
+<span class="linenos">3</span>	            <span class="hljs-string">'title'</span>: post_items[post].meta.title,
+<span class="linenos">4</span>	            <span class="hljs-string">'body'</span>: post_items[post].post.rawcontent,
+<span class="linenos">5</span>	            <span class="hljs-string">'href'</span>: post_items[post].path
+<span class="linenos">6</span>	        };
+<span class="linenos">7</span>	        store[doc.href] = {
+<span class="linenos">8</span>	            <span class="hljs-string">'title'</span>: doc.title
+<span class="linenos">9</span>	        };
+<span class="linenos">10</span>	        searchIndex.add(doc);
+<span class="linenos">11</span>	    }</code></pre>
 <p>At this point, <code>post_items</code> represents an array of objects, with each object representing a blog post. Note that the <code>body</code> field is set to the value of the item’s attribute <code>post.rawcontent</code>, which represents the raw Markdown rather than the compiled HTML.</p>
 <p>I then store the title in the <code>store</code> object, so that it can be accessed using the <code>href</code> field as a key.</p>
 <p>I then do the same thing when generating the pages:</p>
-<pre><code class="hljs lang-javascript"><span class="linenos">1</span>    <span class="hljs-comment">// Add them to the index</span>
-<span class="linenos">2</span>    <span class="hljs-keyword">var</span> doc = {
-<span class="linenos">3</span>        <span class="hljs-string">'title'</span>: data.meta.title,
-<span class="linenos">4</span>        <span class="hljs-string">'body'</span>: data.post.rawcontent,
-<span class="linenos">5</span>        <span class="hljs-string">'href'</span>: permalink + <span class="hljs-string">'/'</span>
-<span class="linenos">6</span>    };
-<span class="linenos">7</span>    store[doc.href] = {
-<span class="linenos">8</span>        <span class="hljs-string">'title'</span>: data.meta.title
-<span class="linenos">9</span>    };
-<span class="linenos">10</span>    searchIndex.add(doc);</code></pre>
+<pre><code class="hljs lang-javascript"><span class="linenos">1</span>	    <span class="hljs-comment">// Add them to the index</span>
+<span class="linenos">2</span>	    <span class="hljs-keyword">var</span> doc = {
+<span class="linenos">3</span>	        <span class="hljs-string">'title'</span>: data.meta.title,
+<span class="linenos">4</span>	        <span class="hljs-string">'body'</span>: data.post.rawcontent,
+<span class="linenos">5</span>	        <span class="hljs-string">'href'</span>: permalink + <span class="hljs-string">'/'</span>
+<span class="linenos">6</span>	    };
+<span class="linenos">7</span>	    store[doc.href] = {
+<span class="linenos">8</span>	        <span class="hljs-string">'title'</span>: data.meta.title
+<span class="linenos">9</span>	    };
+<span class="linenos">10</span>	    searchIndex.add(doc);</code></pre>
 <p>Note that this is already inside the loop that generates the pages, so I don’t include that.</p>
 <p>We then write the index to a file:</p>
-<pre><code class="hljs lang-javascript"><span class="linenos">1</span>    <span class="hljs-comment">// Write index</span>
-<span class="linenos">2</span>    grunt.file.write(options.www.dest + <span class="hljs-string">'/lunr.json'</span>, <span class="hljs-built_in">JSON</span>.stringify({
-<span class="linenos">3</span>        index: searchIndex.toJSON(),
-<span class="linenos">4</span>        store: store
-<span class="linenos">5</span>    }));</code></pre>
+<pre><code class="hljs lang-javascript"><span class="linenos">1</span>	    <span class="hljs-comment">// Write index</span>
+<span class="linenos">2</span>	    grunt.file.write(options.www.dest + <span class="hljs-string">'/lunr.json'</span>, <span class="hljs-built_in">JSON</span>.stringify({
+<span class="linenos">3</span>	        index: searchIndex.toJSON(),
+<span class="linenos">4</span>	        store: store
+<span class="linenos">5</span>	    }));</code></pre>
 <p>That takes care of generating our index, but we need to implement some client-side code to handle the search. We need to include Lunr.js on the client side as well, (I recommend using Bower to do so), alongside jQuery. If you include both, the following code should do the trick:</p>
-<pre><code class="hljs lang-javascript"><span class="linenos">1</span>$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">2</span><span class="hljs-pi">    'use strict'</span>;
-<span class="linenos">3</span>
-<span class="linenos">4</span>    <span class="hljs-comment">// Set up search</span>
-<span class="linenos">5</span>    <span class="hljs-keyword">var</span> index, store;
-<span class="linenos">6</span>    $.getJSON(<span class="hljs-string">'/lunr.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(response)</span> </span>{
-<span class="linenos">7</span>
-<span class="linenos">8</span>        <span class="hljs-comment">// Create index</span>
-<span class="linenos">9</span>        index = lunr.Index.load(response.index);
-<span class="linenos">10</span>
-<span class="linenos">11</span>        <span class="hljs-comment">// Create store</span>
-<span class="linenos">12</span>        store = response.store;
-<span class="linenos">13</span>
-<span class="linenos">14</span>        <span class="hljs-comment">// Handle search</span>
-<span class="linenos">15</span>        $(<span class="hljs-string">'input#search'</span>).on(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">16</span>            <span class="hljs-comment">// Get query</span>
-<span class="linenos">17</span>            <span class="hljs-keyword">var</span> query = $(<span class="hljs-keyword">this</span>).val();
-<span class="linenos">18</span>
-<span class="linenos">19</span>            <span class="hljs-comment">// Search for it</span>
-<span class="linenos">20</span>            <span class="hljs-keyword">var</span> result = index.search(query);
-<span class="linenos">21</span>
-<span class="linenos">22</span>            <span class="hljs-comment">// Output it</span>
-<span class="linenos">23</span>            <span class="hljs-keyword">var</span> resultdiv = $(<span class="hljs-string">'ul.searchresults'</span>);
-<span class="linenos">24</span>            <span class="hljs-keyword">if</span> (result.length === <span class="hljs-number">0</span>) {
-<span class="linenos">25</span>                <span class="hljs-comment">// Hide results</span>
-<span class="linenos">26</span>                resultdiv.hide();
-<span class="linenos">27</span>            } <span class="hljs-keyword">else</span> {
-<span class="linenos">28</span>                <span class="hljs-comment">// Show results</span>
-<span class="linenos">29</span>                resultdiv.empty();
-<span class="linenos">30</span>                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> item <span class="hljs-keyword">in</span> result) {
-<span class="linenos">31</span>                    <span class="hljs-keyword">var</span> ref = result[item].ref;
-<span class="linenos">32</span>                    <span class="hljs-keyword">var</span> searchitem = <span class="hljs-string">'&lt;li&gt;&lt;a href="'</span> + ref + <span class="hljs-string">'"&gt;'</span> + store[ref].title + <span class="hljs-string">'&lt;/a&gt;&lt;/li&gt;'</span>;
-<span class="linenos">33</span>                    resultdiv.append(searchitem);
-<span class="linenos">34</span>                }
-<span class="linenos">35</span>                resultdiv.show();
-<span class="linenos">36</span>            }
-<span class="linenos">37</span>        });
-<span class="linenos">38</span>    });
-<span class="linenos">39</span>});</code></pre>
+<pre><code class="hljs lang-javascript"><span class="linenos">1</span>	$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">2</span>	<span class="hljs-pi">    'use strict'</span>;
+<span class="linenos">3</span>	
+<span class="linenos">4</span>	    <span class="hljs-comment">// Set up search</span>
+<span class="linenos">5</span>	    <span class="hljs-keyword">var</span> index, store;
+<span class="linenos">6</span>	    $.getJSON(<span class="hljs-string">'/lunr.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(response)</span> </span>{
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	        <span class="hljs-comment">// Create index</span>
+<span class="linenos">9</span>	        index = lunr.Index.load(response.index);
+<span class="linenos">10</span>	
+<span class="linenos">11</span>	        <span class="hljs-comment">// Create store</span>
+<span class="linenos">12</span>	        store = response.store;
+<span class="linenos">13</span>	
+<span class="linenos">14</span>	        <span class="hljs-comment">// Handle search</span>
+<span class="linenos">15</span>	        $(<span class="hljs-string">'input#search'</span>).on(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">16</span>	            <span class="hljs-comment">// Get query</span>
+<span class="linenos">17</span>	            <span class="hljs-keyword">var</span> query = $(<span class="hljs-keyword">this</span>).val();
+<span class="linenos">18</span>	
+<span class="linenos">19</span>	            <span class="hljs-comment">// Search for it</span>
+<span class="linenos">20</span>	            <span class="hljs-keyword">var</span> result = index.search(query);
+<span class="linenos">21</span>	
+<span class="linenos">22</span>	            <span class="hljs-comment">// Output it</span>
+<span class="linenos">23</span>	            <span class="hljs-keyword">var</span> resultdiv = $(<span class="hljs-string">'ul.searchresults'</span>);
+<span class="linenos">24</span>	            <span class="hljs-keyword">if</span> (result.length === <span class="hljs-number">0</span>) {
+<span class="linenos">25</span>	                <span class="hljs-comment">// Hide results</span>
+<span class="linenos">26</span>	                resultdiv.hide();
+<span class="linenos">27</span>	            } <span class="hljs-keyword">else</span> {
+<span class="linenos">28</span>	                <span class="hljs-comment">// Show results</span>
+<span class="linenos">29</span>	                resultdiv.empty();
+<span class="linenos">30</span>	                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> item <span class="hljs-keyword">in</span> result) {
+<span class="linenos">31</span>	                    <span class="hljs-keyword">var</span> ref = result[item].ref;
+<span class="linenos">32</span>	                    <span class="hljs-keyword">var</span> searchitem = <span class="hljs-string">'&lt;li&gt;&lt;a href="'</span> + ref + <span class="hljs-string">'"&gt;'</span> + store[ref].title + <span class="hljs-string">'&lt;/a&gt;&lt;/li&gt;'</span>;
+<span class="linenos">33</span>	                    resultdiv.append(searchitem);
+<span class="linenos">34</span>	                }
+<span class="linenos">35</span>	                resultdiv.show();
+<span class="linenos">36</span>	            }
+<span class="linenos">37</span>	        });
+<span class="linenos">38</span>	    });
+<span class="linenos">39</span>	});</code></pre>
 <p>This should be easy to understand. On load, we fetch and parse the <code>lunr.json</code> file from the server, and load the index. We then set up an event handler for the <code>keyup</code> event on an input with the ID of <code>search</code>. We get the value of the input, and query our index, and we loop through our results and display them.</p>
 <p>I was pleased with how straightforward it was to implement search with Lunr.js, and it works well. It’s also a lot faster than any server-side solution since the index is generated during the build process, and is loaded with the test of the site, so the only factor in the speed of the response is how quick your browser executes JavaScript. You could probably also use it with a Node.js application by generating the index dynamically, although you’d probably want to cache it to some extent.</p>
 ]]></description>

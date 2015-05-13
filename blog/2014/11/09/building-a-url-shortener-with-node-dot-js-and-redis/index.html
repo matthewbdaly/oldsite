@@ -1,502 +1,502 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="/favicon.ico" rel="icon"><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><title>Building a URL Shortener With Node.js and Redis - Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><div class="container headercontainer"><div class="jumbotron"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div><div class="container headercontainer"><nav class="navbar navbar-inverse navbar-static-top"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/rss.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"><ul class="searchresults"></ul></div></form></div></div></nav></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th November 2014 5:13 pm</p><h1>Building a URL Shortener With Node.js and Redis</h1><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p><p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p><h2 id="what-is-redis-">What is Redis?</h2><p>Redis is described as follows on the website:</p><blockquote><p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p></blockquote><p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p><p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p><ul><li>A string to identify the correct URL</li><li>The URL</li></ul><p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p><h2 id="getting-started">Getting started</h2><p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p><p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p><pre><code class="hljs lang-bash singleline">$ sudo npm install -g grunt-cli</code></pre><p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p><p>Now, let’s create our <code>package.json</code> file:</p><pre><code class="hljs lang-bash singleline">$ npm init</code></pre><p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p><pre><code class="hljs lang-json"><span class="linenos">1</span>{
-<span class="linenos">2</span>  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"url-shortener"</span></span>,
-<span class="linenos">3</span>  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
-<span class="linenos">4</span>  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A URL shortener"</span></span>,
-<span class="linenos">5</span>  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
-<span class="linenos">6</span>  "<span class="hljs-attribute">scripts</span>": <span class="hljs-value">{
-<span class="linenos">7</span>    "<span class="hljs-attribute">test</span>": <span class="hljs-value"><span class="hljs-string">"grunt test"</span>
-<span class="linenos">8</span>  </span>}</span>,
-<span class="linenos">9</span>  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
-<span class="linenos">10</span>    <span class="hljs-string">"URL"</span>,
-<span class="linenos">11</span>    <span class="hljs-string">"shortener"</span>
-<span class="linenos">12</span>  ]</span>,
-<span class="linenos">13</span>  "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
-<span class="linenos">14</span>  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
-<span class="linenos">15</span></span>}</code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="hljs lang-bash singleline">$ npm install --save body-parser express redis hiredis jade shortid</code></pre><p>Next, install the development dependencies:</p><pre><code class="hljs lang-bash singleline">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request</code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
-<span class="linenos">2</span><span class="hljs-pi">    'use strict'</span>;
-<span class="linenos">3</span>
-<span class="linenos">4</span>    grunt.initConfig({
-<span class="linenos">5</span>        jshint: {
-<span class="linenos">6</span>            all: [
-<span class="linenos">7</span>                <span class="hljs-string">'test/*.js'</span>,
-<span class="linenos">8</span>                <span class="hljs-string">'index.js'</span>
-<span class="linenos">9</span>            ]
-<span class="linenos">10</span>        },
-<span class="linenos">11</span>        mocha_istanbul: {
-<span class="linenos">12</span>            coverage: {
-<span class="linenos">13</span>                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
-<span class="linenos">14</span>                options: {
-<span class="linenos">15</span>                    mask: <span class="hljs-string">'*.js'</span>,
-<span class="linenos">16</span>                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
-<span class="linenos">17</span>                }
-<span class="linenos">18</span>            }
-<span class="linenos">19</span>        }
-<span class="linenos">20</span>    });
-<span class="linenos">21</span>
-<span class="linenos">22</span>    <span class="hljs-comment">// Load tasks</span>
-<span class="linenos">23</span>    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
-<span class="linenos">24</span>    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
-<span class="linenos">25</span>
-<span class="linenos">26</span>    <span class="hljs-comment">// Register tasks</span>
-<span class="linenos">27</span>    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
-<span class="linenos">28</span>};</code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="hljs lang-bash singleline">web: node index.js</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>doctype <span class="hljs-tag">html</span>
-<span class="linenos">2</span><span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
-<span class="linenos">3</span>    head
-<span class="linenos">4</span>        title=<span class="hljs-string">"Shortbread"</span>
-<span class="linenos">5</span>
-<span class="linenos">6</span>    <span class="hljs-tag">body</span>
-<span class="linenos">7</span>        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
-<span class="linenos">8</span>            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
-<span class="linenos">9</span>                <span class="hljs-tag">h1</span> Shortbread
-<span class="linenos">10</span>
-<span class="linenos">11</span>            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
-<span class="linenos">12</span>                <span class="hljs-function"><span class="hljs-title">form</span><span class="hljs-params">(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)</span></span>
-<span class="linenos">13</span>                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)</span></span>
-<span class="linenos">14</span>                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)</span></span></code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>doctype html
-<span class="linenos">2</span>html(lang=<span class="hljs-string">"en"</span>)
-<span class="linenos">3</span>    head
-<span class="linenos">4</span>        title=Shortbread
-<span class="linenos">5</span>
-<span class="linenos">6</span>    body
-<span class="linenos">7</span>        <span class="hljs-operator">div</span>.container
-<span class="linenos">8</span>            <span class="hljs-operator">div</span>.row
-<span class="linenos">9</span>                h1 Shortbread
-<span class="linenos">10</span>                p
-<span class="linenos">11</span>                    | Your shortened <span class="hljs-built_in">URL</span> is
-<span class="linenos">12</span>                    <span class="hljs-operator">a</span>(href=base_url+<span class="hljs-string">'/'</span>+id) <span class="hljs-comment">#{base_url}/#{id}</span></code></pre><p>and <code>views/error.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>doctype <span class="hljs-tag">html</span>
-<span class="linenos">2</span><span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
-<span class="linenos">3</span>    head
-<span class="linenos">4</span>        title=<span class="hljs-string">"Shortbread"</span>
-<span class="linenos">5</span>
-<span class="linenos">6</span>    <span class="hljs-tag">body</span>
-<span class="linenos">7</span>        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
-<span class="linenos">8</span>            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
-<span class="linenos">9</span>                <span class="hljs-tag">h1</span> Shortbread
-<span class="linenos">10</span>                <span class="hljs-tag">p</span> Link not found</code></pre><h2 id="writing-our-first-test">Writing our first test</h2><p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-comment">/*jslint node: true */</span>
-<span class="linenos">2</span><span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
-<span class="linenos">3</span><span class="hljs-pi">"use strict"</span>;
-<span class="linenos">4</span>
-<span class="linenos">5</span><span class="hljs-comment">// Declare the variables used</span>
-<span class="linenos">6</span><span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
-<span class="linenos">7</span>    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
-<span class="linenos">8</span>    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
-<span class="linenos">9</span>    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
-<span class="linenos">10</span>    client;
-<span class="linenos">11</span>client = redis.createClient();
-<span class="linenos">12</span>
-<span class="linenos">13</span><span class="hljs-comment">// Server tasks</span>
-<span class="linenos">14</span>describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">15</span>
-<span class="linenos">16</span>    <span class="hljs-comment">// Beforehand, start the server</span>
-<span class="linenos">17</span>    before(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">18</span>        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
-<span class="linenos">19</span>        done();
-<span class="linenos">20</span>    });
-<span class="linenos">21</span>
-<span class="linenos">22</span>    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
-<span class="linenos">23</span>    after(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">24</span>        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
-<span class="linenos">25</span>        client.flushdb();
-<span class="linenos">26</span>        done();
-<span class="linenos">27</span>    });
-<span class="linenos">28</span>
-<span class="linenos">29</span>    <span class="hljs-comment">// Test the index route</span>
-<span class="linenos">30</span>    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">31</span>        it(<span class="hljs-string">'should return a page with the title Shortbread'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">32</span>            request.get({ url: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
-<span class="linenos">33</span>                expect(body).to.include(<span class="hljs-string">'Shortbread'</span>);
-<span class="linenos">34</span>                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
-<span class="linenos">35</span>                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
-<span class="linenos">36</span>                done();
-<span class="linenos">37</span>            });
-<span class="linenos">38</span>        });
-<span class="linenos">39</span>    });
-<span class="linenos">40</span>});</code></pre><p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p><p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p><p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p><p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p><pre><code class="hljs lang-bash singleline">$ touch index.js</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>  server
-<span class="linenos">9</span>Starting the server
-<span class="linenos">10</span>    Test the index route
-<span class="linenos">11</span>      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> a page with the title Shortbread
-<span class="linenos">12</span>Stopping the server
-<span class="linenos">13</span>
-<span class="linenos">14</span>
-<span class="linenos">15</span>  <span class="hljs-number">0</span> passing (<span class="hljs-number">152</span>ms)
-<span class="linenos">16</span>  <span class="hljs-number">1</span> failing
-<span class="linenos">17</span>
-<span class="linenos">18</span>  <span class="hljs-number">1</span>) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Shortbread:
-<span class="linenos">19</span>     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Shortbread'</span>
-<span class="linenos">20</span>      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">33</span>:<span class="hljs-number">33</span>)
-<span class="linenos">21</span>      at self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
-<span class="linenos">22</span>      at Request.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-<span class="linenos">23</span>      at Request.onRequestError (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">963</span>:<span class="hljs-number">8</span>)
-<span class="linenos">24</span>      at ClientRequest.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-<span class="linenos">25</span>      at Socket.socketErrorListener (http.js:<span class="hljs-number">1551</span>:<span class="hljs-number">9</span>)
-<span class="linenos">26</span>      at Socket.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
-<span class="linenos">27</span>      at net.js:<span class="hljs-number">440</span>:<span class="hljs-number">14</span>
-<span class="linenos">28</span>      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
-<span class="linenos">29</span>
-<span class="linenos">30</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span>=============================================================================
-<span class="linenos">33</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">34</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">35</span>=============================================================================
-<span class="linenos">36</span>
-<span class="linenos">37</span>=============================== Coverage summary ===============================
-<span class="linenos">38</span>Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-<span class="linenos">39</span>Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-<span class="linenos">40</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-<span class="linenos">41</span>Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
-<span class="linenos">42</span>================================================================================
-<span class="linenos">43</span>&gt;&gt;
-<span class="linenos">44</span>Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
-<span class="linenos">45</span>
-<span class="linenos">46</span>Aborted due to warnings.</code></pre><p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-comment">/*jslint node: true */</span>
-<span class="linenos">2</span><span class="hljs-pi">'use strict'</span>;
-<span class="linenos">3</span>
-<span class="linenos">4</span><span class="hljs-comment">// Declare variables used</span>
-<span class="linenos">5</span><span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, port, rtg, shortid;
-<span class="linenos">6</span>
-<span class="linenos">7</span><span class="hljs-comment">// Define values</span>
-<span class="linenos">8</span>express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
-<span class="linenos">9</span>app = express();
-<span class="linenos">10</span>port = process.env.PORT || <span class="hljs-number">5000</span>;
-<span class="linenos">11</span>shortid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'shortid'</span>);
-<span class="linenos">12</span>bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
-<span class="linenos">13</span>base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
-<span class="linenos">14</span>
-<span class="linenos">15</span><span class="hljs-comment">// Set up connection to Redis</span>
-<span class="linenos">16</span><span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
-<span class="linenos">17</span>  rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
-<span class="linenos">18</span>  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
-<span class="linenos">19</span>  client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
-<span class="linenos">20</span>} <span class="hljs-keyword">else</span> {
-<span class="linenos">21</span>  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
-<span class="linenos">22</span>}
-<span class="linenos">23</span>
-<span class="linenos">24</span><span class="hljs-comment">// Set up templating</span>
-<span class="linenos">25</span>app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
-<span class="linenos">26</span>app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"jade"</span>);
-<span class="linenos">27</span>app.engine(<span class="hljs-string">'jade'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'jade'</span>).__express);
-<span class="linenos">28</span>
-<span class="linenos">29</span><span class="hljs-comment">// Set URL</span>
-<span class="linenos">30</span>app.set(<span class="hljs-string">'base_url'</span>, base_url);
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="hljs-comment">// Handle POST data</span>
-<span class="linenos">33</span>app.use(bodyParser.json());
-<span class="linenos">34</span>app.use(bodyParser.urlencoded({
-<span class="linenos">35</span>  extended: <span class="hljs-literal">true</span>
-<span class="linenos">36</span>}));
-<span class="linenos">37</span>
-<span class="linenos">38</span><span class="hljs-comment">// Define index route</span>
-<span class="linenos">39</span>app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
-<span class="linenos">40</span>  res.render(<span class="hljs-string">'index'</span>);
-<span class="linenos">41</span>});
-<span class="linenos">42</span>
-<span class="linenos">43</span><span class="hljs-comment">// Serve static files</span>
-<span class="linenos">44</span>app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="hljs-comment">// Listen</span>
-<span class="linenos">47</span>app.listen(port);
-<span class="linenos">48</span><span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on port '</span> + port);</code></pre><p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p><p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p><p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p><p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p><p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p><p>Let’s run our test:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>Listening on port <span class="hljs-number">5000</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span>  server
-<span class="linenos">10</span>Starting the server
-<span class="linenos">11</span>    Test the index route
-<span class="linenos">12</span>      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">116</span>ms)
-<span class="linenos">13</span>Stopping the server
-<span class="linenos">14</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span>  <span class="hljs-number">1</span> passing (<span class="hljs-number">128</span>ms)
-<span class="linenos">17</span>
-<span class="linenos">18</span>=============================================================================
-<span class="linenos">19</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">20</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">21</span>=============================================================================
-<span class="linenos">22</span>
-<span class="linenos">23</span>=============================== Coverage summary ===============================
-<span class="linenos">24</span>Statements   : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
-<span class="linenos">25</span>Branches     : <span class="hljs-number">83.33</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">6</span> )
-<span class="linenos">26</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
-<span class="linenos">27</span>Lines        : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
-<span class="linenos">28</span>================================================================================
-<span class="linenos">29</span>&gt;&gt; Done. Check coverage folder.
-<span class="linenos">30</span>
-<span class="linenos">31</span>Done, without errors.</code></pre><p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-comment">/* istanbul ignore if */</span>
-<span class="linenos">2</span><span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
-<span class="linenos">3</span>    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
-<span class="linenos">4</span>    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
-<span class="linenos">5</span>    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
-<span class="linenos">6</span>} <span class="hljs-keyword">else</span> {
-<span class="linenos">7</span>    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
-<span class="linenos">8</span>}</code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>    <span class="hljs-comment">// Test submitting a URL</span>
-<span class="linenos">2</span>    describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">3</span>        it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">4</span>            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {form: {url: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
-<span class="linenos">5</span>                expect(body).to.include(<span class="hljs-string">'Your shortened URL is'</span>);
-<span class="linenos">6</span>                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
-<span class="linenos">7</span>                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
-<span class="linenos">8</span>                done();
-<span class="linenos">9</span>            });
-<span class="linenos">10</span>        });
-<span class="linenos">11</span>    });</code></pre><p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>Listening on port <span class="hljs-number">5000</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span>  server
-<span class="linenos">10</span>Starting the server
-<span class="linenos">11</span>    Test the index route
-<span class="linenos">12</span>      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">223</span>ms)
-<span class="linenos">13</span>    Test submitting a URL
-<span class="linenos">14</span>      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> the shortened URL
-<span class="linenos">15</span>Stopping the server
-<span class="linenos">16</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span>  <span class="hljs-number">1</span> passing (<span class="hljs-number">318</span>ms)
-<span class="linenos">19</span>  <span class="hljs-number">1</span> failing
-<span class="linenos">20</span>
-<span class="linenos">21</span>  <span class="hljs-number">1</span>) server Test submitting a URL should <span class="hljs-built_in">return</span> the shortened URL:
-<span class="linenos">22</span>     Uncaught AssertionError: expected <span class="hljs-string">'Cannot POST /\n'</span> to include <span class="hljs-string">'Your shortened URL is'</span>
-<span class="linenos">23</span>      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">45</span>:<span class="hljs-number">33</span>)
-<span class="linenos">24</span>      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
-<span class="linenos">25</span>      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
-<span class="linenos">26</span>      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
-<span class="linenos">27</span>      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">28</span>      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
-<span class="linenos">29</span>      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">30</span>      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
-<span class="linenos">31</span>      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
-<span class="linenos">32</span>
-<span class="linenos">33</span>
-<span class="linenos">34</span>
-<span class="linenos">35</span>=============================================================================
-<span class="linenos">36</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">37</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">38</span>=============================================================================
-<span class="linenos">39</span>
-<span class="linenos">40</span>=============================== Coverage summary ===============================
-<span class="linenos">41</span>Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> ), <span class="hljs-number">3</span> ignored
-<span class="linenos">42</span>Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-<span class="linenos">43</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
-<span class="linenos">44</span>Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> )
-<span class="linenos">45</span>================================================================================
-<span class="linenos">46</span>&gt;&gt;
-<span class="linenos">47</span>Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
-<span class="linenos">48</span>
-<span class="linenos">49</span>Aborted due to warnings.</code></pre><p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-comment">// Define submit route</span>
-<span class="linenos">2</span>app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
-<span class="linenos">3</span>    <span class="hljs-comment">// Declare variables</span>
-<span class="linenos">4</span>    <span class="hljs-keyword">var</span> url, id;
-<span class="linenos">5</span>
-<span class="linenos">6</span>    <span class="hljs-comment">// Get URL</span>
-<span class="linenos">7</span>    url = req.body.url;
-<span class="linenos">8</span>
-<span class="linenos">9</span>    <span class="hljs-comment">// Create a hashed short version</span>
-<span class="linenos">10</span>    id = shortid.generate();
-<span class="linenos">11</span>
-<span class="linenos">12</span>    <span class="hljs-comment">// Store them in Redis</span>
-<span class="linenos">13</span>    client.set(id, url, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">14</span>        <span class="hljs-comment">// Display the response</span>
-<span class="linenos">15</span>        res.render(<span class="hljs-string">'output'</span>, { id: id, base_url: base_url });
-<span class="linenos">16</span>    });
-<span class="linenos">17</span>});</code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>Listening on port <span class="hljs-number">5000</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span>  server
-<span class="linenos">10</span>Starting the server
-<span class="linenos">11</span>    Test the index route
-<span class="linenos">12</span>      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">89</span>ms)
-<span class="linenos">13</span>    Test submitting a URL
-<span class="linenos">14</span>      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">65</span>ms)
-<span class="linenos">15</span>Stopping the server
-<span class="linenos">16</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span>  <span class="hljs-number">2</span> passing (<span class="hljs-number">167</span>ms)
-<span class="linenos">19</span>
-<span class="linenos">20</span>=============================================================================
-<span class="linenos">21</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">22</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">23</span>=============================================================================
-<span class="linenos">24</span>
-<span class="linenos">25</span>=============================== Coverage summary ===============================
-<span class="linenos">26</span>Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
-<span class="linenos">27</span>Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-<span class="linenos">28</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
-<span class="linenos">29</span>Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
-<span class="linenos">30</span>================================================================================
-<span class="linenos">31</span>&gt;&gt; Done. Check coverage folder.
-<span class="linenos">32</span>
-<span class="linenos">33</span>Done, without errors.</code></pre><p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>
-<span class="linenos">2</span>    <span class="hljs-comment">// Test following a URL</span>
-<span class="linenos">3</span>    describe(<span class="hljs-string">'Test following a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">4</span>        it(<span class="hljs-string">'should redirect the user to the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">5</span>            <span class="hljs-comment">// Create the URL</span>
-<span class="linenos">6</span>            client.set(<span class="hljs-string">'testurl'</span>, <span class="hljs-string">'http://www.google.com'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">7</span>                <span class="hljs-comment">// Follow the link</span>
-<span class="linenos">8</span>                request.get({
-<span class="linenos">9</span>                    url: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
-<span class="linenos">10</span>                    followRedirect: <span class="hljs-literal">false</span>
-<span class="linenos">11</span>                }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
-<span class="linenos">12</span>                    expect(response.headers.location).to.equal(<span class="hljs-string">'http://www.google.com'</span>);
-<span class="linenos">13</span>                    expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
-<span class="linenos">14</span>                    done();
-<span class="linenos">15</span>                });
-<span class="linenos">16</span>            });
-<span class="linenos">17</span>        });
-<span class="linenos">18</span>    });
-<span class="linenos">19</span>
-<span class="linenos">20</span>    <span class="hljs-comment">// Test non-existent link</span>
-<span class="linenos">21</span>    describe(<span class="hljs-string">'Test following a non-existent-link'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-<span class="linenos">22</span>        it(<span class="hljs-string">'should return a 404 error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
-<span class="linenos">23</span>            <span class="hljs-comment">// Follow the link</span>
-<span class="linenos">24</span>            request.get({
-<span class="linenos">25</span>                url: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
-<span class="linenos">26</span>                followRedirect: <span class="hljs-literal">false</span>
-<span class="linenos">27</span>            }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
-<span class="linenos">28</span>                expect(response.statusCode).to.equal(<span class="hljs-number">404</span>);
-<span class="linenos">29</span>                expect(body).to.include(<span class="hljs-string">'Link not found'</span>);
-<span class="linenos">30</span>                done();
-<span class="linenos">31</span>            });
-<span class="linenos">32</span>        });
-<span class="linenos">33</span>    });</code></pre><p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p><p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p><p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p><p>If we run our tests, they should now fail:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>Listening on port <span class="hljs-number">5000</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span>  server
-<span class="linenos">10</span>Starting the server
-<span class="linenos">11</span>    Test the index route
-<span class="linenos">12</span>      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">252</span>ms)
-<span class="linenos">13</span>    Test submitting a URL
-<span class="linenos">14</span>      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
-<span class="linenos">15</span>    Test following a URL
-<span class="linenos">16</span>      <span class="hljs-number">1</span>) should redirect the user to the shortened URL
-<span class="linenos">17</span>    Test following a non-existent-link
-<span class="linenos">18</span>      <span class="hljs-number">2</span>) should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
-<span class="linenos">19</span>Stopping the server
-<span class="linenos">20</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span>  <span class="hljs-number">2</span> passing (<span class="hljs-number">322</span>ms)
-<span class="linenos">23</span>  <span class="hljs-number">2</span> failing
-<span class="linenos">24</span>
-<span class="linenos">25</span>  <span class="hljs-number">1</span>) server Test following a URL should redirect the user to the shortened URL:
-<span class="linenos">26</span>     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'http://www.google.com'</span>
-<span class="linenos">27</span>      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">63</span>:<span class="hljs-number">58</span>)
-<span class="linenos">28</span>      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
-<span class="linenos">29</span>      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
-<span class="linenos">30</span>      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
-<span class="linenos">31</span>      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">32</span>      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
-<span class="linenos">33</span>      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">34</span>      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
-<span class="linenos">35</span>      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
-<span class="linenos">36</span>
-<span class="linenos">37</span>  <span class="hljs-number">2</span>) server Test following a non-existent-link should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error:
-<span class="linenos">38</span>     Uncaught AssertionError: expected <span class="hljs-string">'Cannot GET /nonexistenturl\n'</span> to include <span class="hljs-string">'Link not found'</span>
-<span class="linenos">39</span>      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">80</span>:<span class="hljs-number">33</span>)
-<span class="linenos">40</span>      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
-<span class="linenos">41</span>      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
-<span class="linenos">42</span>      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
-<span class="linenos">43</span>      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">44</span>      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
-<span class="linenos">45</span>      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
-<span class="linenos">46</span>      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
-<span class="linenos">47</span>      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
-<span class="linenos">48</span>
-<span class="linenos">49</span>
-<span class="linenos">50</span>
-<span class="linenos">51</span>=============================================================================
-<span class="linenos">52</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">53</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">54</span>=============================================================================
-<span class="linenos">55</span>
-<span class="linenos">56</span>=============================== Coverage summary ===============================
-<span class="linenos">57</span>Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
-<span class="linenos">58</span>Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
-<span class="linenos">59</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
-<span class="linenos">60</span>Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
-<span class="linenos">61</span>================================================================================
-<span class="linenos">62</span>&gt;&gt;
-<span class="linenos">63</span>Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
-<span class="linenos">64</span>
-<span class="linenos">65</span>Aborted due to warnings.</code></pre><p>Now, let’s add our final route:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span><span class="hljs-comment">// Define link route</span>
-<span class="linenos">2</span>app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
-<span class="linenos">3</span>    <span class="hljs-comment">// Get ID</span>
-<span class="linenos">4</span>    <span class="hljs-keyword">var</span> id = req.params.id.trim();
-<span class="linenos">5</span>
-<span class="linenos">6</span>    <span class="hljs-comment">// Look up the URL</span>
-<span class="linenos">7</span>    client.get(id, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(err, reply)</span> </span>{
-<span class="linenos">8</span>        <span class="hljs-keyword">if</span> (!err &amp;&amp; reply) {
-<span class="linenos">9</span>            <span class="hljs-comment">// Redirect user to it</span>
-<span class="linenos">10</span>            res.status(<span class="hljs-number">301</span>);
-<span class="linenos">11</span>            res.set(<span class="hljs-string">'Location'</span>, reply);
-<span class="linenos">12</span>            res.send();
-<span class="linenos">13</span>        } <span class="hljs-keyword">else</span> {
-<span class="linenos">14</span>            <span class="hljs-comment">// Confirm no such link in database</span>
-<span class="linenos">15</span>            res.status(<span class="hljs-number">404</span>);
-<span class="linenos">16</span>            res.render(<span class="hljs-string">'error'</span>);
-<span class="linenos">17</span>        }
-<span class="linenos">18</span>    });
-<span class="linenos">19</span>});</code></pre><p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p><p>Now, let’s check it passes:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>$ grunt <span class="hljs-built_in">test</span>
-<span class="linenos">2</span>Running <span class="hljs-string">"jshint:all"</span> (jshint) task
-<span class="linenos">3</span>&gt;&gt; <span class="hljs-number">2</span> files lint free.
-<span class="linenos">4</span>
-<span class="linenos">5</span>Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
-<span class="linenos">6</span>Listening on port <span class="hljs-number">5000</span>
-<span class="linenos">7</span>
-<span class="linenos">8</span>
-<span class="linenos">9</span>  server
-<span class="linenos">10</span>Starting the server
-<span class="linenos">11</span>    Test the index route
-<span class="linenos">12</span>      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">90</span>ms)
-<span class="linenos">13</span>    Test submitting a URL
-<span class="linenos">14</span>      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
-<span class="linenos">15</span>    Test following a URL
-<span class="linenos">16</span>      ✓ should redirect the user to the shortened URL
-<span class="linenos">17</span>    Test following a non-existent-link
-<span class="linenos">18</span>      ✓ should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
-<span class="linenos">19</span>Stopping the server
-<span class="linenos">20</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span>  <span class="hljs-number">4</span> passing (<span class="hljs-number">191</span>ms)
-<span class="linenos">23</span>
-<span class="linenos">24</span>=============================================================================
-<span class="linenos">25</span>Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
-<span class="linenos">26</span>Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
-<span class="linenos">27</span>=============================================================================
-<span class="linenos">28</span>
-<span class="linenos">29</span>=============================== Coverage summary ===============================
-<span class="linenos">30</span>Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> ), <span class="hljs-number">3</span> ignored
-<span class="linenos">31</span>Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">10</span>/<span class="hljs-number">10</span> ), <span class="hljs-number">1</span> ignored
-<span class="linenos">32</span>Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">5</span> )
-<span class="linenos">33</span>Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> )
-<span class="linenos">34</span>================================================================================
-<span class="linenos">35</span>&gt;&gt; Done. Check coverage folder.
-<span class="linenos">36</span>
-<span class="linenos">37</span>Done, without errors.</code></pre><p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you’ll need to install the Redis to Go addon, and refer to Heroku’s documentation on deploying Node.js applications for more details.</p><h2 id="wrapping-up">Wrapping up</h2><p>You’ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p><p>I hope you’ve enjoyed this brief introduction to Redis, and that it’s opened your eyes to at least one of the alternatives out there to a relational database. I’ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p><ul class="categorylist"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul><div class="addthis_sharing_toolbox"></div><section class="comments"><div id="disqus_thread"></div><script type="text/javascript">window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/";
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"><meta name="description" content="I&#x27;m a web developer in Norfolk. This is my blog..."><link href="/favicon.ico" rel="icon"><link href="http://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><link rel="stylesheet" type="text/css" href="/static/bower_components/sass-bootstrap/dist/css/bootstrap.min.css" media="all"><link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><title>Building a URL Shortener With Node.js and Redis - Matthew Daly&#x27;s Blog</title></head><body><script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=MattBD" async="async"></script><header><div class="container headercontainer"><div class="jumbotron"><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></div></div><div class="container headercontainer"><nav class="navbar navbar-inverse navbar-static-top"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-nav"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button><div class="collapse navbar-collapse" id="header-nav"><ul class="nav navbar-nav"><li><a href="/">Home</a></li><li><a href="/blog/archives/">Archives</a></li><li><a href="/about/">About</a></li><li><a href="/rss.xml">RSS</a></li></ul><form action="http://www.google.com/search" method="GET" name="searchForm" id="searchForm" enctype="application/x-www-form-urlencoded" class="navbar-form navbar-right"><div class="form-group"><input id="search" type="search" name="q" placeholder="Search..." maxlength="200" class="form-control"><ul class="searchresults"></ul></div></form></div></div></nav></div></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th November 2014 5:13 pm</p><h1>Building a URL Shortener With Node.js and Redis</h1><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p><p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p><h2 id="what-is-redis-">What is Redis?</h2><p>Redis is described as follows on the website:</p><blockquote><p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p></blockquote><p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p><p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p><ul><li>A string to identify the correct URL</li><li>The URL</li></ul><p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p><h2 id="getting-started">Getting started</h2><p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p><p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p><pre><code class="hljs lang-bash singleline">$ sudo npm install -g grunt-cli</code></pre><p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p><p>Now, let’s create our <code>package.json</code> file:</p><pre><code class="hljs lang-bash singleline">$ npm init</code></pre><p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p><pre><code class="hljs lang-json"><span class="linenos">1</span>	{
+<span class="linenos">2</span>	  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"url-shortener"</span></span>,
+<span class="linenos">3</span>	  "<span class="hljs-attribute">version</span>": <span class="hljs-value"><span class="hljs-string">"1.0.0"</span></span>,
+<span class="linenos">4</span>	  "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"A URL shortener"</span></span>,
+<span class="linenos">5</span>	  "<span class="hljs-attribute">main</span>": <span class="hljs-value"><span class="hljs-string">"index.js"</span></span>,
+<span class="linenos">6</span>	  "<span class="hljs-attribute">scripts</span>": <span class="hljs-value">{
+<span class="linenos">7</span>	    "<span class="hljs-attribute">test</span>": <span class="hljs-value"><span class="hljs-string">"grunt test"</span>
+<span class="linenos">8</span>	  </span>}</span>,
+<span class="linenos">9</span>	  "<span class="hljs-attribute">keywords</span>": <span class="hljs-value">[
+<span class="linenos">10</span>	    <span class="hljs-string">"URL"</span>,
+<span class="linenos">11</span>	    <span class="hljs-string">"shortener"</span>
+<span class="linenos">12</span>	  ]</span>,
+<span class="linenos">13</span>	  "<span class="hljs-attribute">author</span>": <span class="hljs-value"><span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span></span>,
+<span class="linenos">14</span>	  "<span class="hljs-attribute">license</span>": <span class="hljs-value"><span class="hljs-string">"GPLv2"</span>
+<span class="linenos">15</span>	</span>}</code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="hljs lang-bash singleline">$ npm install --save body-parser express redis hiredis jade shortid</code></pre><p>Next, install the development dependencies:</p><pre><code class="hljs lang-bash singleline">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request</code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(grunt)</span> </span>{
+<span class="linenos">2</span>	<span class="hljs-pi">    'use strict'</span>;
+<span class="linenos">3</span>	
+<span class="linenos">4</span>	    grunt.initConfig({
+<span class="linenos">5</span>	        jshint: {
+<span class="linenos">6</span>	            all: [
+<span class="linenos">7</span>	                <span class="hljs-string">'test/*.js'</span>,
+<span class="linenos">8</span>	                <span class="hljs-string">'index.js'</span>
+<span class="linenos">9</span>	            ]
+<span class="linenos">10</span>	        },
+<span class="linenos">11</span>	        mocha_istanbul: {
+<span class="linenos">12</span>	            coverage: {
+<span class="linenos">13</span>	                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
+<span class="linenos">14</span>	                options: {
+<span class="linenos">15</span>	                    mask: <span class="hljs-string">'*.js'</span>,
+<span class="linenos">16</span>	                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
+<span class="linenos">17</span>	                }
+<span class="linenos">18</span>	            }
+<span class="linenos">19</span>	        }
+<span class="linenos">20</span>	    });
+<span class="linenos">21</span>	
+<span class="linenos">22</span>	    <span class="hljs-comment">// Load tasks</span>
+<span class="linenos">23</span>	    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
+<span class="linenos">24</span>	    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
+<span class="linenos">25</span>	
+<span class="linenos">26</span>	    <span class="hljs-comment">// Register tasks</span>
+<span class="linenos">27</span>	    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
+<span class="linenos">28</span>	};</code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="hljs lang-bash singleline">web: node index.js</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>	doctype <span class="hljs-tag">html</span>
+<span class="linenos">2</span>	<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
+<span class="linenos">3</span>	    head
+<span class="linenos">4</span>	        title=<span class="hljs-string">"Shortbread"</span>
+<span class="linenos">5</span>	
+<span class="linenos">6</span>	    <span class="hljs-tag">body</span>
+<span class="linenos">7</span>	        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
+<span class="linenos">8</span>	            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+<span class="linenos">9</span>	                <span class="hljs-tag">h1</span> Shortbread
+<span class="linenos">10</span>	
+<span class="linenos">11</span>	            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+<span class="linenos">12</span>	                <span class="hljs-function"><span class="hljs-title">form</span><span class="hljs-params">(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)</span></span>
+<span class="linenos">13</span>	                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)</span></span>
+<span class="linenos">14</span>	                    <span class="hljs-function"><span class="hljs-title">input</span><span class="hljs-params">(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)</span></span></code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>	doctype html
+<span class="linenos">2</span>	html(lang=<span class="hljs-string">"en"</span>)
+<span class="linenos">3</span>	    head
+<span class="linenos">4</span>	        title=Shortbread
+<span class="linenos">5</span>	
+<span class="linenos">6</span>	    body
+<span class="linenos">7</span>	        <span class="hljs-operator">div</span>.container
+<span class="linenos">8</span>	            <span class="hljs-operator">div</span>.row
+<span class="linenos">9</span>	                h1 Shortbread
+<span class="linenos">10</span>	                p
+<span class="linenos">11</span>	                    | Your shortened <span class="hljs-built_in">URL</span> is
+<span class="linenos">12</span>	                    <span class="hljs-operator">a</span>(href=base_url+<span class="hljs-string">'/'</span>+id) <span class="hljs-comment">#{base_url}/#{id}</span></code></pre><p>and <code>views/error.jade</code>:</p><pre><code class="hljs lang-jade"><span class="linenos">1</span>	doctype <span class="hljs-tag">html</span>
+<span class="linenos">2</span>	<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
+<span class="linenos">3</span>	    head
+<span class="linenos">4</span>	        title=<span class="hljs-string">"Shortbread"</span>
+<span class="linenos">5</span>	
+<span class="linenos">6</span>	    <span class="hljs-tag">body</span>
+<span class="linenos">7</span>	        <span class="hljs-tag">div</span><span class="hljs-class">.container</span>
+<span class="linenos">8</span>	            <span class="hljs-tag">div</span><span class="hljs-class">.row</span>
+<span class="linenos">9</span>	                <span class="hljs-tag">h1</span> Shortbread
+<span class="linenos">10</span>	                <span class="hljs-tag">p</span> Link not found</code></pre><h2 id="writing-our-first-test">Writing our first test</h2><p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-comment">/*jslint node: true */</span>
+<span class="linenos">2</span>	<span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
+<span class="linenos">3</span>	<span class="hljs-pi">"use strict"</span>;
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	<span class="hljs-comment">// Declare the variables used</span>
+<span class="linenos">6</span>	<span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
+<span class="linenos">7</span>	    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
+<span class="linenos">8</span>	    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
+<span class="linenos">9</span>	    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
+<span class="linenos">10</span>	    client;
+<span class="linenos">11</span>	client = redis.createClient();
+<span class="linenos">12</span>	
+<span class="linenos">13</span>	<span class="hljs-comment">// Server tasks</span>
+<span class="linenos">14</span>	describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">15</span>	
+<span class="linenos">16</span>	    <span class="hljs-comment">// Beforehand, start the server</span>
+<span class="linenos">17</span>	    before(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">18</span>	        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
+<span class="linenos">19</span>	        done();
+<span class="linenos">20</span>	    });
+<span class="linenos">21</span>	
+<span class="linenos">22</span>	    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
+<span class="linenos">23</span>	    after(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">24</span>	        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
+<span class="linenos">25</span>	        client.flushdb();
+<span class="linenos">26</span>	        done();
+<span class="linenos">27</span>	    });
+<span class="linenos">28</span>	
+<span class="linenos">29</span>	    <span class="hljs-comment">// Test the index route</span>
+<span class="linenos">30</span>	    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">31</span>	        it(<span class="hljs-string">'should return a page with the title Shortbread'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">32</span>	            request.get({ url: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+<span class="linenos">33</span>	                expect(body).to.include(<span class="hljs-string">'Shortbread'</span>);
+<span class="linenos">34</span>	                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+<span class="linenos">35</span>	                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
+<span class="linenos">36</span>	                done();
+<span class="linenos">37</span>	            });
+<span class="linenos">38</span>	        });
+<span class="linenos">39</span>	    });
+<span class="linenos">40</span>	});</code></pre><p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p><p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p><p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p><p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p><pre><code class="hljs lang-bash singleline">$ touch index.js</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	  server
+<span class="linenos">9</span>	Starting the server
+<span class="linenos">10</span>	    Test the index route
+<span class="linenos">11</span>	      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> a page with the title Shortbread
+<span class="linenos">12</span>	Stopping the server
+<span class="linenos">13</span>	
+<span class="linenos">14</span>	
+<span class="linenos">15</span>	  <span class="hljs-number">0</span> passing (<span class="hljs-number">152</span>ms)
+<span class="linenos">16</span>	  <span class="hljs-number">1</span> failing
+<span class="linenos">17</span>	
+<span class="linenos">18</span>	  <span class="hljs-number">1</span>) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Shortbread:
+<span class="linenos">19</span>	     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Shortbread'</span>
+<span class="linenos">20</span>	      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">33</span>:<span class="hljs-number">33</span>)
+<span class="linenos">21</span>	      at self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+<span class="linenos">22</span>	      at Request.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+<span class="linenos">23</span>	      at Request.onRequestError (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">963</span>:<span class="hljs-number">8</span>)
+<span class="linenos">24</span>	      at ClientRequest.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+<span class="linenos">25</span>	      at Socket.socketErrorListener (http.js:<span class="hljs-number">1551</span>:<span class="hljs-number">9</span>)
+<span class="linenos">26</span>	      at Socket.emit (events.js:<span class="hljs-number">95</span>:<span class="hljs-number">17</span>)
+<span class="linenos">27</span>	      at net.js:<span class="hljs-number">440</span>:<span class="hljs-number">14</span>
+<span class="linenos">28</span>	      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+<span class="linenos">29</span>	
+<span class="linenos">30</span>	
+<span class="linenos">31</span>	
+<span class="linenos">32</span>	=============================================================================
+<span class="linenos">33</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">34</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">35</span>	=============================================================================
+<span class="linenos">36</span>	
+<span class="linenos">37</span>	=============================== Coverage summary ===============================
+<span class="linenos">38</span>	Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+<span class="linenos">39</span>	Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+<span class="linenos">40</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+<span class="linenos">41</span>	Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">0</span>/<span class="hljs-number">0</span> )
+<span class="linenos">42</span>	================================================================================
+<span class="linenos">43</span>	&gt;&gt;
+<span class="linenos">44</span>	Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+<span class="linenos">45</span>	
+<span class="linenos">46</span>	Aborted due to warnings.</code></pre><p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-comment">/*jslint node: true */</span>
+<span class="linenos">2</span>	<span class="hljs-pi">'use strict'</span>;
+<span class="linenos">3</span>	
+<span class="linenos">4</span>	<span class="hljs-comment">// Declare variables used</span>
+<span class="linenos">5</span>	<span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, port, rtg, shortid;
+<span class="linenos">6</span>	
+<span class="linenos">7</span>	<span class="hljs-comment">// Define values</span>
+<span class="linenos">8</span>	express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="linenos">9</span>	app = express();
+<span class="linenos">10</span>	port = process.env.PORT || <span class="hljs-number">5000</span>;
+<span class="linenos">11</span>	shortid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'shortid'</span>);
+<span class="linenos">12</span>	bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+<span class="linenos">13</span>	base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+<span class="linenos">14</span>	
+<span class="linenos">15</span>	<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="linenos">16</span>	<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+<span class="linenos">17</span>	  rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+<span class="linenos">18</span>	  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+<span class="linenos">19</span>	  client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+<span class="linenos">20</span>	} <span class="hljs-keyword">else</span> {
+<span class="linenos">21</span>	  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+<span class="linenos">22</span>	}
+<span class="linenos">23</span>	
+<span class="linenos">24</span>	<span class="hljs-comment">// Set up templating</span>
+<span class="linenos">25</span>	app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+<span class="linenos">26</span>	app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"jade"</span>);
+<span class="linenos">27</span>	app.engine(<span class="hljs-string">'jade'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'jade'</span>).__express);
+<span class="linenos">28</span>	
+<span class="linenos">29</span>	<span class="hljs-comment">// Set URL</span>
+<span class="linenos">30</span>	app.set(<span class="hljs-string">'base_url'</span>, base_url);
+<span class="linenos">31</span>	
+<span class="linenos">32</span>	<span class="hljs-comment">// Handle POST data</span>
+<span class="linenos">33</span>	app.use(bodyParser.json());
+<span class="linenos">34</span>	app.use(bodyParser.urlencoded({
+<span class="linenos">35</span>	  extended: <span class="hljs-literal">true</span>
+<span class="linenos">36</span>	}));
+<span class="linenos">37</span>	
+<span class="linenos">38</span>	<span class="hljs-comment">// Define index route</span>
+<span class="linenos">39</span>	app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+<span class="linenos">40</span>	  res.render(<span class="hljs-string">'index'</span>);
+<span class="linenos">41</span>	});
+<span class="linenos">42</span>	
+<span class="linenos">43</span>	<span class="hljs-comment">// Serve static files</span>
+<span class="linenos">44</span>	app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
+<span class="linenos">45</span>	
+<span class="linenos">46</span>	<span class="hljs-comment">// Listen</span>
+<span class="linenos">47</span>	app.listen(port);
+<span class="linenos">48</span>	<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on port '</span> + port);</code></pre><p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p><p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p><p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p><p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p><p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p><p>Let’s run our test:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	Listening on port <span class="hljs-number">5000</span>
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	  server
+<span class="linenos">10</span>	Starting the server
+<span class="linenos">11</span>	    Test the index route
+<span class="linenos">12</span>	      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">116</span>ms)
+<span class="linenos">13</span>	Stopping the server
+<span class="linenos">14</span>	
+<span class="linenos">15</span>	
+<span class="linenos">16</span>	  <span class="hljs-number">1</span> passing (<span class="hljs-number">128</span>ms)
+<span class="linenos">17</span>	
+<span class="linenos">18</span>	=============================================================================
+<span class="linenos">19</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">20</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">21</span>	=============================================================================
+<span class="linenos">22</span>	
+<span class="linenos">23</span>	=============================== Coverage summary ===============================
+<span class="linenos">24</span>	Statements   : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
+<span class="linenos">25</span>	Branches     : <span class="hljs-number">83.33</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">6</span> )
+<span class="linenos">26</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+<span class="linenos">27</span>	Lines        : <span class="hljs-number">86.96</span>% ( <span class="hljs-number">20</span>/<span class="hljs-number">23</span> )
+<span class="linenos">28</span>	================================================================================
+<span class="linenos">29</span>	&gt;&gt; Done. Check coverage folder.
+<span class="linenos">30</span>	
+<span class="linenos">31</span>	Done, without errors.</code></pre><p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="linenos">2</span>	<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+<span class="linenos">3</span>	    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+<span class="linenos">4</span>	    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+<span class="linenos">5</span>	    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+<span class="linenos">6</span>	} <span class="hljs-keyword">else</span> {
+<span class="linenos">7</span>	    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+<span class="linenos">8</span>	}</code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	    <span class="hljs-comment">// Test submitting a URL</span>
+<span class="linenos">2</span>	    describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">3</span>	        it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">4</span>	            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {form: {url: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+<span class="linenos">5</span>	                expect(body).to.include(<span class="hljs-string">'Your shortened URL is'</span>);
+<span class="linenos">6</span>	                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+<span class="linenos">7</span>	                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
+<span class="linenos">8</span>	                done();
+<span class="linenos">9</span>	            });
+<span class="linenos">10</span>	        });
+<span class="linenos">11</span>	    });</code></pre><p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	Listening on port <span class="hljs-number">5000</span>
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	  server
+<span class="linenos">10</span>	Starting the server
+<span class="linenos">11</span>	    Test the index route
+<span class="linenos">12</span>	      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">223</span>ms)
+<span class="linenos">13</span>	    Test submitting a URL
+<span class="linenos">14</span>	      <span class="hljs-number">1</span>) should <span class="hljs-built_in">return</span> the shortened URL
+<span class="linenos">15</span>	Stopping the server
+<span class="linenos">16</span>	
+<span class="linenos">17</span>	
+<span class="linenos">18</span>	  <span class="hljs-number">1</span> passing (<span class="hljs-number">318</span>ms)
+<span class="linenos">19</span>	  <span class="hljs-number">1</span> failing
+<span class="linenos">20</span>	
+<span class="linenos">21</span>	  <span class="hljs-number">1</span>) server Test submitting a URL should <span class="hljs-built_in">return</span> the shortened URL:
+<span class="linenos">22</span>	     Uncaught AssertionError: expected <span class="hljs-string">'Cannot POST /\n'</span> to include <span class="hljs-string">'Your shortened URL is'</span>
+<span class="linenos">23</span>	      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">45</span>:<span class="hljs-number">33</span>)
+<span class="linenos">24</span>	      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+<span class="linenos">25</span>	      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+<span class="linenos">26</span>	      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+<span class="linenos">27</span>	      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">28</span>	      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+<span class="linenos">29</span>	      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">30</span>	      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+<span class="linenos">31</span>	      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+<span class="linenos">32</span>	
+<span class="linenos">33</span>	
+<span class="linenos">34</span>	
+<span class="linenos">35</span>	=============================================================================
+<span class="linenos">36</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">37</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">38</span>	=============================================================================
+<span class="linenos">39</span>	
+<span class="linenos">40</span>	=============================== Coverage summary ===============================
+<span class="linenos">41</span>	Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> ), <span class="hljs-number">3</span> ignored
+<span class="linenos">42</span>	Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+<span class="linenos">43</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">1</span>/<span class="hljs-number">1</span> )
+<span class="linenos">44</span>	Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">23</span>/<span class="hljs-number">23</span> )
+<span class="linenos">45</span>	================================================================================
+<span class="linenos">46</span>	&gt;&gt;
+<span class="linenos">47</span>	Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+<span class="linenos">48</span>	
+<span class="linenos">49</span>	Aborted due to warnings.</code></pre><p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-comment">// Define submit route</span>
+<span class="linenos">2</span>	app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+<span class="linenos">3</span>	    <span class="hljs-comment">// Declare variables</span>
+<span class="linenos">4</span>	    <span class="hljs-keyword">var</span> url, id;
+<span class="linenos">5</span>	
+<span class="linenos">6</span>	    <span class="hljs-comment">// Get URL</span>
+<span class="linenos">7</span>	    url = req.body.url;
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	    <span class="hljs-comment">// Create a hashed short version</span>
+<span class="linenos">10</span>	    id = shortid.generate();
+<span class="linenos">11</span>	
+<span class="linenos">12</span>	    <span class="hljs-comment">// Store them in Redis</span>
+<span class="linenos">13</span>	    client.set(id, url, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">14</span>	        <span class="hljs-comment">// Display the response</span>
+<span class="linenos">15</span>	        res.render(<span class="hljs-string">'output'</span>, { id: id, base_url: base_url });
+<span class="linenos">16</span>	    });
+<span class="linenos">17</span>	});</code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	Listening on port <span class="hljs-number">5000</span>
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	  server
+<span class="linenos">10</span>	Starting the server
+<span class="linenos">11</span>	    Test the index route
+<span class="linenos">12</span>	      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">89</span>ms)
+<span class="linenos">13</span>	    Test submitting a URL
+<span class="linenos">14</span>	      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">65</span>ms)
+<span class="linenos">15</span>	Stopping the server
+<span class="linenos">16</span>	
+<span class="linenos">17</span>	
+<span class="linenos">18</span>	  <span class="hljs-number">2</span> passing (<span class="hljs-number">167</span>ms)
+<span class="linenos">19</span>	
+<span class="linenos">20</span>	=============================================================================
+<span class="linenos">21</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">22</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">23</span>	=============================================================================
+<span class="linenos">24</span>	
+<span class="linenos">25</span>	=============================== Coverage summary ===============================
+<span class="linenos">26</span>	Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
+<span class="linenos">27</span>	Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+<span class="linenos">28</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
+<span class="linenos">29</span>	Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
+<span class="linenos">30</span>	================================================================================
+<span class="linenos">31</span>	&gt;&gt; Done. Check coverage folder.
+<span class="linenos">32</span>	
+<span class="linenos">33</span>	Done, without errors.</code></pre><p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	
+<span class="linenos">2</span>	    <span class="hljs-comment">// Test following a URL</span>
+<span class="linenos">3</span>	    describe(<span class="hljs-string">'Test following a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">4</span>	        it(<span class="hljs-string">'should redirect the user to the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">5</span>	            <span class="hljs-comment">// Create the URL</span>
+<span class="linenos">6</span>	            client.set(<span class="hljs-string">'testurl'</span>, <span class="hljs-string">'http://www.google.com'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">7</span>	                <span class="hljs-comment">// Follow the link</span>
+<span class="linenos">8</span>	                request.get({
+<span class="linenos">9</span>	                    url: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
+<span class="linenos">10</span>	                    followRedirect: <span class="hljs-literal">false</span>
+<span class="linenos">11</span>	                }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+<span class="linenos">12</span>	                    expect(response.headers.location).to.equal(<span class="hljs-string">'http://www.google.com'</span>);
+<span class="linenos">13</span>	                    expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
+<span class="linenos">14</span>	                    done();
+<span class="linenos">15</span>	                });
+<span class="linenos">16</span>	            });
+<span class="linenos">17</span>	        });
+<span class="linenos">18</span>	    });
+<span class="linenos">19</span>	
+<span class="linenos">20</span>	    <span class="hljs-comment">// Test non-existent link</span>
+<span class="linenos">21</span>	    describe(<span class="hljs-string">'Test following a non-existent-link'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+<span class="linenos">22</span>	        it(<span class="hljs-string">'should return a 404 error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(done)</span> </span>{
+<span class="linenos">23</span>	            <span class="hljs-comment">// Follow the link</span>
+<span class="linenos">24</span>	            request.get({
+<span class="linenos">25</span>	                url: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
+<span class="linenos">26</span>	                followRedirect: <span class="hljs-literal">false</span>
+<span class="linenos">27</span>	            }, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(error, response, body)</span> </span>{
+<span class="linenos">28</span>	                expect(response.statusCode).to.equal(<span class="hljs-number">404</span>);
+<span class="linenos">29</span>	                expect(body).to.include(<span class="hljs-string">'Link not found'</span>);
+<span class="linenos">30</span>	                done();
+<span class="linenos">31</span>	            });
+<span class="linenos">32</span>	        });
+<span class="linenos">33</span>	    });</code></pre><p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p><p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p><p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p><p>If we run our tests, they should now fail:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	Listening on port <span class="hljs-number">5000</span>
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	  server
+<span class="linenos">10</span>	Starting the server
+<span class="linenos">11</span>	    Test the index route
+<span class="linenos">12</span>	      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">252</span>ms)
+<span class="linenos">13</span>	    Test submitting a URL
+<span class="linenos">14</span>	      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
+<span class="linenos">15</span>	    Test following a URL
+<span class="linenos">16</span>	      <span class="hljs-number">1</span>) should redirect the user to the shortened URL
+<span class="linenos">17</span>	    Test following a non-existent-link
+<span class="linenos">18</span>	      <span class="hljs-number">2</span>) should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
+<span class="linenos">19</span>	Stopping the server
+<span class="linenos">20</span>	
+<span class="linenos">21</span>	
+<span class="linenos">22</span>	  <span class="hljs-number">2</span> passing (<span class="hljs-number">322</span>ms)
+<span class="linenos">23</span>	  <span class="hljs-number">2</span> failing
+<span class="linenos">24</span>	
+<span class="linenos">25</span>	  <span class="hljs-number">1</span>) server Test following a URL should redirect the user to the shortened URL:
+<span class="linenos">26</span>	     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'http://www.google.com'</span>
+<span class="linenos">27</span>	      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">63</span>:<span class="hljs-number">58</span>)
+<span class="linenos">28</span>	      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+<span class="linenos">29</span>	      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+<span class="linenos">30</span>	      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+<span class="linenos">31</span>	      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">32</span>	      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+<span class="linenos">33</span>	      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">34</span>	      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+<span class="linenos">35</span>	      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+<span class="linenos">36</span>	
+<span class="linenos">37</span>	  <span class="hljs-number">2</span>) server Test following a non-existent-link should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error:
+<span class="linenos">38</span>	     Uncaught AssertionError: expected <span class="hljs-string">'Cannot GET /nonexistenturl\n'</span> to include <span class="hljs-string">'Link not found'</span>
+<span class="linenos">39</span>	      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:<span class="hljs-number">80</span>:<span class="hljs-number">33</span>)
+<span class="linenos">40</span>	      at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">372</span>:<span class="hljs-number">22</span>)
+<span class="linenos">41</span>	      at Request.emit (events.js:<span class="hljs-number">98</span>:<span class="hljs-number">17</span>)
+<span class="linenos">42</span>	      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1310</span>:<span class="hljs-number">14</span>)
+<span class="linenos">43</span>	      at Request.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">44</span>	      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:<span class="hljs-number">1258</span>:<span class="hljs-number">12</span>)
+<span class="linenos">45</span>	      at IncomingMessage.emit (events.js:<span class="hljs-number">117</span>:<span class="hljs-number">20</span>)
+<span class="linenos">46</span>	      at _stream_readable.js:<span class="hljs-number">943</span>:<span class="hljs-number">16</span>
+<span class="linenos">47</span>	      at process._tickCallback (node.js:<span class="hljs-number">419</span>:<span class="hljs-number">13</span>)
+<span class="linenos">48</span>	
+<span class="linenos">49</span>	
+<span class="linenos">50</span>	
+<span class="linenos">51</span>	=============================================================================
+<span class="linenos">52</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">53</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">54</span>	=============================================================================
+<span class="linenos">55</span>	
+<span class="linenos">56</span>	=============================== Coverage summary ===============================
+<span class="linenos">57</span>	Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> ), <span class="hljs-number">3</span> ignored
+<span class="linenos">58</span>	Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">6</span>/<span class="hljs-number">6</span> ), <span class="hljs-number">1</span> ignored
+<span class="linenos">59</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">3</span>/<span class="hljs-number">3</span> )
+<span class="linenos">60</span>	Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">29</span>/<span class="hljs-number">29</span> )
+<span class="linenos">61</span>	================================================================================
+<span class="linenos">62</span>	&gt;&gt;
+<span class="linenos">63</span>	Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+<span class="linenos">64</span>	
+<span class="linenos">65</span>	Aborted due to warnings.</code></pre><p>Now, let’s add our final route:</p><pre><code class="hljs lang-javascript"><span class="linenos">1</span>	<span class="hljs-comment">// Define link route</span>
+<span class="linenos">2</span>	app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(req, res)</span> </span>{
+<span class="linenos">3</span>	    <span class="hljs-comment">// Get ID</span>
+<span class="linenos">4</span>	    <span class="hljs-keyword">var</span> id = req.params.id.trim();
+<span class="linenos">5</span>	
+<span class="linenos">6</span>	    <span class="hljs-comment">// Look up the URL</span>
+<span class="linenos">7</span>	    client.get(id, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(err, reply)</span> </span>{
+<span class="linenos">8</span>	        <span class="hljs-keyword">if</span> (!err &amp;&amp; reply) {
+<span class="linenos">9</span>	            <span class="hljs-comment">// Redirect user to it</span>
+<span class="linenos">10</span>	            res.status(<span class="hljs-number">301</span>);
+<span class="linenos">11</span>	            res.set(<span class="hljs-string">'Location'</span>, reply);
+<span class="linenos">12</span>	            res.send();
+<span class="linenos">13</span>	        } <span class="hljs-keyword">else</span> {
+<span class="linenos">14</span>	            <span class="hljs-comment">// Confirm no such link in database</span>
+<span class="linenos">15</span>	            res.status(<span class="hljs-number">404</span>);
+<span class="linenos">16</span>	            res.render(<span class="hljs-string">'error'</span>);
+<span class="linenos">17</span>	        }
+<span class="linenos">18</span>	    });
+<span class="linenos">19</span>	});</code></pre><p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p><p>Now, let’s check it passes:</p><pre><code class="hljs lang-bash"><span class="linenos">1</span>	$ grunt <span class="hljs-built_in">test</span>
+<span class="linenos">2</span>	Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+<span class="linenos">3</span>	&gt;&gt; <span class="hljs-number">2</span> files lint free.
+<span class="linenos">4</span>	
+<span class="linenos">5</span>	Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+<span class="linenos">6</span>	Listening on port <span class="hljs-number">5000</span>
+<span class="linenos">7</span>	
+<span class="linenos">8</span>	
+<span class="linenos">9</span>	  server
+<span class="linenos">10</span>	Starting the server
+<span class="linenos">11</span>	    Test the index route
+<span class="linenos">12</span>	      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (<span class="hljs-number">90</span>ms)
+<span class="linenos">13</span>	    Test submitting a URL
+<span class="linenos">14</span>	      ✓ should <span class="hljs-built_in">return</span> the shortened URL (<span class="hljs-number">47</span>ms)
+<span class="linenos">15</span>	    Test following a URL
+<span class="linenos">16</span>	      ✓ should redirect the user to the shortened URL
+<span class="linenos">17</span>	    Test following a non-existent-link
+<span class="linenos">18</span>	      ✓ should <span class="hljs-built_in">return</span> a <span class="hljs-number">404</span> error
+<span class="linenos">19</span>	Stopping the server
+<span class="linenos">20</span>	
+<span class="linenos">21</span>	
+<span class="linenos">22</span>	  <span class="hljs-number">4</span> passing (<span class="hljs-number">191</span>ms)
+<span class="linenos">23</span>	
+<span class="linenos">24</span>	=============================================================================
+<span class="linenos">25</span>	Writing coverage object [/Users/matthewdaly/Projects/url-shortener/coverage/coverage.json]
+<span class="linenos">26</span>	Writing coverage reports at [/Users/matthewdaly/Projects/url-shortener/coverage]
+<span class="linenos">27</span>	=============================================================================
+<span class="linenos">28</span>	
+<span class="linenos">29</span>	=============================== Coverage summary ===============================
+<span class="linenos">30</span>	Statements   : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> ), <span class="hljs-number">3</span> ignored
+<span class="linenos">31</span>	Branches     : <span class="hljs-number">100</span>% ( <span class="hljs-number">10</span>/<span class="hljs-number">10</span> ), <span class="hljs-number">1</span> ignored
+<span class="linenos">32</span>	Functions    : <span class="hljs-number">100</span>% ( <span class="hljs-number">5</span>/<span class="hljs-number">5</span> )
+<span class="linenos">33</span>	Lines        : <span class="hljs-number">100</span>% ( <span class="hljs-number">38</span>/<span class="hljs-number">38</span> )
+<span class="linenos">34</span>	================================================================================
+<span class="linenos">35</span>	&gt;&gt; Done. Check coverage folder.
+<span class="linenos">36</span>	
+<span class="linenos">37</span>	Done, without errors.</code></pre><p>Excellent! Our URL shortener is now complete. From here, deploying it to Heroku is straightforward - you’ll need to install the Redis to Go addon, and refer to Heroku’s documentation on deploying Node.js applications for more details.</p><h2 id="wrapping-up">Wrapping up</h2><p>You’ll find the source for this application at <a href="https://github.com/matthewbdaly/Shortbread">https://github.com/matthewbdaly/Shortbread</a> and a demo at <a href="http://shortbread-example.herokuapp.com/">http://shortbread-example.herokuapp.com/</a>.</p><p>I hope you’ve enjoyed this brief introduction to Redis, and that it’s opened your eyes to at least one of the alternatives out there to a relational database. I’ll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.</p><ul class="categorylist"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul><div class="addthis_sharing_toolbox"></div><section class="comments"><div id="disqus_thread"></div><script type="text/javascript">window.disqus_identifier="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/";
                     window.disqus_url="http://matthewdaly.co.uk/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/";
                     window.disqus_title="Building a URL Shortener With Node.js and Redis";</script><script type="text/javascript" src="http://disqus.com/forums/matthewdaly/embed.js"></script><noscript><a href="http://matthewdaly.disqus.com/?url=ref">View the discussion thread.</a></noscript></section></article></div><div class="col-md-4"><h1>Recent Posts</h1><p><a href="/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/">My Static Site Generator Post on Sitepoint</a></p><p><a href="/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/">How I Added Search to My Site With Lunr.js</a></p><p><a href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/">Adding a New Search Engine to My Site</a></p><p><a href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/">Syntax Highlighting in Fenced Code Blocks in Vim</a></p><p><a href="/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">Extending Our Node.js and Redis Chat Server</a></p><section id="github-profile"></section><h4>My GitHub repositories</h4><ul id="github-repos"><li>Loading repositories...</li></ul></div></div><div class="row"><div class="col-md-12"><ul class="pager"><li><a href="/blog/2014/12/28/my-first-grunt-plugin/">My First Grunt Plugin</a></li><li><a href="/blog/2014/10/19/my-django-web-server-setup/">My Django Web Server Setup</a></li></ul></div></div></div><footer><div class="container footercontainer"><div class="col-md-12"><p class="copyright">Copyright &copy; Matthew Daly 2015.</p></div></div></footer><script type="text/javascript" src="/static/js/all.min.js"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
