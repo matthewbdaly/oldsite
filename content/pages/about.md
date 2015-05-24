@@ -21,7 +21,7 @@ I've worked extensively with the following technologies:
   * Extensive use of Phonegap to build mobile applications using JavaScript for both iOS and Android
   * Unit testing JavaScript applications using Istanbul, QUnit, nodeunit, Jasmine, Mocha and Chai
   * Using Node.js to build real-time web applications, including use of the Express framework and the Socket.IO library
-  * Extensive use of Grunt to improve workflow when building web apps
+  * Extensive use of Grunt to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/)
   * Some use of Yeoman to generate boilerplate for projects
 * Python, including:
   * Commercial and personal use of the Django framework, including use of Django REST Framework, South, Python Social Auth and Tastypie
