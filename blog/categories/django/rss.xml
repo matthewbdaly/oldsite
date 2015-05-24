@@ -5,7 +5,7 @@
         <description><![CDATA[django | I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://github.com/dylang/node-rss</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 24 May 2015 20:59:50 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 24 May 2015 22:00:29 GMT</lastBuildDate>
         <item>
             <title><![CDATA[My Django web server setup]]></title>
             <description><![CDATA[<p>This isn’t really part of my Django tutorial series (that has now definitely concluded!), but I thought I’d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don’t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p>
@@ -1159,7 +1159,7 @@
 <pre><code class="hljs lang-bash singleline">$ python manage.py syncdb</code></pre>
 <p>You’ll be prompted to create a superuser - go ahead and fill in the details. Now, run the following command:</p>
 <pre><code class="hljs lang-bash singleline">$ python manage.py runserver</code></pre>
-<p>This will run Django’s built-in web server on port 8000, and if you click <a href="http://127.0.0.1:8000">here</a>, you should see a page congratulating you on your first Django-powered page. Once you’re finished with it, you can stop the web server with Ctrl-C.</p>
+<p>This will run Django’s built-in web server on port 8000, and if you click <a href="http://127.0.0.1:8000">here</a>, you should see a page congratulating you on your first Django-powered page. Once you’re finished with it, you can stop the web server with <kbd>Ctrl-C</kbd>.</p>
 <p>Don’t forget to commit your changes:</p>
 <pre><code class="hljs lang-bash"><span class="linenos">1</span>$ git add django_tutorial_blog_ng/settings.py<br/><span class="linenos">2</span>$ git commit -m <span class="hljs-string">'Added South to installed apps'</span><br/></code></pre>
 <h2 id="your-first-app">Your first app</h2>
@@ -1457,7 +1457,7 @@
 <p>This returns a datetime.datetime object. If you look at the documentation for Python’s datetime module, you’ll notice that it has attributes called day, month and year. Here’s how we can use these to get the information we want:</p>
 <pre><code class="hljs lang-python"><span class="linenos">1</span><span class="hljs-prompt">&gt;&gt;&gt; </span>p.pub_date.month<br/><span class="linenos">2</span><span class="hljs-number">3</span><br/><span class="linenos">3</span><span class="hljs-prompt">&gt;&gt;&gt; </span>p.pub_date.day<br/><span class="linenos">4</span><span class="hljs-number">19</span><br/><span class="linenos">5</span><span class="hljs-prompt">&gt;&gt;&gt; </span>p.pub_date.month<br/><span class="linenos">6</span><span class="hljs-number">3</span><br/><span class="linenos">7</span><span class="hljs-prompt">&gt;&gt;&gt; </span>p.pub_date.year<br/><span class="linenos">8</span><span class="hljs-number">2012</span><br/></code></pre>
 <p>It’s that simple – we just refer to the attribute we want to retrieve. So, it should now be pretty easy to understand how we can get the date for each blog post.</p>
-<p>Exit your Python shell with Ctrl-D and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:</p>
+<p>Exit your Python shell with <kbd>Ctrl-D</kbd> and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:</p>
 <pre><code class="hljs lang-python"><span class="linenos">1</span>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_absolute_url</span><span class="hljs-params">(self)</span>:</span><br/><span class="linenos">2</span>        <span class="hljs-keyword">return</span> <span class="hljs-string">"/%s/%s/%s/"</span> % (self.pub_date.year, self.pub_date.month, self.slug)<br/></code></pre>
 <p>Now, you haven’t seen get_absolute_url before. Every time you create a model in Django, you should really create a get_absolute_url method for it. In essence, it defines a single, canonical URL for that object, whether it’s a blog post, a user, or what have you. By creating one method that defines the structure for the URL for this type of object and referring to it elsewhere, we only need to change it in one place if we want to make any changes to how we determine the URL for that type of object.</p>
 <p>What we do here is we define the URL as being /year/month/slug/. If you want, you can quite easily make it include the day as well like this:</p>
@@ -1604,7 +1604,7 @@ Now fire up python manage.py shell again:</p>
 <p>Exit urls.py and head back to the main directory for your project. Now, we need to test that everything works OK. Run the following command:</p>
 <pre><code class="hljs lang-bash singleline">python manage.py runserver</code></pre>
 <p>Remember I said that the manage.py script had a lot of useful functions? This is one of them. Django has its own simple web server so you don’t have to faff around setting up Apache just for development purposes, and this launches it. If you go to <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see a screen telling you that Django is running.</p>
-<p>Now, you can stop the server for now using Ctrl-C, and we’ll start work on your new app. Run the following command to create your new app:</p>
+<p>Now, you can stop the server for now using <kbd>Ctrl-C</kbd>, and we’ll start work on your new app. Run the following command to create your new app:</p>
 <pre><code class="hljs lang-bash singleline">python manage.py startapp blogengine</code></pre>
 <p>Again, note that you used manage.py to do this. There should now be a directory called blogengine in your project. Move into it, and you should find that it contains four files - <strong>init</strong>.py, models.py, tests.py and views.py. Again, <strong>init</strong>.py can be safely ignored, and tests.py can also be left alone, but models.py and views.py deserve closer examination.</p>
 <p>If you haven’t used an MVC framework before, then you’ll need this explaining. MVC stands for Model-View-Controller, and it describes a method of logically separating out code for a web application to make it easier to work with. Models represent the data held by the application, views represent what end-users see of the application, and controllers represent the logic that ties the two together.</p>
