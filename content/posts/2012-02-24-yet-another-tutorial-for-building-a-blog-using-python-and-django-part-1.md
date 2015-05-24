@@ -72,7 +72,7 @@ python manage.py runserver
 
 Remember I said that the manage.py script had a lot of useful functions? This is one of them. Django has its own simple web server so you don't have to faff around setting up Apache just for development purposes, and this launches it. If you go to http://127.0.0.1:8000, you should see a screen telling you that Django is running.
 
-Now, you can stop the server for now using Ctrl-C, and we'll start work on your new app. Run the following command to create your new app:
+Now, you can stop the server for now using <kbd>Ctrl-C</kbd>, and we'll start work on your new app. Run the following command to create your new app:
 
 ```bash
 python manage.py startapp blogengine

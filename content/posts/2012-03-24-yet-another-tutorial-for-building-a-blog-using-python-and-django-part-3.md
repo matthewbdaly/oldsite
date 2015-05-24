@@ -68,7 +68,7 @@ This returns a datetime.datetime object. If you look at the documentation for Py
 
 It’s that simple – we just refer to the attribute we want to retrieve. So, it should now be pretty easy to understand how we can get the date for each blog post.
 
-Exit your Python shell with Ctrl-D and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:
+Exit your Python shell with <kbd>Ctrl-D</kbd> and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:
 
 ```python
     def get_absolute_url(self):

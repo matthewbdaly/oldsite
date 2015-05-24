@@ -28,4 +28,4 @@ class Runserver_Task {
 ?>
 ```
 
-Once this is in place, you can just run `php artisan runserver` to run the development server, and hit Ctrl-C to stop it, giving you an experience much like that with Django. Note this requires PHP 5.4 or greater. You also have the option of specifying a different port eg `php artisan runserver 7000` for port 7000.
+Once this is in place, you can just run `php artisan runserver` to run the development server, and hit <kbd>Ctrl-C</kbd> to stop it, giving you an experience much like that with Django. Note this requires PHP 5.4 or greater. You also have the option of specifying a different port eg `php artisan runserver 7000` for port 7000.

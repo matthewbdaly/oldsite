@@ -168,7 +168,7 @@ You'll be prompted to create a superuser - go ahead and fill in the details. Now
 $ python manage.py runserver
 ```
 
-This will run Django's built-in web server on port 8000, and if you click [here](http://127.0.0.1:8000), you should see a page congratulating you on your first Django-powered page. Once you're finished with it, you can stop the web server with Ctrl-C.
+This will run Django's built-in web server on port 8000, and if you click [here](http://127.0.0.1:8000), you should see a page congratulating you on your first Django-powered page. Once you're finished with it, you can stop the web server with <kbd>Ctrl-C</kbd>.
 
 Don't forget to commit your changes:
 
