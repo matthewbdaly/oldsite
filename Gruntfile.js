@@ -152,7 +152,46 @@ module.exports = function (grunt) {
             'blogbuilderoutput'
         ],
         watch: {
-            scripts: {
+            css: {
+                files: [
+                    'app/sass/style.scss',
+                ],
+                tasks: [
+                    'compass',
+                    'concat',
+                    'cssmin',
+                    'copy:css'
+                ],
+                options: {
+                    spawn: false,
+                    livereload: {
+                        options: {
+                            livereload: 35729
+                        }
+                    }
+                }
+            },
+            js: {
+                files: [
+                    'app/js/main.js'
+                ],
+                tasks: [
+                    'newer:jshint',
+                    'bower_concat',
+                    'uglify',
+                    'copy:static_assets',
+                    'copy:js',
+                ],
+                options: {
+                    spawn: false,
+                    livereload: {
+                        options: {
+                            livereload: 35729
+                        }
+                    }
+                }
+            },
+            content: {
                 files: [
                     'app/templates/*.hbs',
                     'app/templates/partials/*.hbs',
@@ -161,10 +200,19 @@ module.exports = function (grunt) {
                     'content/pages/*.markdown',
                     'content/posts/*.md',
                     'content/posts/*.markdown',
-                    'app/sass/style.scss',
-                    'app/js/main.js'
                 ],
-                tasks: ['default'],
+                tasks: [
+                    'blogbuilder',
+                    'sitemap',
+                    'htmlmin',
+                    'copy:html',
+                    'copy:favicon',
+                    'copy:rss',
+                    'copy:cname',
+                    'copy:sitemap',
+                    'copy:robots',
+                    'copy:lunr'
+                ],
                 options: {
                     spawn: false,
                     livereload: {
