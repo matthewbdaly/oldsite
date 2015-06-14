@@ -31,16 +31,17 @@ I've worked extensively with the following technologies:
 * Perl (primarily for systems administration purposes)
 * PHP, including:
   * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
-  * Building reusable libraries, including [an interface to PushWoosh]
+  * Building reusable libraries, including [an interface to PushWoosh](https://packagist.org/packages/astutech/pushwoosh-php-library)
   * Building WordPress themes and plugins, and setting up and administering WordPress
   * Some unit testing with PHPUnit and Mockery
   * Generating documentation with ApiGen
 * SQL (primarily MySQL, PostgreSQL and SQLite), as well as some use of CouchDB, MongoDB and Redis
 * Some experience with Ruby, including use of Cucumber for testing purposes
+* Experience configuring Varnish for caching high-traffic web pages
 * Linux and Unix, including experience of shell scripting, sed, awk, Ansible, Vagrant, Apache, Nginx and Postfix configuration, and general systems administration. Have predominantly used Debian and Ubuntu
 * Version control (some experience with Subversion, but I primarily use Git)
 * Using Jenkins and Travis CI, together with Coveralls, for continuous integration
 
-Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and *Archer*, and have spent *way* too much time lately playing *Skyrim* and the *Mass Effect* series.
+Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and *Archer*, and have spent *way* too much time lately playing *Skyrim* and the *Mass Effect* series. I've also begun developing an appreciation of Guinness.
 
 Contact me at matthew@matthewdaly.co.uk.
