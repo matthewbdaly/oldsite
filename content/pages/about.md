@@ -24,22 +24,23 @@ I've worked extensively with the following technologies:
   * Extensive use of Grunt to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/)
   * Some use of Yeoman to generate boilerplate for projects
 * Python, including:
-  * Commercial and personal use of the Django framework, including use of Django REST Framework, South, Python Social Auth and Tastypie
+  * Commercial and personal use of the Django framework, including use of Django REST Framework, Celery, South, Python Social Auth and Tastypie
   * Some personal use of the Bottle and Flask frameworks
   * Use of Lettuce and Behave for writing automated acceptance tests
   * Use of Fabric for automating common server tasks
 * Perl (primarily for systems administration purposes)
 * PHP, including:
   * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
+  * Building reusable libraries, including [an interface to PushWoosh]
   * Building WordPress themes and plugins, and setting up and administering WordPress
   * Some unit testing with PHPUnit and Mockery
   * Generating documentation with ApiGen
-* SQL (primarily MySQL and SQLite, but with some use of PostgreSQL), as well as some limited use of MongoDB and Redis for personal projects
-* Some knowledge of Ruby, including use of Cucumber for testing purposes
+* SQL (primarily MySQL, PostgreSQL and SQLite), as well as some use of CouchDB, MongoDB and Redis
+* Some experience with Ruby, including use of Cucumber for testing purposes
 * Linux and Unix, including experience of shell scripting, sed, awk, Ansible, Vagrant, Apache, Nginx and Postfix configuration, and general systems administration. Have predominantly used Debian and Ubuntu
 * Version control (some experience with Subversion, but I primarily use Git)
 * Using Jenkins and Travis CI, together with Coveralls, for continuous integration
 
-Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and have spent *way* too much time lately playing *Skyrim* and the *Mass Effect* series.
+Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and *Archer*, and have spent *way* too much time lately playing *Skyrim* and the *Mass Effect* series.
 
 Contact me at matthew@matthewdaly.co.uk.
