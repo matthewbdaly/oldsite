@@ -5,9 +5,22 @@
         <description><![CDATA[I'm a web developer in Norfolk. This is my blog...]]></description>
         <link>http://matthewdaly.co.uk</link>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
-        <lastBuildDate>Sun, 14 Jun 2015 22:29:48 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 17 Jun 2015 20:21:35 GMT</lastBuildDate>
         <atom:link href="http://matthewdaly.co.uk/rss.xml" rel="self" type="application/rss+xml"/>
         <copyright><![CDATA[Matthew Daly 2015]]></copyright>
+        <item>
+            <title><![CDATA[Getting django-behave and Celery to work together]]></title>
+            <description><![CDATA[<p>I ran into a small issue today. I’m working on a Django app which uses Celery to handle certain tasks that don’t need to return a response within the context of the HTTP request. I also wanted to use <code>django_behave</code> for running BDD tests. The trouble is that both <code>django_behave</code> and Celery provide their own custom test runners that extend the default Django test runner, and so it looked like I might have to choose between the two.</p>
+<p>However, it turned out that the Celery one was actually very simple, with only a handful of changes needing to be made to the default test runner to make it work with Celery. I was therefore able to create my own custom test runner that inherited from <code>DjangoBehaveTestSuiteRunner</code> and applied the changes necessary to get Celery working with it. Here is the test runner I wrote, which was saved as <code>myproject/runner.py</code>:</p>
+<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">from</span> django.conf <span class="hljs-keyword">import</span> settings</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> djcelery.contrib.test_runner <span class="hljs-keyword">import</span> _set_eager</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">from</span> django_behave.runner <span class="hljs-keyword">import</span> DjangoBehaveTestSuiteRunner</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CeleryAndBehaveRunner</span><span class="hljs-params">(DjangoBehaveTestSuiteRunner)</span>:</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setup_test_environment</span><span class="hljs-params">(self, **kwargs)</span>:</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>        _set_eager()</td><tr><td class="linenos" data-pseudo-content="8"></td><td>        settings.BROKER_BACKEND = <span class="hljs-string">'memory'</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td>        super(CeleryAndBehaveRunner, self).setup_test_environment(**kwargs)</td></table></code></pre>
+<p>To use it, you need to set the test runner in <code>settings.py</code></p>
+<pre><code class="hljs lang-python singleline"><table>TEST_RUNNER = <span class="hljs-string">'myproject.runner.CeleryAndBehaveRunner'</span></table></code></pre>
+<p>Once that was done, my tests worked flawlessly with Celery, and the Behave tests ran as expected.</p>
+]]></description>
+            <link>http://matthewdaly.co.uk/blog/2015/06/17/getting-django-behave-and-celery-to-work-together/</link>
+            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/06/17/getting-django-behave-and-celery-to-work-together/</guid>
+            <pubDate>Wed, 17 Jun 2015 19:34:08 GMT</pubDate>
+        </item>
         <item>
             <title><![CDATA[Setting ETags in Laravel 5]]></title>
             <description><![CDATA[<p>Although I’d prefer to use Python or Node.js, there are some times when circumstances dictate that I need to use PHP for a project at work. In the past, I used CodeIgniter, but that was through nothing more than inertia. For some time I’d been planning to switch to Laravel, largely because of the baked-in PHPUnit support, but events conspired against me - one big project that came along had a lot in common with an earlier one, so I forked it rather than starting over.</p>
@@ -1280,30 +1293,6 @@
             <link>http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/</link>
             <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/</guid>
             <pubDate>Sat, 15 Feb 2014 17:45:00 GMT</pubDate>
-        </item>
-        <item>
-            <title><![CDATA[My first Yeoman generator]]></title>
-            <description><![CDATA[<p>At work I use the <a href="http://www.getskeleton.com/">Skeleton boilerplate</a> a lot - my boss, who handles most of the design work, likes it and generally uses it for his designs. I’ve also been using <a href="http://gruntjs.com/">Grunt</a> a lot lately, so it was inevitable that I’d probably start to look for a <a href="http://yeoman.io/">Yeoman</a> generator for working with it.</p>
-<p>There was an existing Yeoman generator for Skeleton, but it didn’t really do what I wanted. I wanted something that:</p>
-<ul>
-<li>Included jQuery and Modernizr</li>
-<li>Automatically concatenates and minifies all the JavaScript and CSS</li>
-<li>Will automatically rebuild on changes</li>
-<li>Includes LiveReload and a development server</li>
-<li>Includes automatic deployment via FTP</li>
-</ul>
-<p>After looking through the documentation for Yeoman, it was actually quick and easy to throw together my own generator and put it up. It’s available <a href="https://npmjs.org/package/generator-skellington">here</a>, and the GitHub repository is <a href="https://github.com/matthewbdaly/generator-skellington">here</a>.</p>
-<p>Future plans for it include:</p>
-<ul>
-<li>Adding auto-prefixing for CSS</li>
-<li>Removing redundant CSS rules automatically</li>
-<li>Possibly, alternate deployment methods</li>
-</ul>
-<p>Frustratingly, NPM seems to be playing up at present - it’s not picking up the README file, and the Yeoman site isn’t pulling it in. Any idea why, anyone?</p>
-]]></description>
-            <link>http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</guid>
-            <pubDate>Sat, 25 Jan 2014 11:38:40 GMT</pubDate>
         </item>
     </channel>
 </rss>
