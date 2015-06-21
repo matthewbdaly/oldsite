@@ -1,21 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
     <channel>
-        <title><![CDATA[javascript | Matthew Daly's Blog]]></title>
-        <description><![CDATA[javascript | I'm a web developer in Norfolk. This is my blog...]]></description>
-        <link>http://github.com/dylang/node-rss</link>
-        <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 21 Jun 2015 10:50:27 GMT</lastBuildDate>
+        <title>javascript | Matthew Daly&apos;s Blog</title>
+        <description>javascript | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <link>http://matthewdaly.co.uk/blog/categories/javascript/</link>
+        <lastBuildDate>Sun, 21 Jun 2015 13:59:37 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <copyright>Matthew Daly 2015</copyright>
+        <generator>Feed for Node.js</generator>
         <item>
             <title><![CDATA[My static site generator post on Sitepoint]]></title>
+            <link>http://matthewdaly.co.uk/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/</link>
+            <guid>http://matthewdaly.co.uk/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/</guid>
+            <pubDate>Sun, 03 May 2015 18:55:30 GMT</pubDate>
             <description><![CDATA[<p>I wrote an article for Sitepoint recently about creating a static site generator as a Grunt plugin, similar to the one for this site. You can find it <a href="http://www.sitepoint.com/building-static-site-generator-grunt-plugin/">here</a>.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/</guid>
-            <pubDate>Sun, 03 May 2015 18:55:30 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[How I added search to my site with Lunr.js]]></title>
+            <link>http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/</link>
+            <guid>http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/</guid>
+            <pubDate>Sat, 18 Apr 2015 14:05:41 GMT</pubDate>
             <description><![CDATA[<p>As I mentioned a while back, I recently switched the search on my site from Google’s site-specific search to <a href="http://lunrjs.com/">Lunr.js</a>. Since my site is built with a static site generator, I can’t implement search using database queries, and I was keen to have an integrated search method that would be fast and not require server-side scripting, and Lunr.js seemed to fit the bill.</p>
 <p>The first task in implementing it was to generate the index. As I wrote the Grunt task that generates the blog, I amended that task to generate an index at the same time as I generated the posts. I installed Lunr.js with the following command:</p>
 <pre><code class="hljs lang-bash singleline"><table>npm install lunr --save</table></code></pre>
@@ -36,12 +42,13 @@
 <p>This should be easy to understand. On load, we fetch and parse the <code>lunr.json</code> file from the server, and load the index. We then set up an event handler for the <code>keyup</code> event on an input with the ID of <code>search</code>. We get the value of the input, and query our index, and we loop through our results and display them.</p>
 <p>I was pleased with how straightforward it was to implement search with Lunr.js, and it works well. It’s also a lot faster than any server-side solution since the index is generated during the build process, and is loaded with the test of the site, so the only factor in the speed of the response is how quick your browser executes JavaScript. You could probably also use it with a Node.js application by generating the index dynamically, although you’d probably want to cache it to some extent.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/</guid>
-            <pubDate>Sat, 18 Apr 2015 14:05:41 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[Switching to my own static site generator]]></title>
+            <link>http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</link>
+            <guid>http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</guid>
+            <pubDate>Sun, 15 Feb 2015 18:11:22 GMT</pubDate>
             <description><![CDATA[<p>As you may have seen if you’re visiting the site, I’ve finally switched over from Octopress to the static site generator I’ve been working on for the last few months. Apologies if you’re seeing lots of old posts in your RSS reader - there must have been an inconsistency between the RSS feed for this and that for Octopress.</p>
 <p>I actually still really like Octopress, however I’m not and have never been a big fan of Ruby. Python and JavaScript are my two main go-to languages (although I do a lot of work professionally with PHP as well), so I wanted a solution in one of those languages, but I wanted something that was very similar to Octopress in every other way. I also wanted the facility to easily concatenate and minify static files as part of my deployment process to make the whole thing as lean as possible, so it made sense to build it as a Grunt plugin and create a Yeoman generator for building the boilerplate for the blog. Also, it’s always easier to work with your own code, and so using templates I wrote myself should make it quicker and easier for me to customise the blog how I want.</p>
 <p>While deploying it did throw up a few errors that I’ve had to fix, it’s gone fairly smoothly and I’m pretty happy with it, although I will no doubt spend some time tweaking it over the next few weeks. It’s built with GitHub Pages in mind, but the fact that it’s built using Grunt should make it straightforward to switch to a different deployment method - during development I’ve actually used <code>grunt-rsync</code> to deploy to my Raspberry Pi and <code>grunt-bitbucket-pages</code> to deploy to Bitbucket in order to test it and both work absolutely fine. There are also Grunt plugins for deploying via FTP around, so if you want to check it out, then as long as you have at least some familiarity with Grunt you should be able to deploy it however you wish. The generator is meant to be only a starting point for your own site, so by all means check it out, tinker with the styling and templates, and make it your own. I will be very happy indeed if I see someone else using it in the wild.</p>
@@ -54,12 +61,13 @@
 </ul>
 <p>If you can get away with using a static site generator rather than a database-driven blogging system, then it’s well worth doing so.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2015/02/15/switching-to-my-own-static-site-generator/</guid>
-            <pubDate>Sun, 15 Feb 2015 18:11:22 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[My first Grunt plugin]]></title>
+            <link>http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</link>
+            <guid>http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</guid>
+            <pubDate>Sun, 28 Dec 2014 17:04:41 GMT</pubDate>
             <description><![CDATA[<p>A while back, I mentioned that I’d written a Yeoman generator for creating a flat HTML blog, called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>. For this, I’d used the first Grunt plugin I could find for the purpose, which was <a href="https://github.com/testdouble/grunt-markdown-blog">grunt-markdown-blog</a>. This worked, but I wasn’t really very happy with it.</p>
 <p>The ideal Grunt plugin I had in mind was as follows:</p>
 <ul>
@@ -72,23 +80,25 @@
 <p>I started a new Git repository a while back, but didn’t make much progress. Then, on Christmas Eve, I suddenly got the urge to start working on this again, and in a matter of a few hours I’d gotten a working Grunt plugin that ticked all of these boxes. I had to delay getting it integrated into the generator due to Christmas day, and then an unfortunate bout of flu, but I’ve now published it as <a href="https://github.com/matthewbdaly/grunt-blogbuilder">grunt-blogbuilder</a> and amended the Yeoman generator to use it instead.</p>
 <p>I’m really pleased with the outcome, and while I’m still not yet ready to migrate over to it from Octopress, it’s a massive step forward, and building a Grunt plugin has been an interesting experience.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/12/28/my-first-grunt-plugin/</guid>
-            <pubDate>Sun, 28 Dec 2014 17:04:41 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[Introducing generator-simple-static-blog]]></title>
+            <link>http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</link>
+            <guid>http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</guid>
+            <pubDate>Sun, 05 Oct 2014 18:56:46 GMT</pubDate>
             <description><![CDATA[<p>I’m a big fan of static site generators. I ditched WordPress for Octopress over two years ago because it was free to host on GitHub Pages and much faster, had much better syntax highlighting, and I liked being able to write posts in Vim, and I’ve never looked back since.</p>
 <p>That said, Octopress is written in Ruby, a language I’ve never been that keen on. Ideally I’d prefer to use Python or JavaScript, but none of the solutions I’ve found have been to my liking. Recently I’ve been using Grunt and Yeoman to some extent, and I’ve wondered about the idea of creating a Yeoman generator to build a static blogging engine. After discovering <code>grunt-markdown-blog</code>, I took the plunge and have built a simple blog generator called <a href="https://github.com/matthewbdaly/generator-simple-static-blog">generator-simple-static-blog</a>.</p>
 <p>I’ve published it to NPM, so feel free to check it out. It includes code highlighting with the Zenburn colour scheme by default (although highlight.js includes many other themes, so just switch to another one if you want), and it should be easy to edit the templates. I’ve also included the ability to deploy automatically to GitHub Pages using Grunt.</p>
 <p>I don’t anticipate moving over to this from Octopress for the foreseeable future, but it’s been an interesting project for the weekend.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/10/05/introducing-generator-simple-static-blog/</guid>
-            <pubDate>Sun, 05 Oct 2014 18:56:46 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[My first Yeoman generator]]></title>
+            <link>http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</link>
+            <guid>http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</guid>
+            <pubDate>Sat, 25 Jan 2014 11:38:40 GMT</pubDate>
             <description><![CDATA[<p>At work I use the <a href="http://www.getskeleton.com/">Skeleton boilerplate</a> a lot - my boss, who handles most of the design work, likes it and generally uses it for his designs. I’ve also been using <a href="http://gruntjs.com/">Grunt</a> a lot lately, so it was inevitable that I’d probably start to look for a <a href="http://yeoman.io/">Yeoman</a> generator for working with it.</p>
 <p>There was an existing Yeoman generator for Skeleton, but it didn’t really do what I wanted. I wanted something that:</p>
 <ul>
@@ -107,33 +117,36 @@
 </ul>
 <p>Frustratingly, NPM seems to be playing up at present - it’s not picking up the README file, and the Yeoman site isn’t pulling it in. Any idea why, anyone?</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2014/01/25/my-first-yeoman-generator/</guid>
-            <pubDate>Sat, 25 Jan 2014 11:38:40 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[First steps with Node.js]]></title>
+            <link>http://matthewdaly.co.uk/blog/2013/07/28/first-steps-with-node-dot-js/</link>
+            <guid>http://matthewdaly.co.uk/blog/2013/07/28/first-steps-with-node-dot-js/</guid>
+            <pubDate>Sun, 28 Jul 2013 18:20:00 GMT</pubDate>
             <description><![CDATA[<p>The idea of building an entire web app using nothing but JavaScript has always appealed to me. Despite its undoubted flaws, JavaScript is a powerful language, and chopping and changing between several different programming languages is never great. So I’ve always wanted to check out Node.js.</p>
 <p>Lately I’ve been tinkering with Backbone.js a lot. As a web and mobile app developer, I’ve seen the benefit of server-side MVC frameworks firsthand, and I’ve also seen how bad a PhoneGap app can get without this kind of structure, so I’ve been very eager for a while to get my head around a JavaScript framework. The first one I was able to really grok was Knockout.js, thanks to its wonderful tutorial, but Backbone.js seemed to have better mindshare, and support for routing, so I knuckled down and used it for a large personal project that is still under wraps, but I hope to make available once complete. Using Backbone has made my client-side code far more organised, and I plan to use it a lot in future.</p>
 <p>I’ve also wanted to get my head around a couple of the NoSQL databases. While the relational model is very often applicable, there are plenty of use cases where it isn’t the best choice, especially for simple data, and MongoDB seemed to be an interesting alternative. So, I decided to have a tinker around with Node.js and Backbone today, and wound up building <a href="https://github.com/matthewbdaly/rabbitrabbitrabbit">a real-time guestbook application</a>. Let me know what you think, but please be gentle - this is my first ever Node.js or MongoDB application.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2013/07/28/first-steps-with-node-dot-js/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2013/07/28/first-steps-with-node-dot-js/</guid>
-            <pubDate>Sun, 28 Jul 2013 18:20:00 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[My first jQuery plugin]]></title>
+            <link>http://matthewdaly.co.uk/blog/2013/04/21/my-first-jquery-plugin/</link>
+            <guid>http://matthewdaly.co.uk/blog/2013/04/21/my-first-jquery-plugin/</guid>
+            <pubDate>Sun, 21 Apr 2013 21:06:00 GMT</pubDate>
             <description><![CDATA[<p>In my day job, I recently finished <a href="https://www.pagepooch.com/">PagePooch</a>, a tool for monitoring web pages for changes in content or prices. It’s a project that I’m immensely proud of, because it was my first big and largely solo project as a developer.</p>
 <p>During the development of this, I initially created the user interface with jQuery Mobile, but later on added a desktop interface as well. During development of the desktop interface, I needed to recreate the functionality of the filter available for listviews in jQuery Mobile, and wound up creating a plugin for jQuery to do so.</p>
 <p>I recently got permission to open-source this, as I figured the functionality was trivial enough that we couldn’t reasonably sell it, but by making it freely available, we’d maybe get some goodwill, and if we were really lucky, a few bugfixes and/or improvements.</p>
 <p>It’s <a href="http://plugins.jquery.com/listfilter/">now available</a> via the jQuery plugin registry. Please let me know what you think, and feel free to fork it and hack on it as you see fit.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2013/04/21/my-first-jquery-plugin/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2013/04/21/my-first-jquery-plugin/</guid>
-            <pubDate>Sun, 21 Apr 2013 21:06:00 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[Falling back to local copies of jQuery and jQuery Mobile]]></title>
+            <link>http://matthewdaly.co.uk/blog/2012/08/13/falling-back-to-local-copies-of-jquery-and-jquery-mobile/</link>
+            <guid>http://matthewdaly.co.uk/blog/2012/08/13/falling-back-to-local-copies-of-jquery-and-jquery-mobile/</guid>
+            <pubDate>Mon, 13 Aug 2012 18:54:00 GMT</pubDate>
             <description><![CDATA[<p>I use jQuery Mobile a lot at work, and it’s brilliant. For quickly knocking together a high-quality user interface that works well on mobile devices, it’s unbeatable.</p>
 <p>Like many web developers, I favour using a CDN-hosted version of both jQuery and jQuery Mobile, because it makes it more likely that the user won’t have to download the appropriate files as their web browser has already cached them. However, by doing this you run the risk of your site being negatively affected if the CDN provider goes down for any length of time. So, I think it’s a good idea to have a fallback for both jQuery and jQuery Mobile.</p>
 <p>I spent a while looking and finally managed to come up with a solution that works well, and borrows heavily from <a href="http://timjames.me/jquery-and-jquery-ui-fallbacks">a similar solution for jQuery UI by Tim James</a>. First of all, load the stylesheets and JavaScript files as usual:</p>
@@ -146,21 +159,23 @@
 <pre><code class="hljs lang-html singleline"><table>&lt;<span class="hljs-keyword">div</span> <span class="hljs-type">class</span>=<span class="hljs-string">"ui-helper-hidden"</span>&gt;&lt;/<span class="hljs-keyword">div</span>&gt;</table></code></pre>
 <p>If you download copies of the appropriate files and set the paths to them correctly, you should now be able to enjoy all the advantages of using a CDN for hosting jQuery and jQuery Mobile while also having the security of knowing that if the CDN goes down, your application will still work fine. Exactly the same approach will work with jQuery UI as well.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2012/08/13/falling-back-to-local-copies-of-jquery-and-jquery-mobile/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2012/08/13/falling-back-to-local-copies-of-jquery-and-jquery-mobile/</guid>
-            <pubDate>Mon, 13 Aug 2012 18:54:00 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[Moving on to Perl]]></title>
+            <link>http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</link>
+            <guid>http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</guid>
+            <pubDate>Wed, 23 Jun 2010 12:41:29 GMT</pubDate>
             <description><![CDATA[<p>I’m glad to report that today I passed my CIW JavaScript Fundamentals exam with 98%! I was a bit concerned about this as some of the questions on the practice exam were downright wrong (as in the supposedly correct answers were in fact wrong), but thankfully this turned out not to be the case for the actual exam.</p>
 <p>Next step is learning Perl. I’m particularly interested to learn more about Perl because it’s something you can get a lot of use out of - it can be used for regular expressions, general Unix scripting and web development, and I’m interested to see how it compares to Python.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/06/23/moving-on-to-perl/</guid>
-            <pubDate>Wed, 23 Jun 2010 12:41:29 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[PassCrunch]]></title>
+            <link>http://matthewdaly.co.uk/blog/2010/05/03/passcrunch/</link>
+            <guid>http://matthewdaly.co.uk/blog/2010/05/03/passcrunch/</guid>
+            <pubDate>Mon, 03 May 2010 17:23:39 GMT</pubDate>
             <description><![CDATA[<p>As an exercise to teach myself the basics of regular expressions in JavaScript I decided to implement a small function I called passCrunch to check how secure a password is. I implemented it based on the following principles:</p>
 <ul>
 <li>First of all, check for a list of well-known easy to break passwords to foil a dictionary attack, and reject it if it’s there.</li>
@@ -191,12 +206,13 @@
 </ul>
 <p>The finished article’s available <a href="http://dl.dropbox.com/u/5031/passcrunch.zip">here</a> as a .zip file if you’d like to use it, or just take a look at the code. Be warned, it’s quite long due to the fact that the list of insecure passwords I used had in excess of 3,000 entries in it! It includes a very simple HTML form which will allow you to submit a function and will return a score for it via an alert() dialogue. Feel free to use it if you wish!</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2010/05/03/passcrunch/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/05/03/passcrunch/</guid>
-            <pubDate>Mon, 03 May 2010 17:23:39 GMT</pubDate>
+            <content:encoded/>
         </item>
         <item>
             <title><![CDATA[Learning JavaScript]]></title>
+            <link>http://matthewdaly.co.uk/blog/2010/05/03/learning-javascript/</link>
+            <guid>http://matthewdaly.co.uk/blog/2010/05/03/learning-javascript/</guid>
+            <pubDate>Mon, 03 May 2010 16:29:30 GMT</pubDate>
             <description><![CDATA[<p>Having recently completed the Database Design Methodology part of my course, I’ve now moved onto the next part, which is JavaScript Fundamentals. It’s quite an interesting topic since unlike HTML and CSS, JavaScript is a proper programming language (OK, technically it’s a scripting language, but it’s not merely a markup language like HTML), so I’m quite enjoying it.</p>
 <p>However, I’m a little disappointed with the quality of the training materials for the course (CIW JavaScript Fundamentals). It was published in 2003, and recommends the use of Windows ME or Windows 2000, and Internet Explorer 5.5 or later, or Netscape Navigator 4.0 or later. Now, IE5.5 was released in July 2000, making it a few months shy of a decade old, a staggering length of time for the web. Netscape Navigator is even older, dating back to June 1997! Of those two browsers, IE5.5 now has a miniscule market share, and Netscape Navigator isn’t actively developed at all anymore (although Mozilla Firefox is built off the same code base).</p>
 <p>Given that in the last few years Internet Explorer has been rapidly losing market share, and developers are doing things with JavaScript that we couldn’t dream of five years ago, you’d hope the course would cover the more interesting and powerful things we can do with JavaScript today, such as AJAX, Greasemonkey scripts or third-party libraries such as jQuery. Instead, I’m stuck with form validation (OK, fair enough, need to learn that), manipulating frames (seriously, frames? When was the last time you even saw a framed website? They’re ugly and a pain to use) and pop-up windows.</p>
@@ -214,9 +230,7 @@
 </ul>
 <p>I really don’t think there’s any excuse for the training materials being that outdated when some of their other CIW training materials are much more current.</p>
 ]]></description>
-            <link>http://matthewdaly.co.uk/blog/2010/05/03/learning-javascript/</link>
-            <guid isPermaLink="true">http://matthewdaly.co.uk/blog/2010/05/03/learning-javascript/</guid>
-            <pubDate>Mon, 03 May 2010 16:29:30 GMT</pubDate>
+            <content:encoded/>
         </item>
     </channel>
 </rss>
