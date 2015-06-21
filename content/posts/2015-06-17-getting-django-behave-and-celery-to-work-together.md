@@ -4,6 +4,8 @@ date: 2015-06-17 20:34:08 +0100
 categories:
 - python
 - django
+- behave
+- celery
 ---
 
 I ran into a small issue today. I'm working on a Django app which uses Celery to handle certain tasks that don't need to return a response within the context of the HTTP request. I also wanted to use `django_behave` for running BDD tests. The trouble is that both `django_behave` and Celery provide their own custom test runners that extend the default Django test runner, and so it looked like I might have to choose between the two.
