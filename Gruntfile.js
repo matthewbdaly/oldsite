@@ -41,7 +41,7 @@ module.exports = function (grunt) {
                 title: "Matthew Daly's Blog",
                 description: "I'm a web developer in Norfolk. This is my blog...",
                 linenos: true,
-                truncatefeed: 600,
+                truncatefeed: 0,
                 keywords: [
                   'web',
                   'development',
