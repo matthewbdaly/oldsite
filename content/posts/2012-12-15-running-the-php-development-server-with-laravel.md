@@ -4,8 +4,8 @@ title: "Running the PHP development server with Laravel"
 date: 2012-12-15 00:26
 comments: true
 categories: 
-- PHP
-- Laravel
+- php
+- laravel
 - webdevelopment
 ---
 
