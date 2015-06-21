@@ -32,6 +32,7 @@ module.exports = function (grunt) {
             options: {
               data: {
                 author: "Matthew Daly",
+                email: "matthew@matthewdaly.co.uk",
                 url: "http://matthewdaly.co.uk",
                 addthis: "MattBD",
                 googleanalytics: "UA-17043630-1",
@@ -72,7 +73,8 @@ module.exports = function (grunt) {
                 cwd: 'build/',
                 src: [
                     '**/*.html',
-                    '**/rss.xml'
+                    '**/rss.xml',
+                    '**/atom.xml'
                 ],
                 dest: 'www/'
             },
@@ -114,6 +116,14 @@ module.exports = function (grunt) {
                 expand: true,
                 src: [
                     '**/rss.xml'
+                ],
+                dest: 'www/'
+            },
+            atom: {
+                cwd: 'blogbuilderoutput/',
+                expand: true,
+                src: [
+                    '**/atom.xml'
                 ],
                 dest: 'www/'
             },
