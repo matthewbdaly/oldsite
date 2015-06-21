@@ -40,7 +40,8 @@ module.exports = function (grunt) {
                 github: "matthewbdaly",
                 title: "Matthew Daly's Blog",
                 description: "I'm a web developer in Norfolk. This is my blog...",
-                linenos: true
+                linenos: true,
+                truncatefeed: 600
               },
               template: {
                 post: 'app/templates/post.hbs',
