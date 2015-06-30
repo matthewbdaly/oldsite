@@ -102,7 +102,14 @@ module.exports = function (grunt) {
                     'favicon.ico'
                 ],
                 dest: 'www/'
-
+            },
+            img_header: {
+                expand: true,
+                cwd: 'static/',
+                src: [
+                  'pattern.svg'
+                ],
+                dest: 'www/'
             },
             css: {
                 expand: true,
