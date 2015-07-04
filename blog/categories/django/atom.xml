@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>django | Matthew Daly&apos;s Blog</title>
     <link>http://matthewdaly.co.uk/blog/categories/django/</link>
-    <updated>2015-06-30T22:47:47Z</updated>
+    <updated>2015-07-04T12:21:08Z</updated>
     <author>
         <name>Matthew Daly</name>
         <email>matthew@matthewdaly.co.uk</email>
@@ -12,6 +12,18 @@
     <subtitle>django | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2015</rights>
     <generator>Feed for Node.js</generator>
+    <entry>
+        <title type="html"><![CDATA[Handling images as base64 strings with Django REST Framework]]></title>
+        <id>http://matthewdaly.co.uk/blog/2015/07/04/handling-images-as-base64-strings-with-django-rest-framework/</id>
+        <link href="http://matthewdaly.co.uk/blog/2015/07/04/handling-images-as-base64-strings-with-django-rest-framework/">
+        </link>
+        <updated>2015-07-04T12:01:40Z</updated>
+        <summary type="html"><![CDATA[<p>I’m currently working on a Phonegap app that involves taking pictures and uploading them via a REST API. I’ve done this before, and I found at that time that the best way to do so was to fetch the image as a base-64 encoded string and push that up, rather than the image file itself. However, the last time I did so, I was using Tastypie to build the API, and I’ve since switched over to Django REST Framework as my API toolkit of choice.</p>
+<p>It didn’t take long to find <a href="https://gist.github.com/yprez/7704036">this gist</a> giving details of how to do so, but it didn’t work as is, partly because I was using Python 3, and partly because the <code>from_native</code> method has gone as at Django REST Framework 3.0. It was, however, straightforward to adapt it to work. Here’s my solution:</p>
+<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">import</span> base64, uuid</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> django.core.files.base <span class="hljs-keyword">import</span> ContentFile</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">from</span> rest_framework <span class="hljs-keyword">import</span> serializers</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-comment"># Custom image field - handles base 64 encoded images</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Base64ImageField</span><span class="hljs-params">(serializers.ImageField)</span>:</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">to_internal_value</span><span class="hljs-params">(self, data)</span>:</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td>        <span class="hljs-keyword">if</span> isinstance(data, str) <span class="hljs-keyword">and</span> data.startswith(<span class="hljs-string">'data:image'</span>):</td><tr><td class="linenos" data-pseudo-content="10"></td><td>            <span class="hljs-comment"># base64 encoded image - decode</span></td><tr><td class="linenos" data-pseudo-content="11"></td><td>            format, imgstr = data.split(<span class="hljs-string">';base64,'</span>) <span class="hljs-comment"># format ~= data:image/X,</span></td><tr><td class="linenos" data-pseudo-content="12"></td><td>            ext = format.split(<span class="hljs-string">'/'</span>)[-<span class="hljs-number">1</span>] <span class="hljs-comment"># guess file extension</span></td><tr><td class="linenos" data-pseudo-content="13"></td><td>            id = uuid.uuid4()</td><tr><td class="linenos" data-pseudo-content="14"></td><td>            data = ContentFile(base64.b64decode(imgstr), name = id.urn[<span class="hljs-number">9</span>:] + <span class="hljs-string">'.'</span> + ext)</td><tr><td class="linenos" data-pseudo-content="15"></td><td>        <span class="hljs-keyword">return</span> super(Base64ImageField, self).to_internal_value(data)</td></table></code></pre>
+<p>This solution will handle both base 64 encoded strings and image files. Then, just use this field as normal.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Getting django-behave and Celery to work together]]></title>
         <id>http://matthewdaly.co.uk/blog/2015/06/17/getting-django-behave-and-celery-to-work-together/</id>
