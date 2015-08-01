@@ -167,7 +167,7 @@ $ python manage.py makemigrations
 $ python manage.py migrate
 ```
 
-We should now have a `Product` model where the attributes can be any arbitrary data we want. Note that we installed `ipdb` earlier - if you're not familiar with it, this is an improved Python debugger, and also pulls in `ipython`, an improved Python shell, which Django will use if available.
+We should now have a `Product` model where the `attributes` field can be any arbitrary data we want. Note that we installed `ipdb` earlier - if you're not familiar with it, this is an improved Python debugger, and also pulls in `ipython`, an improved Python shell, which Django will use if available.
 
 Open up the Django shell:
 
