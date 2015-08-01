@@ -13,7 +13,7 @@ By far the biggest deal out of all of these was the new `HStoreField` type. Post
 
 Let's see a working example. We might be building an online store where products can have all kinds of arbitrary data stored about them. One product might be a plastic box, and you'd need to list the capacity as an additional attribute. Another product might be a pair of shoes, which have no capacity, but do have a size. It might be difficult to model this otherwise, but `HStoreField` is perfect for this kind of data.
 
-First, let's set up our database. I'll assume you already have PostgreSQL up and running via your package manager. First, we need to create a superuser account so that it can install the extension `hstore`:
+First, let's set up our database. I'll assume you already have PostgreSQL up and running via your package manager. First, we need to create our database:
 
 ```bash
 $ createdb djangostore
