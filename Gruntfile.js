@@ -335,6 +335,21 @@ module.exports = function (grunt) {
                 branch: 'master'
             },
             src: ['**']
+        },
+        rsync: {
+          options: {
+            args: ["--verbose"],
+            exclude: [".git*","*.scss","node_modules"],
+            recursive: true
+          },
+          dist: {
+            options: {
+              src: "www/",
+              dest: "/usr/share/nginx/www",
+              host: "matthew@192.168.1.15",
+              delete: true // Careful this option could cause data loss, read the docs!
+            }
+          },
         }
     });
 
@@ -353,6 +368,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-sitemap');
+    grunt.loadNpmTasks('grunt-rsync');
     grunt.loadNpmTasks('grunt-contrib-imagemin');
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
@@ -375,6 +391,10 @@ module.exports = function (grunt) {
         'default',
         'connect',
         'watch'
+    ]);
+    grunt.registerTask('local', [
+        'default',
+        'rsync'
     ]);
     grunt.registerTask('deploy', [
         'default',
