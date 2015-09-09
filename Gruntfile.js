@@ -184,7 +184,6 @@ module.exports = function (grunt) {
                 ],
                 tasks: [
                     'compass',
-                    'concat',
                     'cssmin',
                     'copy:css'
                 ],
@@ -270,18 +269,9 @@ module.exports = function (grunt) {
                 }
             }
         },
-        concat: {
-            dist: {
-                src: [
-                    'static/bower_components/highlightjs/styles/rainbow.css',
-                    'build/css/style.css'
-                ],
-                dest: 'build/css/output.css'
-            }
-        },
         cssmin: {
             dist: {
-                src: 'build/css/output.css',
+                src: 'build/css/style.css',
                 dest: 'build/css/style.min.css'
             }
         },
@@ -361,7 +351,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-compass');
-    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -380,7 +369,6 @@ module.exports = function (grunt) {
         'blogbuilder',
         'sitemap',
         'compass',
-        'concat',
         'cssmin',
         'htmlmin',
         'uglify',
