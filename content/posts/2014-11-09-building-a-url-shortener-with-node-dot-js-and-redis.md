@@ -729,6 +729,6 @@ Excellent! Our URL shortener is now complete. From here, deploying it to Heroku 
 Wrapping up
 -----------
 
-You'll find the source for this application at [https://github.com/matthewbdaly/Shortbread](https://github.com/matthewbdaly/Shortbread) and a demo at [http://shortbread-example.herokuapp.com/](http://shortbread-example.herokuapp.com/).
+You'll find the source for this application [here](https://github.com/matthewbdaly/Shortbread) and a demo [here](http://shortbread-example.herokuapp.com/).
 
 I hope you've enjoyed this brief introduction to Redis, and that it's opened your eyes to at least one of the alternatives out there to a relational database. I'll hopefully be able to follow this up with examples of some other problems Redis is ideal for solving.

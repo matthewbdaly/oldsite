@@ -45,8 +45,8 @@ $(function() {
 
 This won't work if it's placed in the same set of script tags as the code above, because it requires that jQuery be working already. The first part works similarly to the jQuery fallback - if jQuery Mobile is not defined, it writes a new script tag. The second relies on an element in the DOM with a class of ui-helper-hidden, which jQuery Mobile would hide by default if it were loaded. If it is visible, the jQuery Mobile structure CSS file has not been loaded and so a link to the local copy of the stylesheet is created.  Of course, this means you have to create this element, so add the following code to the very top of the body, directly under the opening body tag:
 
-```html
-<div class="ui-helper-hidden"></div>
+```handlebars
+<div class='ui-helper-hidden'></div>
 ```
 
 If you download copies of the appropriate files and set the paths to them correctly, you should now be able to enjoy all the advantages of using a CDN for hosting jQuery and jQuery Mobile while also having the security of knowing that if the CDN goes down, your application will still work fine. Exactly the same approach will work with jQuery UI as well.
