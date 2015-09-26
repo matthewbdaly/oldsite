@@ -6,6 +6,7 @@ categories:
 - nodejs
 - javascript
 - lunr
+comments: true
 ---
 
 As I mentioned a while back, I recently switched the search on my site from Google's site-specific search to [Lunr.js](http://lunrjs.com/). Since my site is built with a static site generator, I can't implement search using database queries, and I was keen to have an integrated search method that would be fast and not require server-side scripting, and Lunr.js seemed to fit the bill.

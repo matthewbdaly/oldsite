@@ -5,6 +5,7 @@ categories:
 - python
 - django
 - tdd
+comments: true
 ---
 
 One thing you may hear said often about test-driven development is that as far as possible, you should test everything in isolation. However, it's not always immediately clear how you actually go about doing this. In Django, it's fairly easy to get your head around testing models in isolation because they're single objects that you can just create, save, and then check their attributes. Forms are also quite easy to test, because you can just set the parameters with the appropriate values and check that the validation works as expected. With views, it's much harder to imagine how you'd go about testing them in isolation, and often people just settle for writing higher-level functional tests instead. While functional tests are important, they're also slower than unit tests, which makes it less likely they'll be run often. So I thought I'd show you a quick and simple example of testing a Django view in isolation.

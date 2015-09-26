@@ -8,6 +8,7 @@ wordpress_id: '545'
 categories:
 - perl
 - python
+comments: true
 ---
 
 After my initial struggles with Perl, I now think I'm really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.

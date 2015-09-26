@@ -8,6 +8,7 @@ wordpress_id: '665'
 categories:
 - php
 - programming
+comments: true
 ---
 
 Ever since I started my new job, I've noticed a curious phenomenon. I work with two wonderfully gifted programmers who both know PHP much better than I do, and I learn something new from them all the time. However, neither one of them really knows or uses regular expressions.

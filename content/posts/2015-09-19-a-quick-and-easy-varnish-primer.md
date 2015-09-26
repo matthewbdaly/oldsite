@@ -4,6 +4,7 @@ date: 2015-09-19 19:42:17 +0100
 categories:
 - varnish
 - performance
+comments: true
 ---
 
 As I [mentioned in an earlier post](/blog/2015/08/22/when-you-should-not-use-wordpress/), I recently had the occasion to use Varnish to improve the performance of a website that otherwise would have been unreliable and unusably slow due to WordPress making an excessive number of queries. The difference it made was nothing short of staggering, and I'm not exaggerating when I say it saved the day. I now use Ansible for provisioning new WordPress sites, and Varnish is now a standard part of my WordPress site setup playbook.

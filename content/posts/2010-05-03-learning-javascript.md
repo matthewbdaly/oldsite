@@ -7,6 +7,7 @@ title: Learning JavaScript
 wordpress_id: '399'
 categories:
 - javascript
+comments: true
 ---
 
 Having recently completed the Database Design Methodology part of my course, I've now moved onto the next part, which is JavaScript Fundamentals. It's quite an interesting topic since unlike HTML and CSS, JavaScript is a proper programming language (OK, technically it's a scripting language, but it's not merely a markup language like HTML), so I'm quite enjoying it.

@@ -9,6 +9,7 @@ categories:
 - django
 - python
 - webdevelopment
+comments: true
 ---
 
 In this instalment I'll be showing you how we can make our blogging engine a little nicer to look at by adding some CSS and images, as well as expanding on Django's templating system.

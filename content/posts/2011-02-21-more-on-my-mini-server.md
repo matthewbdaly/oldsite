@@ -7,6 +7,7 @@ title: More on my mini server
 wordpress_id: '622'
 categories:
 - server
+comments: true
 ---
 
 While I was very pleased to get a proper Linux distro working on my Pogoplug, the Arch-based Plugbox Linux was never really my cup of tea. While it's a fine distro, I always felt that Debian would have been a much better fit. Partly this is because Debian has established a strong history of being a solid, stable distro that would carry on working no matter what, whereas Arch is more bleeding-edge. Also, Debian has a colossal repository that included a lot of software I wanted that wasn't in the Arch repositories and I couldn't get to install or compile from source, such as procmail and Squirrelmail. Debian also has strong support for many different processor architectures, including armel. Finally, being an Ubuntu user on the desktop, Debian is a distro that feels much more familiar to me.

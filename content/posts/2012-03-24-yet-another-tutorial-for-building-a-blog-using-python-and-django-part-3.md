@@ -9,6 +9,7 @@ categories:
 - django
 - python
 - webdevelopment
+comments: true
 ---
 
 Welcome back! In this installment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.

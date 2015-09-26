@@ -7,6 +7,7 @@ title: Deleting unwanted Vim swap files using Perl
 wordpress_id: '585'
 categories:
 - perl
+comments: true
 ---
 
 Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I'd written between several computers, and it would be a good idea to clear them up. I didn't like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!

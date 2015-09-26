@@ -5,6 +5,7 @@ slug: the-rise-and-rise-of-unix
 status: publish
 title: The rise and rise of Unix
 wordpress_id: '14'
+comments: true
 ---
 
 It's weird that Unix is often regarded as something old and dated, often by consultants trying to sell you on Windows. Often they'll try and make out that it's too hard to use, too arcane, and generally a pain, and that you should be using something more modern. But modern Unixes are powerful, flexible and higly mature operating systems that are less bloated than operating systems half their age and can be turned to virtually any task.

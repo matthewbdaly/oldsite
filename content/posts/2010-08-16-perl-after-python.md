@@ -9,6 +9,7 @@ categories:
 - perl
 - programming
 - python
+comments: true
 ---
 
 I'm currently studying for the CIW Web Developer qualification, and having passed the exams for database design and JavaScript, I'm now on to the third component, Perl. I figured that having already picked up a reasonable grasp of another scripting language (namely Python), that I would have no trouble picking up Perl quickly, as happened when I learned JavaScript.

@@ -5,6 +5,7 @@ slug: comments-policy
 status: publish
 title: Comments policy
 wordpress_id: '9'
+comments: true
 ---
 
 As you may be aware, I recently started moderating comments as I've had problems with spammers in the past. I felt it might be helpful to set out a more formal set of guidelines for comments so people know what I'm willing to accept. I've posted them to the right.

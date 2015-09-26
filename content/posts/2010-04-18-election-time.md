@@ -5,6 +5,7 @@ slug: election-time
 status: publish
 title: Election time
 wordpress_id: '8'
+comments: true
 ---
 
 As you may be aware, election time is looming in the UK. As someone who considers themselves old-school Labour (as opposed to Tony Blair's New Labour) there isn't really a party I feel I can align myself with anymore, so I tend to vote more based on issues than habit. I have, however, always felt that if you don't vote you can't complain about the government so I make a point of always doing so.

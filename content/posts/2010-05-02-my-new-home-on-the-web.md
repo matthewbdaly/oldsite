@@ -7,6 +7,7 @@ title: My new home on the Web
 wordpress_id: '364'
 categories:
 - blogging
+comments: true
 ---
 
 I've made the tough decision to abandon Blogger and move my blog to Wordpress. For those of you that have joined me from my old blog at [http://farbeyondtheedgeofreason.blogspot.com/](http://farbeyondtheedgeofreason.blogspot.com/) thank you very much for doing so!

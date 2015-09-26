@@ -5,6 +5,7 @@ slug: switching-to-slackware
 status: publish
 title: Switching to Slackware
 wordpress_id: '11'
+comments: true
 ---
 
 I've had my Dell Inspiron since 2004, and it's worked very, very well for me (it's still going strong), but I can't deny that it's too slow and old for many modern operating systems. I've been running Kubuntu Hardy on it for a while as that was the last version which shipped with KDE3.x but I was feeling the pain of running an older release, so I started hunting around for a replacement. KDE4 is just too heavy for this computer, so that wasn't an option.

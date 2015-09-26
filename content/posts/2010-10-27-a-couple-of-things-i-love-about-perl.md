@@ -7,6 +7,7 @@ title: A couple of things I love about Perl
 wordpress_id: '574'
 categories:
 - perl
+comments: true
 ---
 
 In the time that I've been learning Perl, I've slowly grown to appreciate the strengths of the language more and more. There's two things in particular that I like about Perl. Once that I really don't think anyone is going to be surprised by is CPAN. It's a fantastic resource - there are a huge quantity of Perl modules available for virtually any task under the sun, and they're incredibly useful.

@@ -4,6 +4,7 @@ date: 2015-06-14 21:29:52 +0100
 categories: 
 - php
 - laravel
+comments: true
 ---
 
 Although I'd prefer to use Python or Node.js, there are some times when circumstances dictate that I need to use PHP for a project at work. In the past, I used CodeIgniter, but that was through nothing more than inertia. For some time I'd been planning to switch to Laravel, largely because of the baked-in PHPUnit support, but events conspired against me - one big project that came along had a lot in common with an earlier one, so I forked it rather than starting over.

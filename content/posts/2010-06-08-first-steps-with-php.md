@@ -7,6 +7,7 @@ title: First steps with PHP
 wordpress_id: '469'
 categories:
 - php
+comments: true
 ---
 
 I'm currently working on my very first website for anyone other than myself. It's a simple brochure-style website advertising a friend's chalet at a seaside resort, which she wants to be able to rent out, and includes a simple contact form so that people can get in touch to ask questions or make a booking enquiry. Now, at present Python is the only programming language I know at all well that's useful for server-side scripting, but I decided to have a bash at building it using PHP, since that's pretty well supported and there's loads of tutorials and resources for teaching PHP to newbies, as well as innumerable third-party scripts and libraries. Also, PHP's such a popular language that you can't really get away from it if you want to get into web development - I see loads of PHP jobs advertised but very few Python ones. So I figured it'll be useful to have picked up a little PHP.

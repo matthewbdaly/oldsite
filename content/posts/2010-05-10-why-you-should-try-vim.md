@@ -7,6 +7,7 @@ title: Why you should try Vim
 wordpress_id: '438'
 categories:
 - programming
+comments: true
 ---
 
 I'm a huge fan of the Vim text editor. I have the key bindings burned so deep into my head I keep reaching for the Escape key at work when I want to move around in a document in Microsoft Word, or hitting J to try and move down. In short, I'm incurably hooked on this wonderfully powerful text editor, and if you're still using something like gedit, TextEdit, or (god forbid!) Notepad, then I want to get you to think hard about switching to Vim!

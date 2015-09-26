@@ -7,6 +7,7 @@ title: What makes a good programming textbook?
 wordpress_id: '538'
 categories:
 - programming
+comments: true
 ---
 
 I own a lot of programming textbooks. I went through a long phase of buying ones about virtually any technology I was even remotely interested in, therefore I own loads of books about Perl, Ruby, Python, PHP and C, among others. Granted, with many of them I've done little more than flick through them (I find it's hard to get round to learning things like that without some kind of plan, which was what made me eventually start doing a more formal course since it forced a plan on me), but I've seen quite a few.

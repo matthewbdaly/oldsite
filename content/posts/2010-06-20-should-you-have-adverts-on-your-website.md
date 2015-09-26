@@ -7,6 +7,7 @@ title: Should you have adverts on your website?
 wordpress_id: '480'
 categories:
 - advertisements
+comments: true
 ---
 
 When I set up this blog, I was torn over the decision whether to include adverts or not. On the one hand, the hosting costs, while not unreasonable, are still fairly substantial at around £10 a month, and any help in paying that would be very welcome. On the other hand, I was very concerned that adverts would drive away potential readers, and make me seem like one of the self-appointed "social media experts" that haunt Twitter, which isn't my intention at all.

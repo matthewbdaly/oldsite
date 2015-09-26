@@ -9,6 +9,7 @@ categories:
 - django
 - python
 - webdevelopment
+comments: true
 ---
 
 In the first part of this tutorial, we got the core elements of our blogging application working - we set up our model for posts, and a view, template and URL configuration to view the index. Next we'll start extending this very basic functionality - we'll add a view for individual posts as well, and we'll allow for each post to have a separate URL.

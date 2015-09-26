@@ -5,6 +5,7 @@ slug: moderation-on
 status: publish
 title: Moderation on
 wordpress_id: '13'
+comments: true
 ---
 
 Due to spamming, I've reluctantly decided to start moderating comments on this blog. I don't want to do so, and regret having to take this step, but it was getting really annoying.

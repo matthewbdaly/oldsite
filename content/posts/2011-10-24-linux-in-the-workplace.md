@@ -8,6 +8,7 @@ wordpress_id: '655'
 categories:
 - linux
 - webdevelopment
+comments: true
 ---
 
 At the start of September I left my customer services role and started a new position as a web developer. I won't give the name of either my old or new employer, but I will say that the new role is with a much smaller company, and the part I work for now is an e-commerce store that enjoys a significant degree of independence from the parent company. There are only two developers including myself, and we are solely responsible for the company's IT infrastructure, and we don't have the hassle of dealing with legacy applications or infrastructure. We therefore have considerable freedom in terms of what we choose to use to get our work done.

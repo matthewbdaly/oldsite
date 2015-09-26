@@ -5,6 +5,7 @@ slug: the-great-ie6-switchover
 status: publish
 title: The great IE6 switchover
 wordpress_id: '12'
+comments: true
 ---
 
 OK, this subject has been done to death, but Internet Explorer 6 needs to die. It's old, it's dated, it's insecure, it's not standards compliant, it requires web designers and developers to spend countless hours adjusting perfectly standards-compliant websites to render correctly in IE6 when they could be adding cool new features. You know the drill by now!

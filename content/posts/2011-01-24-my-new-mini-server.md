@@ -8,6 +8,7 @@ wordpress_id: '619'
 categories:
 - hacking
 - hardware
+comments: true
 ---
 
 For a while now I've wanted a home server of some description, the idea being that it was something I could use to run a web server for development purposes, and a mail server so I could have an offline backup for my Gmail account (considering how much I rely on it, it's only prudent to plan for what might happen if Gmail went down), and whatever else I need. Also, I only have laptops at present so I liked the idea of having something I could leave on all the time and connect to remotely via SSH.

@@ -7,6 +7,7 @@ title: Another Perl snippet...
 wordpress_id: '562'
 categories:
 - perl
+comments: true
 ---
 
 Here's another simple Perl program I thought I'd share. It's a very simple app for recording notes from the shell. As pasting the last one into WordPress didn't work too well, [it's on my Dropbox account](http://dl.dropbox.com/u/5031/notable.pl) instead. I've used SQLite as the backend for the database (a no-brainer - I really like SQLite for little quick-and-dirty scripts like this) and it works pretty well.

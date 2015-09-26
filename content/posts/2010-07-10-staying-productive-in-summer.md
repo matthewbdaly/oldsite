@@ -7,6 +7,7 @@ title: Staying productive in summer
 wordpress_id: '515'
 categories:
 - programming
+comments: true
 ---
 
 Unless you live in the southern hemisphere, summer's here. Right now it's gone midnight but it's still very hot, and being in the UK, where home air conditioning is not common, there's little way to alleviate the heat besides opening the window (which you don't want to do because people are continually having barbecues).
