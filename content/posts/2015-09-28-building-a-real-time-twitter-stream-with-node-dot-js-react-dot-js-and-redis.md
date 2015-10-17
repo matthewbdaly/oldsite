@@ -219,7 +219,7 @@ With that done, create the file `src/sass/style.scss` and enter the following:
 @import "../../static/bower_components/sass-bootstrap/lib/bootstrap.scss";
 ```
 
-This includes some dependencies from compass, as well as Bootstrap. We won't be using any of the Javascript features of Bootstrap, so we don't need to worry too much about that.
+This includes some dependencies from Compass, as well as Bootstrap. We won't be using any of the Javascript features of Bootstrap, so we don't need to worry too much about that.
 
 Next, we need to create our view files. As React will be used to render the main part of the page, these will be very basic, with just the header, footer, and a section where the content can be rendered. First, create `views/index.hbs`:
 
