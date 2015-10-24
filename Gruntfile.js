@@ -103,6 +103,16 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/'
             },
+            icons: {
+               expand: true,
+               cwd: 'app',
+               src: [
+                  '*.png',
+                  'manifest.json',
+                  'browserconfig.xml'
+               ],
+               dest: 'www/'
+            },
             img_header: {
                 expand: true,
                 cwd: 'static/',
