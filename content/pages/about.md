@@ -16,12 +16,12 @@ I've worked extensively with the following technologies:
 * JavaScript, including:
   * Extensive use of jQuery, jQuery UI and jQuery Mobile, including creating [a plugin for jQuery](http://plugins.jquery.com/listfilter/)
   * Extensive use of [Ionic](http://ionicframework.com/)
-  * Extensive use of client-side JavaScript MVC frameworks, primarily Angular.js, Knockout.js and Backbone.js. Have also made some limited use of React.js
+  * Extensive use of client-side JavaScript MVC frameworks, primarily Angular.js, Knockout.js and Backbone.js. Have also made some use of React.js and React-Router
   * Extensive use of JavaScript templating libraries, primarily Underscore.js and Handlebars.js
   * Extensive use of Phonegap to build mobile applications using JavaScript for both iOS and Android
-  * Unit testing JavaScript applications using Istanbul, QUnit, nodeunit, Jasmine, Mocha and Chai
+  * Unit testing JavaScript applications using Jest, Istanbul, QUnit, nodeunit, Jasmine, Mocha and Chai
   * Using Node.js to build real-time web applications, including use of the Express framework and the Socket.IO library
-  * Extensive use of Grunt to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/). Have also used Gulp.js to a lesser extent
+  * Extensive use of Grunt to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/). Have also used Browserify, Gulp.js and Webpack
   * Some use of Yeoman to generate boilerplate for projects
 * Python, including:
   * Commercial and personal use of the Django framework, including use of Django REST Framework, Celery, South, Python Social Auth and Tastypie
