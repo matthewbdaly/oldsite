@@ -29,7 +29,7 @@ django-admin.py startproject DjangoBlog
 
 This will create a brand-new directory containing all the files you need for your new Django project. If you now cd into this directory, you should see manage.py, as well as a folder called DjangoBlog containing the files `__init__.py`, `settings.py` and `urls.py`.
 
-Let's go through what these files do. First of all, there's __init__.py - don't worry about this, it's a blank file and you don't need to touch it.
+Let's go through what these files do. First of all, there's `__init__.py` - don't worry about this, it's a blank file and you don't need to touch it.
 
 Next, manage.py contains a number of extremely useful commands that you will find handy when using Django. You're unlikely to need to edit it, but you'll use it a lot.
 
@@ -59,9 +59,9 @@ It really doesn't matter what you call the file. I tend to call mine backend.db,
         'NAME': 'backend.db',                      # Or path to database file if using sqlite3.
 ```
 
-If you keep going down, you'll notice TIME_ZONE and LANGUAGE_CODE. You may wish to change these from their default settings (I change mine to Europe/London for TIME_ZONE and en-gb for LANGUAGE_CODE).
+If you keep going down, you'll notice `TIME_ZONE` and `LANGUAGE_CODE`. You may wish to change these from their default settings (I change mine to `Europe/London` for `TIME_ZONE` and `en-gb` for `LANGUAGE_CODE`).
 
-Even further down, you'll notice the INSTALLED_APPS section. Django distinguishes between a project and an application - while a project will normally be a single website, an application will be a set of functionality within that website. For instance, our blog will be a single application, but we could reuse that application on multiple projects. Django also includes a number of applications out of the box - for instance, the flatpages and admin applications can be used together if you wanted to use Django to build a simple CMS, without having to build a new application at all.
+Even further down, you'll notice the `INSTALLED_APPS` section. Django distinguishes between a project and an application - while a project will normally be a single website, an application will be a set of functionality within that website. For instance, our blog will be a single application, but we could reuse that application on multiple projects. Django also includes a number of applications out of the box - for instance, the flatpages and admin applications can be used together if you wanted to use Django to build a simple CMS, without having to build a new application at all.
 
 For now, we don't need to add any new applications, so let's save the changes we've made to settings.py and move on to urls.py. This handles directing any incoming HTTP requests to the appropriate place to deal with them. It uses simple regular expressions to evaluate the incoming requests, and maps them to specific view functions. Note that it already includes URLs for the admin functionality, but these are commented out by default.
 
@@ -79,7 +79,7 @@ Now, you can stop the server for now using <kbd>Ctrl-C</kbd>, and we'll start wo
 python manage.py startapp blogengine
 ```
 
-Again, note that you used manage.py to do this. There should now be a directory called blogengine in your project. Move into it, and you should find that it contains four files - __init__.py, models.py, tests.py and views.py. Again, __init__.py can be safely ignored, and tests.py can also be left alone, but models.py and views.py deserve closer examination.
+Again, note that you used manage.py to do this. There should now be a directory called blogengine in your project. Move into it, and you should find that it contains four files - `__init__.py`, `models.py`, `tests.py` and `views.py`. Again, `__init__.py` can be safely ignored, and `tests.py` can also be left alone, but `models.py` and `views.py` deserve closer examination.
 
 If you haven't used an MVC framework before, then you'll need this explaining. MVC stands for Model-View-Controller, and it describes a method of logically separating out code for a web application to make it easier to work with. Models represent the data held by the application, views represent what end-users see of the application, and controllers represent the logic that ties the two together.
 
