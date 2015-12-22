@@ -1,6 +1,9 @@
+var $ = require('jquery');
+var lunr = require('lunr');
+
 $(document).ready(function () {
     'use strict';
-    
+
     // Set up search
     var index, store;
     $.getJSON('/lunr.json', function (response) {
@@ -36,7 +39,7 @@ $(document).ready(function () {
             }
         });
     });
-    
+
     // Get GitHub repos
     $.get('https://api.github.com/users/matthewbdaly/repos?type=owner', function (response) {
         var repolist = $('ul#github-repos');
@@ -54,5 +57,5 @@ $(document).ready(function () {
         // Insert them
         $('section#github-profile').append('<a id="github-image" href="' + profile.html_url + '" target="_blank"><img src="' + profile.avatar_url + '"></img></a>');
     });
-    
+
 });
