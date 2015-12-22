@@ -9,23 +9,12 @@ module.exports = function (grunt) {
                 'app/js/*.js'
             ]
         },
-        src: {
-            posts: 'content/posts/',
-            pages: 'content/pages/'
-        },
-        bower_concat: {
-            all: {
-                dest: 'build/dependencies.js',
-                dependencies: {
-                    'bootstrap-sass-official': 'jquery'
-                },
-                bowerOptions: {
-                    relative: false
-                },
-                exclude: [
-                    'highlightjs'
-                ]
+        browserify: {
+          dist: {
+            files: {
+              'build/js/all.js': 'app/js/main.js'
             }
+          }
         },
         blogbuilder: {
           default: {
@@ -212,7 +201,7 @@ module.exports = function (grunt) {
                 ],
                 tasks: [
                     'newer:jshint',
-                    'bower_concat',
+                    'browserify',
                     'uglify',
                     'copy:static_assets',
                     'copy:js',
@@ -302,8 +291,7 @@ module.exports = function (grunt) {
         uglify: {
             dist: {
                 src: [
-                    'build/dependencies.js',
-                    'app/js/main.js'
+                  'build/js/all.js'
                 ],
                 dest: 'build/js/all.min.js'
             }
@@ -364,18 +352,18 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-sitemap');
     grunt.loadNpmTasks('grunt-rsync');
     grunt.loadNpmTasks('grunt-contrib-imagemin');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-browserify');
 
     // Register tasks
     grunt.registerTask('default', [
         'clean',
         'newer:jshint',
-        'bower_concat',
+        'browserify',
         'blogbuilder',
         'sitemap',
         'compass',
