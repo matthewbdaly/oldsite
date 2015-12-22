@@ -76,14 +76,6 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/'
             },
-            static_assets: {
-                expand: true,
-                cwd: 'static/',
-                src: [
-                    'bower_components/**'
-                ],
-                dest: 'www/static/'
-            },
             favicon: {
                 expand: true,
                 cwd: 'static/',
