@@ -281,7 +281,7 @@ sub vcl_recv {
     if (req.method == "PUT" || req.method == "PATCH" || req.method == "DELETE" || req.method == "POST") {
         return (pass);
     }
-````
+```
 
 Here, we declare that we should never cache any `PUT`, `PATCH`, `DELETE` or `POST` requests, on the basis that these change the state of the application. This ensures that things like contact forms will work as expected.
 
