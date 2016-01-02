@@ -195,7 +195,6 @@ module.exports = function (grunt) {
                     'newer:jshint',
                     'browserify',
                     'uglify',
-                    'copy:static_assets',
                     'copy:js',
                 ],
                 options: {
