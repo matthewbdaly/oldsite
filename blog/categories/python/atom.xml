@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>python | Matthew Daly&apos;s Blog</title>
     <link>http://matthewdaly.co.uk/blog/categories/python/</link>
-    <updated>2016-01-26T23:43:35Z</updated>
+    <updated>2016-02-04T22:36:48Z</updated>
     <author>
         <name>Matthew Daly</name>
         <email>matthew@matthewdaly.co.uk</email>
@@ -1719,7 +1719,7 @@ Now fire up python manage.py shell again:</p>
         <updated>2012-03-19T15:18:57Z</updated>
         <summary type="html"><![CDATA[<p>In the first part of this tutorial, we got the core elements of our blogging application working - we set up our model for posts, and a view, template and URL configuration to view the index. Next we’ll start extending this very basic functionality - we’ll add a view for individual posts as well, and we’ll allow for each post to have a separate URL.</p>
 <p>First, we need to set up some pagination for the home page. At this point, it’s worth taking the time to look at how we want our URL to look. Here, we’ll work on the basis that by default, the home page will show the first five blog posts, and if someone wants to see later posts, they need to append a number to the end. Here’s the URL for the second page assuming it’s at example.com:</p>
-<pre><code class="singleline"><span class="hljs-string">http:</span><span class="hljs-comment">//www.example.com/2/</span></code></pre><p>So, we need two separate rules for the URLs. We need one for a URL with no number at the end, and one for a URL with a number at the end, and an optional forward slash. Open up urls.py and edit it so the Home page section looks like this:</p>
+<pre><code class="singleline"><span class="hljs-symbol">http:</span><span class="hljs-comment">//www.example.com/2/</span></code></pre><p>So, we need two separate rules for the URLs. We need one for a URL with no number at the end, and one for a URL with a number at the end, and an optional forward slash. Open up urls.py and edit it so the Home page section looks like this:</p>
 <pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-comment"># Home page</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>url(<span class="hljs-string">r'^$'</span>, <span class="hljs-string">'blogengine.views.getPosts'</span>),</td><tr><td class="linenos" data-pseudo-content="3"></td><td>url(<span class="hljs-string">r'^(?P&lt;selected_page&gt;\d+)/?$'</span>, <span class="hljs-string">'blogengine.views.getPosts'</span>),</td></table></code></pre>
 <p>Note that I’ve edited the first rule to include ^$ as the regular expression. ^ denotes the start of a regex, and $ denotes the end, so this represents a URL with nothing added after the domain name, such as <a href="http://www.example.com">http://www.example.com</a>. We’ve also changed getRecentPosts to getPosts, as that’s now a more descriptive name.</p>
 <p>The second line will match if there is a digit (denoted by the \d+ section) and will pass that digit through to the getPosts function as selected_page. With that done, we now need to make the necessary changes in the view, so move into the blogengine directory and amend views.py to look like this:</p>
