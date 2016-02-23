@@ -18,7 +18,7 @@ The next step was to enable caching. I installed Memcached and Varnish (incident
 
 This still wasn't enough, however. The admin was still very slow, and often crashed. I actually wound up having to write a shell script that would check to see if MySQL was running and restart it if it wasn't, and set up a cron job to run it every minute, just to ensure I wasn't having to restart it myself. The issue was only really dealt with once we upped the specs on the VPS from 1GB RAM and 1 core to 3GB RAM and 2 cores, which should really have been overkill for something like WordPress.
 
-As it turned out, the issue wasn't exactly helped by the fact that someone had been making an unusually persistent attempt to brute-force `wp-login.php`. I was able to mitigate this by password-protecting it in the `.htaccess` file and adding some custom rules to fail2ban But the fundamental problem remained that the resources used by WordPress to load a single page were grossly excessive.
+As it turned out, the issue wasn't exactly helped by the fact that someone had been making an unusually persistent attempt to brute-force `wp-login.php`. I was able to mitigate this by password-protecting it in the `.htaccess` file and adding some custom rules to fail2ban. But the fundamental problem remained that the resources used by WordPress to load a single page were grossly excessive.
 
 Since then, we've continued to have some difficulties with it. There are some rather arcane criteria for calculating the shipping costs, and implementing them has been a real uphill struggle. We've also had to deal with breakages in the theme when updating WooCommerce, and other painful issues. It feels at times like the site will never be "done done".
 
