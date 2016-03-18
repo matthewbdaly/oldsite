@@ -36,7 +36,7 @@ The other is for Laravel or Lumen web apps or APIs and consists of:
 * PostgreSQL
 * Redis
 
-It took some time to decide what we wanted to settle on, and indeed we had a mobile app backend that went up around Christmas time that we wrote with Laravel, but deployed to Apache with PHP 5.6 because when we first pushed it up PHP 7 wasn't out yet. However, given that Laravel 5 already had good support for PHP 7, we decided we'd consider it for the next app. I tend to use PostgreSQL rather than MySQL these days because it has a lot of nifty feature like JSON fields and full text search, and using an ORM minimises the learning curve in switching, and Redis is much more versatile than Memcached, so they were vital parts of our stack.
+It took some time to decide what we wanted to settle on, and indeed we had a mobile app backend that went up around Christmas time that we wrote with Laravel, but deployed to Apache with PHP 5.6 because when we first pushed it up PHP 7 wasn't out yet. However, given that Laravel 5 already had good support for PHP 7, we decided we'd consider it for the next app. I tend to use PostgreSQL rather than MySQL these days because it has a lot of nifty features like JSON fields and full text search, and using an ORM minimises the learning curve in switching, and Redis is much more versatile than Memcached, so they were vital parts of our stack.
 
 Our first PHP 7 app
 -------------------
