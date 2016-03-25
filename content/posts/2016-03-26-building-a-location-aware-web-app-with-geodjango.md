@@ -1197,10 +1197,18 @@ And the following as `gigs/templates/gigs/lookup.html`:
         </div>
         <input class="btn btn-primary" type="submit" value="Submit" />
     </form>
+    <script language="javascript" type="text/javascript">
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var lat = document.getElementById('id_latitude');
+            var lon = document.getElementById('id_longitude');
+            lat.value = position.coords.latitude;
+            lon.value = position.coords.longitude;
+        });
+    </script>
 {% endblock %}
 ```
 
-Now, if we run our tests:
+Note the JavaScript to populate the latitude and longitude. Now, if we run our tests:
 
 ```bash
 $ python manage.py test gigs
