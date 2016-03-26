@@ -12,7 +12,7 @@ comments: true
 draft: false
 ---
 
-PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it. In this tutorial, I'll show you how to build a web app that allows users to search for gigs and events near them.
+PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it thanks to GeoDjango. In this tutorial, I'll show you how to use GeoDjango to build a web app that allows users to search for gigs and events near them.
 
 Requirements
 ------------
@@ -384,7 +384,7 @@ $ git add requirements.txt gigs/
 $ git commit -m 'Venue model in place'
 ```
 
-With our venue done, let's turn to our `Event` model. Amend `gigs/models.py` as follows:
+With our venue done, let's turn to our `Event` model. Amend `gigs/tests.py` as follows:
 
 ```python
 from django.test import TestCase
@@ -618,7 +618,7 @@ $ git commit -m 'Added Event model'
 Setting up the admin
 --------------------
 
-For an application like this, you'd expect the curators of the site to maintain the gigs and venues stored in the database, and that's an obvious use case for the Django admin. So let's set our models up to be available in the admin. Open up `gigs\admin.py and amend it as follows:
+For an application like this, you'd expect the curators of the site to maintain the gigs and venues stored in the database, and that's an obvious use case for the Django admin. So let's set our models up to be available in the admin. Open up `gigs/admin.py` and amend it as follows:
 
 ```python
 from django.contrib import admin
@@ -858,7 +858,7 @@ With our admin ready, it's time to move on to the user-facing part of the web ap
 Creating our views
 ------------------
 
-We will keep the front end for this app as simple as possible for the purposes of this tutorial, but of course you should feel free to expand upon this as you see fit. What we'll do is create a form that uses HTML5 geolocation to get the user's current geographical coordinates. It will then return events in the next week, ordered by how close the venue is.
+We will keep the front end for this app as simple as possible for the purposes of this tutorial, but of course you should feel free to expand upon this as you see fit. What we'll do is create a form that uses HTML5 geolocation to get the user's current geographical coordinates. It will then return events in the next week, ordered by how close the venue is. Please note that there are plans afoot in some browsers to prevent HTML5 geolocation from working unless content is server over HTTPS, so that may complicate things.
 
 How do we query the database to get this data? It's not too difficult, as shown in this example:
 
@@ -896,8 +896,8 @@ In [6]: next_week = timezone.now() + timezone.timedelta(weeks=1)
 Then we can get the events we want, sorted by distance, like this:
 
 ```python
-In [7]: Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:2]
-Out[7]: [<Event: Nirvana - Waterfront Norwich>, <Event: Primal Scream - UEA Norwich>]
+In [7]: Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+Out[7]: [<Event: Primal Scream - UEA Norwich>, <Event: Queens of the Stone Age - Wembley Arena>]
 ```
 
 With that in mind, let's write the test for our view. The view should contain a single form that accepts a user's geographical coordinates - for convenience we'll autocomplete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.
@@ -1075,12 +1075,14 @@ urlpatterns = [
 Then amend `gigfinder/urls.py` as follows:
 
 ```python
-from django.conf.urls import url
-from gigs.views import LookupView
+from django.conf.urls import url, include
+from django.contrib import admin
 
 urlpatterns = [
-    # Lookup
-    url(r'', LookupView.as_view(), name='lookup'),
+    url(r'^admin/', admin.site.urls),
+
+    # Gig URLs
+    url(r'', include('gigs.urls')),
 ]
 ```
 
@@ -1331,13 +1333,15 @@ class LookupView(FormView):
         location = Point(longitude, latitude, srid=4326)
 
         # Look up events
-        events = Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+        events = Event.objects.filter(datetime__gte=now).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
 
         # Render the template
         return render_to_response('gigs/lookupresults.html', {
             'events': events
             })
 ```
+
+Note that we're switching from a `View` to a `FormView` so that it can more easily handle our form. We could render the form using this as well, but as it's a simple form I decided it wasn't worth the bother. Also, note that the longitude goes first - this caught me out as I expected the latitude to be the first argument.
 
 Now, if we run our tests, they should complain about our missing template:
 
@@ -1434,13 +1438,15 @@ class LookupView(FormView):
         location = Point(longitude, latitude, srid=4326)
 
         # Look up events
-        events = Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+        events = Event.objects.filter(datetime__gte=now).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
 
         # Render the template
         return render_to_response('gigs/lookupresults.html', {
             'events': events
             })
 ```
+
+Here we're adding the request context so that the CSRF token is available.
 
 If you run the dev server, add a few events and venues via the admin, and submit a search, you'll see that you're returning events closest to you first.
 
