@@ -9,7 +9,7 @@ categories:
 - geo
 - geodjango
 comments: true
-draft: true
+draft: false
 ---
 
 PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it. In this tutorial, I'll show you how to build a web app that allows users to search for gigs and events near them.
@@ -1189,11 +1189,11 @@ And the following as `gigs/templates/gigs/lookup.html`:
     <form role="form" action="/" method="post">{% csrf_token %}
         <div class="form-group">
             <label for="latitude">Latitude:</label>
-            <input id="id_latitude" name="latitude" type="number" class="form-control"></input>
+            <input id="id_latitude" name="latitude" type="text" class="form-control"></input>
         </div>
         <div class="form-group">
             <label for="longitude">Longitude:</label>
-            <input id="id_longitude" name="longitude" type="number" class="form-control"></input>
+            <input id="id_longitude" name="longitude" type="text" class="form-control"></input>
         </div>
         <input class="btn btn-primary" type="submit" value="Submit" />
     </form>
@@ -1231,4 +1231,227 @@ $ git commit -m 'Implemented GET handler'
 Handling POST requests
 ----------------------
 
-Now we need to be able to handle POST requests and return the appropriate results.
+Now we need to be able to handle POST requests and return the appropriate results. First, let's write a test for it in our existing `LookupViewTest` class:
+
+```python
+    def test_post(self):
+        # Create venues to return
+        v1 = VenueFactory(name='Venue1')
+        v2 = VenueFactory(name='Venue2')
+        v3 = VenueFactory(name='Venue3')
+        v4 = VenueFactory(name='Venue4')
+        v5 = VenueFactory(name='Venue5')
+        v6 = VenueFactory(name='Venue6')
+        v7 = VenueFactory(name='Venue7')
+        v8 = VenueFactory(name='Venue8')
+        v9 = VenueFactory(name='Venue9')
+        v10 = VenueFactory(name='Venue10')
+
+        # Create events to return
+        e1 = EventFactory(name='Event1', venue=v1)
+        e2 = EventFactory(name='Event2', venue=v2)
+        e3 = EventFactory(name='Event3', venue=v3)
+        e4 = EventFactory(name='Event4', venue=v4)
+        e5 = EventFactory(name='Event5', venue=v5)
+        e6 = EventFactory(name='Event6', venue=v6)
+        e7 = EventFactory(name='Event7', venue=v7)
+        e8 = EventFactory(name='Event8', venue=v8)
+        e9 = EventFactory(name='Event9', venue=v9)
+        e10 = EventFactory(name='Event10', venue=v10)
+
+        # Set parameters
+        lat = 52.3749159
+        lon = 1.1067473
+
+        # Put together request
+        data = {
+            'latitude': lat,
+            'longitude': lon
+        }
+        request = self.factory.post(reverse('lookup'), data)
+        response = LookupView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('gigs/lookupresults.html')
+```
+
+If we now run this test:
+
+```bash
+$ python manage.py test gigs
+Creating test database for alias 'default'...
+..F.
+======================================================================
+FAIL: test_post (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/matthewdaly/Projects/gigfinder/gigs/tests.py", line 117, in test_post
+    self.assertEqual(response.status_code, 200)
+AssertionError: 405 != 200
+
+----------------------------------------------------------------------
+Ran 4 tests in 1.281s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+```
+
+We can see that it fails because the POST method is not supported. Now we can start work on implementing it. First, let's create a form in `gigs/forms.py`:
+
+```python
+from django.forms import Form, FloatField
+
+class LookupForm(Form):
+    latitude = FloatField()
+    longitude = FloatField()
+```
+
+Next, edit `gigs/views.py`:
+
+```python
+from django.shortcuts import render_to_response
+from django.views.generic.edit import FormView
+from gigs.forms import LookupForm
+from gigs.models import Event
+from django.utils import timezone
+from django.contrib.gis.geos import Point
+from django.contrib.gis.db.models.functions import Distance
+
+class LookupView(FormView):
+    form_class = LookupForm
+
+    def get(self, request):
+        return render_to_response('gigs/lookup.html')
+
+    def form_valid(self, form):
+        # Get data
+        latitude = form.cleaned_data['latitude']
+        longitude = form.cleaned_data['longitude']
+
+        # Get next week's date
+        next_week = timezone.now() + timezone.timedelta(weeks=1)
+
+        # Get Point
+        location = Point(latitude, longitude, srid=4326)
+
+        # Look up events
+        events = Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+
+        # Render the template
+        return render_to_response('gigs/lookupresults.html', {
+            'events': events
+            })
+```
+
+Now, if we run our tests, they should complain about our missing template:
+
+```bash
+$ python manage.py test gigs
+Creating test database for alias 'default'...
+..E.
+======================================================================
+ERROR: test_post (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/matthewdaly/Projects/gigfinder/gigs/tests.py", line 116, in test_post
+    response = LookupView.as_view()(request)
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py", line 68, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py", line 88, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/edit.py", line 222, in post
+    return self.form_valid(form)
+  File "/Users/matthewdaly/Projects/gigfinder/gigs/views.py", line 31, in form_valid
+    'events': events
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/shortcuts.py", line 39, in render_to_response
+    content = loader.render_to_string(template_name, context, using=using)
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py", line 96, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py", line 43, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: gigs/lookupresults.html
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.506s
+
+FAILED (errors=1)
+Destroying test database for alias 'default'...
+```
+
+So let's create `gigs/templates/gigs/lookupresults.html`:
+
+```django
+{% extends "gigs/includes/base.html" %}
+
+{% block content %}
+    <ul>
+    {% for event in events %}
+    <li>{{ event.name }} - {{ event.venue.name }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}
+```
+
+Now, if we run our tests, they should pass:
+
+```bash
+$ python manage.py test gigs
+Creating test database for alias 'default'...
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.728s
+
+OK
+Destroying test database for alias 'default'...
+```
+
+However, if we try actually submitting the form by hand, we get the error `CSRF token missing or incorrect`. Edit `views.py` as follows to resolve this:
+
+```python
+from django.shortcuts import render_to_response
+from django.views.generic.edit import FormView
+from gigs.forms import LookupForm
+from gigs.models import Event
+from django.utils import timezone
+from django.contrib.gis.geos import Point
+from django.contrib.gis.db.models.functions import Distance
+from django.template import RequestContext
+
+class LookupView(FormView):
+    form_class = LookupForm
+
+    def get(self, request):
+        return render_to_response('gigs/lookup.html', RequestContext(request))
+
+    def form_valid(self, form):
+        # Get data
+        latitude = form.cleaned_data['latitude']
+        longitude = form.cleaned_data['longitude']
+
+        # Get next week's date
+        next_week = timezone.now() + timezone.timedelta(weeks=1)
+
+        # Get Point
+        location = Point(latitude, longitude, srid=4326)
+
+        # Look up events
+        events = Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+
+        # Render the template
+        return render_to_response('gigs/lookupresults.html', {
+            'events': events
+            })
+```
+
+Now that we can submit searches, we're ready to commit:
+
+```bash
+$ git add gigs/
+$ git commit -m 'Can now retrieve search results'
+```
+
+There's just one more thing left to do...
+
+Displaying search results on a map
+----------------------------------
+
+Ideally we want to plot our venues on a map, so we can see how far away the nearest gigs are.
