@@ -1,6 +1,6 @@
 ---
 title: "Building a location aware web app with GeoDjango"
-date: 2016-03-26 13:21:29 +0000
+date: 2016-03-26 20:30:29 +0000
 categories:
 - python
 - django
@@ -68,7 +68,7 @@ Then activate it:
 $ source venv/bin/activate
 ```
 
-Then we install Django, along with our dependencies for hosting it on Heroku:
+Then we install Django, along with a few other production dependencies:
 
 ```bash
 $ pip install django-toolbelt
@@ -906,7 +906,7 @@ In [7]: Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance
 Out[7]: [<Event: Nirvana - Waterfront Norwich>, <Event: Primal Scream - UEA Norwich>]
 ```
 
-With that in mind, let's write the test for our view. The view should contain a single form that accepts a user's geographical coordinates - for convenience we'll autocomplete this with HTML5 geolocation. On submit, the user should see a map displaying the location of the five closest events in the next week.
+With that in mind, let's write the test for our view. The view should contain a single form that accepts a user's geographical coordinates - for convenience we'll autocomplete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.
 
 First, let's test the GET request. Amend `gigs/tests.py` as follows:
 
@@ -1327,14 +1327,17 @@ class LookupView(FormView):
         latitude = form.cleaned_data['latitude']
         longitude = form.cleaned_data['longitude']
 
+        # Get today's date
+        now = timezone.now()
+
         # Get next week's date
-        next_week = timezone.now() + timezone.timedelta(weeks=1)
+        next_week = now + timezone.timedelta(weeks=1)
 
         # Get Point
-        location = Point(latitude, longitude, srid=4326)
+        location = Point(longitude, latitude, srid=4326)
 
         # Look up events
-        events = Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+        events = Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
 
         # Render the template
         return render_to_response('gigs/lookupresults.html', {
@@ -1427,20 +1430,25 @@ class LookupView(FormView):
         latitude = form.cleaned_data['latitude']
         longitude = form.cleaned_data['longitude']
 
+        # Get today's date
+        now = timezone.now()
+
         # Get next week's date
-        next_week = timezone.now() + timezone.timedelta(weeks=1)
+        next_week = now + timezone.timedelta(weeks=1)
 
         # Get Point
-        location = Point(latitude, longitude, srid=4326)
+        location = Point(longitude, latitude, srid=4326)
 
         # Look up events
-        events = Event.objects.filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
+        events = Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance('venue__location', location)).order_by('distance')[0:5]
 
         # Render the template
         return render_to_response('gigs/lookupresults.html', {
             'events': events
             })
 ```
+
+If you run the dev server, add a few events and venues via the admin, and submit a search, you'll see that you're returning events closest to you first.
 
 Now that we can submit searches, we're ready to commit:
 
@@ -1449,9 +1457,6 @@ $ git add gigs/
 $ git commit -m 'Can now retrieve search results'
 ```
 
-There's just one more thing left to do...
+And that's it! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there's plenty of methods of doing so.
 
-Displaying search results on a map
-----------------------------------
-
-Ideally we want to plot our venues on a map, so we can see how far away the nearest gigs are.
+I can't say that working with GeoDjango isn't a bit of a struggle at times, but being able to make spatial queries in this fashion is very useful. With more and more people carrying smartphones, you're more likely than ever to be asked to build applications that return data based on someone's geographical location, and GeoDjango is a great way to do this with a Django application. You can find the source on [Github](https://github.com/matthewbdaly/gigfinder).
