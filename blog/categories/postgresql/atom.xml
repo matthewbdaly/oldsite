@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>postgresql | Matthew Daly&apos;s Blog</title>
     <link>http://matthewdaly.co.uk/blog/categories/postgresql/</link>
-    <updated>2016-03-19T14:04:51Z</updated>
+    <updated>2016-03-26T21:31:35Z</updated>
     <author>
         <name>Matthew Daly</name>
         <email>matthew@matthewdaly.co.uk</email>
@@ -28,9 +28,8 @@
 <p>You’ll be prompted for a password - I’m assuming this will just be <code>password</code> here. Next, we need to connect to PostgreSQL using the <code>psql</code> utility:</p>
 <pre><code class="hljs lang-bash singleline"><table>$ psql djangostore -U store -W</table></code></pre>
 <p>You’ll be prompted for your new password. Next, run the following command:</p>
-<pre><code class="hljs lang-psql singleline"><table># <span class="hljs-keyword">CREATE</span> EXTENSION <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> hstore;</table></code></pre>
-<p>This installs the HStore extension. Next let’s make sure our new user has the privileges required on the new database:</p>
-<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td># <span class="hljs-keyword">GRANT</span> ALL <span class="hljs-keyword">PRIVILEGES</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DATABASE</span> djangostore <span class="hljs-keyword">TO</span> <span class="hljs-keyword">store</span>;</td><tr><td class="linenos" data-pseudo-content="2"></td><td># \q</td></table></code></pre>
+<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td># <span class="hljs-keyword">CREATE</span> EXTENSION hstore;</td><tr><td class="linenos" data-pseudo-content="2"></td><td># <span class="hljs-keyword">GRANT</span> ALL <span class="hljs-keyword">PRIVILEGES</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DATABASE</span> djangostore <span class="hljs-keyword">TO</span> <span class="hljs-keyword">store</span>;</td><tr><td class="linenos" data-pseudo-content="3"></td><td># \q</td></table></code></pre>
+<p>The first command installs the HStore extension. Next we make sure our new user has the privileges required on the new database:</p>
 <p>We’ve now created our database and a user to interact with it. Next, we’ll set up our Django install:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ <span class="hljs-built_in">cd</span> Projects</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ mkdir djangostore</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ <span class="hljs-built_in">cd</span> djangostore</td><tr><td class="linenos" data-pseudo-content="4"></td><td>$ pyvenv venv</td><tr><td class="linenos" data-pseudo-content="5"></td><td>$ <span class="hljs-built_in">source</span> venv/bin/activate</td><tr><td class="linenos" data-pseudo-content="6"></td><td>$ pip install Django psycopg2 ipdb</td><tr><td class="linenos" data-pseudo-content="7"></td><td>$ django-admin.py startproject djangostore</td><tr><td class="linenos" data-pseudo-content="8"></td><td>$ python manage.py startapp store</td></table></code></pre>
 <p>I’m assuming here that you’re using Python 3.4. On Ubuntu, getting it working is <a href="https://gist.github.com/denilsonsa/21e50a357f2d4920091e">a bit more involved</a>.</p>
