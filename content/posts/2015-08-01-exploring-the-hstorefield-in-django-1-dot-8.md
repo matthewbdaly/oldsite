@@ -35,15 +35,12 @@ $ psql djangostore -U store -W
 You'll be prompted for your new password. Next, run the following command:
 
 ```psql
-# CREATE EXTENSION IF NOT EXISTS hstore;
-```
-
-This installs the HStore extension. Next let's make sure our new user has the privileges required on the new database:
-
-```psql
+# CREATE EXTENSION hstore;
 # GRANT ALL PRIVILEGES ON DATABASE djangostore TO store;
 # \q
 ```
+
+The first command installs the HStore extension. Next we make sure our new user has the privileges required on the new database:
 
 We've now created our database and a user to interact with it. Next, we'll set up our Django install:
 
