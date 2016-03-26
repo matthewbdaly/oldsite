@@ -42,19 +42,13 @@ You'll be prompted to enter a password for the new user. Next, we want to use th
 $ psql gigfinder
 ```
 
-This connects to the database. First, run this command to set up access to the database:
+This connects to the database. Run these commands to set up access to the database and install the PostGIS extension:
 
-```sql
-gigfinder=# GRANT ALL PRIVILEGES ON DATABASE gigfinder TO giguser;
+```psql
+# GRANT ALL PRIVILEGES ON DATABASE gigfinder TO giguser;
+# CREATE EXTENSION postgis;
+# \q
 ```
-
-Next, let's install the PostGIS extension:
-
-```sql
-gigfinder=# CREATE EXTENSION postgis;
-```
-
-Finally, disconnect with `\q`.
 
 With our database set up, it's time to start work on our project. Let's create our virtualenv in a new folder:
 
