@@ -1,6 +1,6 @@
 ---
 title: "Writing faster Laravel tests"
-date: 2016-04-03 13:14:15 +0100
+date: 2016-04-04 20:55:15 +0100
 categories:
 - php
 - laravel
@@ -29,18 +29,24 @@ To do so, we can create custom `setUp()` and `tearDown()` methods for our base `
 ```php
 <?php
 
-use Illuminate\Support\Facades\Artisan;
-
-class TestCase extends Laravel\Lumen\Testing\TestCase
+class TestCase extends Illuminate\Foundation\Testing\TestCase
 {
+    /**
+     * The base URL to use while testing the application.
+     *
+     * @var string
+     */
+    protected $baseUrl = 'http://localhost';
     /**
      * Creates the application.
      *
-     * @return \Laravel\Lumen\Application
+     * @return \Illuminate\Foundation\Application
      */
     public function createApplication()
     {
-        return require __DIR__.'/../bootstrap/app.php';
+        $app = require __DIR__.'/../bootstrap/app.php';
+        $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        return $app;
     }
 
     public function setUp()
@@ -72,6 +78,8 @@ It's not always practical to do this, especially if you rely on database feature
         <env name="DB_DATABASE" value=":memory:"/>
 ```
 
+This can result in a very significant speed boost.
+
 I would still recommend that you test against your production database, but this can be easily handed off to a continuous integration server such as Jenkins, since that way it won't disrupt your workflow. 
 
-During TDD, you'll typically run your tests several times for any change you make, so if they're too slow it can have a disastrous effect on your productivity. But with a few simple changes like this, you can ensure your tests run as quickly as possible.
+During TDD, you'll typically run your tests several times for any change you make, so if they're too slow it can have a disastrous effect on your productivity. But with a few simple changes like this, you can ensure your tests run as quickly as possible. This approach should also be viable for Lumen apps.

@@ -1,6 +1,6 @@
 ---
 title: "Building a location aware web app with GeoDjango"
-date: 2016-03-26 20:30:29 +0000
+date: 2016-03-26 21:30:29 +0000
 categories:
 - python
 - django
@@ -9,7 +9,6 @@ categories:
 - geo
 - geodjango
 comments: true
-draft: false
 ---
 
 PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it thanks to GeoDjango. In this tutorial, I'll show you how to use GeoDjango to build a web app that allows users to search for gigs and events near them.
@@ -1457,6 +1456,6 @@ $ git add gigs/
 $ git commit -m 'Can now retrieve search results'
 ```
 
-And that's it! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there's plenty of methods of doing so.
+And we're done! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there's plenty of methods of doing so - you can retrieve the latitude and longitude in the template and use Google Maps to display them. I'll leave doing so as an exercise for the reader.
 
 I can't say that working with GeoDjango isn't a bit of a struggle at times, but being able to make spatial queries in this fashion is very useful. With more and more people carrying smartphones, you're more likely than ever to be asked to build applications that return data based on someone's geographical location, and GeoDjango is a great way to do this with a Django application. You can find the source on [Github](https://github.com/matthewbdaly/gigfinder).
