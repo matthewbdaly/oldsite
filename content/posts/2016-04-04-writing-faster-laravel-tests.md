@@ -66,6 +66,8 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
 
 That takes care of building up and tearing down our database for each test.
 
+EDIT: Turns out there's actually a much easier way of doing this already included in Laravel. Just add either `use DatabaseMigrations;` or `use DatabaseTransactions;` to the `TestCase` class. The first will roll back the database and migrate it again after each test, while the second wraps each test in a transaction.
+
 Using an in-memory SQLite database for testing purposes
 -------------------------------------------------------
 
