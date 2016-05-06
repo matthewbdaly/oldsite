@@ -118,6 +118,12 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/static/js/'
             },
+            fonts: {
+               cwd: 'node_modules/bootstrap-sass/assets/',
+               expand: true,
+               src: 'fonts/**/*',
+               dest: 'www/static/'
+            },
             rss: {
                 cwd: 'blogbuilderoutput/',
                 expand: true,
