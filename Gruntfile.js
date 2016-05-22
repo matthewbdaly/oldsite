@@ -222,6 +222,7 @@ module.exports = function (grunt) {
                 files: [
                     'app/templates/*.hbs',
                     'app/templates/partials/*.hbs',
+                    'app/templates/amp/*.hbs',
                     'app/templates/robots.txt',
                     'content/pages/*.md',
                     'content/pages/*.markdown',
