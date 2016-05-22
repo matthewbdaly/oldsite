@@ -1,0 +1,154 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/",
+  			"headline": "Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim",
+  			"datePublished": "28th September 2014 7:53 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">28th September 2014 7:53 pm</p><h1>Changing Date Format from DD/MM/YYYY to YYYY-MM-DD in Vim</h1><p>Recently I had the occasion to reformat a load of dates in Vim from <code>DD/MM/YYYY</code> to <code>YYYY-MM-DD</code>. In Vim, this is quite simple:</p><pre><code class="hljs lang-viml">:<span class="hljs-built_in">%s</span>/\(\<span class="hljs-keyword">d</span>\{<span class="hljs-number">2</span>}\)\/\(\<span class="hljs-keyword">d</span>\{<span class="hljs-number">2</span>}\)\/\(\<span class="hljs-keyword">d</span>\{<span class="hljs-number">4</span>}\)/\<span class="hljs-number">3</span>-\<span class="hljs-number">2</span>-\<span class="hljs-number">1</span>/g
+</code></pre><p>This should be easy to adapt to reformatting other date formats.</p><section><ul class="categories"><li><a href="/blog/categories/vim/">vim</a></li><li><a href="/blog/categories/regex/">regex</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2014/09/28/changing-date-format-from-dd-slash-mm-slash-yyyy-to-yyyy-mm-dd-in-vim/">View the article with comments</a></section><section><a class="postlink" href="/blog/2014/09/28/django-blog-tutorial-the-next-generation-part-9/amp/">Django Blog Tutorial - the Next Generation - Part 9</a> <a class="postlink" href="/blog/2014/08/31/django-blog-tutorial-the-next-generation-part-8/amp/">Django Blog Tutorial - the Next Generation - Part 8</a></section></article></div></div></div></body></html>

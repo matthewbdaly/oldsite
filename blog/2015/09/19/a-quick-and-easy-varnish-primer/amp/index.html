@@ -1,0 +1,412 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>A Quick and Easy Varnish Primer - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/09/19/a-quick-and-easy-varnish-primer/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/09/19/a-quick-and-easy-varnish-primer/",
+  			"headline": "A Quick and Easy Varnish Primer",
+  			"datePublished": "19th September 2015 7:42 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">19th September 2015 7:42 pm</p><h1>A Quick and Easy Varnish Primer</h1><p>As I <a href="/blog/2015/08/22/when-you-should-not-use-wordpress/">mentioned in an earlier post</a>, I recently had the occasion to use Varnish to improve the performance of a website that otherwise would have been unreliable and unusably slow due to WordPress making an excessive number of queries. The difference it made was nothing short of staggering, and I’m not exaggerating when I say it saved the day. I now use Ansible for provisioning new WordPress sites, and Varnish is now a standard part of my WordPress site setup playbook.</p><p>However, Varnish can be quite fiddly to configure, and it was something of a baptism of fire for me to learn how to configure it appropriately for this use case. I did make a few mistakes that caused problems down the line, so I thought I’d share the details of how I got it working for that particular site.</p><h2 id="what-is-varnish-">What is Varnish?</h2><p>From <a href="https://www.varnish-cache.org/about">the website</a>:</p><blockquote><p>Varnish Cache is a web application accelerator also known as a caching HTTP reverse proxy. You install it in front of any server that speaks HTTP and configure it to cache the contents. Varnish Cache is really, really fast. It typically speeds up delivery with a factor of 300 - 1000x, depending on your architecture.</p></blockquote><p>In other words, you run it on the usual HTTP or HTTPS port, move your usual web server to a different port, and configure it, and it will cache web pages so they can be served more quickly to subsequent visitors.</p><p>Be warned - Varnish is not something where you can generally stick with the default settings. The default behaviour does make a lot of sense, but in practice almost no-one will be able to get away with leaving the configuration unchanged.</p><h2 id="installing-varnish">Installing Varnish</h2><p>If you’re using Debian or a derivative such as Ubuntu, Varnish is available via <code>apt-get</code>:</p><pre><code class="hljs lang-bash">$ sudo apt-get install varnish
+</code></pre><p>You may also want to install the documentation:</p><pre><code class="hljs lang-bash">$ sudo apt-get install varnish-doc
+</code></pre><p>If you’re using Apache I’d also recommend installing <code>libapache2-mod-rpaf</code> and enabling it with <code>sudo a2enmod rpaf</code> - without this, Apache will log all incoming requests as coming from the same server.</p><p>I’m assuming you already have a normal web server installed. I’ll assume you’re using Apache, but it shouldn’t be hard to adapt these instructions to work with Nginx. I’m also assuming that the site you want to use Varnish for is a WordPress site with WooCommerce and W3 Total Cache installed. However, this is only for example purposes. If you want to use Varnish for a different web app, you’ll need to plan your caching strategy around that web app yourself.</p><p>Please also note that this is using Varnish 4.0, which is the version available with Debian Jessie. If you’re using an older operating system, you may have Varnish 3.0 in the repositories - be warned, the configuration language changed in Varnish 4.0, so the examples here will not work with older versions of Varnish.</p><p>By default, Varnish runs on port 6081, which is fine for testing it out, but once you want to go live it’s not what you want. When it’s time to go live, you’ll need to open up <code>/etc/default/varnish</code> and edit the value of <code>DAEMON_OPTS</code> to something like this:</p><pre><code class="hljs lang-bash">DAEMON_OPTS=<span class="hljs-string">"-a :80 \
+             -T localhost:6082 \
+             -f /etc/varnish/default.vcl \
+             -S /etc/varnish/secret \
+             -s malloc,256m"</span>
+</code></pre><p>Note that the <code>-a</code> flag represents the port Varnish is running on.</p><p>If you’re using an operating system that uses <code>systemd</code>, such as Debian Jessie, this alone won’t be sufficient. Create a new file at <code>/etc/systemd/system/varnish.service</code> and enter the following:</p><pre><code class="hljs lang-bash">[Unit]
+Description=Varnish HTTP accelerator
+
+[Service]
+Type=forking
+LimitNOFILE=131072
+LimitMEMLOCK=82000
+ExecStartPre=/usr/sbin/varnishd -C <span class="hljs-_">-f</span> /etc/varnish/default.vcl
+ExecStart=/usr/sbin/varnishd <span class="hljs-_">-a</span> :80 -T localhost:6082 <span class="hljs-_">-f</span> /etc/varnish/default.vcl -S /etc/varnish/secret <span class="hljs-_">-s</span> malloc,256m
+ExecReload=/usr/share/varnish/reload-vcl
+
+[Install]
+WantedBy=multi-user.target
+</code></pre><p>Next, we need to move our web server to a different port. We’ll use port 8080. Replace the contents of <code>/etc/apache2/ports.conf</code> with this:</p><pre><code class="hljs lang-apache"><span class="hljs-comment"># If you just change the port or add more ports here, you will likely also</span>
+<span class="hljs-comment"># have to change the VirtualHost statement in</span>
+<span class="hljs-comment"># /etc/apache2/sites-enabled/000-default</span>
+<span class="hljs-comment"># This is also true if you have upgraded from before 2.2.9-3 (i.e. from</span>
+<span class="hljs-comment"># Debian etch). See /usr/share/doc/apache2.2-common/NEWS.Debian.gz and</span>
+<span class="hljs-comment"># README.Debian.gz</span>
+
+<span class="hljs-attribute">NameVirtualHost</span> *:8080
+<span class="hljs-attribute"><span class="hljs-nomarkup">Listen</span></span> 8080
+
+<span class="hljs-section">&lt;IfModule mod_ssl.c&gt;</span>
+    <span class="hljs-comment"># If you add NameVirtualHost *:443 here, you will also have to change</span>
+    <span class="hljs-comment"># the VirtualHost statement in /etc/apache2/sites-available/default-ssl</span>
+    <span class="hljs-comment"># to &lt;VirtualHost *:443&gt;</span>
+    <span class="hljs-comment"># Server Name Indication for SSL named virtual hosts is currently not</span>
+    <span class="hljs-comment"># supported by MSIE on Windows XP.</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">Listen</span></span> 443
+<span class="hljs-section">&lt;/IfModule&gt;</span>
+
+<span class="hljs-section">&lt;IfModule mod_gnutls.c&gt;</span>
+    <span class="hljs-attribute"><span class="hljs-nomarkup">Listen</span></span> 443
+<span class="hljs-section">&lt;/IfModule&gt;</span>
+</code></pre><p>You’ll also need to change the ports for the individual site files under <code>/etc/apache2/sites-available</code>, as in this example:</p><pre><code class="hljs lang-apache"><span class="hljs-section">&lt;VirtualHost *:8080&gt;</span>
+    <span class="hljs-attribute">ServerAdmin</span> webmaster@localhost
+
+    <span class="hljs-attribute"><span class="hljs-nomarkup">DocumentRoot</span></span> /var/www
+    <span class="hljs-section">&lt;Directory /&gt;</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Options</span></span> FollowSymLinks
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+    <span class="hljs-section">&lt;Directory /var/www/&gt;</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Options</span></span> FollowSymLinks MultiViews
+        <span class="hljs-attribute">AllowOverride</span> <span class="hljs-literal">All</span>
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> allow,deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">allow</span></span> from <span class="hljs-literal">all</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ScriptAlias</span> /cgi-bin/ /usr/lib/cgi-bin/
+    <span class="hljs-section">&lt;Directory "/usr/lib/cgi-bin"&gt;</span>
+        <span class="hljs-attribute">AllowOverride</span> None
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Options</span></span> +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Order</span></span> allow,deny
+        <span class="hljs-attribute"><span class="hljs-nomarkup">Allow</span></span> from <span class="hljs-literal">all</span>
+    <span class="hljs-section">&lt;/Directory&gt;</span>
+
+    <span class="hljs-attribute">ErrorLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/error.log
+
+    <span class="hljs-comment"># Possible values include: debug, info, notice, warn, error, crit,</span>
+    <span class="hljs-comment"># alert, emerg.</span>
+    <span class="hljs-attribute">LogLevel</span> warn
+
+    <span class="hljs-attribute">CustomLog</span> <span class="hljs-variable">${APACHE_LOG_DIR}</span>/access.log combined
+<span class="hljs-section">&lt;/VirtualHost&gt;</span>
+</code></pre><h2 id="writing-our-vcl-file">Writing our VCL file</h2><p>Next, we come to our Varnish configuration proper, which resides at <code>/etc/varnish/default.vcl</code>. The <code>vcl</code> stands for Varnish Configuration Language, and it has a syntax somewhat reminiscent of C.</p><p>The default behaviour for Varnish is as follows:</p><ul><li>It does not cache requests that contain cookie or authorization headers</li><li>It does not cache requests which the backend HTTP server indicates should not be cached</li><li>It will only cache GET and HEAD requests</li></ul><p>This behaviour is unlikely to meet your needs. We’ll therefore work through the Varnish config file I wrote for this WordPress site in the hope that it will teach you enough to adapt it to your own needs.</p><pre><code class="hljs lang-bash">vcl 4.0;
+
+backend default {
+    .host = <span class="hljs-string">"127.0.0.1"</span>;
+    .port = <span class="hljs-string">"8080"</span>;
+}
+
+acl purge {
+    <span class="hljs-string">"127.0.0.1"</span>;
+    <span class="hljs-string">"localhost"</span>;
+}
+
+sub vcl_recv {
+
+    <span class="hljs-comment"># Never cache PUT, PATCH, DELETE or POST requests</span>
+    <span class="hljs-keyword">if</span> (req.method == <span class="hljs-string">"PUT"</span> || req.method == <span class="hljs-string">"PATCH"</span> || req.method == <span class="hljs-string">"DELETE"</span> || req.method == <span class="hljs-string">"POST"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache cart, account, checkout or addons</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"^/(cart|my-account|checkout|addons)"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache adding to cart</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"\?add-to-cart="</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache admin or login</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"^/wp-(admin|login|cron)"</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache WooCommerce API</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"wc-api"</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Remove has_js and CloudFlare/Google Analytics __* cookies and statcounter is_unique</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"(^|;\s*)(_[_a-z]+|has_js|is_unique)=[^;]*"</span>, <span class="hljs-string">""</span>);
+    <span class="hljs-comment"># Remove a ";" prefix, if present.</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsub(req.http.Cookie, <span class="hljs-string">"^;\s*"</span>, <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp-settings-1 cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wp-settings-1=[^;]+(; )?"</span>, <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp-settings-time-1 cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wp-settings-time-1=[^;]+(; )?"</span>
+            , <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp test cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wordpress_test_cookie=[^;]+(; )?"</span>, <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Static content unique to the theme can be cached (so no user uploaded images)</span>
+    <span class="hljs-comment"># The reason I don't take the wp-content/uploads is because of cache size on bigger blogs</span>
+    <span class="hljs-comment"># that would fill up with all those files getting pushed into cache</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"wp-content/themes/"</span> &amp;&amp; req.url ~ <span class="hljs-string">"\.(css|js|png|gif|jp(e)?g)"</span>) {
+        <span class="hljs-built_in">unset</span> req.http.cookie;
+    }
+
+    <span class="hljs-comment"># Even if no cookies are present, I don't want my "uploads" to be cached due to their potential size</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"/wp-content/uploads/"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># any pages with captchas need to be excluded</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"^/contact/"</span>)
+    {
+        <span class="hljs-built_in">return</span>(pass);
+    }
+
+    <span class="hljs-comment"># Check the cookies for wordpress-specific items</span>
+    <span class="hljs-keyword">if</span> (req.http.Cookie ~ <span class="hljs-string">"wordpress_"</span> || req.http.Cookie ~ <span class="hljs-string">"comment_"</span>) {
+        <span class="hljs-comment"># A wordpress specific cookie has been set</span>
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># allow PURGE from localhost</span>
+    <span class="hljs-keyword">if</span> (req.method == <span class="hljs-string">"PURGE"</span>) {
+        <span class="hljs-keyword">if</span> (!client.ip ~ purge) {
+            <span class="hljs-built_in">return</span>(synth(405, <span class="hljs-string">"Not allowed."</span>));
+        }
+        <span class="hljs-built_in">return</span> (purge);
+    }
+
+    <span class="hljs-comment"># Force lookup if the request is a no-cache request from the client</span>
+    <span class="hljs-keyword">if</span> (req.http.Cache-Control ~ <span class="hljs-string">"no-cache"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Try a cache-lookup</span>
+    <span class="hljs-built_in">return</span> (<span class="hljs-built_in">hash</span>);
+}
+
+sub vcl_backend_response {
+    <span class="hljs-built_in">set</span> beresp.grace = 5m;
+}
+</code></pre><p>Let’s take a closer look at the first part of the config:</p><pre><code class="hljs lang-bash">vcl 4.0;
+
+backend default {
+    .host = <span class="hljs-string">"127.0.0.1"</span>;
+    .port = <span class="hljs-string">"8080"</span>;
+}
+</code></pre><p>Here we define that we’re using version 4.0 of VCL, and that the host to use as a back end is port 8080 on the same server. If your normal HTTP server is running on a different port, you will need to set it here. Also, note that you can use a different host as the backend.</p><pre><code class="hljs lang-bash">acl purge {
+    <span class="hljs-string">"127.0.0.1"</span>;
+    <span class="hljs-string">"localhost"</span>;
+}
+</code></pre><p>We also set which hosts can trigger a purge of the cache, namely <code>localhost</code> and <code>127.0.0.1</code>. The web app hosted on the server can then make an HTTP <code>PURGE</code> request to a given path, which will clear that path from the cache. In our case, W3 Total Cache supports this - if it’s a custom web app, you’ll need to implement this functionality yourself to clear the cache when new content is added.</p><p>Next, we start the <code>vcl_recv</code> subroutine. This is where we define our rules for deciding whether or not to serve content from the cache. Let’s look at our first rule:</p><pre><code class="hljs lang-bash">sub vcl_recv {
+
+    <span class="hljs-comment"># Never cache PUT, PATCH, DELETE or POST requests</span>
+    <span class="hljs-keyword">if</span> (req.method == <span class="hljs-string">"PUT"</span> || req.method == <span class="hljs-string">"PATCH"</span> || req.method == <span class="hljs-string">"DELETE"</span> || req.method == <span class="hljs-string">"POST"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+</code></pre><p>Here, we declare that we should never cache any <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code> or <code>POST</code> requests, on the basis that these change the state of the application. This ensures that things like contact forms will work as expected.</p><p>Note that we’re getting the value of <code>req.method</code> to determine the HTTP verb used. The <code>req</code> object has many other properties we’ll see being used.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Never cache cart, account, checkout or addons</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"^/(cart|my-account|checkout|addons)"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache adding to cart</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"\?add-to-cart="</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache admin or login</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"^/wp-(admin|login|cron)"</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+
+    <span class="hljs-comment"># Never cache WooCommerce API</span>
+    <span class="hljs-keyword">if</span> ( req.url ~ <span class="hljs-string">"wc-api"</span> ) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+</code></pre><p>Next, we define a series of regular expressions, and if the URL (represented by <code>req.url</code>) matches that regex, then the request is passed straight through to Apache without Varnish getting involved. In this case, we never want to cache the following sections:</p><ul><li>The shopping cart, checkout, addons page or account page</li><li>The Add to cart button</li><li>The WordPress admin and login screen, and cron requests</li><li>The WooCommerce API</li></ul><p>You’ll need to consider which parts of your site must always serve the latest content and which don’t need everything to be fully up to date. Typically admin areas any anything interactive must not be cached, while the front page is usually fine.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Remove has_js and CloudFlare/Google Analytics __* cookies and statcounter is_unique</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"(^|;\s*)(_[_a-z]+|has_js|is_unique)=[^;]*"</span>, <span class="hljs-string">""</span>);
+    <span class="hljs-comment"># Remove a ";" prefix, if present.</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsub(req.http.Cookie, <span class="hljs-string">"^;\s*"</span>, <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp-settings-1 cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wp-settings-1=[^;]+(; )?"</span>, <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp-settings-time-1 cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wp-settings-time-1=[^;]+(; )?"</span>
+            , <span class="hljs-string">""</span>);
+
+    <span class="hljs-comment"># Remove the wp test cookie</span>
+    <span class="hljs-built_in">set</span> req.http.Cookie = regsuball(req.http.Cookie, <span class="hljs-string">"wordpress_test_cookie=[^;]+(; )?"</span>, <span class="hljs-string">""</span>);
+</code></pre><p>Cookies, even ones set on the client side such as those for Google Analytics, can prevent content from being cached. To prevent this, you need to configure Varnish to discard these cookies before passing them on to Apache. In this case, we want to exclude Google Analytics and various WordPress cookies.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Static content unique to the theme can be cached (so no user uploaded images)</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"wp-content/themes/"</span> &amp;&amp; req.url ~ <span class="hljs-string">"\.(css|js|png|gif|jp(e)?g)"</span>) {
+        <span class="hljs-built_in">unset</span> req.http.cookie;
+    }
+</code></pre><p>Here we allow static content that’s part of the site theme to be cached since that doesn’t change often, so we unset the cookies for that request.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Even if no cookies are present, I don't want my "uploads" to be cached due to their potential size</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"/wp-content/uploads/"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+</code></pre><p>Here we prevent any user-uploaded content from being cached, since that can change often.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># any pages with captchas need to be excluded</span>
+    <span class="hljs-keyword">if</span> (req.url ~ <span class="hljs-string">"^/contact/"</span>)
+    {
+        <span class="hljs-built_in">return</span>(pass);
+    }
+</code></pre><p>Captchas must obviously never be cached since that will break them. In this case, we assume that the contact form has a captcha, so it gets excluded from the cache.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Check the cookies for wordpress-specific items</span>
+    <span class="hljs-keyword">if</span> (req.http.Cookie ~ <span class="hljs-string">"wordpress_"</span> || req.http.Cookie ~ <span class="hljs-string">"comment_"</span>) {
+        <span class="hljs-comment"># A wordpress specific cookie has been set</span>
+        <span class="hljs-built_in">return</span> (pass);
+    }
+</code></pre><p>Here we check for remaining WordPress-specific cookies. These would indicate that a user is signed in, in which case we may want to serve them all the latest content rather than displaying content from the cache.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># allow PURGE from localhost</span>
+    <span class="hljs-keyword">if</span> (req.method == <span class="hljs-string">"PURGE"</span>) {
+        <span class="hljs-keyword">if</span> (!client.ip ~ purge) {
+            <span class="hljs-built_in">return</span>(synth(405, <span class="hljs-string">"Not allowed."</span>));
+        }
+        <span class="hljs-built_in">return</span> (purge);
+    }
+</code></pre><p>Remember where we allowed the local server to clear the cache? This section actually carries out the purge when it receives a request from an authorised client.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Force lookup if the request is a no-cache request from the client</span>
+    <span class="hljs-keyword">if</span> (req.http.Cache-Control ~ <span class="hljs-string">"no-cache"</span>) {
+        <span class="hljs-built_in">return</span> (pass);
+    }
+</code></pre><p>Here we check to see if the <code>Cache-Control</code> HTTP header is set to <code>no-cache</code>. If so, we pass it straight through to Apache.</p><pre><code class="hljs lang-bash">    <span class="hljs-comment"># Try a cache-lookup</span>
+    <span class="hljs-built_in">return</span> (<span class="hljs-built_in">hash</span>);
+}
+</code></pre><p>This is the last rule under <code>vcl_recv</code>, because it only reaches this point if the request has got past all the other rules. It tries to fetch the page from the cache. If the page is not in the cache, it passes it on to Apache and will cache the response.</p><pre><code class="hljs lang-bash">sub vcl_backend_response {
+    <span class="hljs-built_in">set</span> beresp.grace = 5m;
+}
+</code></pre><p>This is where we set how long responses are cached for. Here we’ve set it to 5 minutes.</p><p>With that done, we should be ready to restart Varnish and Apache. If you are using an operating system with <code>systemd</code>, then the following commands should restart Apache and Varnish:</p><pre><code class="hljs lang-bash">$ sudo systemctl reload apache2.service
+$ sudo systemctl reload varnish.service
+</code></pre><p>For those not yet using <code>systemd</code>, try this instead:</p><pre><code class="hljs lang-bash">$ sudo service apache2 restart
+$ sudo service varnish restart
+</code></pre><p>If you then visit your site and inspect the HTTP headers using your browser’s dev tools, you’ll notice the new HTTP header <code>X-Varnish</code> in the response. This tells you that Varnish is up and running. If you make sure you’re logged out, you should hopefully see that if you load a page, and then load it again, the second response is noticeably quicker.</p><p>Installing and configuring Varnish is a relatively quick and easy way of helping your website scale to be able to serve many more users, and if the site becomes popular all of a sudden, it can make a huge difference as to whether the site can stand up to the load or not. If you need more information on how to configure Varnish for your own needs, I recommend consulting the excellent <a href="https://www.varnish-cache.org/docs/4.0/">documentation</a>.</p><section><ul class="categories"><li><a href="/blog/categories/varnish/">varnish</a></li><li><a href="/blog/categories/performance/">performance</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/09/19/a-quick-and-easy-varnish-primer/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/09/28/building-a-real-time-twitter-stream-with-node-dot-js-react-dot-js-and-redis/amp/">Building a Real-time Twitter Stream With Node.js, React.js and Redis</a> <a class="postlink" href="/blog/2015/08/22/when-you-should-not-use-wordpress/amp/">When You Should Not Use Wordpress</a></section></article></div></div></div></body></html>

@@ -1,0 +1,249 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Mocking External Apis in Python - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/01/26/mocking-external-apis-in-python/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/01/26/mocking-external-apis-in-python/",
+  			"headline": "Mocking External Apis in Python",
+  			"datePublished": "26th January 2016 11:40 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">26th January 2016 11:40 pm</p><h1>Mocking External Apis in Python</h1><p>It’s quite common to have to integrate an external API into your web app for some of your functionality. However, it’s a really bad idea to have requests be sent to the remote API when running your tests. At best, it means your tests may fail due to unexpected circumstances, such as a network outage. At worst, you could wind up making requests to paid services that will cost you money, or sending push notifications to clients. It’s therefore a good idea to mock these requests in some way, but it can be fiddly.</p><p>In this post I’ll show you several ways you can mock an external API so as to prevent requests being sent when running your test suite. I’m sure there are many others, but these have worked for me recently.</p><h2 id="mocking-the-client-library">Mocking the client library</h2><p>Nowadays many third-party services realise that providing developers with client libraries in a variety of languages is a good idea, so it’s quite common to find a library for interfacing with a third-party service. Under these circumstances, the library itself is usually already thoroughly tested, so there’s no point in you writing additional tests for that functionality. Instead, you can just mock the client library so that the request is never sent, and if you need a response, then you can specify one that will remain constant.</p><p>I recently had to integrate Stripe with a mobile app backend, and I used their client library. I needed to ensure that I got the right result back. In this case I only needed to use the <code>Token</code> object’s <code>create()</code> method. I therefore created a new <code>MockToken</code> class that inherited from <code>Token</code>, and overrode its <code>create()</code> method so that it only accepted one card number and returned a hard-coded response for it:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> stripe.resource <span class="hljs-keyword">import</span> Token, convert_to_stripe_object
+<span class="hljs-keyword">from</span> stripe.error <span class="hljs-keyword">import</span> CardError
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MockToken</span><span class="hljs-params">(Token)</span>:</span>
+
+<span class="hljs-meta">    @classmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">create</span><span class="hljs-params">(cls, api_key=None, idempotency_key=None,
+               stripe_account=None, **params)</span>:</span>
+        <span class="hljs-keyword">if</span> params[<span class="hljs-string">'card'</span>][<span class="hljs-string">'number'</span>] != <span class="hljs-string">'4242424242424242'</span>:
+            <span class="hljs-keyword">raise</span> CardError(<span class="hljs-string">'Invalid card number'</span>, <span class="hljs-keyword">None</span>, <span class="hljs-number">402</span>)
+
+        response = {
+            <span class="hljs-string">"card"</span>: {
+              <span class="hljs-string">"address_city"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_country"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_line1"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_line1_check"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_line2"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_state"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_zip"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_zip_check"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"brand"</span>: <span class="hljs-string">"Visa"</span>,
+              <span class="hljs-string">"country"</span>: <span class="hljs-string">"US"</span>,
+              <span class="hljs-string">"cvc_check"</span>: <span class="hljs-string">"unchecked"</span>,
+              <span class="hljs-string">"dynamic_last4"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"exp_month"</span>: <span class="hljs-number">12</span>,
+              <span class="hljs-string">"exp_year"</span>: <span class="hljs-number">2017</span>,
+              <span class="hljs-string">"fingerprint"</span>: <span class="hljs-string">"49gS1c4YhLaGEQbj"</span>,
+              <span class="hljs-string">"funding"</span>: <span class="hljs-string">"credit"</span>,
+              <span class="hljs-string">"id"</span>: <span class="hljs-string">"card_17XXdZGzvyST06Z022EiG1zt"</span>,
+              <span class="hljs-string">"last4"</span>: <span class="hljs-string">"4242"</span>,
+              <span class="hljs-string">"metadata"</span>: {},
+              <span class="hljs-string">"name"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"object"</span>: <span class="hljs-string">"card"</span>,
+              <span class="hljs-string">"tokenization_method"</span>: <span class="hljs-keyword">None</span>
+          },
+            <span class="hljs-string">"client_ip"</span>: <span class="hljs-string">"192.168.1.1"</span>,
+            <span class="hljs-string">"created"</span>: <span class="hljs-number">1453817861</span>,
+            <span class="hljs-string">"id"</span>: <span class="hljs-string">"tok_42XXdZGzvyST06Z0LA6h5gJp"</span>,
+            <span class="hljs-string">"livemode"</span>: <span class="hljs-keyword">False</span>,
+            <span class="hljs-string">"object"</span>: <span class="hljs-string">"token"</span>,
+            <span class="hljs-string">"type"</span>: <span class="hljs-string">"card"</span>,
+            <span class="hljs-string">"used"</span>: <span class="hljs-keyword">False</span>
+        }
+        <span class="hljs-keyword">return</span> convert_to_stripe_object(response, api_key, stripe_account)
+</code></pre><p>Much of this was lifted straight from the source code for the library. I then wrote a test for the payment endpoint and patched the <code>Token</code> class:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PaymentTest</span><span class="hljs-params">(TestCase)</span>:</span>
+<span class="hljs-meta">    @mock.patch('stripe.Token', MockToken)</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_payments</span><span class="hljs-params">(self)</span>:</span>
+        data = {
+            <span class="hljs-string">"number"</span>: <span class="hljs-string">'1111111111111111'</span>,
+            <span class="hljs-string">"exp_month"</span>: <span class="hljs-number">12</span>,
+            <span class="hljs-string">"exp_year"</span>: <span class="hljs-number">2017</span>,
+            <span class="hljs-string">"cvc"</span>: <span class="hljs-string">'123'</span>
+        }
+        response = self.client.post(reverse(<span class="hljs-string">'payments'</span>), data=data, format=<span class="hljs-string">'json'</span>)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+</code></pre><p>This replaced <code>stripe.Token</code> with <code>MockToken</code> so that in this test, the response from the client library was always going to be the expected one.</p><p>If the response doesn’t matter and all you need to do is be sure that the right method would have been called, this is easier. You can just mock the method in question using <code>MagicMock</code> and assert that it has been called afterwards, as in this example:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReminderTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_send_reminder</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Mock PushService.create_message()</span>
+        PushService.create_message = mock.MagicMock(name=<span class="hljs-string">"create_message"</span>)
+
+        <span class="hljs-comment"># Call reminder task</span>
+        send_reminder()
+
+        <span class="hljs-comment"># Check user would have received a push notification</span>
+        PushService.create_message.assert_called_with([{<span class="hljs-string">'text'</span>: <span class="hljs-string">'My push'</span>, <span class="hljs-string">'conditions'</span>: [<span class="hljs-string">'UserID'</span>, <span class="hljs-string">'EQ'</span>, <span class="hljs-number">1</span>]}])
+</code></pre><h2 id="mocking-lower-level-requests">Mocking lower-level requests</h2><p>Sometimes, no client library is available, or it’s not worth using one as you only have to make one or two requests. Under these circumstances, there are ways to mock the actual request to the external API. If you’re using the <code>requests</code> module, then there’s a <code>responses</code> module that’s ideal for mocking the API request.</p><p>Suppose we have the following code:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> json, requests
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">send_request_to_api</span><span class="hljs-params">(data)</span>:</span>
+    <span class="hljs-comment"># Put together the request</span>
+    params = {
+        <span class="hljs-string">'auth'</span>: settings.AUTH_KEY,
+        <span class="hljs-string">'data'</span>: data
+    }
+    response = requests.post(settings.API_URL, data={<span class="hljs-string">'params'</span>: json.dumps(params)})
+    <span class="hljs-keyword">return</span> response
+</code></pre><p>Using <code>responses</code> we can mock the response from the server in our test:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">APITest</span><span class="hljs-params">(TestCase)</span>:</span>
+<span class="hljs-meta">    @responses.activate</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_send_request</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Mock the API</span>
+        responses.add(responses.POST,
+            settings.API_URL,
+            status=<span class="hljs-number">200</span>,
+            content_type=<span class="hljs-string">"application/json"</span>,
+            body=<span class="hljs-string">'{"item_id": "12345678"}'</span>)
+
+        <span class="hljs-comment"># Call function</span>
+        data = {
+            <span class="hljs-string">"surname"</span>: <span class="hljs-string">"Smith"</span>,
+            <span class="hljs-string">"location"</span>: <span class="hljs-string">"London"</span>
+        }
+        send_request_to_api(data)
+
+        <span class="hljs-comment"># Check request went to correct URL</span>
+        <span class="hljs-keyword">assert</span> responses.calls[<span class="hljs-number">0</span>].request.url == settings.API_URL
+</code></pre><p>Note the use of the <code>@responses.activate</code> decorator. We use <code>responses.add()</code> to set up each URL we want to be able to mock, and pass through details of the response we want to return. We then make the request, and check that it was made as expected.</p><p>You can find more details of the <code>responses</code> module <a href="https://github.com/getsentry/responses">here</a>.</p><h2 id="summary">Summary</h2><p>I’m pretty certain that there are other ways you can mock an external API in Python, but these ones have worked for me recently. If you use another method, please feel free to share it in the comments.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/mock/">mock</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/01/26/mocking-external-apis-in-python/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/03/18/my-experience-using-php-7-in-production/amp/">My Experience Using PHP 7 in Production</a> <a class="postlink" href="/blog/2015/11/18/learning-more-about-react-dot-js-and-flux/amp/">Learning More About React.js and Flux</a></section></article></div></div></div></body></html>

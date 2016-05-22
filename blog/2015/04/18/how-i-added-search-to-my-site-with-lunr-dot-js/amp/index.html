@@ -1,0 +1,226 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>How I Added Search to My Site With Lunr.js - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/",
+  			"headline": "How I Added Search to My Site With Lunr.js",
+  			"datePublished": "18th April 2015 3:05 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th April 2015 3:05 pm</p><h1>How I Added Search to My Site With Lunr.js</h1><p>As I mentioned a while back, I recently switched the search on my site from Google’s site-specific search to <a href="http://lunrjs.com/">Lunr.js</a>. Since my site is built with a static site generator, I can’t implement search using database queries, and I was keen to have an integrated search method that would be fast and not require server-side scripting, and Lunr.js seemed to fit the bill.</p><p>The first task in implementing it was to generate the index. As I wrote the Grunt task that generates the blog, I amended that task to generate an index at the same time as I generated the posts. I installed Lunr.js with the following command:</p><pre><code class="hljs lang-bash">npm install lunr --save
+</code></pre><p>I then imported it in the task, and set up the field names:</p><pre><code class="hljs lang-javascript">    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);
+
+    searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { boost: <span class="hljs-number">10</span> });
+        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);
+        <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);
+    });
+</code></pre><p>This defined fields for the title, body, and hyperlink, and set the hyperlink as the reference. The variable <code>searchIndex</code> represents the Lunr index.</p><p>Next, I looped through the posts, and passed the appropriate details to be added to the index:</p><pre><code class="hljs lang-javascript">    <span class="hljs-keyword">for</span> (post <span class="hljs-keyword">in</span> post_items) {
+        <span class="hljs-keyword">var</span> doc = {
+            <span class="hljs-string">'title'</span>: post_items[post].meta.title,
+            <span class="hljs-string">'body'</span>: post_items[post].post.rawcontent,
+            <span class="hljs-string">'href'</span>: post_items[post].path
+        };
+        store[doc.href] = {
+            <span class="hljs-string">'title'</span>: doc.title
+        };
+        searchIndex.add(doc);
+    }
+</code></pre><p>At this point, <code>post_items</code> represents an array of objects, with each object representing a blog post. Note that the <code>body</code> field is set to the value of the item’s attribute <code>post.rawcontent</code>, which represents the raw Markdown rather than the compiled HTML.</p><p>I then store the title in the <code>store</code> object, so that it can be accessed using the <code>href</code> field as a key.</p><p>I then do the same thing when generating the pages:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Add them to the index</span>
+    <span class="hljs-keyword">var</span> doc = {
+        <span class="hljs-string">'title'</span>: data.meta.title,
+        <span class="hljs-string">'body'</span>: data.post.rawcontent,
+        <span class="hljs-string">'href'</span>: permalink + <span class="hljs-string">'/'</span>
+    };
+    store[doc.href] = {
+        <span class="hljs-string">'title'</span>: data.meta.title
+    };
+    searchIndex.add(doc);
+</code></pre><p>Note that this is already inside the loop that generates the pages, so I don’t include that.</p><p>We then write the index to a file:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Write index</span>
+    grunt.file.write(options.www.dest + <span class="hljs-string">'/lunr.json'</span>, <span class="hljs-built_in">JSON</span>.stringify({
+        index: searchIndex.toJSON(),
+        store: store
+    }));
+</code></pre><p>That takes care of generating our index, but we need to implement some client-side code to handle the search. We need to include Lunr.js on the client side as well, (I recommend using Bower to do so), alongside jQuery. If you include both, the following code should do the trick:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">    'use strict'</span>;
+
+    <span class="hljs-comment">// Set up search</span>
+    <span class="hljs-keyword">var</span> index, store;
+    $.getJSON(<span class="hljs-string">'/lunr.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+
+        <span class="hljs-comment">// Create index</span>
+        index = lunr.Index.load(response.index);
+
+        <span class="hljs-comment">// Create store</span>
+        store = response.store;
+
+        <span class="hljs-comment">// Handle search</span>
+        $(<span class="hljs-string">'input#search'</span>).on(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            <span class="hljs-comment">// Get query</span>
+            <span class="hljs-keyword">var</span> query = $(<span class="hljs-keyword">this</span>).val();
+
+            <span class="hljs-comment">// Search for it</span>
+            <span class="hljs-keyword">var</span> result = index.search(query);
+
+            <span class="hljs-comment">// Output it</span>
+            <span class="hljs-keyword">var</span> resultdiv = $(<span class="hljs-string">'ul.searchresults'</span>);
+            <span class="hljs-keyword">if</span> (result.length === <span class="hljs-number">0</span>) {
+                <span class="hljs-comment">// Hide results</span>
+                resultdiv.hide();
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// Show results</span>
+                resultdiv.empty();
+                <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> item <span class="hljs-keyword">in</span> result) {
+                    <span class="hljs-keyword">var</span> ref = result[item].ref;
+                    <span class="hljs-keyword">var</span> searchitem = <span class="hljs-string">'&lt;li&gt;&lt;a href="'</span> + ref + <span class="hljs-string">'"&gt;'</span> + store[ref].title + <span class="hljs-string">'&lt;/a&gt;&lt;/li&gt;'</span>;
+                    resultdiv.append(searchitem);
+                }
+                resultdiv.show();
+            }
+        });
+    });
+});
+</code></pre><p>This should be easy to understand. On load, we fetch and parse the <code>lunr.json</code> file from the server, and load the index. We then set up an event handler for the <code>keyup</code> event on an input with the ID of <code>search</code>. We get the value of the input, and query our index, and we loop through our results and display them.</p><p>I was pleased with how straightforward it was to implement search with Lunr.js, and it works well. It’s also a lot faster than any server-side solution since the index is generated during the build process, and is loaded with the rest of the site, so the only factor in the speed of the response is how quick your browser executes JavaScript. You could probably also use it with a Node.js application by generating the index dynamically, although you’d probably want to cache it to some extent.</p><section><ul class="categories"><li><a href="/blog/categories/grunt/">grunt</a></li><li><a href="/blog/categories/nodejs/">nodejs</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/lunr/">lunr</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/04/18/how-i-added-search-to-my-site-with-lunr-dot-js/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/amp/">My Static Site Generator Post on Sitepoint</a> <a class="postlink" href="/blog/2015/04/04/adding-a-new-search-engine-to-my-site/amp/">Adding a New Search Engine to My Site</a></section></article></div></div></div></body></html>

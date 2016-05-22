@@ -1,0 +1,192 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Writing Faster Laravel Tests - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/",
+  			"headline": "Writing Faster Laravel Tests",
+  			"datePublished": "4th April 2016 8:55 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th April 2016 8:55 pm</p><h1>Writing Faster Laravel Tests</h1><p>Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practicing TDD a lot easier.</p><p>Out of the box running Laravel tests can be quite slow, which is a big issue - if your test suite takes several minutes to run, that’s a huge disruption. Also, Laravel doesn’t create a dedicated test database - instead it runs the tests against the same database you’re using normally, which is almost always not what you want. I’ll show you how to set up a dedicated test database, and how to use an in-memory SQLite database for faster tests. This results in cleaner and easier-to-maintain tests, since you can be sure the test database is restored to a clean state at the end of every test.</p><h2 id="setup">Setup</h2><p>Our first step is to make sure that when a new test begins, the following should happen:</p><ul><li>We should create a new transaction</li><li>We should empty and migrate our database</li></ul><p>Then, at the end of each test:</p><ul><li>We should roll back our transaction to restore the database to its prior state</li></ul><p>To do so, we can create custom <code>setUp()</code> and <code>tearDown()</code> methods for our base <code>TestCase</code> class. Save this in <code>tests/TestCase.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestCase</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-comment">/**
+     * The base URL to use while testing the application.
+     *
+     * <span class="hljs-doctag">@var</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> $baseUrl = <span class="hljs-string">'http://localhost'</span>;
+    <span class="hljs-comment">/**
+     * Creates the application.
+     *
+     * <span class="hljs-doctag">@return</span> \Illuminate\Foundation\Application
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createApplication</span><span class="hljs-params">()</span>
+    </span>{
+        $app = <span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../bootstrap/app.php'</span>;
+        $app-&gt;make(Illuminate\Contracts\Console\Kernel::class)-&gt;bootstrap();
+        <span class="hljs-keyword">return</span> $app;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setUp</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">parent</span>::setUp();
+        DB::beginTransaction();
+        Artisan::call(<span class="hljs-string">'migrate:refresh'</span>);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tearDown</span><span class="hljs-params">()</span>
+    </span>{
+        DB::rollBack();
+        <span class="hljs-keyword">parent</span>::tearDown();
+    }
+}
+</code></pre><p>That takes care of building up and tearing down our database for each test.</p><p>EDIT: Turns out there’s actually a much easier way of doing this already included in Laravel. Just import and add either <code>use DatabaseMigrations;</code> or <code>use DatabaseTransactions;</code> to the <code>TestCase</code> class. The first will roll back the database and migrate it again after each test, while the second wraps each test in a transaction.</p><h2 id="using-an-in-memory-sqlite-database-for-testing-purposes">Using an in-memory SQLite database for testing purposes</h2><p>It’s not always practical to do this, especially if you rely on database features in PostgreSQL that aren’t available in SQLite, but if it is, it’s probably worth using an in-memory SQLite database for your tests. If you want to do so, here’s some example settings you might want to use in <code>phpunit.xml</code>:</p><pre><code class="hljs lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"APP_ENV"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"testing"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"CACHE_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"array"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_CONNECTION"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sqlite"</span>/&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_DATABASE"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">":memory:"</span>/&gt;</span>
+</code></pre><p>This can result in a very significant speed boost.</p><p>I would still recommend that you test against your production database, but this can be easily handed off to a continuous integration server such as Jenkins, since that way it won’t disrupt your workflow.</p><p>During TDD, you’ll typically run your tests several times for any change you make, so if they’re too slow it can have a disastrous effect on your productivity. But with a few simple changes like this, you can ensure your tests run as quickly as possible. This approach should also be viable for Lumen apps.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/05/14/broadcasting-events-with-laravel-and-socket-dot-io/amp/">Broadcasting Events With Laravel and Socket.io</a> <a class="postlink" href="/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/amp/">Building a Location Aware Web App With Geodjango</a></section></article></div></div></div></body></html>

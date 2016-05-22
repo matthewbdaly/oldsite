@@ -1,0 +1,288 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Exploring the Hstorefield in Django 1.8 - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/08/01/exploring-the-hstorefield-in-django-1-dot-8/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/08/01/exploring-the-hstorefield-in-django-1-dot-8/",
+  			"headline": "Exploring the Hstorefield in Django 1.8",
+  			"datePublished": "1st August 2015 6:26 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">1st August 2015 6:26 pm</p><h1>Exploring the Hstorefield in Django 1.8</h1><p>One of the most interesting additions in Django 1.8 is the new Postgres-specific fields. I started using PostgreSQL in preference to MySQL for Django apps last year, and so I was interested in the additional functionality they offer.</p><p>By far the biggest deal out of all of these was the new <code>HStoreField</code> type. PostgreSQL added a JSON data type a little while back, and <code>HStoreField</code> allows you to use that field type. This is a really big deal because it allows you to store arbitrary data as JSON and query it. Previously, you could of course just store data as JSON in a text field, but that lacked the same ability to query it. This gives you many of the advantages of a NoSQL document database such as MongoDB in a relational database. For instance, you can store different products with different data about them, and crucially, query them by that data. Previously, the only way to add arbitrary product data and be able to query it was to have it in a separate table, and it was often cumbersome to join them when fetching multiple products.</p><p>Let’s see a working example. We might be building an online store where products can have all kinds of arbitrary data stored about them. One product might be a plastic box, and you’d need to list the capacity as an additional attribute. Another product might be a pair of shoes, which have no capacity, but do have a size. It might be difficult to model this otherwise, but <code>HStoreField</code> is perfect for this kind of data.</p><p>First, let’s set up our database. I’ll assume you already have PostgreSQL up and running via your package manager. First, we need to create our database:</p><pre><code class="hljs lang-bash">$ createdb djangostore
+</code></pre><p>Next, we need to create a new user for this database with superuser access:</p><pre><code class="hljs lang-bash">$ createuser store <span class="hljs-_">-s</span> -P
+</code></pre><p>You’ll be prompted for a password - I’m assuming this will just be <code>password</code> here. Next, we need to connect to PostgreSQL using the <code>psql</code> utility:</p><pre><code class="hljs lang-bash">$ psql djangostore -U store -W
+</code></pre><p>You’ll be prompted for your new password. Next, run the following command:</p><pre><code class="hljs lang-psql"><span class="hljs-meta"># CREATE EXTENSION hstore;</span>
+<span class="hljs-meta"># GRANT ALL PRIVILEGES ON DATABASE djangostore TO store;</span>
+<span class="hljs-meta"># \q</span>
+</code></pre><p>The first command installs the HStore extension. Next we make sure our new user has the privileges required on the new database:</p><p>We’ve now created our database and a user to interact with it. Next, we’ll set up our Django install:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">cd</span> Projects
+$ mkdir djangostore
+$ <span class="hljs-built_in">cd</span> djangostore
+$ pyvenv venv
+$ <span class="hljs-built_in">source</span> venv/bin/activate
+$ pip install Django psycopg2 ipdb
+$ django-admin.py startproject djangostore
+$ python manage.py startapp store
+</code></pre><p>I’m assuming here that you’re using Python 3.4. On Ubuntu, getting it working is <a href="https://gist.github.com/denilsonsa/21e50a357f2d4920091e">a bit more involved</a>.</p><p>Next, open up <code>djangostore/settings.py</code> and amend <code>INSTALLED_APPS</code> to include the new app and the PostgreSQL-specific functionality:</p><pre><code class="hljs lang-python">INSTALLED_APPS = (
+    <span class="hljs-string">'django.contrib.admin'</span>,
+    <span class="hljs-string">'django.contrib.auth'</span>,
+    <span class="hljs-string">'django.contrib.contenttypes'</span>,
+    <span class="hljs-string">'django.contrib.sessions'</span>,
+    <span class="hljs-string">'django.contrib.messages'</span>,
+    <span class="hljs-string">'django.contrib.staticfiles'</span>,
+    <span class="hljs-string">'django.contrib.postgres'</span>,
+    <span class="hljs-string">'store'</span>,
+)
+</code></pre><p>You’ll also need to configure the database settings:</p><pre><code class="hljs lang-python">DATABASES = {
+    <span class="hljs-string">'default'</span>: {
+        <span class="hljs-string">'ENGINE'</span>: <span class="hljs-string">'django.db.backends.postgresql_psycopg2'</span>,
+        <span class="hljs-string">'NAME'</span>: <span class="hljs-string">'djangostore'</span>,
+        <span class="hljs-string">'USER'</span>: <span class="hljs-string">'store'</span>,
+        <span class="hljs-string">'PASSWORD'</span>: <span class="hljs-string">'password'</span>,
+        <span class="hljs-string">'HOST'</span>: <span class="hljs-string">'localhost'</span>,
+        <span class="hljs-string">'PORT'</span>: <span class="hljs-string">''</span>,
+    }
+}
+</code></pre><p>We need to create an empty migration to use <code>HStoreField</code>:</p><pre><code class="hljs lang-bash">$ python manage.py makemigrations --empty store
+</code></pre><p>This command should create the file <code>store/migrations/0001_initial.py</code>. Open this up and edit it to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span>
+<span class="hljs-keyword">from</span> __future__ <span class="hljs-keyword">import</span> unicode_literals
+
+<span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models, migrations
+<span class="hljs-keyword">from</span> django.contrib.postgres.operations <span class="hljs-keyword">import</span> HStoreExtension
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Migration</span><span class="hljs-params">(migrations.Migration)</span>:</span>
+
+    dependencies = [
+    ]
+
+    operations = [
+        HStoreExtension(),
+    ]
+</code></pre><p>This will make sure the HStore extension is installed. Next, let’s run these migrations:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+Operations to perform:
+  Synchronize unmigrated apps: messages, staticfiles, postgres
+  Apply all migrations: sessions, store, admin, auth, contenttypes
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+  Installing custom SQL...
+Running migrations:
+  Rendering model states... DONE
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying contenttypes.0002_remove_content_<span class="hljs-built_in">type</span>_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying sessions.0001_initial... OK
+  Applying store.0001_initial... OK
+</code></pre><p>Now, we’re ready to start creating our <code>Product</code> model. Open up <code>store/models.py</code> and amend it as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.postgres.fields <span class="hljs-keyword">import</span> HStoreField
+<span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
+
+<span class="hljs-comment"># Create your models here.</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span><span class="hljs-params">(models.Model)</span>:</span>
+    created_at = models.DateTimeField(auto_now_add=<span class="hljs-keyword">True</span>)
+    updated_at = models.DateTimeField(auto_now=<span class="hljs-keyword">True</span>)
+    name = models.CharField(max_length=<span class="hljs-number">200</span>)
+    description = models.TextField()
+    price = models.FloatField()
+    attributes = HStoreField()
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__str__</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> self.name
+</code></pre><p>Note that <code>HStoreField</code> is not part of the standard group of model fields, and needs to be imported from the Postgres-specific fields module. Next, let’s create and run our migrations:</p><pre><code class="hljs lang-bash">$ python manage.py makemigrations
+$ python manage.py migrate
+</code></pre><p>We should now have a <code>Product</code> model where the <code>attributes</code> field can be any arbitrary data we want. Note that we installed <code>ipdb</code> earlier - if you’re not familiar with it, this is an improved Python debugger, and also pulls in <code>ipython</code>, an improved Python shell, which Django will use if available.</p><p>Open up the Django shell:</p><pre><code class="hljs lang-bash">$ python manage.py shell
+</code></pre><p>Then, import the <code>Product</code> model:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> store.models <span class="hljs-keyword">import</span> Product
+</code></pre><p>Let’s create our first product - a plastic storage box:</p><pre><code class="hljs lang-python">box = Product()
+box.name = <span class="hljs-string">'Box'</span>
+box.description = <span class="hljs-string">'A big box'</span>
+box.price = <span class="hljs-number">5.99</span>
+box.attributes = { <span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">"colour"</span>: <span class="hljs-string">"blue"</span>}
+box.save()
+</code></pre><p>If we take a look, we can see that the attributes can be returned as a Python dictionary:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">12</span>]: Product.objects.all()[<span class="hljs-number">0</span>].attributes
+Out[<span class="hljs-number">12</span>]: {<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>}
+</code></pre><p>We can easily retrieve single values:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">15</span>]: Product.objects.all()[<span class="hljs-number">0</span>].attributes[<span class="hljs-string">'capacity'</span>]
+Out[<span class="hljs-number">15</span>]: <span class="hljs-string">'1L'</span>
+</code></pre><p>Let’s add a second product - a mop:</p><pre><code class="hljs lang-python">mop = Product()
+mop.name = <span class="hljs-string">'Mop'</span>
+mop.description = <span class="hljs-string">'A mop'</span>
+mop.price = <span class="hljs-number">12.99</span>
+mop.attributes = { <span class="hljs-string">'colour'</span>: <span class="hljs-string">"red"</span> }
+mop.save()
+</code></pre><p>Now, we can filter out only the red items easily:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">2</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'colour'</span>: <span class="hljs-string">'red'</span>})
+Out[<span class="hljs-number">2</span>]: [&lt;Product: Mop&gt;]
+</code></pre><p>Here we search for items where the <code>colour</code> attribute is set to <code>red</code>, and we only get back the mop. Let’s do the same for blue items:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">3</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>})
+Out[<span class="hljs-number">3</span>]: [&lt;Product: Box&gt;]
+</code></pre><p>Here it returns the box. Let’s now search for an item with a capacity of 1L:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">4</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>})
+Out[<span class="hljs-number">4</span>]: [&lt;Product: Box&gt;]
+</code></pre><p>Only the box has the capacity attribute at all, and it’s the only one returned. Let’s see what happens when we search for an item with a capacity of 2L, which we know is not present:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">5</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'2L'</span>})
+Out[<span class="hljs-number">5</span>]: []
+</code></pre><p>No items returned, as expected. Let’s look for any item with the <code>capacity</code> attribute:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">6</span>]: Product.objects.filter(attributes__has_key=<span class="hljs-string">'capacity'</span>)
+Out[<span class="hljs-number">6</span>]: [&lt;Product: Box&gt;]
+</code></pre><p>Again, it only returns the box, as that’s the only one where that key exists. Note that all of this is tightly integrated with the existing API for the Django ORM. Let’s add a third product, a food hamper:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">3</span>]: hamper = Product()
+
+In [<span class="hljs-number">4</span>]: hamper.name = <span class="hljs-string">'Hamper'</span>
+
+In [<span class="hljs-number">5</span>]: hamper.description = <span class="hljs-string">'A food hamper'</span>
+
+In [<span class="hljs-number">6</span>]: hamper.price = <span class="hljs-number">19.99</span>
+
+In [<span class="hljs-number">7</span>]: hamper.attributes = {
+   ...: <span class="hljs-string">'contents'</span>: <span class="hljs-string">'ham, cheese, coffee'</span>,
+   ...: <span class="hljs-string">'size'</span>: <span class="hljs-string">'90cmx60cm'</span>
+   ...: }
+
+In [<span class="hljs-number">8</span>]: hamper.save()
+</code></pre><p>Next, let’s return only those items that have a <code>contents</code> attribute that contains <code>cheese</code>:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">9</span>]: Product.objects.filter(attributes__contents__contains=<span class="hljs-string">'cheese'</span>)
+Out[<span class="hljs-number">9</span>]: [&lt;Product: Hamper&gt;]
+</code></pre><p>As you can see, the <code>HStoreField</code> type allows for quite complex queries, while allowing you to set arbitrary values for an individual item. This overcomes one of the biggest issues with relational databases - the inability to set arbitrary data. Previously, you might have to work around it in some fashion, such as creating a table containing attributes for individual items which had to be joined on the product table. This is very cumbersome and difficult to use, especially when you wanted to work with more than one product. With this approach, it’s easy to filter products by multiple values in the HStore field, and you get back all of the attributes at once, as in this example:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">13</span>]: Product.objects.filter(attributes__capacity=<span class="hljs-string">'1L'</span>, attributes__colour=<span class="hljs-string">'blue'</span>)
+Out[<span class="hljs-number">13</span>]: [&lt;Product: Box&gt;]
+In [<span class="hljs-number">14</span>]: Product.objects.filter(attributes__capacity=<span class="hljs-string">'1L'</span>, attributes__colour=<span class="hljs-string">'blue'</span>)[<span class="hljs-number">0</span>].attributes
+Out[<span class="hljs-number">14</span>]: {<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>}
+</code></pre><p>Similar functionality is coming in a future version of MySQL, so it wouldn’t be entirely surprising to see <code>HStoreField</code> become more generally available in Django in the near future. For now, this functionality is extremely useful and makes for a good reason to ditch MySQL in favour of PostgreSQL for your future Django apps.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/postgresql/">postgresql</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/08/01/exploring-the-hstorefield-in-django-1-dot-8/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/08/02/testing-django-views-in-isolation/amp/">Testing Django Views in Isolation</a> <a class="postlink" href="/blog/2015/07/21/new-laptop/amp/">New Laptop</a></section></article></div></div></div></body></html>

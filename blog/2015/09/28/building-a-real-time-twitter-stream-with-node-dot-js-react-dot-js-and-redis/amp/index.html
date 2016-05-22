@@ -1,0 +1,620 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Building a Real-time Twitter Stream With Node.js, React.js and Redis - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/09/28/building-a-real-time-twitter-stream-with-node-dot-js-react-dot-js-and-redis/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/09/28/building-a-real-time-twitter-stream-with-node-dot-js-react-dot-js-and-redis/",
+  			"headline": "Building a Real-time Twitter Stream With Node.js, React.js and Redis",
+  			"datePublished": "28th September 2015 8:00 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">28th September 2015 8:00 pm</p><h1>Building a Real-time Twitter Stream With Node.js, React.js and Redis</h1><p>In the last year or so, React.js has taken the world of web development by storm. A major reason for this is that it makes it possible to build <strong>isomorphic web applications</strong> - web apps where the same code can run on the client and the server. Using React.js, you can create a template that will be executed on the server when the page first loads, and then the same template can be used to re-render the content when it’s updated, whether that’s via AJAX, WebSockets or another method entirely.</p><p>In this tutorial, I’ll show you how to build a simple Twitter streaming app using Node.js. I’m actually <a href="https://scotch.io/tutorials/build-a-real-time-twitter-stream-with-node-and-react-js">not the only person to have built this to demonstrate React.js</a>, but this is my own particular take on this idea, since it’s such an obvious use case for React.</p><h2 id="what-is-react-js-">What is React.js?</h2><p>A lot of people get rather confused over this issue. It’s not correct to compare React.js with frameworks like Angular.js or Backbone.js. It’s often described as being just the V in MVC - it represents only the view layer. If you’re familiar with Backbone.js, I think it’s reasonable to compare it to Backbone’s views, albeit with it’s own templating syntax. It does not provide the following functionality like Angular and Backbone do:</p><ul><li>Support for models</li><li>Any kind of helpers for AJAX requests</li><li>Routing</li></ul><p>If you want any of this functionality, you need to look elsewhere. There are other libraries around that offer this kind of functionality, so if you want to use React as part of some kind of MVC structure, you can do so - they’re just not a part of the library itself.</p><p>React.js uses a so-called “virtual DOM” - rather than re-rendering the view from scratch when the state changes, it instead retains a virtual representation of the DOM in memory, updates that, then figures out what changes are required to update the existing DOM and applies them. This means it only needs to change what actually changes, making it faster than other client-side templating systems. Combined with the ability to render on the server side, React allows you to build high-performance apps that combine the initial speed and SEO advantages of conventional web apps with the responsiveness of single-page web apps.</p><p>To create components with React, it’s common to use an XML-like syntax called JSX. It’s not mandatory, but I highly recommend you do so as it’s much more intuitive than creating elements with Javascript.</p><h2 id="getting-started">Getting started</h2><p>You’ll need a Twitter account, and you’ll need to <a href="https://apps.twitter.com/">create a new Twitter app</a> and obtain the security credentials to let you access the Twitter Streaming API. You’ll also need to have Node.js installed (ideally using <code>nvm</code>) - at this time, however, you can’t use Node 4.0 because of issues with Redis. You will also need to install Redis and hiredis - if you’ve worked through my previous Redis tutorials you’ll have these already.</p><p>We’ll be using Gulp.js as our build system, and Bower to install some client-side packages, so they need to be installed globally:</p><pre><code class="hljs lang-bash">$ npm install -g gulp bower
+</code></pre><p>We’ll also be using Compass to help with our stylesheets:</p><pre><code class="hljs lang-bash">$ sudo gem install compass
+</code></pre><p>With that all done, let’s start work on our app. First, run the following command to create your <code>package.json</code>:</p><pre><code class="hljs lang-bash">$ npm init
+</code></pre><p>I’m assuming you’re well-acquainted enough with Node.js to know what this does, and can answer the questions without difficulty. I won’t cover writing tests in this tutorial as, but set your test command to <code>gulp test</code> and you should be fine.</p><p>Next, we need to install our dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save babel compression express hbs hiredis lodash morgan react redis socket.io socket.io-client twitter
+$ npm install --save-dev browserify chai gulp gulp-compass gulp-coveralls gulp-istanbul gulp-jshint gulp-mocha gulp-uglify jshint-stylish reactify request vinyl-buffer vinyl-source-stream
+</code></pre><h2 id="planning-our-app">Planning our app</h2><p>Now, it’s worth taking a few minutes to plan the architecture of our app. We want to have the app listen to the Twitter Streaming API and filter for messages with any arbitrary string in them - in this case we’ll be searching for “javascript”, but you can set it to anything you like. That means that that part needs to be listening all the time, not just when someone is using the app. Also, it doesn’t fit neatly into the usual request-response cycle - if several people visit the site at once, we could end up with multiple connections to fetch the same data, which is really not efficient, and could cause problems with duplicate tweets showing up.</p><p>Instead, we’ll have a separate <code>worker.js</code> file which runs constantly. This will listen for any matching messages on Twitter. When one appears, rather than returning it itself, it will publish it to a Redis channel, as well as persisting it. Then, the web app, which will be the <code>index.js</code> file, will be subscribed to the same channel, and will receive the tweet and push it to all current users using Socket.io.</p><p>This is a good example of a message queue, and it’s a common pattern. It allows you to create dedicated sections of your app for different tasks, and means that they will generally be more robust. In this case, if the worker goes down, users will still be able to see some tweets, and if the server goes down, the tweets will still be persisted to Redis. In theory, this would also allow you to scale your app more easily by allowing movement of different tasks to different servers, and several app servers could interface with a single worker process. The only downside I can think of is that on a platform like Heroku you’d need to have a separate dyno for the worker process - however, with Heroku’s pricing model changing recently, since this needs to be listening all the time it won’t be suitable for the free tier anyway.</p><p>First let’s create our <code>gulpfile.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> gulp = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp'</span>);
+<span class="hljs-keyword">var</span> jshint = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-jshint'</span>);
+<span class="hljs-keyword">var</span> source = <span class="hljs-built_in">require</span>(<span class="hljs-string">'vinyl-source-stream'</span>);
+<span class="hljs-keyword">var</span> buffer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'vinyl-buffer'</span>);
+<span class="hljs-keyword">var</span> browserify = <span class="hljs-built_in">require</span>(<span class="hljs-string">'browserify'</span>);
+<span class="hljs-keyword">var</span> reactify = <span class="hljs-built_in">require</span>(<span class="hljs-string">'reactify'</span>);
+<span class="hljs-keyword">var</span> mocha = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-mocha'</span>);
+<span class="hljs-keyword">var</span> istanbul = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-istanbul'</span>);
+<span class="hljs-keyword">var</span> coveralls = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-coveralls'</span>);
+<span class="hljs-keyword">var</span> compass = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-compass'</span>);
+<span class="hljs-keyword">var</span> uglify = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-uglify'</span>);
+
+<span class="hljs-keyword">var</span> paths = {
+    scripts: [<span class="hljs-string">'components/*.jsx'</span>],
+    styles: [<span class="hljs-string">'src/sass/*.scss'</span>]
+};
+gulp.task(<span class="hljs-string">'lint'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> gulp.src([
+      <span class="hljs-string">'index.js'</span>,
+      <span class="hljs-string">'components/*.js'</span>
+      ])
+    .pipe(jshint())
+    .pipe(jshint.reporter(<span class="hljs-string">'jshint-stylish'</span>));
+});
+
+gulp.task(<span class="hljs-string">'compass'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  gulp.src(<span class="hljs-string">'src/sass/*.scss'</span>)
+    .pipe(compass({
+      css: <span class="hljs-string">'static/css'</span>,
+      sass: <span class="hljs-string">'src/sass'</span>
+    }))
+    .pipe(gulp.dest(<span class="hljs-string">'static/css'</span>));
+});;
+
+gulp.task(<span class="hljs-string">'test'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  gulp.src(<span class="hljs-string">'index.js'</span>)
+    .pipe(istanbul())
+    .pipe(istanbul.hookRequire())
+    .on(<span class="hljs-string">'finish'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      gulp.src(<span class="hljs-string">'test/test.js'</span>, {read: <span class="hljs-literal">false</span>})
+        .pipe(mocha({ reporter: <span class="hljs-string">'spec'</span> }))
+        .pipe(istanbul.writeReports({
+          reporters: [
+            <span class="hljs-string">'lcovonly'</span>,
+            <span class="hljs-string">'cobertura'</span>,
+            <span class="hljs-string">'html'</span>
+          ]
+        }))
+        .pipe(istanbul.enforceThresholds({ thresholds: { global: <span class="hljs-number">90</span> } }))
+        .once(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          process.exit(<span class="hljs-number">0</span>);
+        })
+        .once(<span class="hljs-string">'end'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          process.exit(<span class="hljs-number">0</span>);
+        });
+    });
+});
+
+gulp.task(<span class="hljs-string">'coveralls'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  gulp.src(<span class="hljs-string">'coverage/lcov.info'</span>)
+    .pipe(coveralls());
+});
+
+gulp.task(<span class="hljs-string">'react'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> browserify({ entries: [<span class="hljs-string">'components/index.jsx'</span>], debug: <span class="hljs-literal">true</span> })
+    .transform(reactify)
+    .bundle()
+    .pipe(source(<span class="hljs-string">'bundle.js'</span>))
+    .pipe(buffer())
+    .pipe(uglify())
+    .pipe(gulp.dest(<span class="hljs-string">'static/jsx/'</span>));
+});
+
+gulp.task(<span class="hljs-string">'default'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  gulp.watch(paths.scripts, [<span class="hljs-string">'react'</span>]);
+  gulp.watch(paths.styles, [<span class="hljs-string">'compass'</span>]);
+});
+</code></pre><p>I’ve added tasks for the tests and JSHint if you choose to implement them, but the only ones I’ve actually used are the <code>compass</code> and <code>react</code> tasks. The <code>compass</code> task compiles our Sass files into CSS, while the <code>react</code> task uses Browserify to take our React components and various modules installed using NPM and build them for use in the browser, as well as minifying them. Note that we installed React and lodash with NPM? We’re going to be able to use them in the browser and on the server, thanks to Browserify.</p><p>Next, let’s create our <code>worker.js</code> file:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-comment">// Get dependencies</span>
+<span class="hljs-keyword">var</span> Twitter = <span class="hljs-built_in">require</span>(<span class="hljs-string">'twitter'</span>);
+
+<span class="hljs-comment">// Set up Twitter client</span>
+<span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+});
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-keyword">var</span> redis;
+<span class="hljs-keyword">if</span> (process.env.REDIS_URL) {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(process.env.REDIS_URL);
+} <span class="hljs-keyword">else</span> {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+client.stream(<span class="hljs-string">'statuses/filter'</span>, {track: <span class="hljs-string">'javascript'</span>, lang: <span class="hljs-string">'en'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">stream</span>) </span>{
+  stream.on(<span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">tweet</span>) </span>{
+    <span class="hljs-comment">// Log it to console</span>
+    <span class="hljs-built_in">console</span>.log(tweet);
+
+    <span class="hljs-comment">// Publish it</span>
+    redis.publish(<span class="hljs-string">'tweets'</span>, <span class="hljs-built_in">JSON</span>.stringify(tweet));
+
+    <span class="hljs-comment">// Persist it to a Redis list</span>
+    redis.rpush(<span class="hljs-string">'stream:tweets'</span>, <span class="hljs-built_in">JSON</span>.stringify(tweet));
+  });
+
+  <span class="hljs-comment">// Handle errors</span>
+  stream.on(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+    <span class="hljs-built_in">console</span>.log(error);
+  });
+});
+</code></pre><p>Most of this file should be fairly straightforward. We set up our connection to Twitter (you’ll need to set the various environment variables listed here using the appropriate method for your operating system), and a connection to Redis.</p><p>We then stream the Twitter statuses that match our filter. When we receive a tweet, we log it to the console (feel free to comment this out in production if desired), publish it to a Redis channel called <code>tweets</code>, and push it to the end of a Redis list called <code>stream:tweets</code>. When an error occurs, we output it to the console.</p><p>Let’s use Bootstrap to style the app. Create the following <code>.bowerrc</code> file:</p><pre><code class="hljs lang-bash">{
+    <span class="hljs-string">"directory"</span>: <span class="hljs-string">"static/bower_components"</span>
+}
+</code></pre><p>Then run <code>bower init</code> to create your <code>bower.json</code> file, and install Bootstrap with <code>bower install --save sass-bootstrap</code>.</p><p>With that done, create the file <code>src/sass/style.scss</code> and enter the following:</p><pre><code class="hljs lang-scss">@<span class="hljs-keyword">import</span> <span class="hljs-string">"compass/css3/user-interface"</span>;
+@<span class="hljs-keyword">import</span> <span class="hljs-string">"compass/css3"</span>;
+@<span class="hljs-keyword">import</span> <span class="hljs-string">"../../static/bower_components/sass-bootstrap/lib/bootstrap.scss"</span>;
+</code></pre><p>This includes some dependencies from Compass, as well as Bootstrap. We won’t be using any of the Javascript features of Bootstrap, so we don’t need to worry too much about that.</p><p>Next, we need to create our view files. As React will be used to render the main part of the page, these will be very basic, with just the header, footer, and a section where the content can be rendered. First, create <code>views/index.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-template-variable">{{&gt; header }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col-md-12"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">'view'</span>&gt;</span></span><span class="hljs-template-variable">{{{ markup }}</span><span class="xml">}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"initial-state"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span>&gt;</span><span class="undefined"></span></span><span class="hljs-template-variable">{{{state}}</span><span class="xml"><span class="undefined">}</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</span><span class="hljs-template-variable">{{&gt; footer }}</span><span class="xml"></span>
+</code></pre><p>As promised, this a very basic layout. Note the <code>markup</code> variable, which is where the markup generated by React will be inserted when rendered on the server, and the <code>state</code> variable, which will contain the JSON representation of the data used to generate that markup. By passing that data through, you can ensure that the instance of React on the client has access to the same raw data as was passed through to the view on the server side, so that when the data needs to be re-rendered, it can be done so correctly.</p><p>We’ll also define partials for the header and footer. The header should be in <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Tweet Stream<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">""</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1"</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/style.css"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
+            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+        &lt;![endif]--&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar navbar-inverse navbar-static-top"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"navigation"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container-fluid"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-toggle"</span> <span class="hljs-attr">data-toggle</span>=<span class="hljs-string">"collapse"</span> <span class="hljs-attr">data-target</span>=<span class="hljs-string">"#header-nav"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-brand"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span>Tweet Stream<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"collapse navbar-collapse navbar-right"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"header-nav"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span></span>
+</code></pre><p>The footer should be in <code>views/partials/footer.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/jsx/bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
+</code></pre><p>Note that we load the Javascript file <code>/jsx/bundle.js</code> - this is the output from the command <code>gulp react</code>.</p><h2 id="creating-the-back-end">Creating the back end</h2><p>The next step is to implement the back end of the website. Add the following code as <code>index.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'babel/register'</span>);
+
+<span class="hljs-comment">// Get dependencies</span>
+<span class="hljs-keyword">var</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">var</span> app = express();
+<span class="hljs-keyword">var</span> compression = <span class="hljs-built_in">require</span>(<span class="hljs-string">'compression'</span>);
+<span class="hljs-keyword">var</span> port = process.env.PORT || <span class="hljs-number">5000</span>;
+<span class="hljs-keyword">var</span> base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+<span class="hljs-keyword">var</span> hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
+<span class="hljs-keyword">var</span> morgan = <span class="hljs-built_in">require</span>(<span class="hljs-string">'morgan'</span>);
+<span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> Tweets = React.createFactory(<span class="hljs-built_in">require</span>(<span class="hljs-string">'./components/tweets.jsx'</span>));
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-keyword">var</span> redis, subscribe;
+<span class="hljs-keyword">if</span> (process.env.REDIS_URL) {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(process.env.REDIS_URL);
+  subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(process.env.REDIS_URL);
+} <span class="hljs-keyword">else</span> {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+  subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"hbs"</span>);
+app.engine(<span class="hljs-string">'hbs'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>).__express);
+
+<span class="hljs-comment">// Register partials</span>
+hbs.registerPartials(__dirname + <span class="hljs-string">'/views/partials'</span>);
+
+<span class="hljs-comment">// Set up logging</span>
+app.use(morgan(<span class="hljs-string">'combined'</span>));
+
+<span class="hljs-comment">// Compress responses</span>
+app.use(compression());
+
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
+
+<span class="hljs-comment">// Serve static files</span>
+app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
+
+<span class="hljs-comment">// Render main view</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-comment">// Get tweets</span>
+  redis.lrange(<span class="hljs-string">'stream:tweets'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, tweets</span>) </span>{
+    <span class="hljs-keyword">if</span> (err) {
+      <span class="hljs-built_in">console</span>.log(err);
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// Get tweets</span>
+      <span class="hljs-keyword">var</span> tweet_list = [];
+      tweets.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">tweet, i</span>) </span>{
+        tweet_list.push(<span class="hljs-built_in">JSON</span>.parse(tweet));
+      });
+
+      <span class="hljs-comment">// Render page</span>
+      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ data: tweet_list.reverse() }));
+      res.render(<span class="hljs-string">'index'</span>, {
+        markup: markup,
+        state: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
+      });
+    }
+  });
+});
+
+<span class="hljs-comment">// Listen</span>
+<span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)({
+}).listen(app.listen(port));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Listening on port "</span> + port);
+
+<span class="hljs-comment">// Handle connections</span>
+io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) </span>{
+  <span class="hljs-comment">// Subscribe to the Redis channel</span>
+  subscribe.subscribe(<span class="hljs-string">'tweets'</span>);
+
+  <span class="hljs-comment">// Handle receiving messages</span>
+  <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">channel, data</span>) </span>{
+    socket.emit(<span class="hljs-string">'message'</span>, data);
+  };
+  subscribe.on(<span class="hljs-string">'message'</span>, callback);
+
+  <span class="hljs-comment">// Handle disconnect</span>
+  socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
+  });
+});
+</code></pre><p>Let’s go through this bit by bit:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'babel/register'</span>);
+</code></pre><p>Here we’re using Babel, which is a library that allows you to use new features in Javascript even if the interpreter doesn’t support it. It also includes support for JSX, allowing us to require JSX files in the same way we would require Javascript files.</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Get dependencies</span>
+<span class="hljs-keyword">var</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+<span class="hljs-keyword">var</span> app = express();
+<span class="hljs-keyword">var</span> compression = <span class="hljs-built_in">require</span>(<span class="hljs-string">'compression'</span>);
+<span class="hljs-keyword">var</span> port = process.env.PORT || <span class="hljs-number">5000</span>;
+<span class="hljs-keyword">var</span> base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+<span class="hljs-keyword">var</span> hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
+<span class="hljs-keyword">var</span> morgan = <span class="hljs-built_in">require</span>(<span class="hljs-string">'morgan'</span>);
+<span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> Tweets = React.createFactory(<span class="hljs-built_in">require</span>(<span class="hljs-string">'./components/tweets.jsx'</span>));
+</code></pre><p>Here we include our dependencies. Most of this will be familiar if you’ve used Express before, but we also use React to create a factory for a React component called <code>Tweets</code>.</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-keyword">var</span> redis, subscribe;
+<span class="hljs-keyword">if</span> (process.env.REDIS_URL) {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(process.env.REDIS_URL);
+  subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(process.env.REDIS_URL);
+} <span class="hljs-keyword">else</span> {
+  redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+  subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"hbs"</span>);
+app.engine(<span class="hljs-string">'hbs'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>).__express);
+
+<span class="hljs-comment">// Register partials</span>
+hbs.registerPartials(__dirname + <span class="hljs-string">'/views/partials'</span>);
+
+<span class="hljs-comment">// Set up logging</span>
+app.use(morgan(<span class="hljs-string">'combined'</span>));
+
+<span class="hljs-comment">// Compress responses</span>
+app.use(compression());
+
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
+
+<span class="hljs-comment">// Serve static files</span>
+app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
+</code></pre><p>This section sets up the various dependencies of our app. We set up two connections to Redis - one for handling subscriptions, the other for reading from Redis in order to populate the view.</p><p>We also set up our views, logging, compression of the HTTP response, a base URL, and serving static files.</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Render main view</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  <span class="hljs-comment">// Get tweets</span>
+  redis.lrange(<span class="hljs-string">'stream:tweets'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, tweets</span>) </span>{
+    <span class="hljs-keyword">if</span> (err) {
+      <span class="hljs-built_in">console</span>.log(err);
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-comment">// Get tweets</span>
+      <span class="hljs-keyword">var</span> tweet_list = [];
+      tweets.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">tweet, i</span>) </span>{
+        tweet_list.push(<span class="hljs-built_in">JSON</span>.parse(tweet));
+      });
+
+      <span class="hljs-comment">// Render page</span>
+      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ data: tweet_list.reverse() }));
+      res.render(<span class="hljs-string">'index'</span>, {
+        markup: markup,
+        state: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
+      });
+    }
+  });
+});
+</code></pre><p>Our app only has a single view. When the root is loaded, we first of all fetch all of the tweets stored in the <code>stream:tweets</code> list. We then convert them into an array of objects.</p><p>Next, we render the <code>Tweets</code> component to a string, passing through our list of tweets, and store the resulting markup. We then pass through this markup and the string representation of the list of tweets to the template.</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Listen</span>
+<span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io'</span>)({
+}).listen(app.listen(port));
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Listening on port "</span> + port);
+
+<span class="hljs-comment">// Handle connections</span>
+io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) </span>{
+  <span class="hljs-comment">// Subscribe to the Redis channel</span>
+  subscribe.subscribe(<span class="hljs-string">'tweets'</span>);
+
+  <span class="hljs-comment">// Handle receiving messages</span>
+  <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">channel, data</span>) </span>{
+    socket.emit(<span class="hljs-string">'message'</span>, data);
+  };
+  subscribe.on(<span class="hljs-string">'message'</span>, callback);
+
+  <span class="hljs-comment">// Handle disconnect</span>
+  socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
+  });
+});
+</code></pre><p>Finally, we set up Socket.io. On a connection, we subscribe to the Redis channel <code>tweets</code>. When we receive a tweet from Redis, we emit that tweet so that it can be rendered on the client side. We also handle disconnections by removing our Redis subscription.</p><h2 id="creating-our-react-components">Creating our React components</h2><p>Now it’s time to create our first React component. We’ll create a folder called <code>components</code> to hold all of our component files. Our first file is <code>components/index.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> Tweets = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweets.jsx'</span>);
+
+<span class="hljs-keyword">var</span> initialState = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'initial-state'</span>).innerHTML);
+
+React.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Tweets</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{initialState}</span> /&gt;</span>,
+  document.getElementById('view')
+);</span>
+</code></pre><p>First of all, we include React and the same <code>Tweets</code> component we require on the server side (note that we need to specify the <code>.jsx</code> extension). Then we fetch the initial state from the script tag we created earlier. Finally we render the <code>Tweets</code> components, passing through the initial state, and specify that it should be inserted into the element with an id of <code>view</code>. Note that we store the initial state in <code>data</code> - inside the component, this can be accessed as <code>this.props.data</code>.</p><p>This particular component is only ever used on the client side - when we render on the server side, we don’t need any of this functionality since we insert the markup into the <code>view</code> element anyway, and we don’t need to specify the initial data in the same way.</p><p>Next, we define the <code>Tweets</code> component in <code>components/tweets.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>);
+<span class="hljs-keyword">var</span> TweetList = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetlist.jsx'</span>);
+<span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+
+<span class="hljs-keyword">var</span> Tweets = React.createClass({
+  componentDidMount: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Get reference to this item</span>
+    <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
+
+    <span class="hljs-comment">// Set up the connection</span>
+    <span class="hljs-keyword">var</span> socket = io.connect(<span class="hljs-built_in">window</span>.location.href);
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+      <span class="hljs-comment">// Insert the message</span>
+      <span class="hljs-keyword">var</span> tweets = that.props.data;
+      tweets.push(<span class="hljs-built_in">JSON</span>.parse(data));
+      tweets = _.sortBy(tweets, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
+        <span class="hljs-keyword">return</span> item.created_at;
+      }).reverse();
+      that.setProps({data: tweets});
+    });
+  },
+  getInitialState: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> {data: <span class="hljs-keyword">this</span>.props.data};
+  },
+  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Tweets<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">TweetList</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{this.props.data}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    )
+  }
+});
+
+module.exports = Tweets;</span>
+</code></pre><p>Let’s work our way through each section in turn:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>);
+<span class="hljs-keyword">var</span> TweetList = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetlist.jsx'</span>);
+<span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
+</code></pre><p>Here we include React and the Socket.io client, as well as Lodash and our TweetList component. With React.js, it’s recommend that you break up each individual part of your interface into a single component - here <code>Tweets</code> is a wrapper for the tweets that includes a heading. <code>TweetList</code> will be a list of tweets, and <code>TweetItem</code> will be an individual tweet.</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> Tweets = React.createClass({
+  componentDidMount: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Get reference to this item</span>
+    <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
+
+    <span class="hljs-comment">// Set up the connection</span>
+    <span class="hljs-keyword">var</span> socket = io.connect(<span class="hljs-built_in">window</span>.location.href);
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+      <span class="hljs-comment">// Insert the message</span>
+      <span class="hljs-keyword">var</span> tweets = that.props.data;
+      tweets.push(<span class="hljs-built_in">JSON</span>.parse(data));
+      tweets = _.sortBy(tweets, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
+        <span class="hljs-keyword">return</span> item.created_at;
+      }).reverse();
+      that.setProps({data: tweets});
+    });
+  },
+</code></pre><p>Note the use of the <code>componentDidMount</code> method - this fires when a component has been rendered on the client side for the first time. You can therefore use it to set up events. Here, we’re setting up a callback so that when a new tweet is received, we get the existing tweets (stored in <code>this.props.data</code>, although we copy <code>this</code> to <code>that</code> so it works inside the callback), push the tweet to this list, sort it by the time created, and set <code>this.props.data</code> to the new value. This will result in the tweets being re-rendered.</p><pre><code class="hljs lang-javascript">  getInitialState: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> {data: <span class="hljs-keyword">this</span>.props.data};
+  },
+</code></pre><p>Here we set the initial state of the component - it sets the value of <code>this.state</code> to the object passed through. In this case, we pass through an object with the attribute <code>data</code> defined as the value of <code>this.props.data</code>, meaning that <code>this.state.data</code> is the same as <code>this.props.data</code>.</p><pre><code class="hljs lang-javascript">  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Tweets<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">TweetList</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{this.props.data}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    )
+  }
+});
+
+module.exports = Tweets;</span>
+</code></pre><p>Here we define our <code>render</code> function. This can be thought of as our template. Note that we include <code>TweetList</code> inside our template and pass through the data. Afterwards, we export <code>Tweets</code> so it can be used elsewhere.</p><p>Next, let’s create <code>components/tweetlist.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+<span class="hljs-keyword">var</span> TweetItem = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetitem.jsx'</span>);
+
+<span class="hljs-keyword">var</span> TweetList = React.createClass({
+  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
+    <span class="hljs-keyword">var</span> tweetNodes = <span class="hljs-keyword">this</span>.props.data.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item, index</span>) </span>{
+      <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">TweetItem</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{index}</span> <span class="hljs-attr">text</span>=<span class="hljs-string">{item.text}</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">TweetItem</span>&gt;</span></span>
+      );
+    });
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"tweets list-group"</span>&gt;</span>
+        {tweetNodes}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+    )
+  }
+});
+
+<span class="hljs-built_in">module</span>.exports = TweetList;
+</code></pre><p>This component is much simpler - it only has a <code>render</code> method. First, we get our individual tweets and for each one define a <code>TweetItem</code> component. Then we create an unordered list and insert the tweet items into it. We then export it as <code>TweetList</code>.</p><p>Our final component is the <code>TweetItem</code> component. Create the following file at <code>components/tweetitem.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
+
+<span class="hljs-keyword">var</span> TweetItem = React.createClass({
+  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>{this.props.text}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
+    );
+  }
+});
+
+<span class="hljs-built_in">module</span>.exports = TweetItem;
+</code></pre><p>This component is quite simple. It’s just a single list item with the text set to the value of the tweet’s <code>text</code> attribute.</p><p>That should be all of our components done. Time to compile our Sass and run Browserify:</p><pre><code class="hljs lang-bash">$ gulp compass
+$ gulp react
+</code></pre><p>Now, if you make sure you have set the appropriate environment variables, and then run <code>node worker.js</code> in one terminal, and <code>node index.js</code> in another, and visit <a href="http://localhost:5000/">http://localhost:5000/</a>, you should see your Twitter stream in all its glory! You can also try it with Javascript disabled, or in a text-mode browser such as Lynx, to demonstrate that it still renders the page without having to do anything on the client side - you’re only missing the constant updates.</p><h2 id="wrapping-up">Wrapping up</h2><p>I hope this gives you some idea of how you can easily use React.js on both the client and server side to make web apps that are fast and search-engine friendly while also being easy to update dynamically. You can find the source code on <a href="https://github.com/matthewbdaly/twitter-stream">GitHub</a>.</p><p>Hopefully I’ll be able to publish some later tutorials that build on this to show you how to build more substantial web apps with React.</p><section><ul class="categories"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/react-js/">react.js</a></li><li><a href="/blog/categories/redis/">redis</a></li><li><a href="/blog/categories/socket-io/">socket.io</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/09/28/building-a-real-time-twitter-stream-with-node-dot-js-react-dot-js-and-redis/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/11/18/learning-more-about-react-dot-js-and-flux/amp/">Learning More About React.js and Flux</a> <a class="postlink" href="/blog/2015/09/19/a-quick-and-easy-varnish-primer/amp/">A Quick and Easy Varnish Primer</a></section></article></div></div></div></body></html>

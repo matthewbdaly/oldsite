@@ -1,0 +1,192 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Setting Etags in Laravel 5 - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/06/14/setting-etags-in-laravel-5/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/06/14/setting-etags-in-laravel-5/",
+  			"headline": "Setting Etags in Laravel 5",
+  			"datePublished": "14th June 2015 9:29 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">14th June 2015 9:29 pm</p><h1>Setting Etags in Laravel 5</h1><p>Although I’d prefer to use Python or Node.js, there are some times when circumstances dictate that I need to use PHP for a project at work. In the past, I used CodeIgniter, but that was through nothing more than inertia. For some time I’d been planning to switch to Laravel, largely because of the baked-in PHPUnit support, but events conspired against me - one big project that came along had a lot in common with an earlier one, so I forked it rather than starting over.</p><p>Recently I built a REST API for a mobile app, and I decided to use that to try out Laravel (if it had been available at the time, I’d have gone for Lumen instead). I was very pleased with the results - I was able to quickly put together the back end I wanted, with good test coverage, and the <code>tinker</code> command in particular was useful in debugging. The end result is fast and efficient, with query caching in place using Memcached to improve response times.</p><p>I also implemented a simple middleware to add ETags to HTTP responses and compare them on incoming requests, returning a <code>304 Not Modified</code> status code if they are the same, which is given below:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Middleware</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Closure</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ETagMiddleware</span> </span>{
+
+    <span class="hljs-comment">/**
+     * Implement Etag support
+     *
+     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
+     * <span class="hljs-doctag">@param</span>  \Closure  $next
+     * <span class="hljs-doctag">@return</span> mixed
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">($request, Closure $next)</span>
+    </span>{
+        <span class="hljs-comment">// Get response</span>
+        $response = $next($request);
+
+        <span class="hljs-comment">// If this was a GET request...</span>
+        <span class="hljs-keyword">if</span> ($request-&gt;isMethod(<span class="hljs-string">'get'</span>)) {
+            <span class="hljs-comment">// Generate Etag</span>
+            $etag = md5($response-&gt;getContent());
+            $requestEtag = str_replace(<span class="hljs-string">'"'</span>, <span class="hljs-string">''</span>, $request-&gt;getETags());
+
+            <span class="hljs-comment">// Check to see if Etag has changed</span>
+            <span class="hljs-keyword">if</span>($requestEtag &amp;&amp; $requestEtag[<span class="hljs-number">0</span>] == $etag) {
+                $response-&gt;setNotModified();
+            }
+
+            <span class="hljs-comment">// Set Etag</span>
+            $response-&gt;setEtag($etag);
+        }
+
+        <span class="hljs-comment">// Send response</span>
+        <span class="hljs-keyword">return</span> $response;
+    }
+
+}
+</code></pre><p>This is based on <a href="https://www.nickv.codes/blog/etags-in-laravel-4/">a solution for Laravel 4 by Nick Verwymeren</a>, but implemented as Laravel 5 middleware, not a Laravel 4 filter. To use this with Laravel 5, save this as <code>app/Http/Middleware/ETagMiddleware.php</code>. Then add this to the <code>$middleware</code> array in <code>app/Http/Kernel.php</code>:</p><pre><code class="hljs lang-php">        <span class="hljs-string">'App\Http\Middleware\ETagMiddleware'</span>,
+</code></pre><p>It’s quite simple to write this kind of middleware with Laravel, and using something like this is a no-brainer for most web apps considering the bandwidth it will likely save your users.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/06/14/setting-etags-in-laravel-5/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/06/17/getting-django-behave-and-celery-to-work-together/amp/">Getting Django-behave and Celery to Work Together</a> <a class="postlink" href="/blog/2015/05/03/my-static-site-generator-post-on-sitepoint/amp/">My Static Site Generator Post on Sitepoint</a></section></article></div></div></div></body></html>

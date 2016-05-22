@@ -1,0 +1,1333 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Extending Our Node.js and Redis Chat Server - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/",
+  			"headline": "Extending Our Node.js and Redis Chat Server",
+  			"datePublished": "2nd March 2015 11:03 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd March 2015 11:03 pm</p><h1>Extending Our Node.js and Redis Chat Server</h1><p>In this tutorial, we’re going to extend the chat system we built in <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">the first tutorial</a> to include the following functionality:</p><ul><li>Persisting the data</li><li>Prompting users to sign in and storing their details in a Redis-backed session</li></ul><p>In the process, we’ll pick up a bit more about using Redis.</p><h2 id="persistence">Persistence</h2><p>Our first task is to make our messages persist when the session ends. Now, in order to do this, we’re going to use a list. A list in Redis can be thought of as equivalent to an array or list in most programming languages, and can be retrieved by passing the key in a similar fashion to how you would retrieve a string.</p><p>As usual, we will write our test first. Open up <code>test/test.js</code> and replace the test for sending a message with this:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test sending a message</span>
+    describe(<span class="hljs-string">'Test sending a message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">"should return 'Message received'"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            <span class="hljs-comment">// Connect to server</span>
+            <span class="hljs-keyword">var</span> socket = io.connect(<span class="hljs-string">'http://localhost:5000'</span>, {
+                <span class="hljs-string">'reconnection delay'</span> : <span class="hljs-number">0</span>,
+                <span class="hljs-string">'reopen delay'</span> : <span class="hljs-number">0</span>,
+                <span class="hljs-string">'force new connection'</span> : <span class="hljs-literal">true</span>
+            });
+
+            <span class="hljs-comment">// Handle the message being received</span>
+            socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+                expect(data).to.include(<span class="hljs-string">'Message received'</span>);
+
+                client.lrange(<span class="hljs-string">'chat:messages'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, messages</span>) </span>{
+                    <span class="hljs-comment">// Check message has been persisted</span>
+                    <span class="hljs-keyword">var</span> message_list = [];
+                    messages.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message, i</span>) </span>{
+                        message_list.push(message);
+                    });
+                    expect(message_list[<span class="hljs-number">0</span>]).to.include(<span class="hljs-string">'Message received'</span>);
+
+                    <span class="hljs-comment">// Finish up</span>
+                    socket.disconnect();
+                    done();
+                });
+            });
+
+            <span class="hljs-comment">// Send the message</span>
+            socket.emit(<span class="hljs-string">'send'</span>, { message: <span class="hljs-string">'Message received'</span> });
+        });
+    });
+</code></pre><p>The main difference here is that we use our Redis client to get the list <code>chat:messages</code>, and check to see if our message appears in it. Now, let’s run our test to ensure it fails:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (484ms)
+    Test sending a message
+      1) should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>
+Stopping the server
+
+
+  1 passing (552ms)
+  1 failing
+
+  1) server Test sending a message should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span>:
+     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Message received'</span>
+      at /Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:62:48
+      at try_callback (/Users/matthewdaly/Projects/babblr/node_modules/redis/index.js:592:9)
+      at RedisClient.return_reply (/Users/matthewdaly/Projects/babblr/node_modules/redis/index.js:685:13)
+      at HiredisReplyParser.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/redis/index.js:321:14)
+      at HiredisReplyParser.emit (events.js:95:17)
+      at HiredisReplyParser.execute (/Users/matthewdaly/Projects/babblr/node_modules/redis/lib/parser/hiredis.js:43:18)
+      at RedisClient.on_data (/Users/matthewdaly/Projects/babblr/node_modules/redis/index.js:547:27)
+      at Socket.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/redis/index.js:102:14)
+      at Socket.emit (events.js:95:17)
+      at Socket.&lt;anonymous&gt; (_stream_readable.js:765:14)
+      at Socket.emit (events.js:92:17)
+      at emitReadable_ (_stream_readable.js:427:10)
+      at emitReadable (_stream_readable.js:423:5)
+      at readableAddChunk (_stream_readable.js:166:9)
+      at Socket.Readable.push (_stream_readable.js:128:10)
+      at TCP.onread (net.js:529:21)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 96.97% ( 32/33 ), 5 ignored
+Branches     : 100% ( 6/6 ), 1 ignored
+Functions    : 80% ( 4/5 )
+Lines        : 96.97% ( 32/33 )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>Our test fails, so now we can start work on implementing the functionality we need. First of all, when a new message is sent, we need to push it to the list. Amend the new message handler in <code>index.js</code> to look like this:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Handle new messages</span>
+io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) </span>{
+    <span class="hljs-comment">// Subscribe to the Redis channel</span>
+    subscribe.subscribe(<span class="hljs-string">'ChatChannel'</span>);
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'send'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+        <span class="hljs-comment">// Publish it</span>
+        client.publish(<span class="hljs-string">'ChatChannel'</span>, data.message);
+
+        <span class="hljs-comment">// Persist it to a Redis list</span>
+        client.rpush(<span class="hljs-string">'chat:messages'</span>, <span class="hljs-string">'Anonymous Coward : '</span> + data.message);
+    });
+
+    <span class="hljs-comment">// Handle receiving messages</span>
+    <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">channel, data</span>) </span>{
+        socket.emit(<span class="hljs-string">'message'</span>, data);
+    };
+    subscribe.on(<span class="hljs-string">'message'</span>, callback);
+
+    <span class="hljs-comment">// Handle disconnect</span>
+    socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
+    });
+});
+</code></pre><p>The only significant change is the <code>Persist it to a Redis list</code> section. Here we call the <code>RPUSH</code> command to push the current message to <code>chat:messages</code>. <code>RPUSH</code> pushes a message to the end of the list. There’s a similar command, <code>LPUSH</code>, which pushes an item to the beginning of the list, as well as <code>LPOP</code> and <code>RPOP</code>, which remove and return an item from the beginning and end of the list respectively.</p><p>Next we need to handle displaying the list when the main route loads. Replace the index route in <code>index.js</code> with this:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define index route</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Get messages</span>
+    client.lrange(<span class="hljs-string">'chat:messages'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, messages</span>) </span>{
+        <span class="hljs-comment">/* istanbul ignore if */</span>
+        <span class="hljs-keyword">if</span> (err) {
+            <span class="hljs-built_in">console</span>.log(err);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// Get messages</span>
+            <span class="hljs-keyword">var</span> message_list = [];
+            messages.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message, i</span>) </span>{
+                <span class="hljs-comment">/* istanbul ignore next */</span>
+                message_list.push(message);
+            });
+
+            <span class="hljs-comment">// Render page</span>
+            res.render(<span class="hljs-string">'index'</span>, { messages: message_list});
+        }
+    });
+});
+</code></pre><p>Here we use the client to return all messages in the list by using the <code>LRANGE</code> command and defining the slice as being from the start to the end of the list. We then loop through the mesages and push each to a list, before passing that list to the view.</p><p>Speaking of which, we also need to update <code>views/index.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-template-variable">{{&gt; header }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col-md-8"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"conversation"</span>&gt;</span>
+                        </span><span class="hljs-template-tag">{{#<span class="hljs-name"><span class="hljs-builtin-name">each</span></span> messages}}</span><span class="xml">
+                        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span></span><span class="hljs-template-variable">{{this}}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                        </span><span class="hljs-template-tag">{{/<span class="hljs-name"><span class="hljs-builtin-name">each</span></span>}}</span><span class="xml">
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col-md-4"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">form</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">"message"</span>&gt;</span>Message<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"message"</span> <span class="hljs-attr">rows</span>=<span class="hljs-string">"20"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"submitbutton"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-primary form-control"</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</span><span class="hljs-template-variable">{{&gt; footer }}</span><span class="xml"></span>
+</code></pre><p>This just loops through the messages and prints each one in turn. Now let’s run our tests and make sure they pass:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (1262ms)
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (48ms)
+Stopping the server
+
+
+  2 passing (2s)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 40/40 ), 7 ignored
+Branches     : 100% ( 8/8 ), 2 ignored
+Functions    : 85.71% ( 6/7 )
+Lines        : 100% ( 40/40 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls"</span> task
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+Verifying property coveralls.app exists <span class="hljs-keyword">in</span> config...OK
+Files: coverage/lcov.info
+Options: src=<span class="hljs-string">"coverage/lcov.info"</span>, force=<span class="hljs-literal">false</span>
+Submitting file to coveralls.io: coverage/lcov.info
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: 422 {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>As before, don’t worry about Coveralls not working - it’s only an issue when it runs on Travis CI. If everything else is fine, our chat server should now persist our changes.</p><h2 id="sessions-and-user-login">Sessions and user login</h2><p>At present, it’s hard to carry on a conversation with someone using this site because you can’t see who is responding to you. We need to implement a mechanism to obtain a username for each user, store it in a session, and then use it to identify all of a user’s messages. In this case, we’re going to just prompt the user to enter a username of their choice, but if you wish, you can use something like <a href="http://passportjs.org/">Passport.js</a> to allow authentication using third-party services - I’ll leave that as an exercise for the reader.</p><p>Now, Express doesn’t include any support for sessions out of the box, so we have to install some additional libraries:</p><pre><code class="hljs lang-bash">$ npm install connect-redis express-session body-parser --save
+</code></pre><p>The <code>express-session</code> library is middleware for Express that allows for storing and retrieving session variables, while <code>connect-redis</code> allows it to use Redis to store this data. We used <code>body-parser</code> for the URL shortener to process <code>POST</code> data, so we will use it again here. Now, we need to set it up. Replace the part of <code>index.js</code> before we set up the templating with this:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, client, express, hbs, io, port, RedisStore, rtg, session, subscribe;
+
+<span class="hljs-comment">// Define values</span>
+express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+app = express();
+port = process.env.PORT || <span class="hljs-number">5000</span>;
+base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
+session = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-session'</span>);
+RedisStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-redis'</span>)(session);
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">'url'</span>).parse(process.env.REDISTOGO_URL);
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(rtg.port, rtg.hostname);
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(<span class="hljs-string">':'</span>)[<span class="hljs-number">1</span>]);
+    subscribe.auth(rtg.auth.split(<span class="hljs-string">':'</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up session</span>
+app.use(session({
+    store: <span class="hljs-keyword">new</span> RedisStore({
+        client: client
+    }),
+    secret: <span class="hljs-string">'blibble'</span>
+}));
+</code></pre><p>This just sets up the session and configures it to use Redis as the back end. Don’t forget to change the value of <code>secret</code>.</p><p>Now, let’s plan out how our username system is going to work. If a user visits the site and there is no session set, then they should be redirected to a new route, <code>/login</code>. Here they will be prompted to enter a username. Once a satisfactory username (eg one or more characters) has been submitted via the form, it should be stored in the session and the user redirected to the index. There should also be a <code>/logout</code> route to destroy the session and redirect the user back to the login form.</p><p>First, let’s implement a test for fetching the login form in <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting to the login route</span>
+    describe(<span class="hljs-string">'Test submitting to the login route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should store the username in the session and redirect the user to the index'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
+                form:{username: <span class="hljs-string">'bobsmith'</span>},
+                followRedirect: <span class="hljs-literal">false</span>},
+                <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'/'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">302</span>);
+                    done();
+            });
+        });
+    });
+</code></pre><p>This test sends a <code>POST</code> request containing the field <code>username</code> with the value <code>bobsmith</code>. We expect to be redirected to the index route.</p><p>Let’s run the test to make sure it fails:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+express-session deprecated undefined resave option; provide resave option index.js:9:1585
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1585
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (45ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test submitting to the login route
+      1) should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (42ms)
+Stopping the server
+
+
+  3 passing (122ms)
+  1 failing
+
+  1) server Test submitting to the login route should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index:
+     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'/'</span>
+      at Request._callback (/Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:61:58)
+      at Request.self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22)
+      at Request.emit (events.js:98:17)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1318:14)
+      at Request.emit (events.js:117:20)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1266:12)
+      at IncomingMessage.emit (events.js:117:20)
+      at _stream_readable.js:944:16
+      at process._tickCallback (node.js:442:13)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 45/45 ), 7 ignored
+Branches     : 100% ( 8/8 ), 2 ignored
+Functions    : 87.5% ( 7/8 )
+Lines        : 100% ( 45/45 )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>Now, all we need to do to make this test pass is create a view containing the form and define a route to display it. First, we’ll define our new route in <code>index.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define login route</span>
+app.get(<span class="hljs-string">'/login'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Render view</span>
+    res.render(<span class="hljs-string">'login'</span>);
+});
+</code></pre><p>Next, we’ll create our new template at <code>views/login.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-template-variable">{{&gt; header }}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col-md-12"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"/login"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"POST"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">"Username"</span>&gt;</span>Please enter a handle<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span> <span class="hljs-attr">size</span>=<span class="hljs-string">"20"</span> <span class="hljs-attr">required</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"username"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"username"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">input</span>&gt;</span>
+                            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-primary form-control"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">input</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</span><span class="hljs-template-variable">{{&gt; footer }}</span><span class="xml"></span>
+</code></pre><p>Let’s run our tests and make sure they pass:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+express-session deprecated undefined resave option; provide resave option index.js:9:1585
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1585
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (64ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (78ms)
+Stopping the server
+
+
+  3 passing (179ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 45/45 ), 7 ignored
+Branches     : 100% ( 8/8 ), 2 ignored
+Functions    : 87.5% ( 7/8 )
+Lines        : 100% ( 45/45 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls"</span> task
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+Verifying property coveralls.app exists <span class="hljs-keyword">in</span> config...OK
+Files: coverage/lcov.info
+Options: src=<span class="hljs-string">"coverage/lcov.info"</span>, force=<span class="hljs-literal">false</span>
+Submitting file to coveralls.io: coverage/lcov.info
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: 422 {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>Next, we need to process the submitted form, set the session, and redirect the user back to the index. First, let’s add another test:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting to the login route</span>
+    describe(<span class="hljs-string">'Test submitting to the login route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should store the username in the session and redirect the user to the index'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
+                form:{username: <span class="hljs-string">'bobsmith'</span>},
+                followRedirect: <span class="hljs-literal">false</span>},
+                <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'http://localhost:5000'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
+                    done();
+            });
+        });
+    });
+</code></pre><p>This test submits the username, and makes sure that the response received is a 301 redirect to the index route. Let’s check to make sure it fails:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+express-session deprecated undefined resave option; provide resave option index.js:9:1585
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1585
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (476ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test submitting to the login route
+      1) should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (42ms)
+Stopping the server
+
+
+  3 passing (557ms)
+  1 failing
+
+  1) server Test submitting to the login route should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index:
+     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'http://localhost:5000'</span>
+      at Request._callback (/Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:61:58)
+      at Request.self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22)
+      at Request.emit (events.js:98:17)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1318:14)
+      at Request.emit (events.js:117:20)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1266:12)
+      at IncomingMessage.emit (events.js:117:20)
+      at _stream_readable.js:944:16
+      at process._tickCallback (node.js:442:13)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 45/45 ), 7 ignored
+Branches     : 100% ( 8/8 ), 2 ignored
+Functions    : 87.5% ( 7/8 )
+Lines        : 100% ( 45/45 )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>Now, in order to process <code>POST</code> data we’ll need to use <code>body-parser</code>. Amend the top of <code>index.js</code> to look like this::</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
+
+<span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, hbs, io, port, RedisStore, rtg, session, subscribe;
+
+<span class="hljs-comment">// Define values</span>
+express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+app = express();
+bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+port = process.env.PORT || <span class="hljs-number">5000</span>;
+base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
+hbs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>);
+session = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express-session'</span>);
+RedisStore = <span class="hljs-built_in">require</span>(<span class="hljs-string">'connect-redis'</span>)(session);
+
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">'url'</span>).parse(process.env.REDISTOGO_URL);
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(rtg.port, rtg.hostname);
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(<span class="hljs-string">':'</span>)[<span class="hljs-number">1</span>]);
+    subscribe.auth(rtg.auth.split(<span class="hljs-string">':'</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+    subscribe = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
+}
+
+<span class="hljs-comment">// Set up session</span>
+app.use(session({
+    store: <span class="hljs-keyword">new</span> RedisStore({
+        client: client
+    }),
+    secret: <span class="hljs-string">'blibble'</span>
+}));
+
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"hbs"</span>);
+app.engine(<span class="hljs-string">'hbs'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'hbs'</span>).__express);
+
+<span class="hljs-comment">// Register partials</span>
+hbs.registerPartials(__dirname + <span class="hljs-string">'/views/partials'</span>);
+
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
+
+<span class="hljs-comment">// Handle POST data</span>
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+      extended: <span class="hljs-literal">true</span>
+}));
+</code></pre><p>Next, we define a <code>POST</code> route to handle the username input:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Process login</span>
+app.post(<span class="hljs-string">'/login'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Get username</span>
+    <span class="hljs-keyword">var</span> username = req.body.username;
+
+    <span class="hljs-comment">// If username length is zero, reload the page</span>
+    <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span>) {
+        res.render(<span class="hljs-string">'login'</span>);
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// Store username in session and redirect to index</span>
+        req.session.username = username;
+        res.redirect(<span class="hljs-string">'/'</span>);
+    }
+});
+</code></pre><p>This should be fairly straightforward. This route accepts a username parameter. If this parameter is not present, the user will see the login form again. Otherwise, they are redirected back to the index.</p><p>Now, if you check <code>coverage/index.html</code> after running the tests again, you’ll notice that there’s a gap in our coverage for the scenario when a user submits an empty username. Let’s fix that - add the following test to <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test empty login</span>
+    describe(<span class="hljs-string">'Test empty login'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should show the login form'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
+                form:{username: <span class="hljs-string">''</span>},
+                followRedirect: <span class="hljs-literal">false</span>},
+                <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                    expect(body).to.include(<span class="hljs-string">'Please enter a handle'</span>);
+                    done();
+            });
+        });
+    });
+</code></pre><p>Let’s run our tests again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; babblr@1.0.0 <span class="hljs-built_in">test</span> /Users/matthewdaly/Projects/babblr
+&gt; grunt <span class="hljs-built_in">test</span> --verbose
+
+Initializing
+Command-line options: --verbose
+
+Reading <span class="hljs-string">"Gruntfile.js"</span> Gruntfile...OK
+
+Registering Gruntfile tasks.
+Initializing config...OK
+
+Registering <span class="hljs-string">"grunt-contrib-jshint"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-contrib-jshint/package.json...OK
+Loading <span class="hljs-string">"jshint.js"</span> tasks...OK
++ jshint
+
+Registering <span class="hljs-string">"grunt-coveralls"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-coveralls/package.json...OK
+Loading <span class="hljs-string">"coverallsTask.js"</span> tasks...OK
++ coveralls
+
+Registering <span class="hljs-string">"grunt-mocha-istanbul"</span> <span class="hljs-built_in">local</span> Npm module tasks.
+Reading /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Parsing /Users/matthewdaly/Projects/babblr/node_modules/grunt-mocha-istanbul/package.json...OK
+Loading <span class="hljs-string">"index.js"</span> tasks...OK
++ istanbul_check_coverage, mocha_istanbul
+Loading <span class="hljs-string">"Gruntfile.js"</span> tasks...OK
++ <span class="hljs-built_in">test</span>
+
+Running tasks: <span class="hljs-built_in">test</span>
+
+Running <span class="hljs-string">"test"</span> task
+
+Running <span class="hljs-string">"jshint"</span> task
+
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+Verifying property jshint.all exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>/test.js, index.js -&gt; all
+Options: force=<span class="hljs-literal">false</span>, reporterOutput=null
+OK
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+Verifying property mocha_istanbul.coverage exists <span class="hljs-keyword">in</span> config...OK
+Files: <span class="hljs-built_in">test</span>
+Options: require=[], ui=<span class="hljs-literal">false</span>, globals=[], reporter=<span class="hljs-literal">false</span>, timeout=<span class="hljs-literal">false</span>, coverage=<span class="hljs-literal">false</span>, slow=<span class="hljs-literal">false</span>, grep=<span class="hljs-literal">false</span>, dryRun=<span class="hljs-literal">false</span>, quiet=<span class="hljs-literal">false</span>, recursive=<span class="hljs-literal">false</span>, mask=<span class="hljs-string">"*.js"</span>, root=<span class="hljs-literal">false</span>, <span class="hljs-built_in">print</span>=<span class="hljs-literal">false</span>, noColors=<span class="hljs-literal">false</span>, harmony=<span class="hljs-literal">false</span>, coverageFolder=<span class="hljs-string">"coverage"</span>, reportFormats=[<span class="hljs-string">"cobertura"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"lcovonly"</span>], check={<span class="hljs-string">"statements"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"lines"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"functions"</span>:<span class="hljs-literal">false</span>,<span class="hljs-string">"branches"</span>:<span class="hljs-literal">false</span>}, excludes=<span class="hljs-literal">false</span>, mochaOptions=<span class="hljs-literal">false</span>, istanbulOptions=<span class="hljs-literal">false</span>
+&gt;&gt; Will execute: node /Users/matthewdaly/Projects/babblr/node_modules/istanbul/lib/cli.js cover --dir=/Users/matthewdaly/Projects/babblr/coverage --report=cobertura --report=html --report=lcovonly /Users/matthewdaly/Projects/babblr/node_modules/mocha/bin/_mocha -- <span class="hljs-built_in">test</span>/*.js
+express-session deprecated undefined resave option; provide resave option index.js:9:1669
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1669
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (44ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test submitting to the login route
+      ✓ should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index
+    Test empty login
+      ✓ should show the login form
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (41ms)
+Stopping the server
+
+
+  5 passing (145ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 54/54 ), 7 ignored
+Branches     : 100% ( 10/10 ), 2 ignored
+Functions    : 88.89% ( 8/9 )
+Lines        : 100% ( 54/54 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls"</span> task
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+Verifying property coveralls.app exists <span class="hljs-keyword">in</span> config...OK
+Files: coverage/lcov.info
+Options: src=<span class="hljs-string">"coverage/lcov.info"</span>, force=<span class="hljs-literal">false</span>
+Submitting file to coveralls.io: coverage/lcov.info
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: 422 {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+npm ERR! not ok code 0
+</code></pre><p>Our test now passes (bar, of course, Coveralls failing). Our next step is to actually do something with the session. Now, the <code>request</code> module we use in our test requires a third-party module called <code>tough-cookie</code> to work with cookies, so we need to install that:</p><pre><code class="hljs lang-bash">$ npm install tough-cookie --save-dev
+</code></pre><p>Next, amend the login test as follows:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting to the login route</span>
+    describe(<span class="hljs-string">'Test submitting to the login route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should store the username in the session and redirect the user to the index'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
+                form:{username: <span class="hljs-string">'bobsmith'</span>},
+                jar: <span class="hljs-literal">true</span>,
+                followRedirect: <span class="hljs-literal">false</span>},
+                <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'/'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">302</span>);
+
+                    <span class="hljs-comment">// Check the username</span>
+                    request.get({ url: <span class="hljs-string">'http://localhost:5000/'</span>, jar: <span class="hljs-literal">true</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                        expect(body).to.include(<span class="hljs-string">'bobsmith'</span>);
+                        done();
+                    });
+            });
+        });
+    });
+</code></pre><p>Here we’re using a new parameter, namely <code>jar</code> - this tells <code>request</code> to store the cookies. We POST the username to the login form, and then we get the index route and verify that the username is shown in the request. Check the test fails, then amend the index route in <code>index.js</code> as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define index route</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Get messages</span>
+    client.lrange(<span class="hljs-string">'chat:messages'</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-1</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, messages</span>) </span>{
+        <span class="hljs-comment">/* istanbul ignore if */</span>
+        <span class="hljs-keyword">if</span> (err) {
+            <span class="hljs-built_in">console</span>.log(err);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// Get username</span>
+            <span class="hljs-keyword">var</span> username = req.session.username;
+
+            <span class="hljs-comment">// Get messages</span>
+            <span class="hljs-keyword">var</span> message_list = [];
+            messages.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">message, i</span>) </span>{
+                <span class="hljs-comment">/* istanbul ignore next */</span>
+                message_list.push(message);
+            });
+
+            <span class="hljs-comment">// Render page</span>
+            res.render(<span class="hljs-string">'index'</span>, { messages: message_list, username: username });
+        }
+    });
+});
+</code></pre><p>Note we get the username and pass it through to the view. We need to adapt the header view to display the username. Amend <code>views/partials/header.hbs</code> to look like this:</p><pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
+<span class="hljs-comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span> <span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"no-js"</span>&gt;</span> <span class="hljs-comment">&lt;!--&lt;![endif]--&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"description"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">""</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1"</span>&gt;</span>
+
+        <span class="hljs-comment">&lt;!-- Place favicon.ico and apple-touch-icon.png in the root directory --&gt;</span>
+
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/bower_components/bootstrap/dist/css/bootstrap.min.css"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/bower_components/bootstrap/dist/css/bootstrap-theme.min.css"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/style.css"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;
+            &lt;p class="browsehappy"&gt;You are using an &lt;strong&gt;outdated&lt;/strong&gt; browser. Please &lt;a href="http://browsehappy.com/"&gt;upgrade your browser&lt;/a&gt; to improve your experience.&lt;/p&gt;
+        &lt;![endif]--&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">nav</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar navbar-inverse navbar-static-top"</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"navigation"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container-fluid"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-header"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"button"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-toggle"</span> <span class="hljs-attr">data-toggle</span>=<span class="hljs-string">"collapse"</span> <span class="hljs-attr">data-target</span>=<span class="hljs-string">"#header-nav"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"icon-bar"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"navbar-brand"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span>Babblr<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"collapse navbar-collapse navbar-right"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"header-nav"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"nav navbar-nav"</span>&gt;</span>
+                            </span><span class="hljs-template-tag">{{#<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> username}}</span><span class="xml">
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/logout"</span>&gt;</span>Logged in as </span><span class="hljs-template-variable">{{ username }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                            </span><span class="hljs-template-variable">{{<span class="hljs-builtin-name">else</span>}}</span><span class="xml">
+                            <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/login"</span>&gt;</span>Log in<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+                            </span><span class="hljs-template-tag">{{/<span class="hljs-name"><span class="hljs-builtin-name">if</span></span>}}</span><span class="xml">
+                        <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">nav</span>&gt;</span></span>
+</code></pre><p>Note the addition of a logout link, which we will implement later. Let’s check our tests pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+express-session deprecated undefined resave option; provide resave option index.js:9:1669
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1669
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (44ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test submitting to the login route
+      ✓ should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index
+    Test empty login
+      ✓ should show the login form
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (45ms)
+Stopping the server
+
+
+  5 passing (156ms)
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 55/55 ), 7 ignored
+Branches     : 100% ( 10/10 ), 2 ignored
+Functions    : 88.89% ( 8/9 )
+Lines        : 100% ( 55/55 )
+================================================================================
+&gt;&gt; Done. Check coverage folder.
+
+Running <span class="hljs-string">"coveralls:app"</span> (coveralls) task
+&gt;&gt; Failed to submit <span class="hljs-string">'coverage/lcov.info'</span> to coveralls: Bad response: 422 {<span class="hljs-string">"message"</span>:<span class="hljs-string">"Couldn't find a repository matching this job."</span>,<span class="hljs-string">"error"</span>:<span class="hljs-literal">true</span>}
+&gt;&gt; Failed to submit coverage results to coveralls
+Warning: Task <span class="hljs-string">"coveralls:app"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre><p>Excellent! Next, let’s implement the test for our logout route:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test logout</span>
+    describe(<span class="hljs-string">'Test logout'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should log the user out'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post({ url: <span class="hljs-string">'http://localhost:5000/login'</span>,
+                form:{username: <span class="hljs-string">'bobsmith'</span>},
+                jar: <span class="hljs-literal">true</span>,
+                followRedirect: <span class="hljs-literal">false</span>},
+                <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'/'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">302</span>);
+
+                    <span class="hljs-comment">// Check the username</span>
+                    request.get({ url: <span class="hljs-string">'http://localhost:5000/'</span>, jar: <span class="hljs-literal">true</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                        expect(body).to.include(<span class="hljs-string">'bobsmith'</span>);
+
+                        <span class="hljs-comment">// Log the user out</span>
+                        request.get({ url: <span class="hljs-string">'http://localhost:5000/logout'</span>, jar: <span class="hljs-literal">true</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                            expect(body).to.include(<span class="hljs-string">'Log in'</span>);
+                            done();
+                            });
+                    });
+            });
+        });
+    });
+</code></pre><p>This is largely the same as the previous test, but adds some additional content at the end to test logging out afterwards. Let’s run the test:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
+&gt;&gt; 2 files lint free.
+
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
+express-session deprecated undefined resave option; provide resave option index.js:9:1669
+express-session deprecated undefined saveUninitialized option; provide saveUninitialized option index.js:9:1669
+Listening on port 5000
+
+
+  server
+Starting the server
+    Test the index route
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Babblr (536ms)
+    Test the login route
+      ✓ should <span class="hljs-built_in">return</span> a page with the text Please enter a handle
+    Test submitting to the login route
+      ✓ should store the username <span class="hljs-keyword">in</span> the session and redirect the user to the index
+    Test empty login
+      ✓ should show the login form
+    Test <span class="hljs-built_in">logout</span>
+      1) should <span class="hljs-built_in">log</span> the user out
+    Test sending a message
+      ✓ should <span class="hljs-built_in">return</span> <span class="hljs-string">'Message received'</span> (49ms)
+Stopping the server
+
+
+  5 passing (682ms)
+  1 failing
+
+  1) server Test <span class="hljs-built_in">logout</span> should <span class="hljs-built_in">log</span> the user out:
+     Uncaught AssertionError: expected <span class="hljs-string">'Cannot GET /logout\n'</span> to include <span class="hljs-string">'Log in'</span>
+      at Request._callback (/Users/matthewdaly/Projects/babblr/<span class="hljs-built_in">test</span>/test.js:105:45)
+      at Request.self.callback (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:373:22)
+      at Request.emit (events.js:98:17)
+      at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1318:14)
+      at Request.emit (events.js:117:20)
+      at IncomingMessage.&lt;anonymous&gt; (/Users/matthewdaly/Projects/babblr/node_modules/request/request.js:1266:12)
+      at IncomingMessage.emit (events.js:117:20)
+      at _stream_readable.js:944:16
+      at process._tickCallback (node.js:442:13)
+
+
+
+=============================================================================
+Writing coverage object [/Users/matthewdaly/Projects/babblr/coverage/coverage.json]
+Writing coverage reports at [/Users/matthewdaly/Projects/babblr/coverage]
+=============================================================================
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 55/55 ), 7 ignored
+Branches     : 100% ( 10/10 ), 2 ignored
+Functions    : 88.89% ( 8/9 )
+Lines        : 100% ( 55/55 )
+================================================================================
+&gt;&gt;
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to continue.
+
+Aborted due to warnings.
+</code></pre><p>Now we have a failing test, let’s implement our logout route. Add the following route to <code>index.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Process logout</span>
+app.get(<span class="hljs-string">'/logout'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Delete username from session</span>
+    req.session.username = <span class="hljs-literal">null</span>;
+
+    <span class="hljs-comment">// Redirect user</span>
+    res.redirect(<span class="hljs-string">'/'</span>);
+});
+</code></pre><p>If you run your tests again, they should now pass.</p><p>Now that we have the user’s name stored in the session, we can make use of it. First, let’s amend <code>static/js/main.js</code> so that it no longer adds a default username:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+<span class="hljs-meta">    'use strict'</span>;
+
+    <span class="hljs-comment">// Set up the connection</span>
+    <span class="hljs-keyword">var</span> field, socket, output;
+    socket = io.connect(<span class="hljs-built_in">window</span>.location.href);
+
+    <span class="hljs-comment">// Get a reference to the input</span>
+    field = $(<span class="hljs-string">'textarea#message'</span>);
+
+    <span class="hljs-comment">// Get a reference to the output</span>
+    output = $(<span class="hljs-string">'div.conversation'</span>);
+
+    <span class="hljs-comment">// Handle message submit</span>
+    $(<span class="hljs-string">'a#submitbutton'</span>).on(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-comment">// Create the message</span>
+        <span class="hljs-keyword">var</span> msg;
+        msg = field.val();
+        socket.emit(<span class="hljs-string">'send'</span>, { message: msg });
+        field.val(<span class="hljs-string">''</span>);
+    });
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+        <span class="hljs-comment">// Insert the message</span>
+        output.append(<span class="hljs-string">'&lt;p&gt;'</span> + data + <span class="hljs-string">'&lt;/p&gt;'</span>);
+    });
+});
+</code></pre><p>Then, in <code>index.js</code>, we need to declare a variable for our session middleware, which will be shared between Socket.IO and Express:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, hbs, io, port, RedisStore, rtg, session, sessionMiddleware, subscribe;
+</code></pre><p>Then we amend the session setup to make it easier to reuse for Socket.IO:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Set up session</span>
+sessionMiddleware = session({
+    store: <span class="hljs-keyword">new</span> RedisStore({
+        client: client
+    }),
+    secret: <span class="hljs-string">'blibble'</span>
+});
+app.use(sessionMiddleware);
+</code></pre><p>Towards the end of the file, before we set up our handlers for Socket.IO, we integrate our sessions:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Integrate sessions</span>
+io.use(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">socket, next</span>) </span>{
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
+</code></pre><p>Finally, we rewrite our session handlers to use the username from the session:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Handle new messages</span>
+io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) </span>{
+    <span class="hljs-comment">// Subscribe to the Redis channel</span>
+    subscribe.subscribe(<span class="hljs-string">'ChatChannel'</span>);
+
+    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'send'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+        <span class="hljs-comment">// Define variables</span>
+        <span class="hljs-keyword">var</span> username, message;
+
+        <span class="hljs-comment">// Get username</span>
+        username = socket.request.session.username;
+        <span class="hljs-keyword">if</span> (!username) {
+            username = <span class="hljs-string">'Anonymous Coward'</span>;
+        }
+        message = username + <span class="hljs-string">': '</span> + data.message;
+
+        <span class="hljs-comment">// Publish it</span>
+        client.publish(<span class="hljs-string">'ChatChannel'</span>, message);
+
+        <span class="hljs-comment">// Persist it to a Redis list</span>
+        client.rpush(<span class="hljs-string">'chat:messages'</span>, message);
+    });
+
+    <span class="hljs-comment">// Handle receiving messages</span>
+    <span class="hljs-keyword">var</span> callback = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">channel, data</span>) </span>{
+        socket.emit(<span class="hljs-string">'message'</span>, data);
+    };
+    subscribe.on(<span class="hljs-string">'message'</span>, callback);
+
+    <span class="hljs-comment">// Handle disconnect</span>
+    socket.on(<span class="hljs-string">'disconnect'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        subscribe.removeListener(<span class="hljs-string">'message'</span>, callback);
+    });
+});
+</code></pre><p>Note here that when a message is sent, we get the username from the session, and if it’s empty, set it to Anonymous Coward. We then prepend it to the message, publish it, and persist it.</p><h2 id="one-final-thing-">One final thing…</h2><p>One last job remains. At present, users can pass JavaScript through in messages, which is not terribly secure! We need to fix it. Amend the <code>send</code> handler as follows:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Handle incoming messages</span>
+    socket.on(<span class="hljs-string">'send'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">data</span>) </span>{
+        <span class="hljs-comment">// Define variables</span>
+        <span class="hljs-keyword">var</span> username, message;
+
+        <span class="hljs-comment">// Strip tags from message</span>
+        message = data.message.replace(<span class="hljs-regexp">/&lt;[^&gt;]*&gt;/g</span>, <span class="hljs-string">''</span>);
+
+        <span class="hljs-comment">// Get username</span>
+        username = socket.request.session.username;
+        <span class="hljs-keyword">if</span> (!username) {
+            username = <span class="hljs-string">'Anonymous Coward'</span>;
+        }
+        message = username + <span class="hljs-string">': '</span> + message;
+
+        <span class="hljs-comment">// Publish it</span>
+        client.publish(<span class="hljs-string">'ChatChannel'</span>, message);
+
+        <span class="hljs-comment">// Persist it to a Redis list</span>
+        client.rpush(<span class="hljs-string">'chat:messages'</span>, message);
+    });
+</code></pre><p>Here we use a regex to strip out any HTML tags from the message - this will prevent anyone injecting JavaScript into our chat client.</p><p>And that’s all, folks! If you want to check out the source for this lesson it’s in the repository on GitHub, tagged <code>lesson-2</code>. If you want to carry on working on this on your own, there’s still plenty you can do, such as:</p><ul><li>Adding support for multiple rooms</li><li>Using Passport.js to allow logging in using third-party services such as Twitter or Facebook</li><li>Adding formatting for messages, either by using something like Markdown, or a client-side rich text editor</li></ul><p>As you can see, it’s surprising how much you can accomplish using only Redis, and under certain circumstances it offers a lot of advantages over a relational database. It’s always worth thinking about whether Redis can be used for your project.</p><section><ul class="categories"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/amp/">Syntax Highlighting in Fenced Code Blocks in Vim</a> <a class="postlink" href="/blog/2015/02/15/switching-to-my-own-static-site-generator/amp/">Switching to My Own Static Site Generator</a></section></article></div></div></div></body></html>

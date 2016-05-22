@@ -1,0 +1,1188 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Building a Location Aware Web App With Geodjango - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "NewsArticle",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/",
+  			"headline": "Building a Location Aware Web App With Geodjango",
+  			"datePublished": "26th March 2016 9:30 pm",
+  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"author": {
+	 			"@type": "Person",
+	 			"name": "Matthew Daly"
+  			},
+  			"image": {
+	 			"@type": "ImageObject",
+	 			"url": "http://matthewdaly.co.uk/favicon.ico",
+	 			"height": 16,
+	 			"width":16
+  			}
+		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">26th March 2016 9:30 pm</p><h1>Building a Location Aware Web App With Geodjango</h1><p>PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it thanks to GeoDjango. In this tutorial, I’ll show you how to use GeoDjango to build a web app that allows users to search for gigs and events near them.</p><h2 id="requirements">Requirements</h2><p>I’ve made the jump to Python 3, and if you haven’t done so yet, I highly recommend it - it’s not hard, and there’s very few modules left that haven’t been ported across. As such, this tutorial assumes you’re using Python 3. You’ll also need to have Git, PostgreSQL and PostGIS installed - I’ll leave the details of doing so up to you as it varies by platform, but you can generally do so easily with a package manager on most Linux distros. On Mac OS X I recommend using Homebrew. If you’re on Windows I think your best bet is probably to use a Vagrant VM.</p><p>We’ll be using Django 1.9 - if by the time you read this a newer version of Django is out, it’s quite possible that some things may have changed and you’ll need to work around any problems caused. Generally search engines are the best place to look for this, and I’ll endeavour to keep the resulting Github repository as up to date as I can, so try those if you get stuck.</p><h2 id="getting-started">Getting started</h2><p>First of all, let’s create our database. Make sure you’re running as a user that has the required privileges to create users and databases for PostgreSQL and run the following command:</p><pre><code class="hljs lang-bash">$ createdb gigfinder
+</code></pre><p>This creates the database. Next, we create the user:</p><pre><code class="hljs lang-bash">$ createuser <span class="hljs-_">-s</span> giguser -P
+</code></pre><p>You’ll be prompted to enter a password for the new user. Next, we want to use the <code>psql</code> command-line client to interact with our new database:</p><pre><code class="hljs lang-bash">$ psql gigfinder
+</code></pre><p>This connects to the database. Run these commands to set up access to the database and install the PostGIS extension:</p><pre><code class="hljs lang-psql"><span class="hljs-meta"># GRANT ALL PRIVILEGES ON DATABASE gigfinder TO giguser;</span>
+<span class="hljs-meta"># CREATE EXTENSION postgis;</span>
+<span class="hljs-meta"># \q</span>
+</code></pre><p>With our database set up, it’s time to start work on our project. Let’s create our virtualenv in a new folder:</p><pre><code class="hljs lang-bash">$ pyvenv venv
+</code></pre><p>Then activate it:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
+</code></pre><p>Then we install Django, along with a few other production dependencies:</p><pre><code class="hljs lang-bash">$ pip install django-toolbelt
+</code></pre><p>And record our dependencies:</p><pre><code class="hljs lang-bash">$ pip freeze &gt; requirements.txt
+</code></pre><p>Next, we create our application skeleton:</p><pre><code class="hljs lang-bash">$ django-admin.py startproject gigfinder .
+</code></pre><p>We’ll also create a <code>.gitignore</code> file:</p><pre><code class="hljs lang-bash">venv/
+.DS_Store
+*.swp
+node_modules/
+*.pyc
+</code></pre><p>Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git init
+$ git add .gitignore requirements/txt manage.py gigfinder
+$ git commit -m <span class="hljs-string">'Initial commit'</span>
+</code></pre><p>Next, let’s create our first app, which we will call <code>gigs</code>:</p><pre><code class="hljs lang-bash">$ python manage.py startapp gigs
+</code></pre><p>We need to add our new app to the <code>INSTALLED_APPS</code> setting. While we’re there we’ll also add GIS support and set up the database connection. First, add the required apps to <code>INSTALLED_APPS</code>:</p><pre><code class="hljs lang-python">INSTALLED_APPS = [
+    ...
+    <span class="hljs-string">'django.contrib.gis'</span>,
+    <span class="hljs-string">'gigs'</span>,
+]
+</code></pre><p>Next, configure the database:</p><pre><code class="hljs lang-python">DATABASES = {
+    <span class="hljs-string">'default'</span>: {
+         <span class="hljs-string">'ENGINE'</span>: <span class="hljs-string">'django.contrib.gis.db.backends.postgis'</span>,
+         <span class="hljs-string">'NAME'</span>: <span class="hljs-string">'gigfinder'</span>,
+         <span class="hljs-string">'USER'</span>: <span class="hljs-string">'giguser'</span>,
+         <span class="hljs-string">'PASSWORD'</span>: <span class="hljs-string">'password'</span>,
+    },
+}
+</code></pre><p>Let’s run the migrations:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+Operations to perform:
+  Apply all migrations: sessions, contenttypes, admin, auth
+Running migrations:
+  Rendering model states... DONE
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying contenttypes.0002_remove_content_<span class="hljs-built_in">type</span>_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying sessions.0001_initial... OK
+</code></pre><p>And create our superuser account:</p><pre><code class="hljs lang-bash">$ python manage.py createsuperuser
+</code></pre><p>Now, we’ll commit our changes:</p><pre><code class="hljs lang-bash">$ git add gigfinder/ gigs/
+$ git commit -m <span class="hljs-string">'Created gigs app'</span>
+[master e72a846] Created gigs app
+ 8 files changed, 24 insertions(+), 3 deletions(-)
+ create mode 100644 gigs/__init__.py
+ create mode 100644 gigs/admin.py
+ create mode 100644 gigs/apps.py
+ create mode 100644 gigs/migrations/__init__.py
+ create mode 100644 gigs/models.py
+ create mode 100644 gigs/tests.py
+ create mode 100644 gigs/views.py
+</code></pre><h2 id="our-first-model">Our first model</h2><p>At this point, it’s worth thinking about the models we plan for our app to have. First we’ll have a <code>Venue</code> model that contains details of an individual venue, which will include a name and a geographical location. We’ll also have an <code>Event</code> model that will represent an individual gig or event at a venue, and will include a name, date/time and a venue as a foreign key.</p><p>Before we start writing our first model, we need to write a test for it, but we also need to be able to create objects easily in our tests. We also want to be able to easily examine our objects, so we’ll install iPDB and Factory Boy:</p><pre><code class="hljs lang-bash">$ pip install ipdb factory-boy
+$ pip freeze &gt; requirements.txt
+</code></pre><p>Next, we write a test for the <code>Venue</code> model:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> TestCase
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue
+<span class="hljs-keyword">from</span> factory.fuzzy <span class="hljs-keyword">import</span> BaseFuzzyAttribute
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">import</span> factory.django, random
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FuzzyPoint</span><span class="hljs-params">(BaseFuzzyAttribute)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fuzz</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> Point(random.uniform(<span class="hljs-number">-180.0</span>, <span class="hljs-number">180.0</span>),
+                     random.uniform(<span class="hljs-number">-90.0</span>, <span class="hljs-number">90.0</span>))
+
+<span class="hljs-comment"># Factories for tests</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Venue
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'location'</span>
+        )
+
+    name = <span class="hljs-string">'Wembley Arena'</span>
+    location = FuzzyPoint()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_venue</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_venues = Venue.objects.all()
+        self.assertEqual(len(all_venues), <span class="hljs-number">1</span>)
+        only_venue = all_venues[<span class="hljs-number">0</span>]
+        self.assertEqual(only_venue, venue)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+</code></pre><p>Note that we randomly generate our location - this is done as suggested in <a href="http://stackoverflow.com/questions/32828890/using-factory-boy-with-geodjango-pointfields">this Stack Overflow post</a>.</p><p>Now, running our tests brings up an expected error:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+E
+======================================================================
+ERROR: gigs.tests (unittest.loader._FailedTest)
+----------------------------------------------------------------------
+ImportError: Failed to import <span class="hljs-built_in">test</span> module: gigs.tests
+Traceback (most recent call last):
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line 428, <span class="hljs-keyword">in</span> _find_<span class="hljs-built_in">test</span>_path
+    module = self._get_module_from_name(name)
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line 369, <span class="hljs-keyword">in</span> _get_module_from_name
+    __import__(name)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 2, <span class="hljs-keyword">in</span> &lt;module&gt;
+    from gigs.models import Venue
+ImportError: cannot import name <span class="hljs-string">'Venue'</span>
+
+
+----------------------------------------------------------------------
+Ran 1 <span class="hljs-built_in">test</span> <span class="hljs-keyword">in</span> 0.001s
+
+FAILED (errors=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>Let’s create our <code>Venue</code> model in <code>gigs/models.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.gis.db <span class="hljs-keyword">import</span> models
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Venue</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for a venue
+    """</span>
+    <span class="hljs-keyword">pass</span>
+</code></pre><p>For now, we’re just creating a simple dummy model. Note that we import <code>models</code> from <code>django.contrib.gis.db</code> instead of the usual place - this gives us access to the additional geographical fields.</p><p>If we run our tests again we get an error:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py"</span>, line 64, <span class="hljs-keyword">in</span> execute
+    <span class="hljs-built_in">return</span> self.cursor.execute(sql, params)
+psycopg2.ProgrammingError: relation <span class="hljs-string">"gigs_venue"</span> does not exist
+LINE 1: SELECT <span class="hljs-string">"gigs_venue"</span>.<span class="hljs-string">"id"</span> FROM <span class="hljs-string">"gigs_venue"</span> ORDER BY <span class="hljs-string">"gigs_ve...
+                                      ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "</span>manage.py<span class="hljs-string">", line 10, in &lt;module&gt;
+    execute_from_command_line(sys.argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/__init__.py<span class="hljs-string">", line 353, in execute_from_command_line
+    utility.execute()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/__init__.py<span class="hljs-string">", line 345, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 30, in run_from_argv
+    super(Command, self).run_from_argv(argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/base.py<span class="hljs-string">", line 348, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 74, in execute
+    super(Command, self).execute(*args, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/base.py<span class="hljs-string">", line 399, in execute
+    output = self.handle(*args, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 90, in handle
+    failures = test_runner.run_tests(test_labels)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 532, in run_tests
+    old_config = self.setup_databases()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 482, in setup_databases
+    self.parallel, **kwargs
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 726, in setup_databases
+    serialize=connection.settings_dict.get("</span>TEST<span class="hljs-string">", {}).get("</span>SERIALIZE<span class="hljs-string">", True),
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 78, in create_test_db
+    self.connection._test_serialized_contents = self.serialize_db_to_string()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 122, in serialize_db_to_string
+    serializers.serialize("</span>json<span class="hljs-string">", get_objects(), indent=None, stream=out)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/serializers/__init__.py<span class="hljs-string">", line 129, in serialize
+    s.serialize(queryset, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/serializers/base.py<span class="hljs-string">", line 79, in serialize
+    for count, obj in enumerate(queryset, start=1):
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 118, in get_objects
+    for obj in queryset.iterator():
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/models/query.py<span class="hljs-string">", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/models/sql/compiler.py<span class="hljs-string">", line 848, in execute_sql
+    cursor.execute(sql, params)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py<span class="hljs-string">", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/utils.py<span class="hljs-string">", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/utils/six.py<span class="hljs-string">", line 685, in reraise
+    raise value.with_traceback(tb)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py<span class="hljs-string">", line 64, in execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: relation "</span>gigs_venue<span class="hljs-string">" does not exist
+LINE 1: SELECT "</span>gigs_venue<span class="hljs-string">"."</span>id<span class="hljs-string">" FROM "</span>gigs_venue<span class="hljs-string">" ORDER BY "</span>gigs_ve...
+</code></pre><p>Let’s update our model:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.gis.db <span class="hljs-keyword">import</span> models
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Venue</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for a venue
+    """</span>
+    name = models.CharField(max_length=<span class="hljs-number">200</span>)
+    location = models.PointField()
+</code></pre><p>Then create our migration:</p><pre><code class="hljs lang-bash">$ python manage.py makemigrations
+Migrations <span class="hljs-keyword">for</span> <span class="hljs-string">'gigs'</span>:
+  0001_initial.py:
+    - Create model Venue
+</code></pre><p>And run it:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+Operations to perform:
+  Apply all migrations: gigs, sessions, contenttypes, auth, admin
+Running migrations:
+  Rendering model states... DONE
+  Applying gigs.0001_initial... OK
+</code></pre><p>Then if we run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.
+----------------------------------------------------------------------
+Ran 1 <span class="hljs-built_in">test</span> <span class="hljs-keyword">in</span> 0.362s
+
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>They should pass. Note that Django may complain about needing to delete the test database before running the tests, but this should not cause any problems. Let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add requirements.txt gigs/
+$ git commit -m <span class="hljs-string">'Venue model in place'</span>
+</code></pre><p>With our venue done, let’s turn to our <code>Event</code> model. Amend <code>gigs/tests.py</code> as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> TestCase
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue, Event
+<span class="hljs-keyword">from</span> factory.fuzzy <span class="hljs-keyword">import</span> BaseFuzzyAttribute
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">import</span> factory.django, random
+<span class="hljs-keyword">from</span> django.utils <span class="hljs-keyword">import</span> timezone
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FuzzyPoint</span><span class="hljs-params">(BaseFuzzyAttribute)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fuzz</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> Point(random.uniform(<span class="hljs-number">-180.0</span>, <span class="hljs-number">180.0</span>),
+                     random.uniform(<span class="hljs-number">-90.0</span>, <span class="hljs-number">90.0</span>))
+
+<span class="hljs-comment"># Factories for tests</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Venue
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'location'</span>
+        )
+
+    name = <span class="hljs-string">'Wembley Arena'</span>
+    location = FuzzyPoint()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Event
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'venue'</span>,
+            <span class="hljs-string">'datetime'</span>
+        )
+
+    name = <span class="hljs-string">'Queens of the Stone Age'</span>
+    datetime = timezone.now()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_venue</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_venues = Venue.objects.all()
+        self.assertEqual(len(all_venues), <span class="hljs-number">1</span>)
+        only_venue = all_venues[<span class="hljs-number">0</span>]
+        self.assertEqual(only_venue, venue)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_event</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Create the event</span>
+        event = EventFactory(venue=venue)
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_events = Event.objects.all()
+        self.assertEqual(len(all_events), <span class="hljs-number">1</span>)
+        only_event = all_events[<span class="hljs-number">0</span>]
+        self.assertEqual(only_event, event)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_event.name, <span class="hljs-string">'Queens of the Stone Age'</span>)
+        self.assertEqual(only_event.venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+</code></pre><p>Then we run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+E
+======================================================================
+ERROR: gigs.tests (unittest.loader._FailedTest)
+----------------------------------------------------------------------
+ImportError: Failed to import <span class="hljs-built_in">test</span> module: gigs.tests
+Traceback (most recent call last):
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line 428, <span class="hljs-keyword">in</span> _find_<span class="hljs-built_in">test</span>_path
+    module = self._get_module_from_name(name)
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line 369, <span class="hljs-keyword">in</span> _get_module_from_name
+    __import__(name)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 2, <span class="hljs-keyword">in</span> &lt;module&gt;
+    from gigs.models import Venue, Event
+ImportError: cannot import name <span class="hljs-string">'Event'</span>
+
+
+----------------------------------------------------------------------
+Ran 1 <span class="hljs-built_in">test</span> <span class="hljs-keyword">in</span> 0.001s
+
+FAILED (errors=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>As expected, this fails, so create an empty <code>Event</code> model in <code>gigs/models.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Event</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for an event
+    """</span>
+    <span class="hljs-keyword">pass</span>
+</code></pre><p>Running the tests now will raise an error due to the table not existing:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py"</span>, line 64, <span class="hljs-keyword">in</span> execute
+    <span class="hljs-built_in">return</span> self.cursor.execute(sql, params)
+psycopg2.ProgrammingError: relation <span class="hljs-string">"gigs_event"</span> does not exist
+LINE 1: SELECT <span class="hljs-string">"gigs_event"</span>.<span class="hljs-string">"id"</span> FROM <span class="hljs-string">"gigs_event"</span> ORDER BY <span class="hljs-string">"gigs_ev...
+                                      ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "</span>manage.py<span class="hljs-string">", line 10, in &lt;module&gt;
+    execute_from_command_line(sys.argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/__init__.py<span class="hljs-string">", line 353, in execute_from_command_line
+    utility.execute()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/__init__.py<span class="hljs-string">", line 345, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 30, in run_from_argv
+    super(Command, self).run_from_argv(argv)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/base.py<span class="hljs-string">", line 348, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 74, in execute
+    super(Command, self).execute(*args, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/base.py<span class="hljs-string">", line 399, in execute
+    output = self.handle(*args, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/management/commands/test.py<span class="hljs-string">", line 90, in handle
+    failures = test_runner.run_tests(test_labels)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 532, in run_tests
+    old_config = self.setup_databases()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 482, in setup_databases
+    self.parallel, **kwargs
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/<span class="hljs-built_in">test</span>/runner.py<span class="hljs-string">", line 726, in setup_databases
+    serialize=connection.settings_dict.get("</span>TEST<span class="hljs-string">", {}).get("</span>SERIALIZE<span class="hljs-string">", True),
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 78, in create_test_db
+    self.connection._test_serialized_contents = self.serialize_db_to_string()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 122, in serialize_db_to_string
+    serializers.serialize("</span>json<span class="hljs-string">", get_objects(), indent=None, stream=out)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/serializers/__init__.py<span class="hljs-string">", line 129, in serialize
+    s.serialize(queryset, **options)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/serializers/base.py<span class="hljs-string">", line 79, in serialize
+    for count, obj in enumerate(queryset, start=1):
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/base/creation.py<span class="hljs-string">", line 118, in get_objects
+    for obj in queryset.iterator():
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/models/query.py<span class="hljs-string">", line 52, in __iter__
+    results = compiler.execute_sql()
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/models/sql/compiler.py<span class="hljs-string">", line 848, in execute_sql
+    cursor.execute(sql, params)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py<span class="hljs-string">", line 64, in execute
+    return self.cursor.execute(sql, params)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/utils.py<span class="hljs-string">", line 95, in __exit__
+    six.reraise(dj_exc_type, dj_exc_value, traceback)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/utils/six.py<span class="hljs-string">", line 685, in reraise
+    raise value.with_traceback(tb)
+  File "</span>/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/db/backends/utils.py<span class="hljs-string">", line 64, in execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: relation "</span>gigs_event<span class="hljs-string">" does not exist
+LINE 1: SELECT "</span>gigs_event<span class="hljs-string">"."</span>id<span class="hljs-string">" FROM "</span>gigs_event<span class="hljs-string">" ORDER BY "</span>gigs_ev...
+</code></pre><p>So let’s populate our model:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Event</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for an event
+    """</span>
+    name = models.CharField(max_length=<span class="hljs-number">200</span>)
+    datetime = models.DateTimeField()
+    venue = models.ForeignKey(Venue)
+</code></pre><p>And create our migration:</p><pre><code class="hljs lang-bash">$ python manage.py makemigrations
+Migrations <span class="hljs-keyword">for</span> <span class="hljs-string">'gigs'</span>:
+  0002_event.py:
+    - Create model Event
+</code></pre><p>And run it:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
+Operations to perform:
+  Apply all migrations: auth, admin, sessions, contenttypes, gigs
+Running migrations:
+  Rendering model states... DONE
+  Applying gigs.0002_event... OK
+</code></pre><p>And run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+..
+----------------------------------------------------------------------
+Ran 2 tests <span class="hljs-keyword">in</span> 0.033s
+
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>Again, you may be prompted to delete the test database, but this should not be an issue.</p><p>With this done, let’s commit our changes:</p><pre><code class="hljs lang-bash">$ git add gigs
+$ git commit -m <span class="hljs-string">'Added Event model'</span>
+[master 47ba686] Added Event model
+ 3 files changed, 67 insertions(+), 1 deletion(-)
+ create mode 100644 gigs/migrations/0002_event.py
+</code></pre><h2 id="setting-up-the-admin">Setting up the admin</h2><p>For an application like this, you’d expect the curators of the site to maintain the gigs and venues stored in the database, and that’s an obvious use case for the Django admin. So let’s set our models up to be available in the admin. Open up <code>gigs/admin.py</code> and amend it as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue, Event
+
+admin.site.register(Venue)
+admin.site.register(Event)
+</code></pre><p>Now, if you start up the dev server as usual with <code>python manage.py runserver</code> and visit <a href="http://127.0.0.1:8000/admin/">http://127.0.0.1:8000/admin/</a>, you can see that our <code>Event</code> and <code>Venue</code> models are now available. However, the string representations of them are pretty useless. Let’s fix that. First, we amend our tests:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> TestCase
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue, Event
+<span class="hljs-keyword">from</span> factory.fuzzy <span class="hljs-keyword">import</span> BaseFuzzyAttribute
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">import</span> factory.django, random
+<span class="hljs-keyword">from</span> django.utils <span class="hljs-keyword">import</span> timezone
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FuzzyPoint</span><span class="hljs-params">(BaseFuzzyAttribute)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fuzz</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> Point(random.uniform(<span class="hljs-number">-180.0</span>, <span class="hljs-number">180.0</span>),
+                     random.uniform(<span class="hljs-number">-90.0</span>, <span class="hljs-number">90.0</span>))
+
+<span class="hljs-comment"># Factories for tests</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Venue
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'location'</span>
+        )
+
+    name = <span class="hljs-string">'Wembley Arena'</span>
+    location = FuzzyPoint()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Event
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'venue'</span>,
+            <span class="hljs-string">'datetime'</span>
+        )
+
+    name = <span class="hljs-string">'Queens of the Stone Age'</span>
+    datetime = timezone.now()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_venue</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_venues = Venue.objects.all()
+        self.assertEqual(len(all_venues), <span class="hljs-number">1</span>)
+        only_venue = all_venues[<span class="hljs-number">0</span>]
+        self.assertEqual(only_venue, venue)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+
+        <span class="hljs-comment"># Check string representation</span>
+        self.assertEqual(only_venue.__str__(), <span class="hljs-string">'Wembley Arena'</span>)
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_event</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Create the event</span>
+        event = EventFactory(venue=venue)
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_events = Event.objects.all()
+        self.assertEqual(len(all_events), <span class="hljs-number">1</span>)
+        only_event = all_events[<span class="hljs-number">0</span>]
+        self.assertEqual(only_event, event)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_event.name, <span class="hljs-string">'Queens of the Stone Age'</span>)
+        self.assertEqual(only_event.venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+
+        <span class="hljs-comment"># Check string representation</span>
+        self.assertEqual(only_event.__str__(), <span class="hljs-string">'Queens of the Stone Age - Wembley Arena'</span>)
+</code></pre><p>Next, we run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+FF
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_event (gigs.tests.EventTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 74, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_event
+    self.assertEqual(only_event.__str__(), <span class="hljs-string">'Queens of the Stone Age - Wembley Arena'</span>)
+AssertionError: <span class="hljs-string">'Event object'</span> != <span class="hljs-string">'Queens of the Stone Age - Wembley Arena'</span>
+- Event object
++ Queens of the Stone Age - Wembley Arena
+
+
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_create_venue (gigs.tests.VenueTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 52, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_create_venue
+    self.assertEqual(only_venue.__str__(), <span class="hljs-string">'Wembley Arena'</span>)
+AssertionError: <span class="hljs-string">'Venue object'</span> != <span class="hljs-string">'Wembley Arena'</span>
+- Venue object
++ Wembley Arena
+
+
+----------------------------------------------------------------------
+Ran 2 tests <span class="hljs-keyword">in</span> 0.059s
+
+FAILED (failures=2)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>They fail as expected. So let’s update <code>gigs/models.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib.gis.db <span class="hljs-keyword">import</span> models
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Venue</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for a venue
+    """</span>
+    name = models.CharField(max_length=<span class="hljs-number">200</span>)
+    location = models.PointField()
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__str__</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> self.name
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Event</span><span class="hljs-params">(models.Model)</span>:</span>
+    <span class="hljs-string">"""
+    Model for an event
+    """</span>
+    name = models.CharField(max_length=<span class="hljs-number">200</span>)
+    datetime = models.DateTimeField()
+    venue = models.ForeignKey(Venue)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__str__</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"%s - %s"</span> % (self.name, self.venue.name)
+</code></pre><p>For the venue, we just use the name. For the event, we use the event name and the venue name.</p><p>Now, we run our tests again:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+..
+----------------------------------------------------------------------
+Ran 2 tests <span class="hljs-keyword">in</span> 0.048s
+
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>Time to commit our changes:</p><pre><code class="hljs lang-bash">$ git add gigs
+$ git commit -m <span class="hljs-string">'Added models to admin'</span>
+[master 65d051f] Added models to admin
+ 3 files changed, 15 insertions(+), 1 deletion(-)
+</code></pre><p>Our models are now in place, so you may want to log into the admin and create a few venues and events so you can see it in action. Note that the location field for the <code>Venue</code> model creates a map widget that allows you to select a geographical location. It is a bit basic, however, so let’s make it better. Let’s install <code>django-floppyforms</code>:</p><pre><code class="hljs lang-bash">$ pip install django-floppyforms
+</code></pre><p>And add it to our requirements:</p><pre><code class="hljs lang-bash">$ pip install -r requirements.txt
+</code></pre><p>Then add it to <code>INSTALLED_APPS</code> in <code>gigfinder/setttings.py</code>:</p><pre><code class="hljs lang-python">INSTALLED_APPS = [
+    ...
+    <span class="hljs-string">'django.contrib.gis'</span>,
+    <span class="hljs-string">'gigs'</span>,
+    <span class="hljs-string">'floppyforms'</span>,
+]
+</code></pre><p>Now we create a custom point widget for our admin, a custom form for the venues, and a custom venue admin:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue, Event
+<span class="hljs-keyword">from</span> django.forms <span class="hljs-keyword">import</span> ModelForm
+<span class="hljs-keyword">from</span> floppyforms.gis <span class="hljs-keyword">import</span> PointWidget, BaseGMapWidget
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CustomPointWidget</span><span class="hljs-params">(PointWidget, BaseGMapWidget)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Media</span>:</span>
+        js = (<span class="hljs-string">'/static/floppyforms/js/MapWidget.js'</span>,)
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueAdminForm</span><span class="hljs-params">(ModelForm)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Venue
+        fields = [<span class="hljs-string">'name'</span>, <span class="hljs-string">'location'</span>]
+        widgets = {
+            <span class="hljs-string">'location'</span>: CustomPointWidget()
+        }
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueAdmin</span><span class="hljs-params">(admin.ModelAdmin)</span>:</span>
+    form = VenueAdminForm
+
+admin.site.register(Venue, VenueAdmin)
+admin.site.register(Event)
+</code></pre><p>Note in particular that we define the media for our widget so we can include some required Javascript. If you run the dev server again, you should see that the map widget in the admin is now provided by Google Maps, making it much easier to identify the correct location of the venue.</p><p>Time to commit our changes:</p><pre><code class="hljs lang-bash">$ git add gigfinder/ gigs/ requirements.txt
+$ git commit -m <span class="hljs-string">'Customised location widget'</span>
+</code></pre><p>With our admin ready, it’s time to move on to the user-facing part of the web app.</p><h2 id="creating-our-views">Creating our views</h2><p>We will keep the front end for this app as simple as possible for the purposes of this tutorial, but of course you should feel free to expand upon this as you see fit. What we’ll do is create a form that uses HTML5 geolocation to get the user’s current geographical coordinates. It will then return events in the next week, ordered by how close the venue is. Please note that there are plans afoot in some browsers to prevent HTML5 geolocation from working unless content is server over HTTPS, so that may complicate things.</p><p>How do we query the database to get this data? It’s not too difficult, as shown in this example:</p><pre><code class="hljs lang-bash">$ python manage.py shell
+Python 3.5.1 (default, Mar 25 2016, 00:17:15)
+Type <span class="hljs-string">"copyright"</span>, <span class="hljs-string">"credits"</span> or <span class="hljs-string">"license"</span> <span class="hljs-keyword">for</span> more information.
+
+IPython 4.1.2 -- An enhanced Interactive Python.
+?         -&gt; Introduction and overview of IPython<span class="hljs-string">'s features.
+%quickref -&gt; Quick reference.
+help      -&gt; Python'</span>s own <span class="hljs-built_in">help</span> system.
+object?   -&gt; Details about <span class="hljs-string">'object'</span>, use <span class="hljs-string">'object??'</span> <span class="hljs-keyword">for</span> extra details.
+
+In [1]: from gigs.models import *
+
+In [2]: from django.contrib.gis.geos import Point
+
+In [3]: from django.contrib.gis.db.models.functions import Distance
+
+In [4]: location = Point(52.3749159, 1.1067473, srid=4326)
+
+In [5]: Venue.objects.all().annotate(distance=Distance(<span class="hljs-string">'location'</span>, location)).order_by(<span class="hljs-string">'distance'</span>)
+Out[5]: [&lt;Venue: Diss Corn Hall&gt;, &lt;Venue: Waterfront Norwich&gt;, &lt;Venue: UEA Norwich&gt;, &lt;Venue: Wembley Arena&gt;]
+</code></pre><p>I’ve set up a number of venues using the admin, one round the corner, two in Norwich, and one in London. I then imported the models, the <code>Point</code> class, and the <code>Distance</code> function, and created a <code>Point</code> object. Note that the <code>Point</code> is passed three fields - the first and second are the latitude and longitude, respectively, while the <code>srid</code> field takes a value of <code>4326</code>. This field represents the <a href="https://en.wikipedia.org/wiki/SRID">Spatial Reference System Identifier</a> used for this query - we’ve gone for <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84">WGS 84</a>, which is a common choice and is referred to with the SRID 4326.</p><p>Now, we want the user to be able to submit the form and get the 5 nearest events in the next week. We can get the date for this time next week as follows:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">6</span>]: next_week = timezone.now() + timezone.timedelta(weeks=<span class="hljs-number">1</span>)
+</code></pre><p>Then we can get the events we want, sorted by distance, like this:</p><pre><code class="hljs lang-python">In [<span class="hljs-number">7</span>]: Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance(<span class="hljs-string">'venue__location'</span>, location)).order_by(<span class="hljs-string">'distance'</span>)[<span class="hljs-number">0</span>:<span class="hljs-number">5</span>]
+Out[<span class="hljs-number">7</span>]: [&lt;Event: Primal Scream - UEA Norwich&gt;, &lt;Event: Queens of the Stone Age - Wembley Arena&gt;]
+</code></pre><p>With that in mind, let’s write the test for our view. The view should contain a single form that accepts a user’s geographical coordinates - for convenience we’ll autocomplete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.</p><p>First, let’s test the GET request. Amend <code>gigs/tests.py</code> as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> TestCase
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Venue, Event
+<span class="hljs-keyword">from</span> factory.fuzzy <span class="hljs-keyword">import</span> BaseFuzzyAttribute
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">import</span> factory.django, random
+<span class="hljs-keyword">from</span> django.utils <span class="hljs-keyword">import</span> timezone
+<span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> RequestFactory
+<span class="hljs-keyword">from</span> django.core.urlresolvers <span class="hljs-keyword">import</span> reverse
+<span class="hljs-keyword">from</span> gigs.views <span class="hljs-keyword">import</span> LookupView
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FuzzyPoint</span><span class="hljs-params">(BaseFuzzyAttribute)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fuzz</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-keyword">return</span> Point(random.uniform(<span class="hljs-number">-180.0</span>, <span class="hljs-number">180.0</span>),
+                     random.uniform(<span class="hljs-number">-90.0</span>, <span class="hljs-number">90.0</span>))
+
+<span class="hljs-comment"># Factories for tests</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Venue
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'location'</span>
+        )
+
+    name = <span class="hljs-string">'Wembley Arena'</span>
+    location = FuzzyPoint()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventFactory</span><span class="hljs-params">(factory.django.DjangoModelFactory)</span>:</span>
+    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Meta</span>:</span>
+        model = Event
+        django_get_or_create = (
+            <span class="hljs-string">'name'</span>,
+            <span class="hljs-string">'venue'</span>,
+            <span class="hljs-string">'datetime'</span>
+        )
+
+    name = <span class="hljs-string">'Queens of the Stone Age'</span>
+    datetime = timezone.now()
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VenueTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_venue</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_venues = Venue.objects.all()
+        self.assertEqual(len(all_venues), <span class="hljs-number">1</span>)
+        only_venue = all_venues[<span class="hljs-number">0</span>]
+        self.assertEqual(only_venue, venue)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+
+        <span class="hljs-comment"># Check string representation</span>
+        self.assertEqual(only_venue.__str__(), <span class="hljs-string">'Wembley Arena'</span>)
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_event</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create the venue</span>
+        venue = VenueFactory()
+
+        <span class="hljs-comment"># Create the event</span>
+        event = EventFactory(venue=venue)
+
+        <span class="hljs-comment"># Check we can find it</span>
+        all_events = Event.objects.all()
+        self.assertEqual(len(all_events), <span class="hljs-number">1</span>)
+        only_event = all_events[<span class="hljs-number">0</span>]
+        self.assertEqual(only_event, event)
+
+        <span class="hljs-comment"># Check attributes</span>
+        self.assertEqual(only_event.name, <span class="hljs-string">'Queens of the Stone Age'</span>)
+        self.assertEqual(only_event.venue.name, <span class="hljs-string">'Wembley Arena'</span>)
+
+        <span class="hljs-comment"># Check string representation</span>
+        self.assertEqual(only_event.__str__(), <span class="hljs-string">'Queens of the Stone Age - Wembley Arena'</span>)
+
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupViewTest</span><span class="hljs-params">(TestCase)</span>:</span>
+    <span class="hljs-string">"""
+    Test lookup view
+    """</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setUp</span><span class="hljs-params">(self)</span>:</span>
+        self.factory = RequestFactory()
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_get</span><span class="hljs-params">(self)</span>:</span>
+        request = self.factory.get(reverse(<span class="hljs-string">'lookup'</span>))
+        response = LookupView.as_view()(request)
+        self.assertEqual(response.status_code, <span class="hljs-number">200</span>)
+        self.assertTemplateUsed(<span class="hljs-string">'gigs/lookup.html'</span>)
+</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-python">$ python manage.py test gigs
+Creating test database <span class="hljs-keyword">for</span> alias <span class="hljs-string">'default'</span>...
+E
+======================================================================
+ERROR: gigs.tests (unittest.loader._FailedTest)
+----------------------------------------------------------------------
+ImportError: Failed to <span class="hljs-keyword">import</span> test module: gigs.tests
+Traceback (most recent call last):
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line <span class="hljs-number">428</span>, <span class="hljs-keyword">in</span> _find_test_path
+    module = self._get_module_from_name(name)
+  File <span class="hljs-string">"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/python3.5/unittest/loader.py"</span>, line <span class="hljs-number">369</span>, <span class="hljs-keyword">in</span> _get_module_from_name
+    __import__(name)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line <span class="hljs-number">9</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    <span class="hljs-keyword">from</span> gigs.views <span class="hljs-keyword">import</span> LookupView
+ImportError: cannot <span class="hljs-keyword">import</span> name <span class="hljs-string">'LookupView'</span>
+
+
+----------------------------------------------------------------------
+Ran <span class="hljs-number">1</span> test <span class="hljs-keyword">in</span> <span class="hljs-number">0.000</span>s
+
+FAILED (errors=<span class="hljs-number">1</span>)
+Destroying test database <span class="hljs-keyword">for</span> alias <span class="hljs-string">'default'</span>...
+</code></pre><p>Our first issue is that we can’t import the view in the test. Let’s fix that by amending <code>gigs/views.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render
+<span class="hljs-keyword">from</span> django.views.generic.base <span class="hljs-keyword">import</span> View
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupView</span><span class="hljs-params">(View)</span>:</span>
+    <span class="hljs-keyword">pass</span>
+</code></pre><p>Running the tests again results in the following:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.E.
+======================================================================
+ERROR: <span class="hljs-built_in">test</span>_get (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 88, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_get
+    request = self.factory.get(reverse(<span class="hljs-string">'lookup'</span>))
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/urlresolvers.py"</span>, line 600, <span class="hljs-keyword">in</span> reverse
+    <span class="hljs-built_in">return</span> force_text(iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs)))
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/core/urlresolvers.py"</span>, line 508, <span class="hljs-keyword">in</span> _reverse_with_prefix
+    (lookup_view_s, args, kwargs, len(patterns), patterns))
+django.core.urlresolvers.NoReverseMatch: Reverse <span class="hljs-keyword">for</span> <span class="hljs-string">'lookup'</span> with arguments <span class="hljs-string">'()'</span> and keyword arguments <span class="hljs-string">'{}'</span> not found. 0 pattern(s) tried: []
+
+----------------------------------------------------------------------
+Ran 3 tests <span class="hljs-keyword">in</span> 0.154s
+
+FAILED (errors=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>We can’t resolve the URL for our new view, so we need to add it to our URLconf. First of all, save this as <code>gigs/urls.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> url
+<span class="hljs-keyword">from</span> gigs.views <span class="hljs-keyword">import</span> LookupView
+
+urlpatterns = [
+    <span class="hljs-comment"># Lookup</span>
+    url(<span class="hljs-string">r''</span>, LookupView.as_view(), name=<span class="hljs-string">'lookup'</span>),
+]
+</code></pre><p>Then amend <code>gigfinder/urls.py</code> as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> url, include
+<span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
+
+urlpatterns = [
+    url(<span class="hljs-string">r'^admin/'</span>, admin.site.urls),
+
+    <span class="hljs-comment"># Gig URLs</span>
+    url(<span class="hljs-string">r''</span>, include(<span class="hljs-string">'gigs.urls'</span>)),
+]
+</code></pre><p>Then run the tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.F.
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_get (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 90, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_get
+    self.assertEqual(response.status_code, 200)
+AssertionError: 405 != 200
+
+----------------------------------------------------------------------
+Ran 3 tests <span class="hljs-keyword">in</span> 0.417s
+
+FAILED (failures=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>We get a 405 response because the view does not accept GET requests. Let’s resolve that:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> django.views.generic.base <span class="hljs-keyword">import</span> View
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupView</span><span class="hljs-params">(View)</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get</span><span class="hljs-params">(self, request)</span>:</span>
+        <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'gigs/lookup.html'</span>)
+</code></pre><p>If we run our tests now:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+.E.
+======================================================================
+ERROR: <span class="hljs-built_in">test</span>_get (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 89, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_get
+    response = LookupView.as_view()(request)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py"</span>, line 68, <span class="hljs-keyword">in</span> view
+    <span class="hljs-built_in">return</span> self.dispatch(request, *args, **kwargs)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py"</span>, line 88, <span class="hljs-keyword">in</span> dispatch
+    <span class="hljs-built_in">return</span> handler(request, *args, **kwargs)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/views.py"</span>, line 6, <span class="hljs-keyword">in</span> get
+    <span class="hljs-built_in">return</span> render_to_response(<span class="hljs-string">'gigs/lookup.html'</span>)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/shortcuts.py"</span>, line 39, <span class="hljs-keyword">in</span> render_to_response
+    content = loader.render_to_string(template_name, context, using=using)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py"</span>, line 96, <span class="hljs-keyword">in</span> render_to_string
+    template = get_template(template_name, using=using)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py"</span>, line 43, <span class="hljs-keyword">in</span> get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: gigs/lookup.html
+
+----------------------------------------------------------------------
+Ran 3 tests <span class="hljs-keyword">in</span> 0.409s
+
+FAILED (errors=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>We see that the template is not defined. Save the following as <code>gigs/templates/gigs/includes/base.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Gig finder<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">link</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Gig Finder<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-2.2.2.min.js"</span> <span class="hljs-attr">integrity</span>=<span class="hljs-string">"sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="</span> <span class="hljs-attr">crossorigin</span>=<span class="hljs-string">"anonymous"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">language</span>=<span class="hljs-string">"javascript"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
+</code></pre><p>And the following as <code>gigs/templates/gigs/lookup.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"form"</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"post"</span>&gt;</span></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">csrf_token</span></span> %}</span><span class="xml">
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">"latitude"</span>&gt;</span>Latitude:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"id_latitude"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"latitude"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">input</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-group"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">"longitude"</span>&gt;</span>Longitude:<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"id_longitude"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"longitude"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"form-control"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">input</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"btn btn-primary"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"Submit"</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">language</span>=<span class="hljs-string">"javascript"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;</span><span class="javascript">
+        navigator.geolocation.getCurrentPosition(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">position</span>) </span>{
+            <span class="hljs-keyword">var</span> lat = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'id_latitude'</span>);
+            <span class="hljs-keyword">var</span> lon = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'id_longitude'</span>);
+            lat.value = position.coords.latitude;
+            lon.value = position.coords.longitude;
+        });
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</code></pre><p>Note the JavaScript to populate the latitude and longitude. Now, if we run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+...
+----------------------------------------------------------------------
+Ran 3 tests <span class="hljs-keyword">in</span> 1.814s
+
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>Success! We now render our form as expected. Time to commit:</p><pre><code class="hljs lang-bash">$ git add gigs gigfinder
+$ git commit -m <span class="hljs-string">'Implemented GET handler'</span>
+</code></pre><h2 id="handling-post-requests">Handling POST requests</h2><p>Now we need to be able to handle POST requests and return the appropriate results. First, let’s write a test for it in our existing <code>LookupViewTest</code> class:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_post</span><span class="hljs-params">(self)</span>:</span>
+        <span class="hljs-comment"># Create venues to return</span>
+        v1 = VenueFactory(name=<span class="hljs-string">'Venue1'</span>)
+        v2 = VenueFactory(name=<span class="hljs-string">'Venue2'</span>)
+        v3 = VenueFactory(name=<span class="hljs-string">'Venue3'</span>)
+        v4 = VenueFactory(name=<span class="hljs-string">'Venue4'</span>)
+        v5 = VenueFactory(name=<span class="hljs-string">'Venue5'</span>)
+        v6 = VenueFactory(name=<span class="hljs-string">'Venue6'</span>)
+        v7 = VenueFactory(name=<span class="hljs-string">'Venue7'</span>)
+        v8 = VenueFactory(name=<span class="hljs-string">'Venue8'</span>)
+        v9 = VenueFactory(name=<span class="hljs-string">'Venue9'</span>)
+        v10 = VenueFactory(name=<span class="hljs-string">'Venue10'</span>)
+
+        <span class="hljs-comment"># Create events to return</span>
+        e1 = EventFactory(name=<span class="hljs-string">'Event1'</span>, venue=v1)
+        e2 = EventFactory(name=<span class="hljs-string">'Event2'</span>, venue=v2)
+        e3 = EventFactory(name=<span class="hljs-string">'Event3'</span>, venue=v3)
+        e4 = EventFactory(name=<span class="hljs-string">'Event4'</span>, venue=v4)
+        e5 = EventFactory(name=<span class="hljs-string">'Event5'</span>, venue=v5)
+        e6 = EventFactory(name=<span class="hljs-string">'Event6'</span>, venue=v6)
+        e7 = EventFactory(name=<span class="hljs-string">'Event7'</span>, venue=v7)
+        e8 = EventFactory(name=<span class="hljs-string">'Event8'</span>, venue=v8)
+        e9 = EventFactory(name=<span class="hljs-string">'Event9'</span>, venue=v9)
+        e10 = EventFactory(name=<span class="hljs-string">'Event10'</span>, venue=v10)
+
+        <span class="hljs-comment"># Set parameters</span>
+        lat = <span class="hljs-number">52.3749159</span>
+        lon = <span class="hljs-number">1.1067473</span>
+
+        <span class="hljs-comment"># Put together request</span>
+        data = {
+            <span class="hljs-string">'latitude'</span>: lat,
+            <span class="hljs-string">'longitude'</span>: lon
+        }
+        request = self.factory.post(reverse(<span class="hljs-string">'lookup'</span>), data)
+        response = LookupView.as_view()(request)
+        self.assertEqual(response.status_code, <span class="hljs-number">200</span>)
+        self.assertTemplateUsed(<span class="hljs-string">'gigs/lookupresults.html'</span>)
+</code></pre><p>If we now run this test:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+..F.
+======================================================================
+FAIL: <span class="hljs-built_in">test</span>_post (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 117, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_post
+    self.assertEqual(response.status_code, 200)
+AssertionError: 405 != 200
+
+----------------------------------------------------------------------
+Ran 4 tests <span class="hljs-keyword">in</span> 1.281s
+
+FAILED (failures=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>We can see that it fails because the POST method is not supported. Now we can start work on implementing it. First, let’s create a form in <code>gigs/forms.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.forms <span class="hljs-keyword">import</span> Form, FloatField
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupForm</span><span class="hljs-params">(Form)</span>:</span>
+    latitude = FloatField()
+    longitude = FloatField()
+</code></pre><p>Next, edit <code>gigs/views.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> django.views.generic.edit <span class="hljs-keyword">import</span> FormView
+<span class="hljs-keyword">from</span> gigs.forms <span class="hljs-keyword">import</span> LookupForm
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Event
+<span class="hljs-keyword">from</span> django.utils <span class="hljs-keyword">import</span> timezone
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">from</span> django.contrib.gis.db.models.functions <span class="hljs-keyword">import</span> Distance
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupView</span><span class="hljs-params">(FormView)</span>:</span>
+    form_class = LookupForm
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get</span><span class="hljs-params">(self, request)</span>:</span>
+        <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'gigs/lookup.html'</span>)
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">form_valid</span><span class="hljs-params">(self, form)</span>:</span>
+        <span class="hljs-comment"># Get data</span>
+        latitude = form.cleaned_data[<span class="hljs-string">'latitude'</span>]
+        longitude = form.cleaned_data[<span class="hljs-string">'longitude'</span>]
+
+        <span class="hljs-comment"># Get today's date</span>
+        now = timezone.now()
+
+        <span class="hljs-comment"># Get next week's date</span>
+        next_week = now + timezone.timedelta(weeks=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># Get Point</span>
+        location = Point(longitude, latitude, srid=<span class="hljs-number">4326</span>)
+
+        <span class="hljs-comment"># Look up events</span>
+        events = Event.objects.filter(datetime__gte=now).filter(datetime__lte=next_week).annotate(distance=Distance(<span class="hljs-string">'venue__location'</span>, location)).order_by(<span class="hljs-string">'distance'</span>)[<span class="hljs-number">0</span>:<span class="hljs-number">5</span>]
+
+        <span class="hljs-comment"># Render the template</span>
+        <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'gigs/lookupresults.html'</span>, {
+            <span class="hljs-string">'events'</span>: events
+            })
+</code></pre><p>Note that we’re switching from a <code>View</code> to a <code>FormView</code> so that it can more easily handle our form. We could render the form using this as well, but as it’s a simple form I decided it wasn’t worth the bother. Also, note that the longitude goes first - this caught me out as I expected the latitude to be the first argument.</p><p>Now, if we run our tests, they should complain about our missing template:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+..E.
+======================================================================
+ERROR: <span class="hljs-built_in">test</span>_post (gigs.tests.LookupViewTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/tests.py"</span>, line 116, <span class="hljs-keyword">in</span> <span class="hljs-built_in">test</span>_post
+    response = LookupView.as_view()(request)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py"</span>, line 68, <span class="hljs-keyword">in</span> view
+    <span class="hljs-built_in">return</span> self.dispatch(request, *args, **kwargs)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/base.py"</span>, line 88, <span class="hljs-keyword">in</span> dispatch
+    <span class="hljs-built_in">return</span> handler(request, *args, **kwargs)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/views/generic/edit.py"</span>, line 222, <span class="hljs-keyword">in</span> post
+    <span class="hljs-built_in">return</span> self.form_valid(form)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/gigs/views.py"</span>, line 31, <span class="hljs-keyword">in</span> form_valid
+    <span class="hljs-string">'events'</span>: events
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/shortcuts.py"</span>, line 39, <span class="hljs-keyword">in</span> render_to_response
+    content = loader.render_to_string(template_name, context, using=using)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py"</span>, line 96, <span class="hljs-keyword">in</span> render_to_string
+    template = get_template(template_name, using=using)
+  File <span class="hljs-string">"/Users/matthewdaly/Projects/gigfinder/venv/lib/python3.5/site-packages/django/template/loader.py"</span>, line 43, <span class="hljs-keyword">in</span> get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: gigs/lookupresults.html
+
+----------------------------------------------------------------------
+Ran 4 tests <span class="hljs-keyword">in</span> 0.506s
+
+FAILED (errors=1)
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>So let’s create <code>gigs/templates/gigs/lookupresults.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
+
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">for</span></span> event <span class="hljs-keyword">in</span> events %}</span><span class="xml">
+    <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span><span class="hljs-template-variable">{{ event.name }}</span><span class="xml"> - </span><span class="hljs-template-variable">{{ event.venue.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endfor</span></span> %}</span><span class="xml">
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</code></pre><p>Now, if we run our tests, they should pass:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
+Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+....
+----------------------------------------------------------------------
+Ran 4 tests <span class="hljs-keyword">in</span> 0.728s
+
+OK
+Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>However, if we try actually submitting the form by hand, we get the error <code>CSRF token missing or incorrect</code>. Edit <code>views.py</code> as follows to resolve this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.shortcuts <span class="hljs-keyword">import</span> render_to_response
+<span class="hljs-keyword">from</span> django.views.generic.edit <span class="hljs-keyword">import</span> FormView
+<span class="hljs-keyword">from</span> gigs.forms <span class="hljs-keyword">import</span> LookupForm
+<span class="hljs-keyword">from</span> gigs.models <span class="hljs-keyword">import</span> Event
+<span class="hljs-keyword">from</span> django.utils <span class="hljs-keyword">import</span> timezone
+<span class="hljs-keyword">from</span> django.contrib.gis.geos <span class="hljs-keyword">import</span> Point
+<span class="hljs-keyword">from</span> django.contrib.gis.db.models.functions <span class="hljs-keyword">import</span> Distance
+<span class="hljs-keyword">from</span> django.template <span class="hljs-keyword">import</span> RequestContext
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LookupView</span><span class="hljs-params">(FormView)</span>:</span>
+    form_class = LookupForm
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get</span><span class="hljs-params">(self, request)</span>:</span>
+        <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'gigs/lookup.html'</span>, RequestContext(request))
+
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">form_valid</span><span class="hljs-params">(self, form)</span>:</span>
+        <span class="hljs-comment"># Get data</span>
+        latitude = form.cleaned_data[<span class="hljs-string">'latitude'</span>]
+        longitude = form.cleaned_data[<span class="hljs-string">'longitude'</span>]
+
+        <span class="hljs-comment"># Get today's date</span>
+        now = timezone.now()
+
+        <span class="hljs-comment"># Get next week's date</span>
+        next_week = now + timezone.timedelta(weeks=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># Get Point</span>
+        location = Point(longitude, latitude, srid=<span class="hljs-number">4326</span>)
+
+        <span class="hljs-comment"># Look up events</span>
+        events = Event.objects.filter(datetime__gte=now).filter(datetime__lte=next_week).annotate(distance=Distance(<span class="hljs-string">'venue__location'</span>, location)).order_by(<span class="hljs-string">'distance'</span>)[<span class="hljs-number">0</span>:<span class="hljs-number">5</span>]
+
+        <span class="hljs-comment"># Render the template</span>
+        <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'gigs/lookupresults.html'</span>, {
+            <span class="hljs-string">'events'</span>: events
+            })
+</code></pre><p>Here we’re adding the request context so that the CSRF token is available.</p><p>If you run the dev server, add a few events and venues via the admin, and submit a search, you’ll see that you’re returning events closest to you first.</p><p>Now that we can submit searches, we’re ready to commit:</p><pre><code class="hljs lang-bash">$ git add gigs/
+$ git commit -m <span class="hljs-string">'Can now retrieve search results'</span>
+</code></pre><p>And we’re done! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there’s plenty of methods of doing so - you can retrieve the latitude and longitude in the template and use Google Maps to display them. I’ll leave doing so as an exercise for the reader.</p><p>I can’t say that working with GeoDjango isn’t a bit of a struggle at times, but being able to make spatial queries in this fashion is very useful. With more and more people carrying smartphones, you’re more likely than ever to be asked to build applications that return data based on someone’s geographical location, and GeoDjango is a great way to do this with a Django application. You can find the source on <a href="https://github.com/matthewbdaly/gigfinder">Github</a>.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/postgres/">postgres</a></li><li><a href="/blog/categories/geo/">geo</a></li><li><a href="/blog/categories/geodjango/">geodjango</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/04/04/writing-faster-laravel-tests/amp/">Writing Faster Laravel Tests</a> <a class="postlink" href="/blog/2016/03/18/my-experience-using-php-7-in-production/amp/">My Experience Using PHP 7 in Production</a></section></article></div></div></div></body></html>
