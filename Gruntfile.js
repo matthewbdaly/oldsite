@@ -52,6 +52,11 @@ module.exports = function (grunt) {
                 robots: 'app/templates/robots.txt',
                 category: 'app/templates/category.hbs'
               },
+              amptemplate: {
+                 post: 'app/templates/amp/post.hbs',
+                 header: 'app/templates/amp/header.hbs',
+                 footer: 'app/templates/amp/footer.hbs',
+              },
               src: {
                 posts: 'content/posts/',
                 pages: 'content/pages/'
