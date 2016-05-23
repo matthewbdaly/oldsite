@@ -3,19 +3,30 @@
   			"@type": "NewsArticle",
   			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/",
   			"headline": "Building a Location Aware Web App With Geodjango",
-  			"datePublished": "26th March 2016 9:30 pm",
-  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"datePublished": "2016-03-26T21:30:29.000Z",
+  			"dateModified": "2016-03-26T21:30:29.000Z",
+  			"description": "&lt;p&gt;PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Djang...",
   			"author": {
-	 			"@type": "Person",
-	 			"name": "Matthew Daly"
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
   			},
-  			"image": {
-	 			"@type": "ImageObject",
-	 			"url": "http://matthewdaly.co.uk/favicon.ico",
-	 			"height": 16,
-	 			"width":16
-  			}
-		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/favicon.ico",
+            "height": 16,
+            "width": 16
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
          background-color: #252525;
       }
       div.container {
@@ -165,6 +176,13 @@
          padding: 3px;
          color: #fff;
          text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">26th March 2016 9:30 pm</p><h1>Building a Location Aware Web App With Geodjango</h1><p>PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it thanks to GeoDjango. In this tutorial, I’ll show you how to use GeoDjango to build a web app that allows users to search for gigs and events near them.</p><h2 id="requirements">Requirements</h2><p>I’ve made the jump to Python 3, and if you haven’t done so yet, I highly recommend it - it’s not hard, and there’s very few modules left that haven’t been ported across. As such, this tutorial assumes you’re using Python 3. You’ll also need to have Git, PostgreSQL and PostGIS installed - I’ll leave the details of doing so up to you as it varies by platform, but you can generally do so easily with a package manager on most Linux distros. On Mac OS X I recommend using Homebrew. If you’re on Windows I think your best bet is probably to use a Vagrant VM.</p><p>We’ll be using Django 1.9 - if by the time you read this a newer version of Django is out, it’s quite possible that some things may have changed and you’ll need to work around any problems caused. Generally search engines are the best place to look for this, and I’ll endeavour to keep the resulting Github repository as up to date as I can, so try those if you get stuck.</p><h2 id="getting-started">Getting started</h2><p>First of all, let’s create our database. Make sure you’re running as a user that has the required privileges to create users and databases for PostgreSQL and run the following command:</p><pre><code class="hljs lang-bash">$ createdb gigfinder
 </code></pre><p>This creates the database. Next, we create the user:</p><pre><code class="hljs lang-bash">$ createuser <span class="hljs-_">-s</span> giguser -P
 </code></pre><p>You’ll be prompted to enter a password for the new user. Next, we want to use the <code>psql</code> command-line client to interact with our new database:</p><pre><code class="hljs lang-bash">$ psql gigfinder

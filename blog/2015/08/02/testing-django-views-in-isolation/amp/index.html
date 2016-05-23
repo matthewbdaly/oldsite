@@ -3,19 +3,30 @@
   			"@type": "NewsArticle",
   			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/08/02/testing-django-views-in-isolation/",
   			"headline": "Testing Django Views in Isolation",
-  			"datePublished": "2nd August 2015 5:58 pm",
-  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"datePublished": "2015-08-02T16:58:45.000Z",
+  			"dateModified": "2015-08-02T16:58:45.000Z",
+  			"description": "&lt;p&gt;One thing you may hear said often about test-driven development is that as far as possible, you s...",
   			"author": {
-	 			"@type": "Person",
-	 			"name": "Matthew Daly"
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
   			},
-  			"image": {
-	 			"@type": "ImageObject",
-	 			"url": "http://matthewdaly.co.uk/favicon.ico",
-	 			"height": 16,
-	 			"width":16
-  			}
-		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/favicon.ico",
+            "height": 16,
+            "width": 16
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
          background-color: #252525;
       }
       div.container {
@@ -165,6 +176,13 @@
          padding: 3px;
          color: #fff;
          text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd August 2015 5:58 pm</p><h1>Testing Django Views in Isolation</h1><p>One thing you may hear said often about test-driven development is that as far as possible, you should test everything in isolation. However, it’s not always immediately clear how you actually go about doing this. In Django, it’s fairly easy to get your head around testing models in isolation because they’re single objects that you can just create, save, and then check their attributes. Forms are also quite easy to test, because you can just set the parameters with the appropriate values and check that the validation works as expected. With views, it’s much harder to imagine how you’d go about testing them in isolation, and often people just settle for writing higher-level functional tests instead. While functional tests are important, they’re also slower than unit tests, which makes it less likely they’ll be run often. So I thought I’d show you a quick and simple example of testing a Django view in isolation.</p><p>One of the little projects I’ve written in the past to help get my head around certain aspects of Django is a code-snippet sharing Django application which I named <a href="https://github.com/matthewbdaly/snippetr">Snippetr</a>. The index route of this application is a form for submitting a brand-new code snippet and I’ll show you how we would write a test for that.</p><h2 id="testing-a-get-request">Testing a GET request</h2><p>Before now, you may well have used the Django test client to test views. That is fine for higher-level tests, but if you want to test a view in isolation, it’s no use because it emulates a real web server and all of the middleware and authentication, which we want to keep out of the way. Instead, we need to use <code>RequestFactory</code>:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> RequestFactory
 </code></pre><p><code>RequestFactory</code> actually implements a subset of the functionality of the Django test client, so while it will feel somewhat familiar, it won’t have all the same functionality. For instance, it doesn’t support middleware, so rather than logging in using the test client’s <code>login()</code> method, you instead attach a user directly to the request, as in this example:</p><pre><code class="hljs lang-python">request = RequestFactory()
 request.user = user

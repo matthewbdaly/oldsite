@@ -3,19 +3,30 @@
   			"@type": "NewsArticle",
   			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/05/14/broadcasting-events-with-laravel-and-socket-dot-io/",
   			"headline": "Broadcasting Events With Laravel and Socket.io",
-  			"datePublished": "14th May 2016 9:00 pm",
-  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"datePublished": "2016-05-14T20:00:00.000Z",
+  			"dateModified": "2016-05-14T20:00:00.000Z",
+  			"description": "&lt;p&gt;PHP frameworks like Laravel aren’t really set up to handle real-time events properly, so if you w...",
   			"author": {
-	 			"@type": "Person",
-	 			"name": "Matthew Daly"
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
   			},
-  			"image": {
-	 			"@type": "ImageObject",
-	 			"url": "http://matthewdaly.co.uk/favicon.ico",
-	 			"height": 16,
-	 			"width":16
-  			}
-		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/favicon.ico",
+            "height": 16,
+            "width": 16
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
          background-color: #252525;
       }
       div.container {
@@ -165,6 +176,13 @@
          padding: 3px;
          color: #fff;
          text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">14th May 2016 9:00 pm</p><h1>Broadcasting Events With Laravel and Socket.io</h1><p>PHP frameworks like Laravel aren’t really set up to handle real-time events properly, so if you want to build a real-time app, you’re generally better off with another platform, such as Node.js. However, if that only forms a small part of your application, you may still prefer to work with PHP. Fortunately it’s fairly straightforward to hand off the real-time aspects of your application to a dedicated microservice written using Node.js and still use Laravel to handle the rest of the functionality.</p><p>Here I’ll show you how I built a Laravel app that uses a separate Node.js script to handle sending real-time updates to the user.</p><h2 id="events-in-laravel">Events in Laravel</h2><p>In this case, I was building a REST API to serve as the back end for a Phonegap app that allowed users to message each other. The API includes an endpoint that allows users to create and fetch messages. Now, in theory, we could just repeatedly poll the endpoint for new messages, but that would be inefficient. What we needed was a way to notify users of new messages in real time, which seemed like the perfect opportunity to use Socket.io.</p><p>Laravel comes with a simple, but robust system that allows you to broadcast events to a Redis server. Another service can then listen for these events and carry out jobs on them, and there is no reason why this service has to be written in PHP. This makes it easy to decouple your application into smaller parts. In essence the functionality we wanted was as follows:</p><ul><li>Receive message</li><li>Push message to Redis</li><li>Have a separate service pick up message on Redis</li><li>Push message to clients</li></ul><p>First off, we need to define an event in our Laravel app. You can create a boilerplate with the following Artisan command:</p><pre><code class="hljs lang-bash">$ php artisan make:event NewMessage
 </code></pre><p>This will create the file <code>app/Events/NewMessage.php</code>. You can then customise this as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 

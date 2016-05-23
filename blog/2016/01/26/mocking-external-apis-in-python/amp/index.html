@@ -3,19 +3,30 @@
   			"@type": "NewsArticle",
   			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/01/26/mocking-external-apis-in-python/",
   			"headline": "Mocking External Apis in Python",
-  			"datePublished": "26th January 2016 11:40 pm",
-  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"datePublished": "2016-01-26T23:40:25.000Z",
+  			"dateModified": "2016-01-26T23:40:25.000Z",
+  			"description": "&lt;p&gt;It’s quite common to have to integrate an external API into your web app for some of your functio...",
   			"author": {
-	 			"@type": "Person",
-	 			"name": "Matthew Daly"
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
   			},
-  			"image": {
-	 			"@type": "ImageObject",
-	 			"url": "http://matthewdaly.co.uk/favicon.ico",
-	 			"height": 16,
-	 			"width":16
-  			}
-		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/favicon.ico",
+            "height": 16,
+            "width": 16
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
          background-color: #252525;
       }
       div.container {
@@ -165,6 +176,13 @@
          padding: 3px;
          color: #fff;
          text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">26th January 2016 11:40 pm</p><h1>Mocking External Apis in Python</h1><p>It’s quite common to have to integrate an external API into your web app for some of your functionality. However, it’s a really bad idea to have requests be sent to the remote API when running your tests. At best, it means your tests may fail due to unexpected circumstances, such as a network outage. At worst, you could wind up making requests to paid services that will cost you money, or sending push notifications to clients. It’s therefore a good idea to mock these requests in some way, but it can be fiddly.</p><p>In this post I’ll show you several ways you can mock an external API so as to prevent requests being sent when running your test suite. I’m sure there are many others, but these have worked for me recently.</p><h2 id="mocking-the-client-library">Mocking the client library</h2><p>Nowadays many third-party services realise that providing developers with client libraries in a variety of languages is a good idea, so it’s quite common to find a library for interfacing with a third-party service. Under these circumstances, the library itself is usually already thoroughly tested, so there’s no point in you writing additional tests for that functionality. Instead, you can just mock the client library so that the request is never sent, and if you need a response, then you can specify one that will remain constant.</p><p>I recently had to integrate Stripe with a mobile app backend, and I used their client library. I needed to ensure that I got the right result back. In this case I only needed to use the <code>Token</code> object’s <code>create()</code> method. I therefore created a new <code>MockToken</code> class that inherited from <code>Token</code>, and overrode its <code>create()</code> method so that it only accepted one card number and returned a hard-coded response for it:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> stripe.resource <span class="hljs-keyword">import</span> Token, convert_to_stripe_object
 <span class="hljs-keyword">from</span> stripe.error <span class="hljs-keyword">import</span> CardError
 

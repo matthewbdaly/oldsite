@@ -3,19 +3,30 @@
   			"@type": "NewsArticle",
   			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2014/02/15/django-blog-tutorial-the-next-generation-part-4/",
   			"headline": "Django Blog Tutorial - the Next Generation - Part 4",
-  			"datePublished": "15th February 2014 5:45 pm",
-  			"description": "I&#x27;m a web developer in Norfolk. This is my blog...",
+  			"datePublished": "2014-02-15T17:45:00.000Z",
+  			"dateModified": "2014-02-15T17:45:00.000Z",
+  			"description": "&lt;p&gt;Hello again! As promised, in this instalment we’ll implement categories and tags, as well as an R...",
   			"author": {
-	 			"@type": "Person",
-	 			"name": "Matthew Daly"
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
   			},
-  			"image": {
-	 			"@type": "ImageObject",
-	 			"url": "http://matthewdaly.co.uk/favicon.ico",
-	 			"height": 16,
-	 			"width":16
-  			}
-		}</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/favicon.ico",
+            "height": 16,
+            "width": 16
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
          background-color: #252525;
       }
       div.container {
@@ -165,6 +176,13 @@
          padding: 3px;
          color: #fff;
          text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">15th February 2014 5:45 pm</p><h1>Django Blog Tutorial - the Next Generation - Part 4</h1><p>Hello again! As promised, in this instalment we’ll implement categories and tags, as well as an RSS feed.</p><p>As usual, we need to switch into our virtualenv:</p><pre><code class="hljs lang-bash">$ <span class="hljs-built_in">source</span> venv/bin/activate
 </code></pre><h2 id="categories">Categories</h2><p>It’s worth taking a little time at this point to set out what we mean by categories and tags in this case, as the two can be very similar. In this case, we’ll use the following criteria:</p><ul><li>A post can have only one category, or none, but a category can be applied to any number of posts</li><li>A post can have any number of tags, and a tag can be applied to any number of posts</li></ul><p>If you’re not too familiar with relational database theory, the significance of this may not be apparent, so here’s a quick explanation. Because the categories are limited to one per post, the relationship between a post and a category is known as <em>one-to-many</em>. In other words, one post can only have one category, but one category can have many posts. You can therefore define the categories in one table in your database, and refer to them by their ID (the reference to the category in the post table is referred to as a <em>foreign key</em>).</p><p>As usual, we will write a test first. Open up <code>blogengine/tests.py</code> and edit the line importing the <code>Post</code> model as follows:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category
 </code></pre><p>Also, add the following method before <code>test_create_post</code>:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_create_category</span><span class="hljs-params">(self)</span>:</span>
