@@ -90,6 +90,14 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/'
             },
+            logo: {
+                expand: true,
+                cwd: 'static/',
+                src: [
+                    'logo.png'
+                ],
+                dest: 'www/'
+            },
             icons: {
                expand: true,
                cwd: 'app',
