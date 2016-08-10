@@ -215,7 +215,7 @@ testserver | SUCCESS | rc=0 &gt;&gt;
 testserver ansible_ssh_host=<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> ansible_ssh_port=<span class="hljs-number">2222</span>
 example.com ansible_ssh_host=<span class="hljs-number">192.168</span><span class="hljs-number">.56</span><span class="hljs-number">.101</span>
 </code></pre><p>You could then call the following to run the <code>uptime</code> command on all the servers in the <code>webservers</code> group:</p><pre><code class="hljs lang-perl">$ ansible webservers -a <span class="hljs-string">'uptime'</span>
-</code></pre><p>If you want to run the command as a different user, you can do so:</p><pre><code class="hljs lang-perl">$ ansible testserver -a <span class="hljs-string">'uptime'</span> -u bob
+</code></pre><p>If you want to run the command as a different user, you can do so:</p><pre><code class="hljs lang-perl">$ ansible webservers -a <span class="hljs-string">'uptime'</span> -u bob
 </code></pre><p>Note that for running <code>uptime</code> we haven’t specified the <code>-m</code> flag. This is because the <code>command</code> module is the default, but it’s very basic and doesn’t support shell variables. For more complex interactions you might need to use the <code>shell</code> module, as in this example:</p><pre><code class="hljs lang-bash">$ ansible testserver -m shell <span class="hljs-_">-a</span> <span class="hljs-string">'echo $PATH'</span>
 testserver | SUCCESS | rc=0 &gt;&gt;
 /usr/<span class="hljs-built_in">local</span>/bin:/usr/bin:/bin:/usr/games
