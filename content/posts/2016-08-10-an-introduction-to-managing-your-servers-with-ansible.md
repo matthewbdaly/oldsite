@@ -1,6 +1,6 @@
 ---
 title: "An introduction to managing your servers with Ansible"
-date: 2016-08-10 09:40:56 +0100
+date: 2016-08-10 20:45:56 +0100
 categories:
 - ansible
 - sysadmin
@@ -134,13 +134,13 @@ example.com ansible_ssh_host=192.168.56.101
 You could then call the following to run the `uptime` command on all the servers in the `webservers` group:
 
 ```bash
-$ ansible webservers -a "uptime"
+$ ansible webservers -a 'uptime'
 ```
 
 If you want to run the command as a different user, you can do so:
 
 ```bash
-$ ansible testserver -a "uptime" -u bob
+$ ansible testserver -a 'uptime' -u bob
 ```
 
 Note that for running `uptime` we haven't specified the `-m` flag. This is because the `command` module is the default, but it's very basic and doesn't support shell variables. For more complex interactions you might need to use the `shell` module, as in this example:
@@ -343,6 +343,20 @@ $ ansible-playbook playbooks/sitecopy.yml -l testserver
 ```
 
 Using these same basic concepts, you can invoke many different Ansible modules to achieve many different tasks. You can spin up new servers on supported cloud hosting companies, you can set up a known good fail2ban config, you can configure your firewall, and many more tasks. As your playbooks get bigger, it's worth moving sections into separate roles that get invoked within multiple playbooks, in order to reduce repetition.
+
+Finally, I mentioned earlier that you can use Ansible to update all of your servers regularly. Here's the playbook I use for that:
+
+```yml
+---
+- name: Update system
+  hosts: all
+  become: True
+  tasks:
+    - name: update system
+      apt: upgrade=full update_cache=yes
+```
+
+This connects to all hosts using the `all` shortcut we saw earlier, and upgrades all existing packages. Using this method is a lot easier than connecting to each one in turn via SSH and updating it manually.
 
 Summary
 -------
