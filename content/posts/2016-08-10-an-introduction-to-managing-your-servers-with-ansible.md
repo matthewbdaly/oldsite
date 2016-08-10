@@ -140,7 +140,7 @@ $ ansible webservers -a 'uptime'
 If you want to run the command as a different user, you can do so:
 
 ```perl
-$ ansible testserver -a 'uptime' -u bob
+$ ansible webservers -a 'uptime' -u bob
 ```
 
 Note that for running `uptime` we haven't specified the `-m` flag. This is because the `command` module is the default, but it's very basic and doesn't support shell variables. For more complex interactions you might need to use the `shell` module, as in this example:
