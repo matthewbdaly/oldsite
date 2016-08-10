@@ -4,7 +4,7 @@
         <title>sysadmin | Matthew Daly&apos;s Blog</title>
         <description>sysadmin | I&apos;m a web developer in Norfolk. This is my blog...</description>
         <link>http://matthewdaly.co.uk/blog/categories/sysadmin/</link>
-        <lastBuildDate>Wed, 10 Aug 2016 19:49:30 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 10 Aug 2016 20:28:35 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <copyright>Matthew Daly 2016</copyright>
         <generator>Feed for Node.js</generator>
@@ -62,9 +62,9 @@
 <p>Here we specified the server as <code>testserver</code>. What about if you want to specify more than one server, but not all of them? You can create groups of servers in <code>inventory</code>, as in this example:</p>
 <pre><code class="hljs lang-conf"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>[webservers]</td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver ansible_ssh_host=<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> ansible_ssh_port=<span class="hljs-number">2222</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>example.com ansible_ssh_host=<span class="hljs-number">192.168</span><span class="hljs-number">.56</span><span class="hljs-number">.101</span></td></table></code></pre>
 <p>You could then call the following to run the <code>uptime</code> command on all the servers in the <code>webservers</code> group:</p>
-<pre><code class="hljs lang-bash singleline"><table>$ ansible webservers <span class="hljs-_">-a</span> <span class="hljs-string">'uptime'</span></table></code></pre>
+<pre><code class="hljs lang-perl singleline"><table>$ ansible webservers -a <span class="hljs-string">'uptime'</span></table></code></pre>
 <p>If you want to run the command as a different user, you can do so:</p>
-<pre><code class="hljs lang-bash singleline"><table>$ ansible testserver <span class="hljs-_">-a</span> <span class="hljs-string">'uptime'</span> -u bob</table></code></pre>
+<pre><code class="hljs lang-perl singleline"><table>$ ansible testserver -a <span class="hljs-string">'uptime'</span> -u bob</table></code></pre>
 <p>Note that for running <code>uptime</code> we haven’t specified the <code>-m</code> flag. This is because the <code>command</code> module is the default, but it’s very basic and doesn’t support shell variables. For more complex interactions you might need to use the <code>shell</code> module, as in this example:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible testserver -m shell <span class="hljs-_">-a</span> <span class="hljs-string">'echo $PATH'</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS | rc=0 &gt;&gt;</td><tr><td class="linenos" data-pseudo-content="3"></td><td>/usr/<span class="hljs-built_in">local</span>/bin:/usr/bin:/bin:/usr/games</td></table></code></pre>
 <p>For installing a package on Debian or Ubuntu, you might use the <code>apt</code> module:</p>
