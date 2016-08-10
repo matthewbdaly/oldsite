@@ -133,13 +133,13 @@ example.com ansible_ssh_host=192.168.56.101
 
 You could then call the following to run the `uptime` command on all the servers in the `webservers` group:
 
-```bash
+```perl
 $ ansible webservers -a 'uptime'
 ```
 
 If you want to run the command as a different user, you can do so:
 
-```bash
+```perl
 $ ansible testserver -a 'uptime' -u bob
 ```
 
