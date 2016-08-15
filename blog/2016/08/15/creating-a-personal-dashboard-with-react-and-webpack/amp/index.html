@@ -1,0 +1,848 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Creating a Personal Dashboard With React and Webpack - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "BlogPosting",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/",
+  			"headline": "Creating a Personal Dashboard With React and Webpack",
+  			"datePublished": "2016-08-15T22:18:00.000Z",
+  			"dateModified": "2016-08-15T22:18:00.000Z",
+  			"description": "&lt;p&gt;The Raspberry Pi is a great device for running simple web apps at home on a permanent basis, and ...",
+  			"author": {
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
+  			},
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+        display: block;
+        overflow-wrap: normal;
+        word-wrap: normal;
+        white-space: pre;
+        font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">15th August 2016 11:18 pm</p><h1>Creating a Personal Dashboard With React and Webpack</h1><p>The Raspberry Pi is a great device for running simple web apps at home on a permanent basis, and you can pick up a small touchscreen for it quite cheaply. This makes it easy to build and host a small personal dashboard that pulls important data from various APIs or RSS feeds and displays it. You’ll often see dashboards like this on Raspberry Pi forums and subreddits. As I’m currently between jobs, and have some time to spare before my new job starts, I decided to start creating my own version of it. It was obvious that React.js is a good fit for this as it allows you to break up your user interface into multiple independent components and keep the functionality close to the UI. It also makes it easy to reuse widgets by passing different parameters through each time.</p><p>In this tutorial I’ll show you how to start building a simple personal dashboard using React and Webpack. You can then install Nginx on your Raspberry Pi and host it from there. In the process, you’ll be able to pick up a bit of knowledge about Webpack and ECMAScript 2015 (using Babel). Our initial implementation will have only two widgets, a clock and a feed, but those should show you enough of the basics that you should then be able to build other widgets you may have in mind.</p><h2 id="installing-our-dependencies">Installing our dependencies</h2><p>First, let’s create our <code>package.json</code>:</p><pre><code class="hljs lang-bash">$ npm init -y
+</code></pre><p>Then install the dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev babel-cli babel-register babel-core babel-eslint babel-loader babel-preset-es2015 babel-preset-react chai css-loader eslint eslint-loader eslint-plugin-react file-loader istanbul@^1.0.0-alpha.2 jquery jsdom mocha moment node-sass react react-addons-pure-render-mixin react-addons-test-utils react-dom react-hot-loader request sass-loader style-loader url-loader webpack webpack-dev-server
+</code></pre><p>Note that we need to install a specific version of Istanbul to get code coverage.</p><p>Next, we create our Webpack config. Save this as <code>webpack.config.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);  
+<span class="hljs-built_in">module</span>.exports = {  
+    entry: [
+      <span class="hljs-string">'webpack/hot/only-dev-server'</span>,
+      <span class="hljs-string">"./js/app.js"</span>
+    ],
+    debug: <span class="hljs-literal">true</span>,
+    devtool: <span class="hljs-string">'source-map'</span>,
+    output: {
+        path: __dirname + <span class="hljs-string">'/static'</span>,
+        filename: <span class="hljs-string">"bundle.js"</span>
+    },
+    <span class="hljs-built_in">module</span>: {
+        preLoaders: [
+          {
+            test: <span class="hljs-regexp">/(\.js$|\.jsx$)/</span>, 
+            exclude: <span class="hljs-regexp">/node_modules/</span>, 
+            loader: <span class="hljs-string">"eslint-loader"</span>
+          }
+        ],
+        loaders: [
+            { test: <span class="hljs-regexp">/\.jsx?$/</span>, loaders: [<span class="hljs-string">'react-hot'</span>, <span class="hljs-string">'babel'</span>], exclude: <span class="hljs-regexp">/node_modules/</span> },
+            { test: <span class="hljs-regexp">/\.js$/</span>, exclude: <span class="hljs-regexp">/node_modules/</span>, loader: <span class="hljs-string">'babel-loader'</span>},
+            { test: <span class="hljs-regexp">/\.woff2?$/</span>, loader: <span class="hljs-string">"url-loader?limit=25000"</span> },
+            { test: <span class="hljs-regexp">/\.(eot|svg|ttf)?$/</span>, loader: <span class="hljs-string">"file-loader"</span> },
+            { test: <span class="hljs-regexp">/\.scss$/</span>, loader: <span class="hljs-string">"style!css!sass"</span> }
+        ]
+    },
+    eslint: {
+      configFile: <span class="hljs-string">'.eslintrc.yml'</span>
+    },
+    plugins: [
+      <span class="hljs-keyword">new</span> webpack.HotModuleReplacementPlugin(),
+      <span class="hljs-keyword">new</span> webpack.NoErrorsPlugin()
+    ]
+};
+</code></pre><p>Note the various loaders we’re using. We use ESLint to lint our Javascript files for code quality, and the build will fail if they do not match the required standards. We’re also using loaders for CSS, Sass, Babel (so we can use ES2015 for our Javascript) and fonts. Also, note the hot module replacement plugin - this allows us to reload the application automatically. If you haven’t used Webpack before, this config should be sufficient to get you started, but I recommend reading the <a href="https://webpack.github.io/">documentation</a>.</p><p>We also need to configure ESLint how we want. Here is the configuration we will be using, which should be saved as <code>.eslintrc.yml</code>:</p><pre><code class="hljs lang-yaml"><span class="hljs-attr">rules:</span>
+<span class="hljs-attr">  no-debugger:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">0</span>
+<span class="hljs-attr">  no-console:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">0</span>
+<span class="hljs-attr">  no-unused-vars:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">0</span>
+<span class="hljs-attr">  indent:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">2</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">2</span>
+<span class="hljs-attr">  quotes:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">2</span>
+<span class="hljs-bullet">    -</span> single
+<span class="hljs-attr">  linebreak-style:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">2</span>
+<span class="hljs-bullet">    -</span> unix
+<span class="hljs-attr">  semi:</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-number">2</span>
+<span class="hljs-bullet">    -</span> always
+<span class="hljs-attr">env:</span>
+<span class="hljs-attr">  es6:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">  browser:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">  node:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">extends:</span> <span class="hljs-string">'eslint:recommended'</span>
+<span class="hljs-attr">parserOptions:</span>
+<span class="hljs-attr">  sourceType:</span> module
+<span class="hljs-attr">  ecmaFeatures:</span>
+<span class="hljs-attr">    jsx:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">    experimentalObjectRestSpread:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">    modules:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">plugins:</span>
+<span class="hljs-bullet">  -</span> react
+</code></pre><p>We also need a base HTML file. Save this as <code>index.html</code>:</p><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!doctype html&gt;</span>  
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>  
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Personal Dashboard<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"view"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre><p>We also need to set the commands for building and testing our app in <code>package.json</code>:</p><pre><code class="hljs lang-json">  &quot;scripts&quot;: {
+    &quot;test&quot;: &quot;istanbul cover _mocha -- --compilers js:babel-core/register --require ./test/setup.js &#39;test/**/*.@(js|jsx)&#39;&quot;,
+    &quot;test:watch&quot;: &quot;npm run test -- --watch&quot;,
+    &quot;start&quot;: &quot;webpack-dev-server --progress --colors&quot;,
+    &quot;build&quot;: &quot;webpack --progress --colors&quot;
+  },
+  &quot;babel&quot;: {
+    &quot;presets&quot;: [
+      &quot;es2015&quot;,
+      &quot;react&quot;
+    ]
+  },
+</code></pre><p>The <code>npm test</code> command will call Mocha to run the tests, but will also use Istanbul to generate test coverage. For the sake of brevity, our tests won’t be terribly comprehensive. The <code>npm start</code> command will run a development server, while <code>npm run build</code> will build our application.</p><p>We also need to create the <code>test/</code> folder and the <code>test/setup.js</code> file:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> jsdom <span class="hljs-keyword">from</span> <span class="hljs-string">'jsdom'</span>;
+<span class="hljs-keyword">import</span> chai <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+
+<span class="hljs-keyword">const</span> doc = jsdom.jsdom(<span class="hljs-string">'&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;'</span>);
+<span class="hljs-keyword">const</span> win = doc.defaultView;
+
+global.document = doc;
+global.window = win;
+
+<span class="hljs-built_in">Object</span>.keys(<span class="hljs-built_in">window</span>).forEach((key) =&gt; {
+  <span class="hljs-keyword">if</span> (!(key <span class="hljs-keyword">in</span> global)) {
+    global[key] = <span class="hljs-built_in">window</span>[key];
+  }
+});
+</code></pre><p>This sets up Chai and creates a dummy DOM for our tests. We also need to create the folder <code>js/</code> and the file <code>js/app.js</code>. You can leave that file empty for now.</p><p>If you now run <code>npm start</code> and navigate to <a href="http://localhost:8080/webpack-dev-server/">http://localhost:8080/webpack-dev-server/</a>, you can see the current state of the application.</p><h2 id="our-dashboard-component">Our dashboard component</h2><p>Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralized data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we’re better off having each widget manage its own data internally, rather than have it be passed down from a single data store.</p><p>Save the following as <code>test/components/dashboard.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> TestUtils <span class="hljs-keyword">from</span> <span class="hljs-string">'react-addons-test-utils'</span>;
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {findDOMNode} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Dashboard <span class="hljs-keyword">from</span> <span class="hljs-string">'../../js/components/dashboard'</span>;
+<span class="hljs-keyword">import</span> {expect} <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+
+<span class="hljs-keyword">const</span> {renderIntoDocument, scryRenderedDOMComponentsWithClass, Simulate} = TestUtils;
+
+describe(<span class="hljs-string">'Dashboard'</span>, () =&gt; {
+  it(<span class="hljs-string">'renders the dashboard'</span>, () =&gt; {
+    <span class="hljs-keyword">const</span> component = renderIntoDocument(
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Dashboard</span> <span class="hljs-attr">title</span>=<span class="hljs-string">"My Dashboard"</span> /&gt;</span>
+    );
+    const title = findDOMNode(component.refs.title);
+    expect(title).to.be.ok;
+    expect(title.textContent).to.contain('My Dashboard');
+  });
+}</span>
+</code></pre><p>This tests that we can set the title of our dashboard component. Let’s run our tests:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
+&gt; istanbul cover _mocha -- --compilers js:babel-core/register --require ./<span class="hljs-built_in">test</span>/setup.js <span class="hljs-string">'test/**/*.@(js|jsx)'</span>
+
+No coverage information was collected, <span class="hljs-built_in">exit</span> without writing coverage information
+module.js:327
+    throw err;
+    ^
+
+Error: Cannot find module <span class="hljs-string">'../../js/components/dashboard'</span>
+    at Function.Module._resolveFilename (module.js:325:15)
+    at Function.Module._load (module.js:276:25)
+    at Module.require (module.js:353:17)
+    at require (internal/module.js:12:17)
+    at Object.&lt;anonymous&gt; (dashboard.js:4:1)
+    at Module._compile (module.js:409:26)
+    at loader (/home/matthew/Projects/personal-dashboard/node_modules/babel-register/lib/node.js:148:5)
+    at Object.require.extensions.(anonymous <span class="hljs-keyword">function</span>) [as .js] (/home/matthew/Projects/personal-dashboard/node_modules/babel-register/lib/node.js:158:7)
+    at Module.load (module.js:343:32)
+    at Function.Module._load (module.js:300:12)
+    at Module.require (module.js:353:17)
+    at require (internal/module.js:12:17)
+    at /home/matthew/Projects/personal-dashboard/node_modules/mocha/lib/mocha.js:220:27
+    at Array.forEach (native)
+    at Mocha.loadFiles (/home/matthew/Projects/personal-dashboard/node_modules/mocha/lib/mocha.js:217:14)
+    at Mocha.run (/home/matthew/Projects/personal-dashboard/node_modules/mocha/lib/mocha.js:485:10)
+    at Object.&lt;anonymous&gt; (/home/matthew/Projects/personal-dashboard/node_modules/mocha/bin/_mocha:403:18)
+    at Module._compile (module.js:409:26)
+    at Object.Module._extensions..js (module.js:416:10)
+    at Object.Module._extensions.(anonymous <span class="hljs-keyword">function</span>) (/home/matthew/Projects/personal-dashboard/node_modules/istanbul/lib/hook.js:109:37)
+    at Module.load (module.js:343:32)
+    at Function.Module._load (module.js:300:12)
+    at Function.Module.runMain (module.js:441:10)
+    at runFn (/home/matthew/Projects/personal-dashboard/node_modules/istanbul/lib/<span class="hljs-built_in">command</span>/common/run-with-cover.js:122:16)
+    at /home/matthew/Projects/personal-dashboard/node_modules/istanbul/lib/<span class="hljs-built_in">command</span>/common/run-with-cover.js:251:17
+    at /home/matthew/Projects/personal-dashboard/node_modules/istanbul/lib/util/file-matcher.js:68:16
+    at /home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:52:16
+    at /home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:361:13
+    at /home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:52:16
+    at <span class="hljs-keyword">done</span> (/home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:246:17)
+    at /home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:44:16
+    at /home/matthew/Projects/personal-dashboard/node_modules/async/lib/async.js:358:17
+    at LOOP (fs.js:1530:14)
+    at nextTickCallbackWith0Args (node.js:420:9)
+    at process._tickCallback (node.js:349:13)
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+</code></pre><p>Our dashboard file doesn’t exist. So let’s create it:</p><pre><code class="hljs lang-bash">$ mkdir js/components
+$ touch js/components/dashboard.js
+</code></pre><p>And run our test again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
+&gt; istanbul cover _mocha -- --compilers js:babel-core/register --require ./<span class="hljs-built_in">test</span>/setup.js <span class="hljs-string">'test/**/*.@(js|jsx)'</span>
+
+
+
+  Dashboard
+Warning: React.createElement: <span class="hljs-built_in">type</span> should not be null, undefined, boolean, or number. It should be a string (<span class="hljs-keyword">for</span> DOM elements) or a ReactClass (<span class="hljs-keyword">for</span> composite components).
+    1) renders the dashboard
+
+
+  0 passing (31ms)
+  1 failing
+
+  1) Dashboard renders the dashboard:
+     Invariant Violation: Element <span class="hljs-built_in">type</span> is invalid: expected a string (<span class="hljs-keyword">for</span> built-in components) or a class/<span class="hljs-keyword">function</span> (<span class="hljs-keyword">for</span> composite components) but got: object.
+      at invariant (node_modules/fbjs/lib/invariant.js:38:15)
+      at [object Object].instantiateReactComponent [as _instantiateReactComponent] (node_modules/react/lib/instantiateReactComponent.js:86:134)
+      at [object Object].ReactCompositeComponentMixin.performInitialMount (node_modules/react/lib/ReactCompositeComponent.js:388:22)
+      at [object Object].ReactCompositeComponentMixin.mountComponent (node_modules/react/lib/ReactCompositeComponent.js:262:21)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at mountComponentIntoNode (node_modules/react/lib/ReactMount.js:105:32)
+      at ReactReconcileTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at batchedMountComponentIntoNode (node_modules/react/lib/ReactMount.js:126:15)
+      at ReactDefaultBatchingStrategyTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at Object.ReactDefaultBatchingStrategy.batchedUpdates (node_modules/react/lib/ReactDefaultBatchingStrategy.js:63:19)
+      at Object.batchedUpdates (node_modules/react/lib/ReactUpdates.js:98:20)
+      at Object.ReactMount._renderNewRootComponent (node_modules/react/lib/ReactMount.js:285:18)
+      at Object.ReactMount._renderSubtreeIntoContainer (node_modules/react/lib/ReactMount.js:371:32)
+      at Object.ReactMount.render (node_modules/react/lib/ReactMount.js:392:23)
+      at ReactTestUtils.renderIntoDocument (node_modules/react/lib/ReactTestUtils.js:85:21)
+      at Context.&lt;anonymous&gt; (dashboard.js:11:23)
+
+
+
+No coverage information was collected, <span class="hljs-built_in">exit</span> without writing coverage information
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+</code></pre><p>Now we have a failing test, we can create our component. Save this as <code>js/components/dashboard.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"dashboard"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"title"</span>&gt;</span>{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"wrapper"</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+});
+</code></pre><p>And let’s run our tests again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
+&gt; istanbul cover _mocha -- --compilers js:babel-core/register --require ./<span class="hljs-built_in">test</span>/setup.js <span class="hljs-string">'test/**/*.@(js|jsx)'</span>
+
+
+
+  Dashboard
+    ✓ renders the dashboard
+
+
+  1 passing (50ms)
+
+No coverage information was collected, <span class="hljs-built_in">exit</span> without writing coverage information
+</code></pre><p>Our first component is in place. However, it isn’t getting loaded. We also need to start thinking about styling. Create the file <code>scss/style.scss</code>, but leave it blank for now. Then save this in <code>js/app.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> Dashboard <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/dashboard'</span>;
+<span class="hljs-keyword">import</span> styles <span class="hljs-keyword">from</span> <span class="hljs-string">'../scss/style.scss'</span>;
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Dashboard</span> <span class="hljs-attr">title</span>=<span class="hljs-string">"My Dashboard"</span> /&gt;</span>,
+  document.getElementById('view')
+);</span>
+</code></pre><p>Note that we’re importing CSS or Sass files in the same way as Javascript files. This is unique to Webpack, and while it takes a bit of getting used to, it has its advantages - if you import only the styles relating to each component, you can be sure there’s no orphaned CSS files. Here, we only have one CSS file anyway, so it’s a non-issue.</p><p>If you now run <code>npm start</code>, our dashboard gets loaded and the title is displayed. With our dashboard in place, we can now implement our first widget.</p><h2 id="creating-the-clock-widget">Creating the clock widget</h2><p>Our first widget will be a simple clock. This demonstrates changing the state of the widget on an interval. First let’s write a test - save this as <code>test/components/clockwidget.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> TestUtils <span class="hljs-keyword">from</span> <span class="hljs-string">'react-addons-test-utils'</span>;
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {findDOMNode} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> ClockWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'../../js/components/clockwidget'</span>;
+<span class="hljs-keyword">import</span> {expect} <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+
+<span class="hljs-keyword">const</span> {renderIntoDocument, scryRenderedDOMComponentsWithClass, Simulate} = TestUtils;
+
+describe(<span class="hljs-string">'Clock Widget'</span>, () =&gt; {
+  it(<span class="hljs-string">'renders the clock widget'</span>, () =&gt; {
+    <span class="hljs-keyword">const</span> currentTime = <span class="hljs-number">1465160300530</span>;
+    <span class="hljs-keyword">const</span> component = renderIntoDocument(
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ClockWidget</span> <span class="hljs-attr">time</span>=<span class="hljs-string">{currentTime}</span> /&gt;</span>
+    );
+    const time = findDOMNode(component.refs.time);
+    expect(time).to.be.ok;
+    expect(time.textContent).to.contain('Sunday');
+  });
+});</span>
+</code></pre><p>And create an empty file at <code>js/components/clockwidget.js</code>. Then we run our tests again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
+&gt; istanbul cover _mocha -- --compilers js:babel-core/register --require ./<span class="hljs-built_in">test</span>/setup.js <span class="hljs-string">'test/**/*.@(js|jsx)'</span>
+
+
+
+  Clock Widget
+Warning: React.createElement: <span class="hljs-built_in">type</span> should not be null, undefined, boolean, or number. It should be a string (<span class="hljs-keyword">for</span> DOM elements) or a ReactClass (<span class="hljs-keyword">for</span> composite components).
+    1) renders the clock widget
+
+  Dashboard
+    ✓ renders the dashboard
+
+
+  1 passing (46ms)
+  1 failing
+
+  1) Clock Widget renders the clock widget:
+     Invariant Violation: Element <span class="hljs-built_in">type</span> is invalid: expected a string (<span class="hljs-keyword">for</span> built-in components) or a class/<span class="hljs-keyword">function</span> (<span class="hljs-keyword">for</span> composite components) but got: object.
+      at invariant (node_modules/fbjs/lib/invariant.js:38:15)
+      at [object Object].instantiateReactComponent [as _instantiateReactComponent] (node_modules/react/lib/instantiateReactComponent.js:86:134)
+      at [object Object].ReactCompositeComponentMixin.performInitialMount (node_modules/react/lib/ReactCompositeComponent.js:388:22)
+      at [object Object].ReactCompositeComponentMixin.mountComponent (node_modules/react/lib/ReactCompositeComponent.js:262:21)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at mountComponentIntoNode (node_modules/react/lib/ReactMount.js:105:32)
+      at ReactReconcileTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at batchedMountComponentIntoNode (node_modules/react/lib/ReactMount.js:126:15)
+      at ReactDefaultBatchingStrategyTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at Object.ReactDefaultBatchingStrategy.batchedUpdates (node_modules/react/lib/ReactDefaultBatchingStrategy.js:63:19)
+      at Object.batchedUpdates (node_modules/react/lib/ReactUpdates.js:98:20)
+      at Object.ReactMount._renderNewRootComponent (node_modules/react/lib/ReactMount.js:285:18)
+      at Object.ReactMount._renderSubtreeIntoContainer (node_modules/react/lib/ReactMount.js:371:32)
+      at Object.ReactMount.render (node_modules/react/lib/ReactMount.js:392:23)
+      at ReactTestUtils.renderIntoDocument (node_modules/react/lib/ReactTestUtils.js:85:21)
+      at Context.&lt;anonymous&gt; (clockwidget.js:12:23)
+
+
+
+No coverage information was collected, <span class="hljs-built_in">exit</span> without writing coverage information
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+</code></pre><p>With a failing test in place, we can create our component:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> moment <span class="hljs-keyword">from</span> <span class="hljs-string">'moment'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  getInitialState() {
+    <span class="hljs-keyword">return</span> {
+      time: <span class="hljs-keyword">this</span>.props.time || moment()
+    };
+  },
+  render() {
+    <span class="hljs-keyword">const</span> time = moment(<span class="hljs-keyword">this</span>.state.time).format(<span class="hljs-string">'dddd, Do MMMM YYYY, h:mm:ss a'</span>);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"clockwidget widget"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"widget-content"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"time"</span>&gt;</span>{time}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+});
+</code></pre><p>Note that the component accepts a property of <code>time</code>. The <code>getInitialState()</code> method then converts <code>this.props.time</code> into <code>this.state.time</code> so that it can be displayed on render. Note we also set a default of the current time using Moment.js.</p><p>We also need to update the dashboard component to load this new component:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ClockWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'./clockwidget'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"dashboard"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"title"</span>&gt;</span>{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"wrapper"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">ClockWidget</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    );
+  }
+});</span>
+</code></pre><p>Now, if you try running <code>npm start</code> and viewing the dashboard in the browser, you will see that it displays the current time and date, but it’s not being updated. You can force the page to reload every now and then, but we can do better than that. We can set an interval in which the time will refresh. As the smallest unit we show is seconds, this interval should be 1 second.</p><p>Amend the clock component as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> moment <span class="hljs-keyword">from</span> <span class="hljs-string">'moment'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  getInitialState() {
+    <span class="hljs-keyword">return</span> {
+      time: <span class="hljs-keyword">this</span>.props.time || moment()
+    };
+  },
+  tick() {
+    <span class="hljs-keyword">this</span>.setState({
+      time: moment()
+    });
+  },
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.interval = setInterval(<span class="hljs-keyword">this</span>.tick, <span class="hljs-number">1000</span>);
+  },
+  componentWillUnmount() {
+    clearInterval(<span class="hljs-keyword">this</span>.interval);
+  },
+  render() {
+    <span class="hljs-keyword">const</span> time = moment(<span class="hljs-keyword">this</span>.state.time).format(<span class="hljs-string">'dddd, Do MMMM YYYY, h:mm:ss a'</span>);
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"clockwidget widget"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"widget-content"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"time"</span>&gt;</span>{time}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+});
+</code></pre><p>When our component has mounted, we set an interval of 1,000 milliseconds, and each time it elapses we call the <code>tick()</code> method. This method sets the state to the current time, and as a result the user interface is automatically re-rendered. On unmount, we clear the interval.</p><p>In this case we’re just calling a single function on a set interval. In principle, the same approach can be used to populate components in other ways, such as by making an AJAX request.</p><h2 id="creating-an-rss-widget">Creating an RSS widget</h2><p>Our next widget will be a simple RSS feed reader. We’ll fetch the content with jQuery and render it using React. We’ll also reload it regularly. First, let’s create our test:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> TestUtils <span class="hljs-keyword">from</span> <span class="hljs-string">'react-addons-test-utils'</span>;
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> {findDOMNode} <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
+<span class="hljs-keyword">import</span> FeedWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'../../js/components/feedwidget'</span>;
+<span class="hljs-keyword">import</span> {expect} <span class="hljs-keyword">from</span> <span class="hljs-string">'chai'</span>;
+
+<span class="hljs-keyword">const</span> {renderIntoDocument, scryRenderedDOMComponentsWithClass, Simulate} = TestUtils;
+
+describe(<span class="hljs-string">'Feed Widget'</span>, () =&gt; {
+  it(<span class="hljs-string">'renders the Feed widget'</span>, () =&gt; {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://feeds.bbci.co.uk/news/rss.xml?edition=uk"</span>
+    <span class="hljs-keyword">const</span> component = renderIntoDocument(
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">FeedWidget</span> <span class="hljs-attr">feed</span>=<span class="hljs-string">{url}</span> <span class="hljs-attr">size</span>=<span class="hljs-string">{5}</span> <span class="hljs-attr">delay</span>=<span class="hljs-string">{60}</span> /&gt;</span>
+    );
+    const feed = findDOMNode(component.refs.feed);
+    expect(feed).to.be.ok;
+    expect(feed.textContent).to.contain(url);
+  });
+});</span>
+</code></pre><p>Our feed widget will accept an external URL as an argument, and will then poll this URL regularly to populate the feed. It also allows us to specify the <code>size</code> attribute, which denotes the number of feed items, and the <code>delay</code> attribute, which denotes the number of seconds it should wait before fetching the data again.</p><p>We also need to amend the dashboard component to include this widget:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ClockWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'./clockwidget'</span>;
+<span class="hljs-keyword">import</span> FeedWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'./feedwidget'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  render() {
+    <span class="hljs-keyword">return</span> (
+      &lt;div className="dashboard"&gt;
+        &lt;h1 ref="title"&gt;{this.props.title}&lt;/h1&gt;
+        &lt;div className="wrapper"&gt;
+          &lt;ClockWidget /&gt;
+          &lt;FeedWidget feed="http://feeds.bbci.co.uk/news/rss.xml?edition=uk" size="5" delay="60" /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+</code></pre><p>If we then create <code>js/components/feedwidget.js</code> and run <code>npm test</code>:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
+&gt; istanbul cover _mocha -- --compilers js:babel-core/register --require ./<span class="hljs-built_in">test</span>/setup.js <span class="hljs-string">'test/**/*.@(js|jsx)'</span>
+
+
+
+  Clock Widget
+    ✓ renders the clock widget (92ms)
+
+  Dashboard
+Warning: React.createElement: <span class="hljs-built_in">type</span> should not be null, undefined, boolean, or number. It should be a string (<span class="hljs-keyword">for</span> DOM elements) or a ReactClass (<span class="hljs-keyword">for</span> composite components). Check the render method of `dashboard`.
+    1) renders the dashboard
+
+  Feed Widget
+Warning: React.createElement: <span class="hljs-built_in">type</span> should not be null, undefined, boolean, or number. It should be a string (<span class="hljs-keyword">for</span> DOM elements) or a ReactClass (<span class="hljs-keyword">for</span> composite components).
+    2) renders the Feed widget
+
+
+  1 passing (286ms)
+  2 failing
+
+  1) Dashboard renders the dashboard:
+     Invariant Violation: Element <span class="hljs-built_in">type</span> is invalid: expected a string (<span class="hljs-keyword">for</span> built-in components) or a class/<span class="hljs-keyword">function</span> (<span class="hljs-keyword">for</span> composite components) but got: object. Check the render method of `dashboard`.
+      at invariant (node_modules/fbjs/lib/invariant.js:38:15)
+      at instantiateReactComponent (node_modules/react/lib/instantiateReactComponent.js:86:134)
+      at instantiateChild (node_modules/react/lib/ReactChildReconciler.js:43:28)
+      at node_modules/react/lib/ReactChildReconciler.js:70:16
+      at traverseAllChildrenImpl (node_modules/react/lib/traverseAllChildren.js:69:5)
+      at traverseAllChildrenImpl (node_modules/react/lib/traverseAllChildren.js:85:23)
+      at traverseAllChildren (node_modules/react/lib/traverseAllChildren.js:164:10)
+      at Object.ReactChildReconciler.instantiateChildren (node_modules/react/lib/ReactChildReconciler.js:69:7)
+      at ReactDOMComponent.ReactMultiChild.Mixin._reconcilerInstantiateChildren (node_modules/react/lib/ReactMultiChild.js:194:41)
+      at ReactDOMComponent.ReactMultiChild.Mixin.mountChildren (node_modules/react/lib/ReactMultiChild.js:231:27)
+      at ReactDOMComponent.Mixin._createInitialChildren (node_modules/react/lib/ReactDOMComponent.js:715:32)
+      at ReactDOMComponent.Mixin.mountComponent (node_modules/react/lib/ReactDOMComponent.js:531:12)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at ReactDOMComponent.ReactMultiChild.Mixin.mountChildren (node_modules/react/lib/ReactMultiChild.js:242:44)
+      at ReactDOMComponent.Mixin._createInitialChildren (node_modules/react/lib/ReactDOMComponent.js:715:32)
+      at ReactDOMComponent.Mixin.mountComponent (node_modules/react/lib/ReactDOMComponent.js:531:12)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at [object Object].ReactCompositeComponentMixin.performInitialMount (node_modules/react/lib/ReactCompositeComponent.js:397:34)
+      at [object Object].ReactCompositeComponentMixin.mountComponent (node_modules/react/lib/ReactCompositeComponent.js:262:21)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at [object Object].ReactCompositeComponentMixin.performInitialMount (node_modules/react/lib/ReactCompositeComponent.js:397:34)
+      at [object Object].ReactCompositeComponentMixin.mountComponent (node_modules/react/lib/ReactCompositeComponent.js:262:21)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at mountComponentIntoNode (node_modules/react/lib/ReactMount.js:105:32)
+      at ReactReconcileTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at batchedMountComponentIntoNode (node_modules/react/lib/ReactMount.js:126:15)
+      at ReactDefaultBatchingStrategyTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at Object.ReactDefaultBatchingStrategy.batchedUpdates (node_modules/react/lib/ReactDefaultBatchingStrategy.js:63:19)
+      at Object.batchedUpdates (node_modules/react/lib/ReactUpdates.js:98:20)
+      at Object.ReactMount._renderNewRootComponent (node_modules/react/lib/ReactMount.js:285:18)
+      at Object.ReactMount._renderSubtreeIntoContainer (node_modules/react/lib/ReactMount.js:371:32)
+      at Object.ReactMount.render (node_modules/react/lib/ReactMount.js:392:23)
+      at ReactTestUtils.renderIntoDocument (node_modules/react/lib/ReactTestUtils.js:85:21)
+      at Context.&lt;anonymous&gt; (dashboard.js:11:23)
+
+  2) Feed Widget renders the Feed widget:
+     Invariant Violation: Element <span class="hljs-built_in">type</span> is invalid: expected a string (<span class="hljs-keyword">for</span> built-in components) or a class/<span class="hljs-keyword">function</span> (<span class="hljs-keyword">for</span> composite components) but got: object.
+      at invariant (node_modules/fbjs/lib/invariant.js:38:15)
+      at [object Object].instantiateReactComponent [as _instantiateReactComponent] (node_modules/react/lib/instantiateReactComponent.js:86:134)
+      at [object Object].ReactCompositeComponentMixin.performInitialMount (node_modules/react/lib/ReactCompositeComponent.js:388:22)
+      at [object Object].ReactCompositeComponentMixin.mountComponent (node_modules/react/lib/ReactCompositeComponent.js:262:21)
+      at Object.ReactReconciler.mountComponent (node_modules/react/lib/ReactReconciler.js:47:35)
+      at mountComponentIntoNode (node_modules/react/lib/ReactMount.js:105:32)
+      at ReactReconcileTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at batchedMountComponentIntoNode (node_modules/react/lib/ReactMount.js:126:15)
+      at ReactDefaultBatchingStrategyTransaction.Mixin.perform (node_modules/react/lib/Transaction.js:138:20)
+      at Object.ReactDefaultBatchingStrategy.batchedUpdates (node_modules/react/lib/ReactDefaultBatchingStrategy.js:63:19)
+      at Object.batchedUpdates (node_modules/react/lib/ReactUpdates.js:98:20)
+      at Object.ReactMount._renderNewRootComponent (node_modules/react/lib/ReactMount.js:285:18)
+      at Object.ReactMount._renderSubtreeIntoContainer (node_modules/react/lib/ReactMount.js:371:32)
+      at Object.ReactMount.render (node_modules/react/lib/ReactMount.js:392:23)
+      at ReactTestUtils.renderIntoDocument (node_modules/react/lib/ReactTestUtils.js:85:21)
+      at Context.&lt;anonymous&gt; (feedwidget.js:12:23)
+
+
+
+
+=============================== Coverage summary ===============================
+Statements   : 83.33% ( 10/12 )
+Branches     : 50% ( 1/2 )
+Functions    : 66.67% ( 4/6 )
+Lines        : 83.33% ( 10/12 )
+================================================================================
+npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more details.
+</code></pre><p>Our test fails, so we can start work on the widget proper. Here it is:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> jQuery <span class="hljs-keyword">from</span> <span class="hljs-string">'jquery'</span>;
+<span class="hljs-built_in">window</span>.jQuery = jQuery;
+
+<span class="hljs-keyword">const</span> FeedItem = React.createClass({
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">{this.props.link}</span> <span class="hljs-attr">target</span>=<span class="hljs-string">"_blank"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"feeditem"</span>&gt;</span>{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></span>
+    );
+  }
+});
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  getInitialState() {
+    <span class="hljs-keyword">return</span> {
+      feed: [],
+      size: <span class="hljs-keyword">this</span>.props.size || <span class="hljs-number">5</span>
+    };
+  },
+  componentDidMount() {
+    <span class="hljs-keyword">this</span>.getFeed();
+    <span class="hljs-keyword">this</span>.interval = setInterval(<span class="hljs-keyword">this</span>.getFeed, (<span class="hljs-keyword">this</span>.props.delay * <span class="hljs-number">1000</span>));
+  },
+  componentWillUnmount() {
+    clearInterval(<span class="hljs-keyword">this</span>.interval);
+  },
+  getFeed() {
+    <span class="hljs-keyword">let</span> that = <span class="hljs-keyword">this</span>;
+    jQuery.ajax({
+      url: <span class="hljs-keyword">this</span>.props.feed,
+      success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+        <span class="hljs-keyword">let</span> xml = jQuery(response);
+        <span class="hljs-keyword">let</span> feed = [];
+        xml.find(<span class="hljs-string">'item'</span>).each(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          <span class="hljs-keyword">let</span> item = {};
+          item.title = jQuery(<span class="hljs-keyword">this</span>).find(<span class="hljs-string">'title'</span>).text();
+          item.link = jQuery(<span class="hljs-keyword">this</span>).find(<span class="hljs-string">'guid'</span>).text();
+          feed.push(item);
+        });
+        that.setState({
+          feed: feed.slice(<span class="hljs-number">0</span>,that.state.size)
+        });
+      }
+    });
+  },
+  render() {
+    <span class="hljs-keyword">let</span> feedItems = <span class="hljs-keyword">this</span>.state.feed.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item, index</span>) </span>{
+      <span class="hljs-keyword">return</span> (
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">FeedItem</span> <span class="hljs-attr">title</span>=<span class="hljs-string">{item.title}</span> <span class="hljs-attr">link</span>=<span class="hljs-string">{item.link}</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item.link}</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">FeedItem</span>&gt;</span></span>
+      );
+    });
+    <span class="hljs-keyword">return</span> (
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"feedwidget widget"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"widget-content"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"feed"</span>&gt;</span> Fetched from {this.props.feed}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+            {feedItems}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+});
+</code></pre><p>This is by far the most complex component, so a little explanation is called for. We include jQuery as a dependency at the top of the file. Then we create a component for rendering an individual feed item, called <code>FeedItem</code>. This is very simple, consisting of an anchor tag wrapped around a list item. Note the use of the <code>const</code> keyword - in ES6 this denotes a constant.</p><p>Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a <code>componentDidMount()</code> method that calls <code>getFeed()</code> and sets up an interval to call it again, based on the <code>delay</code> property. The <code>getFeed()</code> method fetches the URL in question and sets <code>this.state.feed</code> to an array of the most recent entries in the feed, with the size denoted by the <code>size</code> property passed through. We also clear that interval when the component is about to be umounted.</p><p>Note that you may have problems with the <code>Access-Control-Allow-Origin</code> HTTP header. It’s possible to disable this in your web browser, so if you want to run this as a dashboard you’ll probably need to do so. On Chrome there’s a useful <a href="https://www.google.co.uk/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwiw9Mm4r8TOAhVNOMAKHUicCF4QFggcMAA&amp;url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fallow-control-allow-origi%2Fnlfbmbojpeacfghkpbjhddihlkkiljbi%3Fhl%3Den&amp;usg=AFQjCNHSUFqc6ylxfxfbWzmmFJ6L5QUvyg&amp;sig2=fJaf_HKgY8XDsd-JeY_PXg&amp;bvm=bv.129422649,d.d24">plugin</a> that allows you to disable this when needed.</p><p>Because our <code>FeedWidget</code> has been created in a generic manner, we can then include multiple feed widgets easily, as in this example:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
+<span class="hljs-keyword">import</span> ClockWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'./clockwidget'</span>;
+<span class="hljs-keyword">import</span> FeedWidget <span class="hljs-keyword">from</span> <span class="hljs-string">'./feedwidget'</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
+  render() {
+    <span class="hljs-keyword">return</span> (
+      &lt;div className="dashboard"&gt;
+        &lt;h1 ref="title"&gt;{this.props.title}&lt;/h1&gt;
+        &lt;div className="wrapper"&gt;
+          &lt;ClockWidget /&gt;
+          &lt;FeedWidget feed="http://feeds.bbci.co.uk/news/rss.xml?edition=uk" size="5" delay="60" /&gt;
+          &lt;FeedWidget feed="https://www.sitepoint.com/feed/" size="10" delay="120" /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+});
+</code></pre><p>We also need to style our widgets. Save this as <code>scss/_colours.scss</code>:</p><pre><code class="hljs lang-scss"><span class="hljs-variable">$bgColour</span>: <span class="hljs-number">#151515</span>;
+<span class="hljs-variable">$txtColour</span>: <span class="hljs-number">#cfcfcf</span>;
+<span class="hljs-variable">$clockBg</span>: <span class="hljs-number">#fa8c00</span>;
+<span class="hljs-variable">$clockHoverBg</span>: <span class="hljs-number">#0099ff</span>;
+<span class="hljs-variable">$clockTxt</span>: <span class="hljs-number">#fff</span>;
+<span class="hljs-variable">$feedBg</span>: <span class="hljs-number">#0099ff</span>;
+<span class="hljs-variable">$feedTxt</span>: <span class="hljs-number">#fff</span>;
+<span class="hljs-variable">$feedHoverBg</span>: <span class="hljs-number">#fa8c00</span>;
+</code></pre><p>And this as <code>scss/style.scss</code>:</p><pre><code class="hljs lang-scss">@<span class="hljs-keyword">import</span> <span class="hljs-string">'colours'</span>;
+
+<span class="hljs-selector-tag">html</span>, <span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-variable">$bgColour</span>;
+    <span class="hljs-attribute">color</span>: <span class="hljs-variable">$txtColour</span>;
+    <span class="hljs-attribute">font-family</span>: Arial, Helvetica, sans-serif;
+}
+
+<span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.dashboard</span> {
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span>;
+}
+
+<span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.wrapper</span> {
+    -moz-<span class="hljs-attribute">column-count</span>: <span class="hljs-number">4</span>;
+    -webkit-<span class="hljs-attribute">column-count</span>: <span class="hljs-number">4</span>;
+    <span class="hljs-attribute">column-count</span>: <span class="hljs-number">4</span>;
+    -moz-<span class="hljs-attribute">column-gap</span>: <span class="hljs-number">1em</span>;
+    -webkit-<span class="hljs-attribute">column-gap</span>: <span class="hljs-number">1em</span>;
+    <span class="hljs-attribute">column-gap</span>: <span class="hljs-number">1em</span>;
+}
+
+<span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.widget</span> {
+    <span class="hljs-attribute">display</span>: inline-block;
+    <span class="hljs-attribute">margin</span>: <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">1em</span>;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+    <span class="hljs-attribute">min-height</span>: <span class="hljs-number">100px</span>;
+    <span class="hljs-attribute">margin</span>: <span class="hljs-number">5px</span>;
+    <span class="hljs-attribute">opacity</span>: <span class="hljs-number">0.8</span>;
+    <span class="hljs-attribute">transition</span>: opacity <span class="hljs-number">1s</span>;
+
+    &amp;:hover {
+        <span class="hljs-attribute">opacity</span>: <span class="hljs-number">1</span>;
+    }
+
+    <span class="hljs-selector-tag">h2</span>, <span class="hljs-selector-tag">h4</span> {
+        <span class="hljs-attribute">padding</span>: <span class="hljs-number">20px</span>;
+    }
+
+    <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.widget-content</span> {
+        <span class="hljs-attribute">width</span>: <span class="hljs-number">100%</span>;
+    }
+}
+
+<span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.clockwidget</span> {
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-variable">$clockBg</span>;
+    <span class="hljs-attribute">color</span>: <span class="hljs-variable">$clockTxt</span>;
+}
+
+<span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.feedwidget</span> {
+    <span class="hljs-attribute">background-color</span>: <span class="hljs-variable">$feedBg</span>;
+    <span class="hljs-attribute">color</span>: <span class="hljs-variable">$feedTxt</span>;
+
+    <span class="hljs-selector-tag">h2</span> {
+        <span class="hljs-attribute">word-wrap</span>: break-word;
+    }
+
+    <span class="hljs-selector-tag">ul</span> {
+        <span class="hljs-attribute">margin-left</span>: <span class="hljs-number">0</span>;
+        <span class="hljs-attribute">padding-left</span>: <span class="hljs-number">20px</span>;
+
+        <span class="hljs-selector-tag">a</span> {
+            <span class="hljs-attribute">text-decoration</span>: none;
+            <span class="hljs-attribute">padding</span>: <span class="hljs-number">5px</span>;
+
+            <span class="hljs-selector-tag">li</span> {
+                <span class="hljs-attribute">list-style-type</span>: none;
+                <span class="hljs-attribute">font-weight</span>: bold;
+                <span class="hljs-attribute">color</span>: <span class="hljs-variable">$feedTxt</span>;
+            }
+        }
+    }
+}
+</code></pre><p>The end result should look something like this:</p><p></p><p>With that done, feel free to add whatever other feeds you want to include.</p><h2 id="deploying-our-dashboard">Deploying our dashboard</h2><p>The final step is deploying our dashboard to our Raspberry Pi or other device. Run the following command to generate the Javascript:</p><pre><code class="hljs lang-bash">$ npm run build
+</code></pre><p>This will create <code>static/bundle.js</code>. You can then copy that file over to your web server with <code>index.html</code> and place both files in the web root. I recommend using Nginx if you’re using a Raspberry Pi as it’s faster and simpler for static content. If you’re likely to make a lot of changes you might want to create a command in the <code>scripts</code> section of your <code>package.json</code> to deploy the files more easily.</p><p>These basic widgets should be enough to get you started. You should be able to use the feed widget with virtually any RSS feed, and you should be able to use a similar approach to poll third-party APIs, although you might need to authenticate in some way (if you do, you won’t want to expose your authentication details, so ensure that nobody from outside the network can view your application). I’ll leave it to you to see what kind of interesting widgets you come up with for your own dashboard, but some ideas to get you started include:</p><ul><li>Public transport schedules/Traffic issues</li><li>Weather reports</li><li>Shopping lists/Todo lists, with HTML5 local storage used to persist them</li><li>Galleries of recent photos on social networks</li><li>Status of servers on cloud hosting providers</li></ul><p>With a little thought, you can probably come up with a few more than that! I’ve created a <a href="https://github.com/matthewbdaly/personal-dashboard">Github repository with the source code</a> so you can check your own implementation against it.</p><section><ul class="categories"><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/react/">react</a></li><li><a href="/blog/categories/webpack/">webpack</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/10/an-introduction-to-managing-your-servers-with-ansible/amp/">An Introduction to Managing Your Servers With Ansible</a></section></article></div></div></div></body></html>
