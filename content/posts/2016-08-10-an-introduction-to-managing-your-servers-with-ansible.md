@@ -49,7 +49,7 @@ For Windows users, you'll want to drop `sudo`. On Unix-like OS's that don't have
 Our first Ansible command
 -------------------------
 
-We'll demonstrate Ansible in action with a Vagrant VM. Drop the following `.Vagrantfile` into your working directory:
+We'll demonstrate Ansible in action with a Vagrant VM. Drop the following `Vagrantfile` into your working directory:
 
 ```ruby
 # -*- mode: ruby -*-
