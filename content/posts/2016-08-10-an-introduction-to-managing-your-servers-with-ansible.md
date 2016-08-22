@@ -239,7 +239,7 @@ You can call any installed Ansible module in an ad-hoc fashion in the same way. 
 Playbooks
 ---------
 
-Ad-hoc commands are useful, but they don't offer much extra over using SSH. Playbooks allow you to define a repeatable set of cammands for a particular use case. In this example, I'll show you how to write a playbook that does the following:
+Ad-hoc commands are useful, but they don't offer much extra over using SSH. Playbooks allow you to define a repeatable set of commands for a particular use case. In this example, I'll show you how to write a playbook that does the following:
 
 * Installs and configures Nginx
 * Clones the repository for my site into the web root
