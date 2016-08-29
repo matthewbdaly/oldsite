@@ -1,0 +1,297 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Maintaining Your CV With Markdown and Emacs - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+  			"@context": "http://schema.org",
+  			"@type": "BlogPosting",
+  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/",
+  			"headline": "Maintaining Your CV With Markdown and Emacs",
+  			"datePublished": "2016-08-29T15:40:08.000Z",
+  			"dateModified": "2016-08-29T15:40:08.000Z",
+  			"description": "&lt;p&gt;I’ve recently been jobhunting, so that has meant having to update my CV. Fortunately, I’ve got in...",
+  			"author": {
+	 			  "@type": "Person",
+	 			  "name": "Matthew Daly"
+  			},
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+         background-color: #252525;
+      }
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+        display: block;
+        overflow-wrap: normal;
+        word-wrap: normal;
+        white-space: pre;
+        font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+        display: block;
+        overflow-x: auto;
+        padding: 0.5em;
+        background: #474949;
+        color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+        color: #969896;
+        font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+        color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+        color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+        color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+        color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+        font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+        color: #f99157;
+      }
+      .hljs-deletion {
+        color: #dc322f;
+      }
+      .hljs-formula {
+        background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+        color: #81a2be;
+      }
+      .hljs-emphasis {
+        font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+        font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th August 2016 4:40 pm</p><h1>Maintaining Your CV With Markdown and Emacs</h1><p>I’ve recently been jobhunting, so that has meant having to update my CV. Fortunately, I’ve got into the habit of keeping it up to date easily by writing it in Markdown and generating it in the required format on demand. That way I can easily convert it to HTML, PDF or Microsoft DocX format as and when I need it. I thought I’d share this method as it works very well for me.</p><h2 id="maintaining-your-cv-in-emacs-">Maintaining your CV in Emacs?</h2><p>Yes, you read that right! Although I’m a die-hard Vim user, I do use Emacs for a few things. One of them is time-tracking using <code>org-mode</code>, and another is maintaining my CV.</p><p>First of all you’ll need to install <code>pandoc</code>, <code>texlive</code> and <code>markdown</code>. On Ubuntu this is easily done using <code>apt-get</code>:</p><pre><code class="hljs lang-bash">$ sudo apt-get install pandoc markdown texlive
+</code></pre><p>You’ll also need to install Emacs and the appropriate packages, namely <code>markdown-mode</code> and <code>markdown-mode+</code>. To do so, first ensure this is in your <code>.emacs.d/init.el</code>:</p><pre><code class="hljs lang-lisp">(<span class="hljs-name">require</span> 'package)
+(<span class="hljs-name">add-to-list</span> 'package-archives '(<span class="hljs-string">"melpa"</span> . <span class="hljs-string">"http://melpa.org/packages/"</span>))
+(<span class="hljs-name">package-initialize</span>)
+
+<span class="hljs-comment">;; Markdown support</span>
+(<span class="hljs-name">require</span> 'markdown-mode)
+(<span class="hljs-name">require</span> 'markdown-mode+)
+(<span class="hljs-name">setq</span> markdown-command <span class="hljs-string">"/usr/bin/markdown"</span>)
+(<span class="hljs-name">add-to-list</span> 'auto-mode-alist '(<span class="hljs-string">"\\.markdown$"</span> . markdown-mode))
+(<span class="hljs-name">add-to-list</span> 'auto-mode-alist '(<span class="hljs-string">"\\.md$"</span> . markdown-mode))
+(<span class="hljs-name">setq</span> markdown-css-paths `(,(expand-file-name <span class="hljs-string">"Documents/markdown.css"</span>)))
+</code></pre><p>Then fire up Emacs, ignoring the warnings you get, and run <code>M-x package-list-packages</code> to load the list of available packages. I’ll leave navigating and installing this list of packages to you, but once they’re done you should have everything you need.</p><p>This assumes the stylesheet you wish to use is at <code>~/Documents/markdown.css</code> - adjust the path if necessary. You may also need to amend the path to your Markdown install if the location differs. You can put what you like in the stylesheet, but my advice is to keep it as simple as you can - it’s your CV, not a web page. Here’s what I use:</p><pre><code class="hljs lang-css"><span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">font-family</span>: <span class="hljs-string">"Helvetica Neue"</span>, Helvetica, Arial, sans-serif;
+    <span class="hljs-attribute">width</span>: <span class="hljs-number">80%</span>;
+    <span class="hljs-attribute">margin</span>: auto;
+    <span class="hljs-attribute">background</span>: <span class="hljs-number">#ffffff</span>;
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span>;
+}
+
+<span class="hljs-selector-tag">h2</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">30px</span>;
+    <span class="hljs-attribute">color</span>: <span class="hljs-number">#757575</span>;
+    <span class="hljs-attribute">text-align</span>: center;
+    <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">15px</span>;
+}
+
+<span class="hljs-selector-tag">h1</span> {
+    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">55px</span>;
+    <span class="hljs-attribute">color</span>: <span class="hljs-number">#757575</span>;
+    <span class="hljs-attribute">text-align</span>: center;
+    <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">15px</span>;
+}
+
+<span class="hljs-selector-tag">hr</span> {
+    <span class="hljs-attribute">color</span>: <span class="hljs-number">#000000</span>;
+}
+
+<span class="hljs-selector-tag">ul</span> <span class="hljs-selector-tag">li</span> {
+    <span class="hljs-attribute">list-style-type</span>: disc;
+}
+
+<span class="hljs-selector-tag">blockquote</span> {
+    <span class="hljs-attribute">text-align</span>: center;
+}
+
+<span class="hljs-selector-tag">a</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:visited</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> {
+    <span class="hljs-attribute">text-decoration</span>: none;
+    <span class="hljs-attribute">color</span>: <span class="hljs-number">#000000</span>;
+}
+
+<span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:link</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:visited</span> {
+    <span class="hljs-attribute">text-decoration</span>: none;
+    <span class="hljs-attribute">color</span>: black;
+}
+
+<span class="hljs-selector-tag">code</span> {
+    <span class="hljs-attribute">white-space</span>: pre-wrap;
+    <span class="hljs-attribute">word-wrap</span>: break-word;
+}
+</code></pre><p>Next, we write our CV in Markdown. Here’s a sample one based on mine:</p><pre><code class="hljs lang-markdown"><span class="hljs-section">James Smith
+============</span>
+
+<span class="hljs-section">About me
+--------</span>
+
+I'm a full-stack web developer. I have built a wide variety of web applications (including single-page web apps), content based sites and REST APIs.
+
+---
+
+<span class="hljs-section">Skills
+----------</span>
+<span class="hljs-bullet">* </span>HTML5
+<span class="hljs-bullet">* </span>CSS, Sass and Compass
+<span class="hljs-bullet">* </span>Javascript, including Angular.js
+<span class="hljs-bullet">* </span>PHP, including Laravel and Lumen
+
+---
+
+<span class="hljs-section">Employment
+----------</span>
+
+<span class="hljs-strong">**Agency ltd**</span>
+June 2014 - present
+
+I worked for a busy digital agency, building custom web apps using Laravel and Angular.js
+
+---
+
+<span class="hljs-section">Education
+----------</span>
+
+<span class="hljs-bullet">* </span><span class="hljs-strong">**2009-2014 My Secondary School, London**</span> - 7 GCSEs:
+
+---
+
+<span class="hljs-section">Hobbies and Interests
+---------------------</span>
+
+Real ale, learning more about webdev, reading, socialising.
+
+---
+
+<span class="hljs-section">Contact
+-------</span>
+
+<span class="hljs-quote">&gt; **Mobile:** 01234 567890</span>
+
+<span class="hljs-quote">&gt; **[Email](mailto:user@example.com)** - **[Website](http://www.example.com)** - **[GitHub](https://github.com/username)**</span>
+</code></pre><p>Now, if you save this file as something like <code>cv.md</code> and then open it up in Emacs, you should be able to preview it in your browser with <code>C-c C-c p</code>. Nice, huh? To export it to HTML, run <code>C-c C-c v</code> instead.</p><p>What if you want to view it in other formats? Say a potential employer is asking for your CV in Microsoft DocX format (ugh…)? Just run this command in the shell:</p><pre><code class="hljs lang-bash">$ pandoc <span class="hljs-_">-s</span> -S cv.md -o cv.docx
+</code></pre><p>Or how about PDF?</p><pre><code class="hljs lang-bash">$ pandoc <span class="hljs-_">-s</span> -S cv.md -o cv.pdf
+</code></pre><p>Using this method it’s straightforward to maintain a single master copy of your CV which you can then convert to other formats on demand.</p><h2 id="keeping-your-cv-backed-up">Keeping your CV backed up</h2><p>If you want to keep your CV safe, there’s a couple of ways to do it. One is to keep it in a Git or Mercurial repository, and another is to use Dropbox to keep it in sync. I tend to use the latter approach, although I’m considering switching to the former. If you wanted to generate the various versions automatically, you could set up a hook to generate the various versions using Pandoc during the commit process.</p><p>I used to hate updating my CV, but that was largely because I left it too long, and often had nothing much to put on it. Nowadays I’m often learning something new so I quite often have reason to update it to reflect that, and adopting this workflow has made things a lot easier.</p><section><ul class="categories"><li><a href="/blog/categories/markdown/">markdown</a></li><li><a href="/blog/categories/emacs/">emacs</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/amp/">Creating a Personal Dashboard With React and Webpack</a></section></article></div></div></div></body></html>
