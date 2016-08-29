@@ -80,11 +80,6 @@ a, a:visited, a:hover {
     color: #000000;
 }
 
-a:link, a:hover, a:visited {
-    text-decoration: none;
-    color: black;
-}
-
 code {
     white-space: pre-wrap;
     word-wrap: break-word;
