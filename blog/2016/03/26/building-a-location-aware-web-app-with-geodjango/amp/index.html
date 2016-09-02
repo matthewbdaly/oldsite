@@ -1,15 +1,15 @@
-<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Building a Location Aware Web App With Geodjango - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
-  			"@context": "http://schema.org",
-  			"@type": "BlogPosting",
-  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/",
-  			"headline": "Building a Location Aware Web App With Geodjango",
-  			"datePublished": "2016-03-26T21:30:29.000Z",
-  			"dateModified": "2016-03-26T21:30:29.000Z",
-  			"description": "&lt;p&gt;PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Djang...",
-  			"author": {
-	 			  "@type": "Person",
-	 			  "name": "Matthew Daly"
-  			},
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Building a Location Aware Web App With Geodjango - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/",
+         "headline": "Building a Location Aware Web App With Geodjango",
+         "datePublished": "2016-03-26T21:30:29.000Z",
+         "dateModified": "2016-03-26T21:30:29.000Z",
+         "description": "&lt;p&gt;PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Djang...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
          "publisher": {
             "@type": "Organization",
             "name": "Matthew Daly&#x27;s Blog",
@@ -27,8 +27,8 @@
             "width": 1200
          }
       }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
-         background-color: #252525;
-      }
+   background-color: #252525;
+}
       div.container {
          background-color: #f8f8f8;
          width: 100%;
@@ -71,11 +71,11 @@
          word-wrap: break-word;
       }
       pre code {
-        display: block;
-        overflow-wrap: normal;
-        word-wrap: normal;
-        white-space: pre;
-        font-size: 1.2em;
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
       }
       article {
          padding: 20px;
@@ -89,39 +89,39 @@
          border: 1px solid black;
       }
       .hljs {
-        display: block;
-        overflow-x: auto;
-        padding: 0.5em;
-        background: #474949;
-        color: #d1d9e1;
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
       }
       .hljs-comment,
       .hljs-quote {
-        color: #969896;
-        font-style: italic;
+         color: #969896;
+         font-style: italic;
       }
       .hljs-keyword,
       .hljs-selector-tag,
       .hljs-literal,
       .hljs-type,
       .hljs-addition {
-        color: #cc99cc;
+         color: #cc99cc;
       }
       .hljs-number,
       .hljs-selector-attr,
       .hljs-selector-pseudo {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-string,
       .hljs-doctag,
       .hljs-regexp {
-        color: #8abeb7;
+         color: #8abeb7;
       }
       .hljs-title,
       .hljs-name,
       .hljs-section,
       .hljs-built_in {
-        color: #b5bd68;
+         color: #b5bd68;
       }
       .hljs-variable,
       .hljs-template-variable,
@@ -132,27 +132,27 @@
       .hljs-section,
       .hljs-name,
       .hljs-strong {
-        font-weight: bold;
+         font-weight: bold;
       }
       .hljs-symbol,
       .hljs-bullet,
       .hljs-subst,
       .hljs-meta,
       .hljs-link {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-deletion {
-        color: #dc322f;
+         color: #dc322f;
       }
       .hljs-formula {
-        background: #eee8d5;
+         background: #eee8d5;
       }
       .hljs-attr,
       .hljs-attribute {
-        color: #81a2be;
+         color: #81a2be;
       }
       .hljs-emphasis {
-        font-style: italic;
+         font-style: italic;
       }
       ul.categories {
          padding-left: 0px;
@@ -182,7 +182,7 @@
          border-left: 2px solid #cfcfcf;
       }
       blockquote p {
-        font-size: 2.2em;
+         font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">26th March 2016 9:30 pm</p><h1>Building a Location Aware Web App With Geodjango</h1><p>PostgreSQL has excellent support for geographical data thanks to the PostGIS extension, and Django allows you to take full advantage of it thanks to GeoDjango. In this tutorial, I’ll show you how to use GeoDjango to build a web app that allows users to search for gigs and events near them.</p><h2 id="requirements">Requirements</h2><p>I’ve made the jump to Python 3, and if you haven’t done so yet, I highly recommend it - it’s not hard, and there’s very few modules left that haven’t been ported across. As such, this tutorial assumes you’re using Python 3. You’ll also need to have Git, PostgreSQL and PostGIS installed - I’ll leave the details of doing so up to you as it varies by platform, but you can generally do so easily with a package manager on most Linux distros. On Mac OS X I recommend using Homebrew. If you’re on Windows I think your best bet is probably to use a Vagrant VM.</p><p>We’ll be using Django 1.9 - if by the time you read this a newer version of Django is out, it’s quite possible that some things may have changed and you’ll need to work around any problems caused. Generally search engines are the best place to look for this, and I’ll endeavour to keep the resulting Github repository as up to date as I can, so try those if you get stuck.</p><h2 id="getting-started">Getting started</h2><p>First of all, let’s create our database. Make sure you’re running as a user that has the required privileges to create users and databases for PostgreSQL and run the following command:</p><pre><code class="hljs lang-bash">$ createdb gigfinder
 </code></pre><p>This creates the database. Next, we create the user:</p><pre><code class="hljs lang-bash">$ createuser <span class="hljs-_">-s</span> giguser -P
 </code></pre><p>You’ll be prompted to enter a password for the new user. Next, we want to use the <code>psql</code> command-line client to interact with our new database:</p><pre><code class="hljs lang-bash">$ psql gigfinder
@@ -1218,4 +1218,14 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
             })
 </code></pre><p>Here we’re adding the request context so that the CSRF token is available.</p><p>If you run the dev server, add a few events and venues via the admin, and submit a search, you’ll see that you’re returning events closest to you first.</p><p>Now that we can submit searches, we’re ready to commit:</p><pre><code class="hljs lang-bash">$ git add gigs/
 $ git commit -m <span class="hljs-string">'Can now retrieve search results'</span>
-</code></pre><p>And we’re done! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there’s plenty of methods of doing so - you can retrieve the latitude and longitude in the template and use Google Maps to display them. I’ll leave doing so as an exercise for the reader.</p><p>I can’t say that working with GeoDjango isn’t a bit of a struggle at times, but being able to make spatial queries in this fashion is very useful. With more and more people carrying smartphones, you’re more likely than ever to be asked to build applications that return data based on someone’s geographical location, and GeoDjango is a great way to do this with a Django application. You can find the source on <a href="https://github.com/matthewbdaly/gigfinder">Github</a>.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/postgres/">postgres</a></li><li><a href="/blog/categories/geo/">geo</a></li><li><a href="/blog/categories/geodjango/">geodjango</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/04/04/writing-faster-laravel-tests/amp/">Writing Faster Laravel Tests</a> <a class="postlink" href="/blog/2016/03/18/my-experience-using-php-7-in-production/amp/">My Experience Using PHP 7 in Production</a></section></article></div></div></div></body></html>
+</code></pre><p>And we’re done! Of course, you may want to expand on this by plotting each gig venue on a map, or something like that, in which case there’s plenty of methods of doing so - you can retrieve the latitude and longitude in the template and use Google Maps to display them. I’ll leave doing so as an exercise for the reader.</p><p>I can’t say that working with GeoDjango isn’t a bit of a struggle at times, but being able to make spatial queries in this fashion is very useful. With more and more people carrying smartphones, you’re more likely than ever to be asked to build applications that return data based on someone’s geographical location, and GeoDjango is a great way to do this with a Django application. You can find the source on <a href="https://github.com/matthewbdaly/gigfinder">Github</a>.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/postgres/">postgres</a></li><li><a href="/blog/categories/geo/">geo</a></li><li><a href="/blog/categories/geodjango/">geodjango</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/04/04/writing-faster-laravel-tests/amp/">Writing Faster Laravel Tests</a> <a class="postlink" href="/blog/2016/03/18/my-experience-using-php-7-in-production/amp/">My Experience Using PHP 7 in Production</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>

@@ -1,15 +1,15 @@
-<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Extending Our Node.js and Redis Chat Server - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
-  			"@context": "http://schema.org",
-  			"@type": "BlogPosting",
-  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/",
-  			"headline": "Extending Our Node.js and Redis Chat Server",
-  			"datePublished": "2015-03-02T23:03:48.000Z",
-  			"dateModified": "2015-03-02T23:03:48.000Z",
-  			"description": "&lt;p&gt;In this tutorial, we’re going to extend the chat system we built in &lt;a href&#x3D;&quot;/blog/2014/12/31/bui...",
-  			"author": {
-	 			  "@type": "Person",
-	 			  "name": "Matthew Daly"
-  			},
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Extending Our Node.js and Redis Chat Server - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/",
+         "headline": "Extending Our Node.js and Redis Chat Server",
+         "datePublished": "2015-03-02T23:03:48.000Z",
+         "dateModified": "2015-03-02T23:03:48.000Z",
+         "description": "&lt;p&gt;In this tutorial, we’re going to extend the chat system we built in &lt;a href&#x3D;&quot;/blog/2014/12/31/bui...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
          "publisher": {
             "@type": "Organization",
             "name": "Matthew Daly&#x27;s Blog",
@@ -27,8 +27,8 @@
             "width": 1200
          }
       }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
-         background-color: #252525;
-      }
+   background-color: #252525;
+}
       div.container {
          background-color: #f8f8f8;
          width: 100%;
@@ -71,11 +71,11 @@
          word-wrap: break-word;
       }
       pre code {
-        display: block;
-        overflow-wrap: normal;
-        word-wrap: normal;
-        white-space: pre;
-        font-size: 1.2em;
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
       }
       article {
          padding: 20px;
@@ -89,39 +89,39 @@
          border: 1px solid black;
       }
       .hljs {
-        display: block;
-        overflow-x: auto;
-        padding: 0.5em;
-        background: #474949;
-        color: #d1d9e1;
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
       }
       .hljs-comment,
       .hljs-quote {
-        color: #969896;
-        font-style: italic;
+         color: #969896;
+         font-style: italic;
       }
       .hljs-keyword,
       .hljs-selector-tag,
       .hljs-literal,
       .hljs-type,
       .hljs-addition {
-        color: #cc99cc;
+         color: #cc99cc;
       }
       .hljs-number,
       .hljs-selector-attr,
       .hljs-selector-pseudo {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-string,
       .hljs-doctag,
       .hljs-regexp {
-        color: #8abeb7;
+         color: #8abeb7;
       }
       .hljs-title,
       .hljs-name,
       .hljs-section,
       .hljs-built_in {
-        color: #b5bd68;
+         color: #b5bd68;
       }
       .hljs-variable,
       .hljs-template-variable,
@@ -132,27 +132,27 @@
       .hljs-section,
       .hljs-name,
       .hljs-strong {
-        font-weight: bold;
+         font-weight: bold;
       }
       .hljs-symbol,
       .hljs-bullet,
       .hljs-subst,
       .hljs-meta,
       .hljs-link {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-deletion {
-        color: #dc322f;
+         color: #dc322f;
       }
       .hljs-formula {
-        background: #eee8d5;
+         background: #eee8d5;
       }
       .hljs-attr,
       .hljs-attribute {
-        color: #81a2be;
+         color: #81a2be;
       }
       .hljs-emphasis {
-        font-style: italic;
+         font-style: italic;
       }
       ul.categories {
          padding-left: 0px;
@@ -182,7 +182,7 @@
          border-left: 2px solid #cfcfcf;
       }
       blockquote p {
-        font-size: 2.2em;
+         font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd March 2015 11:03 pm</p><h1>Extending Our Node.js and Redis Chat Server</h1><p>In this tutorial, we’re going to extend the chat system we built in <a href="/blog/2014/12/31/building-a-chat-server-with-node-dot-js-and-redis/">the first tutorial</a> to include the following functionality:</p><ul><li>Persisting the data</li><li>Prompting users to sign in and storing their details in a Redis-backed session</li></ul><p>In the process, we’ll pick up a bit more about using Redis.</p><h2 id="persistence">Persistence</h2><p>Our first task is to make our messages persist when the session ends. Now, in order to do this, we’re going to use a list. A list in Redis can be thought of as equivalent to an array or list in most programming languages, and can be retrieved by passing the key in a similar fashion to how you would retrieve a string.</p><p>As usual, we will write our test first. Open up <code>test/test.js</code> and replace the test for sending a message with this:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test sending a message</span>
     describe(<span class="hljs-string">'Test sending a message'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         it(<span class="hljs-string">"should return 'Message received'"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
@@ -1363,4 +1363,14 @@ io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-f
         <span class="hljs-comment">// Persist it to a Redis list</span>
         client.rpush(<span class="hljs-string">'chat:messages'</span>, message);
     });
-</code></pre><p>Here we use a regex to strip out any HTML tags from the message - this will prevent anyone injecting JavaScript into our chat client.</p><p>And that’s all, folks! If you want to check out the source for this lesson it’s in the repository on GitHub, tagged <code>lesson-2</code>. If you want to carry on working on this on your own, there’s still plenty you can do, such as:</p><ul><li>Adding support for multiple rooms</li><li>Using Passport.js to allow logging in using third-party services such as Twitter or Facebook</li><li>Adding formatting for messages, either by using something like Markdown, or a client-side rich text editor</li></ul><p>As you can see, it’s surprising how much you can accomplish using only Redis, and under certain circumstances it offers a lot of advantages over a relational database. It’s always worth thinking about whether Redis can be used for your project.</p><section><ul class="categories"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/amp/">Syntax Highlighting in Fenced Code Blocks in Vim</a> <a class="postlink" href="/blog/2015/02/15/switching-to-my-own-static-site-generator/amp/">Switching to My Own Static Site Generator</a></section></article></div></div></div></body></html>
+</code></pre><p>Here we use a regex to strip out any HTML tags from the message - this will prevent anyone injecting JavaScript into our chat client.</p><p>And that’s all, folks! If you want to check out the source for this lesson it’s in the repository on GitHub, tagged <code>lesson-2</code>. If you want to carry on working on this on your own, there’s still plenty you can do, such as:</p><ul><li>Adding support for multiple rooms</li><li>Using Passport.js to allow logging in using third-party services such as Twitter or Facebook</li><li>Adding formatting for messages, either by using something like Markdown, or a client-side rich text editor</li></ul><p>As you can see, it’s surprising how much you can accomplish using only Redis, and under certain circumstances it offers a lot of advantages over a relational database. It’s always worth thinking about whether Redis can be used for your project.</p><section><ul class="categories"><li><a href="/blog/categories/node-js/">node.js</a></li><li><a href="/blog/categories/redis/">redis</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2015/03/02/extending-our-node-dot-js-and-redis-chat-server/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/03/02/syntax-highlighting-in-fenced-code-blocks-in-vim/amp/">Syntax Highlighting in Fenced Code Blocks in Vim</a> <a class="postlink" href="/blog/2015/02/15/switching-to-my-own-static-site-generator/amp/">Switching to My Own Static Site Generator</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>

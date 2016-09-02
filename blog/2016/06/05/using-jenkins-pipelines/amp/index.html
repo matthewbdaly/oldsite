@@ -1,16 +1,16 @@
-<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Using Jenkins Pipelines - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
-  			"@context": "http://schema.org",
-  			"@type": "BlogPosting",
-  			"mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/",
-  			"headline": "Using Jenkins Pipelines",
-  			"datePublished": "2016-06-05T15:32:15.000Z",
-  			"dateModified": "2016-06-05T15:32:15.000Z",
-  			"description": "&lt;p&gt;I use Jenkins as my main continuous integration solution at work, largely for two reasons:&lt;/p&gt;
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Using Jenkins Pipelines - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/",
+         "headline": "Using Jenkins Pipelines",
+         "datePublished": "2016-06-05T15:32:15.000Z",
+         "dateModified": "2016-06-05T15:32:15.000Z",
+         "description": "&lt;p&gt;I use Jenkins as my main continuous integration solution at work, largely for two reasons:&lt;/p&gt;
 &lt;u...",
-  			"author": {
-	 			  "@type": "Person",
-	 			  "name": "Matthew Daly"
-  			},
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
          "publisher": {
             "@type": "Organization",
             "name": "Matthew Daly&#x27;s Blog",
@@ -28,8 +28,8 @@
             "width": 1200
          }
       }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
-         background-color: #252525;
-      }
+   background-color: #252525;
+}
       div.container {
          background-color: #f8f8f8;
          width: 100%;
@@ -72,11 +72,11 @@
          word-wrap: break-word;
       }
       pre code {
-        display: block;
-        overflow-wrap: normal;
-        word-wrap: normal;
-        white-space: pre;
-        font-size: 1.2em;
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
       }
       article {
          padding: 20px;
@@ -90,39 +90,39 @@
          border: 1px solid black;
       }
       .hljs {
-        display: block;
-        overflow-x: auto;
-        padding: 0.5em;
-        background: #474949;
-        color: #d1d9e1;
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
       }
       .hljs-comment,
       .hljs-quote {
-        color: #969896;
-        font-style: italic;
+         color: #969896;
+         font-style: italic;
       }
       .hljs-keyword,
       .hljs-selector-tag,
       .hljs-literal,
       .hljs-type,
       .hljs-addition {
-        color: #cc99cc;
+         color: #cc99cc;
       }
       .hljs-number,
       .hljs-selector-attr,
       .hljs-selector-pseudo {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-string,
       .hljs-doctag,
       .hljs-regexp {
-        color: #8abeb7;
+         color: #8abeb7;
       }
       .hljs-title,
       .hljs-name,
       .hljs-section,
       .hljs-built_in {
-        color: #b5bd68;
+         color: #b5bd68;
       }
       .hljs-variable,
       .hljs-template-variable,
@@ -133,27 +133,27 @@
       .hljs-section,
       .hljs-name,
       .hljs-strong {
-        font-weight: bold;
+         font-weight: bold;
       }
       .hljs-symbol,
       .hljs-bullet,
       .hljs-subst,
       .hljs-meta,
       .hljs-link {
-        color: #f99157;
+         color: #f99157;
       }
       .hljs-deletion {
-        color: #dc322f;
+         color: #dc322f;
       }
       .hljs-formula {
-        background: #eee8d5;
+         background: #eee8d5;
       }
       .hljs-attr,
       .hljs-attribute {
-        color: #81a2be;
+         color: #81a2be;
       }
       .hljs-emphasis {
-        font-style: italic;
+         font-style: italic;
       }
       ul.categories {
          padding-left: 0px;
@@ -183,7 +183,7 @@
          border-left: 2px solid #cfcfcf;
       }
       blockquote p {
-        font-size: 2.2em;
+         font-size: 2.2em;
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th June 2016 4:32 pm</p><h1>Using Jenkins Pipelines</h1><p>I use Jenkins as my main continuous integration solution at work, largely for two reasons:</p><ul><li>It generally works out cheaper to host it ourselves than to use one of the paid CI solutions for closed-source projects</li><li>The size of the plugin ecosystem</li></ul><p>However, we also use Travis CI for testing one or two open-source projects, and one distinct advantage Travis has is the way you can configure it using a single text file.</p><p>With the Pipeline plugin, it’s possible to define the steps required to run your tests in a <code>Jenkinsfile</code> and then set up a Pipeline job which reads that file from the version control system and runs it accordingly. Here’s a sample <code>Jenkinsfile</code> for a Laravel project:</p><pre><code class="hljs lang-groovy">node {
    <span class="hljs-comment">// Mark the code checkout 'stage'....</span>
    stage <span class="hljs-string">'Checkout'</span>
@@ -203,4 +203,14 @@
    <span class="hljs-comment">// Run the tests</span>
    sh <span class="hljs-string">"vendor/bin/phpunit"</span>
 }
-</code></pre><p>Note the steps it’s broken down into:</p><ul><li><code>stage</code> defines the start of a new stage in the build</li><li><code>git</code> defines a point where we check out the code from the repository</li><li><code>sh</code> defines a point where we run a shell command</li></ul><p>Using these three commands it’s straightforward to define a fairly simple build process for your application in a way that’s more easily repeatable when creating new projects - for instance, you can copy this over to a new project and change the source repository URL and you’re pretty much ready to go.</p><p>Unfortunately, support for the Pipeline plugin is missing from a lot of Jenkins plugins - for instance, I can’t publish the XML coverage reports. This is something of a deal-breaker for most of my projects as I use these kind of report plugins a lot - it’s one of the reasons I chose Jenkins over Travis. Still, this is definitely a big step forward, and if you don’t need this kind of reporting then there’s no reason not to consider using the Pipeline plugin for your Jenkins jobs. Hopefully in future more plugins will be amended to work with Pipeline so that it’s more widely usable.</p><section><ul class="categories"><li><a href="/blog/categories/jenkins/">jenkins</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/08/testing-your-api-documentation-with-dredd/amp/">Testing Your API Documentation With Dredd</a> <a class="postlink" href="/blog/2016/05/22/adding-google-amp-support-to-my-site/amp/">Adding Google AMP Support to My Site</a></section></article></div></div></div></body></html>
+</code></pre><p>Note the steps it’s broken down into:</p><ul><li><code>stage</code> defines the start of a new stage in the build</li><li><code>git</code> defines a point where we check out the code from the repository</li><li><code>sh</code> defines a point where we run a shell command</li></ul><p>Using these three commands it’s straightforward to define a fairly simple build process for your application in a way that’s more easily repeatable when creating new projects - for instance, you can copy this over to a new project and change the source repository URL and you’re pretty much ready to go.</p><p>Unfortunately, support for the Pipeline plugin is missing from a lot of Jenkins plugins - for instance, I can’t publish the XML coverage reports. This is something of a deal-breaker for most of my projects as I use these kind of report plugins a lot - it’s one of the reasons I chose Jenkins over Travis. Still, this is definitely a big step forward, and if you don’t need this kind of reporting then there’s no reason not to consider using the Pipeline plugin for your Jenkins jobs. Hopefully in future more plugins will be amended to work with Pipeline so that it’s more widely usable.</p><section><ul class="categories"><li><a href="/blog/categories/jenkins/">jenkins</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/08/testing-your-api-documentation-with-dredd/amp/">Testing Your API Documentation With Dredd</a> <a class="postlink" href="/blog/2016/05/22/adding-google-amp-support-to-my-site/amp/">Adding Google AMP Support to My Site</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
