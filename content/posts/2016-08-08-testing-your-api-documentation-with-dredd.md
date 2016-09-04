@@ -87,7 +87,7 @@ If you choose to run `dredd init`, you'll see prompts for a number of things, in
 * Any Apiary API key
 * The language you want to use
 
-There are Dredd hooks for many languages, so if you're planning on building a REST API in a language other than PHP, don't worry - you can still test it with Dredd, you'll just get prompted to install different hooks..
+There are Dredd hooks for many languages, so if you're planning on building a REST API in a language other than PHP, don't worry - you can still test it with Dredd, you'll just get prompted to install different hooks.
 
 Note the `hookfiles` section, which specifies a hookfile to run during the test in order to set up the API. We'll touch on that in a moment. Also, note the `server` setting - this specifies the command we should call to run the server. In this case we're using the PHP development server.
 
