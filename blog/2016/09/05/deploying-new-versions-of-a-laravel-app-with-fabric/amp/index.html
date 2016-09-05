@@ -1,0 +1,246 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Deploying New Versions of a Laravel App With Fabric - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/",
+         "headline": "Deploying New Versions of a Laravel App With Fabric",
+         "datePublished": "2016-09-05T21:22:16.000Z",
+         "dateModified": "2016-09-05T21:22:16.000Z",
+         "description": "&lt;p&gt;&lt;a href&#x3D;&quot;https://laravel.com/docs/5.3/envoy&quot;&gt;Envoy&lt;/a&gt; is the official way to run tasks on a remo...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th September 2016 10:22 pm</p><h1>Deploying New Versions of a Laravel App With Fabric</h1><p><a href="https://laravel.com/docs/5.3/envoy">Envoy</a> is the official way to run tasks on a remote server for Laravel apps. A typical Envoy task for deploying a new version might look like this:</p><pre><code class="hljs lang-blade"><span class="hljs-variable">@servers</span>([<span class="hljs-string">'web'</span> =&gt; <span class="hljs-string">'matthew@server1.example.com'</span>])
+
+<span class="hljs-variable">@task</span>(<span class="hljs-string">'deploy'</span>, [<span class="hljs-string">'on'</span> =&gt; <span class="hljs-string">'web'</span>])
+    cd /var/www
+    sudo chown -R <span class="hljs-attribute">matthew</span>:matthew .
+    git pull origin master
+    php artisan migrate
+    php artisan <span class="hljs-attribute">view</span>:clear
+    composer dump-autoload
+    sudo chown -R <span class="hljs-attribute">www-data</span>:www-data .
+    sudo supervisorctl restart mail-queue
+<span class="hljs-variable">@endtask</span>
+</code></pre><p>This would be defined in <code>Envoy.blade.php</code>. With this in place, and Envoy set up globally, you can then run <code>envoy run deploy</code> to run the <code>deploy</code> command.</p><p>However, Envoy requires the PHP SSH library, which I haven’t been able to get working with PHP 7. Fortunately I was already familiar with <a href="http://www.fabfile.org/">Fabric</a>, which makes an excellent alternative as long as you don’t mind writing the task in Python.</p><p>The same kind of task might look like this in a Fabric script, saved as <code>fabfile.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-comment">#!/usr/bin/env python</span>
+<span class="hljs-keyword">from</span> fabric.api <span class="hljs-keyword">import</span> local, env, run, sudo
+<span class="hljs-keyword">from</span> fabric.context_managers <span class="hljs-keyword">import</span> cd, prefix
+
+env.hosts = [<span class="hljs-string">'server1.example.com'</span>]
+env.path = <span class="hljs-string">"/var/www"</span>
+env.user = <span class="hljs-string">"matthew"</span>
+env.password = <span class="hljs-string">"password"</span>
+<span class="hljs-comment"># Or...</span>
+env.key_filename = <span class="hljs-string">'/path/to/ssh/key'</span>
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deploy</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-string">"""
+    Deploy the latest version
+    """</span>
+    <span class="hljs-comment"># Push changes to Bitbucket</span>
+    local(<span class="hljs-string">"git push origin master"</span>)
+
+    <span class="hljs-comment"># Switch to project directory</span>
+    <span class="hljs-keyword">with</span> cd(env.path):
+        <span class="hljs-comment"># Change owner</span>
+        sudo(<span class="hljs-string">'chown -R matthew:matthew .'</span>)
+
+        <span class="hljs-comment"># Pull changes to server</span>
+        run(<span class="hljs-string">'git pull origin master'</span>)
+
+        <span class="hljs-comment"># Run migrations</span>
+        run(<span class="hljs-string">'php artisan migrate'</span>)
+
+        <span class="hljs-comment"># Clear cached files</span>
+        run(<span class="hljs-string">'php artisan view:clear'</span>)
+        run(<span class="hljs-string">'composer dump-autoload'</span>)
+
+        <span class="hljs-comment"># Change owner back</span>
+        sudo(<span class="hljs-string">'chown -R www-data:www-data .'</span>)
+
+        <span class="hljs-comment"># restart mail queue</span>
+        sudo(<span class="hljs-string">'supervisorctl restart mail-queue'</span>)
+</code></pre><p>Then, assuming Fabric is already installed locally, you can run <code>fab deploy</code> to push up the latest revision.</p><p>Either of these solutions will do a fine job of deploying your app. If you do need to store user-specific data in your Fabric script, it’s probably prudent to keep it out of version control.</p><p>Whichever way you choose, it’s a really good idea to do what you can to automate deployment. It can be a boring, repetitive job, and both of these solutions make it much easier.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/fabric/">fabric</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/deployment/">deployment</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/amp/">Maintaining Your CV With Markdown and Emacs</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
