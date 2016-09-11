@@ -1,6 +1,6 @@
 ---
 title: "Building a Phonegap app with Laravel and Angular - Part 1"
-date: 2016-09-11 12:09:41 +0100
+date: 2016-09-11 19:33:41 +0100
 categories:
 - php
 - laravel
@@ -10,9 +10,9 @@ categories:
 comments: true
 ---
 
-A lot of my work over the last few years has been building Phonegap apps. Phonegap isn't terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you've used client-side Javascript frameworks before it can be a struggle.
+A lot of my work over the last few years has been involved Phonegap apps. Phonegap isn't terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you've used client-side Javascript frameworks before it can be a struggle.
 
-In this series of tutorials I'll show you how I might build a Phonegap app. The steps involved will include:
+In this series of tutorials I'll show you how I might build a Phonegap app. The work involved will include:
 
 * Building a REST API using Laravel to expose the data
 * Building an admin interface to manage the data
@@ -26,7 +26,7 @@ The brief
 
 Let's say our new client is an animal shelter. The brief for the app is as follows:
 
-> My New Animal Friend will be an app for finding your new pet. Once a user signs in, they'll be able to choose what type of pet they're looking for, then look through a list of pets. They can reject them by swiping left or save them by swiping right. They can see more about the ones they swipe right on, and arrange to meet them, from within the app. Users can also message the staff to ask questions about a pet
+> My New Animal Friend will be an app for finding a new pet. Once a user signs in, they'll be able to choose what type of pet they're looking for, then look through a list of pets available to adopt. They can reject them by swiping left or save them by swiping right. They can see more about the ones they swipe right on, and arrange to meet them, from within the app. Users can also message the staff to ask questions about a pet.
 
 Nice idea, but there's a lot of work involved! Our very first task is to build the REST API, since everything else relies on that. Before starting, make sure you have the following installed:
 
@@ -953,150 +953,6 @@ Time: 693 ms, Memory: 16.00MB
 OK (9 tests, 39 assertions)
 ```
 
-Now we have all the endpoints we need to get started. You can find the source code for this backend on [Github](https://github.com/matthewbdaly/mynewanimalfriend-backend) - check out the `lesson-1` tag. Let's move onto the app.
+Now we have all the endpoints we need to get started with the app. You can find the source code for this backend on [Github](https://github.com/matthewbdaly/mynewanimalfriend-backend) - check out the `lesson-1` tag.
 
-Creating the Phonegap app
--------------------------
-
-In this lesson, the scope of the app will be extremely simple. We will produce an app that:
-
-* Allows users to log in and out
-* Displays a list of pets
-
-That's fairly simple, and easily achievable within a fairly short timeframe. Start by creating a new folder, separate from the backend, for the app. Then, in there, run the following command:
-
-```bash
-$ npm init -y
-```
-
-Then let's install our dependencies:
-
-```bash
-$ npm install --save-dev gulp karma karma-browserify karma-phantomjs-launcher browserify angular angular-route angular-mocks angular-animate angular-messages angular-sanitize angular-material vinyl-buffer vinyl-source-stream gulp-sass karma-coverage karma-jasmine jasmine-core gulp-webserver
-```
-
-We're going to use [Angular Material](https://material.angularjs.org/latest/) to build our app as it includes support out of the box for swiping left and right. You'll notice it mentioned as one of the dependencies above.
-
-We'll also use Karma for running our tests. Save the following as `karma.conf.js`:
-
-```javascript
-module.exports = function(config) {
-    config.set({
-        basePath: '',
-        frameworks: ['browserify', 'jasmine'],
-        files: [
-            'node_modules/angular/angular.min.js',
-            'node_modules/angular-mocks/angular-mocks.js',
-            'node_modules/angular-material/angular-material-mocks.js',
-            'js/*.js',
-            'tests/*.js'
-        ],
-        exclude: [
-        ],
-        preprocessors: {
-            'js/*.js': ['browserify', 'coverage'],
-            'tests/js': ['browserify']
-        },
-        browserify: {
-          debug: true
-        },
-        reporters: ['progress', 'coverage'],
-        port: 9876,
-        colors: true,
-        logLevel: config.LOG_DEBUG,
-        autoWatch: true,
-        browsers: ['PhantomJS'],
-        singleRun: true,
-        coverageReporter: {
-          dir : 'coverage/',
-          reporters: [
-            { type: 'html', subdir: 'report-html' },
-            { type: 'cobertura', subdir: 'report-cobertura' }
-          ]
-        }
-    });
-};
-```
-
-This is our Karma configuration. Karma can run the same test in multiple browsers. Here we're going to use PhantomJS, but it's trivial to amend the `browsers` section to add more. You just need to make sure you install the appropriate launchers for those browsers.
-
-We'll use Gulp to build the app. Here's the `gulpfile.js`:
-
-```javascript
-var gulp = require('gulp');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var browserify = require('browserify');
-var sass = require('gulp-sass');
-var server = require('gulp-webserver');
-
-var paths = {
-  scripts: ['js/*.js'],
-  styles: ['sass/*.scss']
-};
-
-gulp.task('sass', function() {
-  gulp.src('sass/style.scss')
-   .pipe(sass().on('error', sass.logError))
-   .pipe(gulp.dest('www/css'));
-});;
-
-gulp.task('js', function () {
-  return browserify({ entries: ['js/main.js'], debug: true })
-    .bundle()
-    .pipe(source('bundle.js'))
-    .pipe(buffer())
-    .pipe(gulp.dest('www/js/'));
-});
-
-gulp.task('server', function () {
-  gulp.src('www/')
-    .pipe(server({
-      livereload: true,
-      open: true,
-      port: 5000
-    }));
-});
-
-
-gulp.task('watch', function () {
-  gulp.watch(paths.scripts, ['js']);
-  gulp.watch(paths.styles, ['sass']);
-});
-
-gulp.task('default', ['sass','js','server', 'watch']);
-```
-
-We should be able to test and run the app using NPM, so add these scripts to `package.json`:
-
-```javascript
-  "scripts": {
-    "test": "karma start",
-    "run": "gulp"
-  },
-```
-
-We also need an HTML file. Save this as `www/index.html`:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-        <title>My New Animal Friend</title>
-        <link href="/css/style.css" rel="stylesheet" type="text/css">
-    </head>
-    <body>
-    <div>
-        <div ng-app="mynewanimalfriend">
-            <div ng-view></div>
-        </div>
-    </div>
-    </body>
-    <script language="javascript" type="text/javascript" src="/js/bundle.js"></script>
-</html>
-```
-
-Also create the files `js/main.js`, `sass/style.scss`, and the `test` folder.
+That seems like a good place to stop for now. We have our first pass at the back end. It's not complete by any means, but it's a good start, and is sufficient for us to get some basic functionality up and running in the app. In the next instalment we'll start working with Phonegap to build the first pass at the app itself. Later instalments will see us working with both the app and backend to build it into a more useful whole.
