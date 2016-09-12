@@ -842,7 +842,7 @@ Add these methods to `tests/PetControllerTest.php`:
         );
 
         // Send it
-		  $this->json('GET', '/api/pets/1', [], $headers);
+        $this->json('GET', '/api/pets/1', [], $headers);
         $this->assertResponseStatus(404);
     }
 
