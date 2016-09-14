@@ -10,7 +10,7 @@ categories:
 comments: true
 ---
 
-A lot of my work over the last few years has been involved Phonegap apps. Phonegap isn't terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you've used client-side Javascript frameworks before it can be a struggle.
+A lot of my work over the last few years has been on Phonegap apps. Phonegap isn't terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you've used client-side Javascript frameworks before it can be a struggle.
 
 In this series of tutorials I'll show you how I might build a Phonegap app. The work involved will include:
 
