@@ -1,6 +1,6 @@
 ---
 title: "Building a Phonegap app with Laravel and Angular - Part 2"
-date: 2016-09-18 21:20:06 +0100
+date: 2016-09-18 23:18:06 +0100
 categories:
 - php
 - laravel
@@ -8,17 +8,16 @@ categories:
 - angular
 - phonegap
 comments: true
-draft: false
 ---
 
-In this lesson, the scope of the app will be extremely simple. We will implement functionality that:
+In this lesson, the initial scope of the app will be extremely simple. We will implement functionality that:
 
 * Allows users to log in and out
-* Displays a list of pets
+* Displays the home page
 
-That's fairly simple, and easily achievable within a fairly short timeframe. We'll also write automated tests for our app. By the end of this lesson, we'll have built a working prototype for our app using Angular.js.
+That's fairly simple, and easily achievable within a fairly short timeframe. We'll also write automated tests for our app. By the end of this lesson, we'll have built a first pass for our app using Angular.js.
 
-NOTE: As at time of writing, Angular 2 has just come out. I'm using Angular 1 here, and the two are not compatible.
+NOTE: As at time of writing, Angular 2 has just come out. I'm using Angular 1 here, and the two are not compatible, so make sure you're using Angular 1.
 
 Creating our app
 ----------------
@@ -35,7 +34,7 @@ Then let's install our dependencies:
 $ npm install --save-dev gulp karma karma-browserify karma-phantomjs-launcher browserify angular angular-route angular-mocks angular-animate angular-messages angular-sanitize angular-material angular-resource vinyl-buffer vinyl-source-stream gulp-sass karma-coverage karma-jasmine jasmine-core gulp-webserver
 ```
 
-We're going to use [Angular Material](https://material.angularjs.org/latest/) to build our app as it includes support out of the box for swiping left and right. You'll notice it mentioned as one of the dependencies above.
+We're going to use [Angular Material](https://material.angularjs.org/latest/) for our user interface as it includes support out of the box for swiping left and right. You'll notice it mentioned as one of the dependencies above.
 
 We'll also use Karma for running our tests. Save the following as `karma.conf.js`:
 
@@ -127,6 +126,8 @@ gulp.task('watch', function () {
 gulp.task('default', ['sass','js','server', 'watch']);
 ```
 
+Note that we're going to be using Browserify to handle our dependencies. If you haven't used it before, it lets you use the `require()` syntax from Node.js to include other JavaScript files, including ones available via NPM such as jQuery or Angular, allowing you to compile them all into a single file.
+
 We should be able to test and run the app using NPM, so add these scripts to `package.json`:
 
 ```javascript
@@ -150,7 +151,7 @@ We also need an HTML file. Save this as `www/index.html`:
     </head>
     <body>
     <div>
-        <div ng-app="mynewanimalfriend">
+        <div ng-app="mynewanimalfriend" ng-cloak>
             <div ng-view></div>
         </div>
     </div>
@@ -159,6 +160,8 @@ We also need an HTML file. Save this as `www/index.html`:
 </html>
 ```
 
+Note the use of the Angular directives. `ng-app` denotes the name of the app namespace, `ng-cloak` hides the application until it's fully loaded, and `ng-view` denotes the area containing our content.
+
 You should also create the files `js/main.js`, `sass/style.scss`, and the `test` folder.
 
 Creating our first routes
@@ -166,7 +169,7 @@ Creating our first routes
 
 Our first task is to create the routes we need. Our default route will be `/`, representing the home page. However, users will need to be logged in to see this. Otherwise, they should be redirected to the login route, which will be `/login`, appropriately enough. We'll also have a `/logout` route, which should be self-explanatory.
 
-Before we implement these routes, we need to write a test for them. We'll start with our login route, and we'll test that for this route, the controller will be `LoginCtrl` and the template will be `templates/login.html`. The significance of these will become apparent later. Save this as `/test/routes.spec.js`:
+Before we implement these routes, we need to write a test for them. We'll start with our login route, and we'll test that for this route, the controller will be `LoginCtrl` and the template will be `templates/login.html`. The significance of these will become apparent later. Save this as `test/routes.spec.js`:
 
 ```javascript
 'use strict';
@@ -301,7 +304,7 @@ angular.module('mynewanimalfriend', [
 });
 ```
 
-Because we're using Browserify, we can use the `require()` syntax from Node.js to import our dependencies. Note we also give our module a name and specify the dependencies. Finally, note that we use `$routeProvider` to set up our first route, and we map the template URL and controller to match our test.
+As mentioned earlier, because we're using Browserify, we can use the `require()` syntax to import our dependencies. Note we also give our module a name and specify the dependencies. Finally, note that we use `$routeProvider` to set up our first route, and we map the template URL and controller to match our test.
 
 Let's run the test again:
 
@@ -418,6 +421,8 @@ describe('Routes', function () {
 });
 ```
 
+Note that the logout route uses the login template. This is because all it will do is redirect the user to the login form.
+
 For the sake of brevity I won't display the test output, but two of these tests should now fail. We can easily set up the new routes in `js/main.js`:
 
 ```javascript
@@ -529,7 +534,7 @@ describe('Services', function () {
     }));
 
     it('can create a new token', function () {
-      mockBackend.expectPOST('/api/authenticate', '{"email":"bob@example.com","password":"password"}').respond({token: 'mytoken'});
+      mockBackend.expectPOST('http://localhost:8000/api/authenticate', '{"email":"bob@example.com","password":"password"}').respond({token: 'mytoken'});
       var token = new Token({
         email: 'bob@example.com',
         password: 'password'
@@ -554,7 +559,7 @@ require("angular-resource");
 angular.module('mynewanimalfriend.services', ['ngResource'])
 
 .factory('Token', function ($resource) {
-  return $resource('/api/authenticate/');
+  return $resource('http://localhost:8000/api/authenticate/');
 });
 ```
 
@@ -664,7 +669,7 @@ angular.module('mynewanimalfriend.services', ['ngResource'])
 })
 
 .factory('Token', function ($resource) {
-  return $resource('/api/authenticate/');
+  return $resource('http://localhost:8000/api/authenticate/');
 });
 ```
 
@@ -717,7 +722,7 @@ describe('Controllers', function () {
     // Test doLogin works
     it('should allow the user to log in', function () {
       // Mock the backend
-      mockBackend.expectPOST('/api/authenticate', '{"email":"user@example.com","password":"password"}').respond({token: 123});
+      mockBackend.expectPOST('http://localhost:8000/api/authenticate', '{"email":"user@example.com","password":"password"}').respond({token: 123});
 
       // Define login data
       scope.credentials = {
@@ -985,7 +990,7 @@ angular.module('mynewanimalfriend.services', ['ngResource'])
 })
 
 .factory('Token', function ($resource) {
-  return $resource('/api/authenticate/');
+  return $resource('http://localhost:8000/api/authenticate/');
 })
 
 .factory('sessionInjector', function (Auth) {
@@ -1034,3 +1039,167 @@ We need to import the CSS for Angular Material. Add this to `sass/style.scss`:
 // Angular Material
 @import "node_modules/angular-material/angular-material.scss";
 ```
+
+With that done, we need to configure theming in `main.js`:
+
+```javascript
+'use strict';
+
+require('angular');
+require('angular-route');
+require('angular-animate');
+require('angular-material');
+require('./controllers');
+
+angular.module('mynewanimalfriend', [
+  'ngRoute',
+  'ngAnimate',
+  'ngMaterial',
+  'mynewanimalfriend.controllers'
+])
+
+.config(function ($mdThemingProvider) {
+    $mdThemingProvider.theme('default')
+      .primaryPalette('purple')
+      .accentPalette('cyan');
+})
+
+.run(['$rootScope', '$location', 'Auth', function ($rootScope, $location, Auth) {
+  $rootScope.$on('$routeChangeStart', function (event) {
+
+    if (!Auth.isLoggedIn()) {
+      if ($location.path() !== '/login') {
+        $location.path('/login');
+      }
+    }
+  });
+}])
+
+.config(['$httpProvider', function($httpProvider) {
+  $httpProvider.interceptors.push('sessionInjector');
+  $httpProvider.interceptors.push('authInterceptor');
+}])
+
+.config(function ($routeProvider) {
+  $routeProvider
+  .when('/login', {
+    templateUrl: 'templates/login.html',
+    controller: 'LoginCtrl'
+  })
+  .when('/', {
+    templateUrl: 'templates/home.html',
+    controller: 'HomeCtrl'
+  })
+  .when('/logout', {
+    templateUrl: 'templates/login.html',
+    controller: 'LogoutCtrl'
+  })
+  .otherwise({
+    redirectTo: '/'
+  });
+});
+```
+
+You may want to look at the [documentation](https://material.angularjs.org/latest/Theming/01_introduction) for Angular Material to choose your own theme options. Next, let's create our login template at `www/templates/login.html`:
+
+```html
+<md-content md-theme="default" layout-gt-sm="row" layout-padding>
+	<div>
+		<md-input-container class="md-block">
+			<label>Email</label>
+			<input ng-model="credentials.email" type="email">
+		</md-input-container>
+
+		<md-input-container class="md-block">
+			<label>Password</label>
+			<input ng-model="credentials.password" type="password">
+		</md-input-container>
+		<md-button class="md-raised md-primary" ng-click="doLogin()">Submit</md-button>
+	</div>
+</md-content>
+```
+
+We're using Angular Material's input and button directives to make our inputs look a bit nicer. Note that the `ng-click` handler calls the `doLogin()` method of our controller, and that the `ng-model` attributes contain the `credentials` object that gets passed to the API. If you haven't used Angular before, `ng-model` essentially lets you bind a variable to an element's value so, for instance, when an input is changed, it can be easily accessed via the variable.
+
+Next, we'll implement a placeholder for our home page with a log out button. Save this as `www/templates/home.html`:
+
+```html
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <md-button aria-label="Log out" href="#logout">
+            Log out
+        </md-button>
+    </div>
+</md-toolbar>
+```
+
+That should be all we need to demonstrate logging in and out of our app. Let's try it out. First run the Gulp task to show the app in the browser:
+
+```bash
+$ gulp
+```
+
+Then, in another shell session, switch to the directory with the backend and run the server for that:
+
+```bash
+$ php artisan serve
+```
+
+You should already have a user account set up and ready to use thanks to the seeder we wrote. The browser should show the login page by default, and if you fill in the login form and click the button you should see the home page. You should then be able to log out again.
+
+Congratulations! We've got authentication working.
+
+Switching to HTML5 routing
+--------------------------
+
+You may note that the URLs use hashes - they are in the format `http://localhost:5000/#/login`. Wouldn't it be better if we didn't use the hash? Fortunately modern browsers support this via the HTML5 pushState API, and Angular has built-in support for this.
+
+To enable it, we first need to declare a base URL in `www/index.html`. Amend it as follows:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <title>My New Animal Friend</title>
+        <link href="/css/style.css" rel="stylesheet" type="text/css">
+        <base href="/">
+    </head>
+    <body>
+    <div>
+        <div ng-app="mynewanimalfriend" ng-cloak>
+            <div ng-view></div>
+        </div>
+    </div>
+    </body>
+    <script language="javascript" type="text/javascript" src="/js/bundle.js"></script>
+</html>
+```
+
+Here we've added the `<base href="/">` tag to denote our base URL. Next we configure Angular to use HTML5 routing in `main.js`:
+
+```javascript
+.config(function($locationProvider) {
+  $locationProvider.html5Mode(true);
+})
+```
+
+And amend the URL in the home template:
+
+```html
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <md-button aria-label="Log out" href="/logout">
+            Log out
+        </md-button>
+    </div>
+</md-toolbar>
+```
+
+Now, we should be using HTML5 routing throughout.
+
+With that done, we can finish for today. We've got our basic app skeleton and authentication system up and running, and we'll be in a good place to continue developing the rest of the app next time. I've put the source code on [Github](https://github.com/matthewbdaly/mynewanimalfriend-app), and you can find this lesson's work under the `lesson-2` tag.
+
+Next time we'll develop the app further, including implementing the pet search functionality.
