@@ -92,6 +92,12 @@ And set a custom namespace:
 $ php artisan app:name AnimalFriend
 ```
 
+You'll also want to set up the `.env` file with the configuration settings for your application. There's one at `.env.example` by default that you can copy and customise. Then run the following command to generate the application key:
+
+```bash
+$ php artisan key:generate
+```
+
 I had to change the namespace for the user model in `config/jwt.php` as well:
 
 ```php
