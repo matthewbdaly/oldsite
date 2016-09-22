@@ -526,7 +526,7 @@ describe('Services', function () {
   beforeEach(angular.mock.module('mynewanimalfriend.services'));
 
   describe('Token service', function () {
-    var Token;
+    var mockBackend, Token;
 
     beforeEach(inject(function (_Token_, _$httpBackend_) {
       Token = _Token_;
