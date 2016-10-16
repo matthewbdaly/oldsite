@@ -42,6 +42,6 @@ I've worked extensively with the following technologies:
 * Version control (some experience with Subversion, but I primarily use Git)
 * Using Jenkins and Travis CI, together with Coveralls, for continuous integration
 
-I blog regularly about web development, particularly about Django and Node.js, and have also [written for Sitepoint](http://www.sitepoint.com/author/mdaly/). Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and *Archer*, and have spent *way* too much time lately playing *Skyrim* and the *Mass Effect* series. I've also begun developing an appreciation of Guinness.
+I blog regularly about web development, particularly about Django, Laravel and Node.js, and have also [written for Sitepoint](http://www.sitepoint.com/author/mdaly/). Outside of work and extra-curricular coding I'm a huge fan of *Firefly* and *Archer*, and have spent *way* too much time lately playing *X-COM 2*, *Skyrim* and the *Mass Effect* series. I've also begun developing an appreciation of Guinness and Brewdog's range of ales (Dead Pony Club is my favourite).
 
 Contact me at matthew@matthewdaly.co.uk.
