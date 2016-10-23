@@ -1,0 +1,245 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Creating An Azure Storage Adapter for Laravel - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/",
+         "headline": "Creating An Azure Storage Adapter for Laravel",
+         "datePublished": "2016-10-23T23:25:27.000Z",
+         "dateModified": "2016-10-23T23:25:27.000Z",
+         "description": "&lt;p&gt;About a year ago I was working on my first non-trivial Laravel application. The client had, for t...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="//fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">24th October 2016 12:25 am</p><h1>Creating An Azure Storage Adapter for Laravel</h1><p>About a year ago I was working on my first non-trivial Laravel application. The client had, for their own reasons, wanted to use Microsoft’s Azure platform, particularly for its blob storage functionality, which is somewhat comparable to Amazon S3. Now, Laravel has the excellent <code>Storage</code> facade that allows consistent access to both local files and those stored on various file hosting services, which is built on top of <a href="https://flysystem.thephpleague.com/">Flysystem</a>. Flysystem has an Azure driver, but the Laravel storage doesn’t include support for it, so at the time I resigned myself to using Flysystem directly, which wasn’t actually that bad, but not ideal.</p><p>A few days ago I stumbled across <a href="https://laravel.com/docs/5.1/filesystem#custom-filesystems">this section of the Laravel documentation</a>, which had me kicking myself. It’s actually trivially easy to implement a custom filesystem for Laravel if it already has a Flysystem adapter, as demonstrated in their Dropbox implementation in the docs. Using this as a guide, I was able to produce the following service provider for using Azure as a storage backend very quickly:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Storage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Flysystem</span>\<span class="hljs-title">Filesystem</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Flysystem</span>\<span class="hljs-title">Azure</span>\<span class="hljs-title">AzureAdapter</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">WindowsAzure</span>\<span class="hljs-title">Common</span>\<span class="hljs-title">ServicesBuilder</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AzureStorageServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Perform post-registration booting of services.
+     *
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
+    </span>{
+        Storage::extend(<span class="hljs-string">'azure'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">($app, $config)</span> </span>{
+            $endpoint = sprintf(
+                <span class="hljs-string">'DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s'</span>,
+                $config[<span class="hljs-string">'name'</span>],
+                $config[<span class="hljs-string">'key'</span>]
+            );
+
+            $blobRestProxy = ServicesBuilder::getInstance()-&gt;createBlobService($endpoint);
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Filesystem(<span class="hljs-keyword">new</span> AzureAdapter($blobRestProxy, $config[<span class="hljs-string">'container'</span>]));
+        });
+    }
+
+    <span class="hljs-comment">/**
+     * Register bindings in the container.
+     *
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">//</span>
+    }
+}
+</code></pre><p>This should be saved as <code>app/Providers/AzureStorageServiceProvider.php</code>. You also need to add this to the list of service providers in <code>config/app.php</code>:</p><pre><code class="hljs lang-php">        App\Providers\AzureStorageServiceProvider::class,
+</code></pre><p>And add this to <code>config/filesystems.php</code>:</p><pre><code class="hljs lang-php">        <span class="hljs-string">'azure'</span> =&gt; [
+            <span class="hljs-string">'driver'</span>    =&gt; <span class="hljs-string">'azure'</span>,
+            <span class="hljs-string">'name'</span>      =&gt; env(<span class="hljs-string">'STORAGE_NAME'</span>),
+            <span class="hljs-string">'key'</span>       =&gt; env(<span class="hljs-string">'STORAGE_KEY'</span>),
+            <span class="hljs-string">'container'</span> =&gt; env(<span class="hljs-string">'STORAGE_CONTAINER'</span>),
+        ],
+</code></pre><p>I like to also set my storage backend using environment variables in this file, as in this example:</p><pre><code class="hljs lang-php">    <span class="hljs-string">'default'</span> =&gt; env(<span class="hljs-string">'STORAGE_BACKEND'</span>, <span class="hljs-string">'local'</span>),
+</code></pre><p>That way we can easily set a different backend for testing, development and production so we don’t upload files when running PHPUnit. You can also keep your other config settings in your <code>.env</code> file, which is always a better idea than keeping it under version control. You also need to install the <code>microsoft/windowsazure</code> and <code>league/flysystem-azure</code> packages via Composer for this to work.</p><p>As I’ve since changed jobs it’s unlikely I’ll ever actually use this Azure integration in production - it’s not a service I’d choose of my own accord to use. However, since it’s so straightforward to implement an adapter like this I imagine I may be doing something similar - I’m currently working on a web app that uses MongoDB for some of its data and currently stores files locally, so it might make sense to create a GridFS integration along similar lines. It may also be useful for someone else, so feel free to use it if you wish.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/10/16/building-a-phonegap-app-with-laravel-and-angular-part-3/amp/">Building a Phonegap App With Laravel and Angular - Part 3</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
