@@ -10,7 +10,7 @@ categories:
 comments: true
 ---
 
-Apologies for how long it's taken for this post to be appear. I've got a lot on my plate at present as I recently started a new job, so I haven't been able to devote as much time to this series as I'd like.
+Apologies for how long it's taken for this post to appear. I've got a lot on my plate at present as I recently started a new job, so I haven't been able to devote as much time to this series as I'd like.
 
 In this instalment we'll begin extending our app beyond the basic authentication we've already implemented. We'll start by adding the means to sign up, before adding the list of pets.
 
