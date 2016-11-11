@@ -7,6 +7,7 @@ categories:
 - tdd
 - python
 - django
+- django-blog-tutorial
 ---
 
 Yes, I know the eight instalment was meant to be the last one! Within 24 hours of that post going live, Django 1.7 was released, so naturally I'd like to show you how to upgrade to it.

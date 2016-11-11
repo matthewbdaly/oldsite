@@ -7,6 +7,7 @@ categories:
 - python
 - django
 - tdd
+- django-blog-tutorial
 ---
 
 Hello again! I was originally planning to cover implementing a search system, adding more feeds, and tidying up the front end in this instalment. However, I felt it was time for a change of pace, so instead, we're going to look at:

@@ -7,6 +7,7 @@ categories:
  - tdd
  - python
  - django
+ - django-blog-tutorial
 ---
 
 Hello once again! In this instalment we'll cover:

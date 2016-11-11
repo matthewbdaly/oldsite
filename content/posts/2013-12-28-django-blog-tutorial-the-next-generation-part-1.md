@@ -7,6 +7,7 @@ categories:
 - python
 - django
 - tdd
+- django-blog-tutorial
 ---
 
 My series of Django tutorials for building a blogging engine are by far the most popular posts I've ever written on here. I've had a lot of people contact me with questions or just to express their thanks, for which I'm very grateful!

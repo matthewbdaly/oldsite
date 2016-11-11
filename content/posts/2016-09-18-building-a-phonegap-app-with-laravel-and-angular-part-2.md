@@ -7,6 +7,7 @@ categories:
 - javascript
 - angular
 - phonegap
+- laravel-phonegap-tutorial
 comments: true
 ---
 

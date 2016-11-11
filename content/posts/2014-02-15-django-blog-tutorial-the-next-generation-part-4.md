@@ -7,6 +7,7 @@ categories:
 - python
 - django
 - tdd
+- django-blog-tutorial
 ---
 
 Hello again! As promised, in this instalment we'll implement categories and tags, as well as an RSS feed.

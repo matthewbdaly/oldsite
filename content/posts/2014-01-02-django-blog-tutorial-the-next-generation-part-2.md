@@ -7,6 +7,7 @@ categories:
 - python
 - django
 - tdd
+- django-blog-tutorial
 ---
 
 Welcome back! In this lesson, we'll use Twitter Bootstrap to make our blog look nicer, and we'll implement individual pages for each post.
