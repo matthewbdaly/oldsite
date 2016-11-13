@@ -418,8 +418,8 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
     });
   });
 </code></pre><p>Running the tests should confirm that this fails. So next you should add this to the route provider section of <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript">  .when(<span class="hljs-string">'/register'</span>, {
-    templateUrl: <span class="hljs-string">'templates/register.html'</span>,
-    controller: <span class="hljs-string">'RegisterCtrl'</span>
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/register.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'RegisterCtrl'</span>
   })
 </code></pre><p>We also need to allow the register path to be accessed when not logged in:</p><pre><code class="hljs lang-javascript">.run([<span class="hljs-string">'$rootScope'</span>, <span class="hljs-string">'$location'</span>, <span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $location, Auth</span>) </span>{
   $rootScope.$on(<span class="hljs-string">'$routeChangeStart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
@@ -440,22 +440,22 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
     }));
 
     it(<span class="hljs-string">'can create a new user'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"bob@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({token: <span class="hljs-string">'mytoken'</span>});
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"bob@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
       <span class="hljs-keyword">var</span> user = <span class="hljs-keyword">new</span> User({
-        email: <span class="hljs-string">'bob@example.com'</span>,
-        name: <span class="hljs-string">'bobsmith'</span>,
-        password: <span class="hljs-string">'password'</span>,
-        password_confirmation: <span class="hljs-string">'password'</span>
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'bob@example.com'</span>,
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'bobsmith'</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>,
+        <span class="hljs-attr">password_confirmation</span>: <span class="hljs-string">'password'</span>
       });
       user.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
-        expect(response).toEqualData({token: <span class="hljs-string">'mytoken'</span>});
+        expect(response).toEqualData({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
       });
       mockBackend.flush();
     });
   });
 </code></pre><p>We’re only interested in using this model to create new users at this point, so this is the full scope of this test for now. Make sure the test fails, then we’re ready to create the new service in <code>js/services.js</code>:</p><pre><code class="hljs lang-javascript">.factory(<span class="hljs-string">'User'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
   <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/users/:id'</span>, <span class="hljs-literal">null</span>, {
-    <span class="hljs-string">'update'</span>: { method: <span class="hljs-string">'PATCH'</span> }
+    <span class="hljs-string">'update'</span>: { <span class="hljs-attr">method</span>: <span class="hljs-string">'PATCH'</span> }
   });
 })
 </code></pre><p>Note that <code>angular-resource</code> does not support the <code>PUT</code> or <code>PATCH</code> methods by default, but as shown here it’s easy to implement it ourselves. That should be sufficient to make our test pass.</p><p>Next, we need to create the controller for registration. Here’s the test for it:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Register Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
@@ -465,7 +465,7 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
       mockBackend = _$httpBackend_;
       scope = $rootScope.$<span class="hljs-keyword">new</span>();
       $controller(<span class="hljs-string">'RegisterCtrl'</span>, {
-        $scope: scope
+        <span class="hljs-attr">$scope</span>: scope
       });
     }));
 
@@ -482,14 +482,14 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
     <span class="hljs-comment">// Test doRegister works</span>
     it(<span class="hljs-string">'should allow the user to register'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       <span class="hljs-comment">// Mock the backend</span>
-      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"user@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({token: <span class="hljs-number">123</span>});
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"user@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-number">123</span>});
 
       <span class="hljs-comment">// Define login data</span>
       scope.credentials = {
-        email: <span class="hljs-string">'user@example.com'</span>,
-        name: <span class="hljs-string">"bobsmith"</span>,
-        password: <span class="hljs-string">'password'</span>,
-        password_confirmation: <span class="hljs-string">'password'</span>
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'user@example.com'</span>,
+        <span class="hljs-attr">name</span>: <span class="hljs-string">"bobsmith"</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>,
+        <span class="hljs-attr">password_confirmation</span>: <span class="hljs-string">'password'</span>
       };
 
       <span class="hljs-comment">//  Submit the request</span>
@@ -568,16 +568,16 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
     }));
 
     it(<span class="hljs-string">'can fetch pets'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      mockBackend.expectGET(<span class="hljs-string">'http://localhost:8000/api/pets'</span>).respond([{id:<span class="hljs-number">1</span>,name:<span class="hljs-string">"Freddie"</span>,type:<span class="hljs-string">"Cat"</span>}]);
+      mockBackend.expectGET(<span class="hljs-string">'http://localhost:8000/api/pets'</span>).respond([{<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">"Freddie"</span>,<span class="hljs-attr">type</span>:<span class="hljs-string">"Cat"</span>}]);
       expect(Pet).toBeDefined();
       <span class="hljs-keyword">var</span> pets = Pet.query();
       mockBackend.flush();
-      expect(pets).toEqualData([{id: <span class="hljs-number">1</span>,name:<span class="hljs-string">"Freddie"</span>,type:<span class="hljs-string">"Cat"</span>}]);
+      expect(pets).toEqualData([{<span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">"Freddie"</span>,<span class="hljs-attr">type</span>:<span class="hljs-string">"Cat"</span>}]);
     });
   });
 </code></pre><p>Once you know that fails, it’s time to implement the service:</p><pre><code class="hljs lang-javascript">.factory(<span class="hljs-string">'Pet'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
   <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/pets/:id'</span>, <span class="hljs-literal">null</span>, {
-    <span class="hljs-string">'update'</span>: { method: <span class="hljs-string">'PATCH'</span> }
+    <span class="hljs-string">'update'</span>: { <span class="hljs-attr">method</span>: <span class="hljs-string">'PATCH'</span> }
   });
 })
 </code></pre><p>Next, we want to add the pets to the scope of the home controller. Amend the test for it as follows:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Home Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
@@ -587,8 +587,8 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
       pets = Pet;
       scope = $rootScope.$<span class="hljs-keyword">new</span>();
       $controller(<span class="hljs-string">'HomeCtrl'</span>, {
-        $scope: scope,
-        pets: [{id:<span class="hljs-number">1</span>},{id:<span class="hljs-number">2</span>}]
+        <span class="hljs-attr">$scope</span>: scope,
+        <span class="hljs-attr">pets</span>: [{<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>},{<span class="hljs-attr">id</span>:<span class="hljs-number">2</span>}]
       });
     }));
 
@@ -599,7 +599,7 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
 
     <span class="hljs-comment">// Test pets</span>
     it(<span class="hljs-string">'should define the pets'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      expect(scope.pets).toEqualData([{id: <span class="hljs-number">1</span>}, {id: <span class="hljs-number">2</span>}]);
+      expect(scope.pets).toEqualData([{<span class="hljs-attr">id</span>: <span class="hljs-number">1</span>}, {<span class="hljs-attr">id</span>: <span class="hljs-number">2</span>}]);
     });
   });
 </code></pre><p>We check to see if the scope contains the <code>pets</code> variable. Once you have a failing test, amend the home controller as follows:</p><pre><code class="hljs lang-javascript">.controller(<span class="hljs-string">'HomeCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, Pet, pets</span>) </span>{
@@ -617,10 +617,10 @@ OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</spa
   };
 }])
 </code></pre><p>Then we set that route up to resolve it in <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript">  .when(<span class="hljs-string">'/'</span>, {
-    templateUrl: <span class="hljs-string">'templates/home.html'</span>,
-    controller: <span class="hljs-string">'HomeCtrl'</span>,
-    resolve: {
-      pets: [<span class="hljs-string">'PetsLoader'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">PetsLoader</span>) </span>{
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>,
+    <span class="hljs-attr">resolve</span>: {
+      <span class="hljs-attr">pets</span>: [<span class="hljs-string">'PetsLoader'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">PetsLoader</span>) </span>{
         <span class="hljs-keyword">return</span> PetsLoader();
       }]
     }
@@ -698,7 +698,7 @@ $ php artisan db:seed
         <span class="hljs-tag">&lt;/<span class="hljs-name">md-card-content</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-name">md-card</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
-</code></pre><p>Now we can see our pets in the app.</p><h2 id="wrapping-up">Wrapping up</h2><p>That’s enough for today - the fact that we can log in and out, register, and view the home page is sufficient as a proof of concept for a client. As usual, the results are on Github, tagged <code>lesson-3</code>.</p><p>Next time, we’ll concentrate exclusively on the back end. We’ll build upon what we already have using Laravel to create a full REST API for our app. In a later instalment, we’ll move on to build our admin interface for the staff, before switching back to finish off the app. I hope you’ll join me then.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/angular/">angular</a></li><li><a href="/blog/categories/phonegap/">phonegap</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/10/16/building-a-phonegap-app-with-laravel-and-angular-part-3/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/amp/">Creating An Azure Storage Adapter for Laravel</a> <a class="postlink" href="/blog/2016/09/18/building-a-phonegap-app-with-laravel-and-angular-part-2/amp/">Building a Phonegap App With Laravel and Angular - Part 2</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+</code></pre><p>Now we can see our pets in the app.</p><h2 id="wrapping-up">Wrapping up</h2><p>That’s enough for today - the fact that we can log in and out, register, and view the home page is sufficient as a proof of concept for a client. As usual, the results are on Github, tagged <code>lesson-3</code>.</p><p>Next time, we’ll concentrate exclusively on the back end. We’ll build upon what we already have using Laravel to create a full REST API for our app. In a later instalment, we’ll move on to build our admin interface for the staff, before switching back to finish off the app. I hope you’ll join me then.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/angular/">angular</a></li><li><a href="/blog/categories/phonegap/">phonegap</a></li><li><a href="/blog/categories/laravel-phonegap-tutorial/">laravel-phonegap-tutorial</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/10/16/building-a-phonegap-app-with-laravel-and-angular-part-3/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/amp/">Creating An Azure Storage Adapter for Laravel</a> <a class="postlink" href="/blog/2016/09/18/building-a-phonegap-app-with-laravel-and-angular-part-2/amp/">Building a Phonegap App With Laravel and Angular - Part 2</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"
 					},

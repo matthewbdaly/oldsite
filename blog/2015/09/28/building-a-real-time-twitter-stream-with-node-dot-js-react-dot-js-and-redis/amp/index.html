@@ -201,8 +201,8 @@ $ npm install --save-dev browserify chai gulp gulp-compass gulp-coveralls gulp-i
 <span class="hljs-keyword">var</span> uglify = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-uglify'</span>);
 
 <span class="hljs-keyword">var</span> paths = {
-    scripts: [<span class="hljs-string">'components/*.jsx'</span>],
-    styles: [<span class="hljs-string">'src/sass/*.scss'</span>]
+    <span class="hljs-attr">scripts</span>: [<span class="hljs-string">'components/*.jsx'</span>],
+    <span class="hljs-attr">styles</span>: [<span class="hljs-string">'src/sass/*.scss'</span>]
 };
 gulp.task(<span class="hljs-string">'lint'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">return</span> gulp.src([
@@ -216,8 +216,8 @@ gulp.task(<span class="hljs-string">'lint'</span>, <span class="hljs-function"><
 gulp.task(<span class="hljs-string">'compass'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
   gulp.src(<span class="hljs-string">'src/sass/*.scss'</span>)
     .pipe(compass({
-      css: <span class="hljs-string">'static/css'</span>,
-      sass: <span class="hljs-string">'src/sass'</span>
+      <span class="hljs-attr">css</span>: <span class="hljs-string">'static/css'</span>,
+      <span class="hljs-attr">sass</span>: <span class="hljs-string">'src/sass'</span>
     }))
     .pipe(gulp.dest(<span class="hljs-string">'static/css'</span>));
 });;
@@ -227,16 +227,16 @@ gulp.task(<span class="hljs-string">'test'</span>, <span class="hljs-function"><
     .pipe(istanbul())
     .pipe(istanbul.hookRequire())
     .on(<span class="hljs-string">'finish'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-      gulp.src(<span class="hljs-string">'test/test.js'</span>, {read: <span class="hljs-literal">false</span>})
-        .pipe(mocha({ reporter: <span class="hljs-string">'spec'</span> }))
+      gulp.src(<span class="hljs-string">'test/test.js'</span>, {<span class="hljs-attr">read</span>: <span class="hljs-literal">false</span>})
+        .pipe(mocha({ <span class="hljs-attr">reporter</span>: <span class="hljs-string">'spec'</span> }))
         .pipe(istanbul.writeReports({
-          reporters: [
+          <span class="hljs-attr">reporters</span>: [
             <span class="hljs-string">'lcovonly'</span>,
             <span class="hljs-string">'cobertura'</span>,
             <span class="hljs-string">'html'</span>
           ]
         }))
-        .pipe(istanbul.enforceThresholds({ thresholds: { global: <span class="hljs-number">90</span> } }))
+        .pipe(istanbul.enforceThresholds({ <span class="hljs-attr">thresholds</span>: { <span class="hljs-attr">global</span>: <span class="hljs-number">90</span> } }))
         .once(<span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
           process.exit(<span class="hljs-number">0</span>);
         })
@@ -252,7 +252,7 @@ gulp.task(<span class="hljs-string">'coveralls'</span>, <span class="hljs-functi
 });
 
 gulp.task(<span class="hljs-string">'react'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-  <span class="hljs-keyword">return</span> browserify({ entries: [<span class="hljs-string">'components/index.jsx'</span>], debug: <span class="hljs-literal">true</span> })
+  <span class="hljs-keyword">return</span> browserify({ <span class="hljs-attr">entries</span>: [<span class="hljs-string">'components/index.jsx'</span>], <span class="hljs-attr">debug</span>: <span class="hljs-literal">true</span> })
     .transform(reactify)
     .bundle()
     .pipe(source(<span class="hljs-string">'bundle.js'</span>))
@@ -273,10 +273,10 @@ gulp.task(<span class="hljs-string">'default'</span>, <span class="hljs-function
 
 <span class="hljs-comment">// Set up Twitter client</span>
 <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
-  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
+  <span class="hljs-attr">consumer_key</span>: process.env.TWITTER_CONSUMER_KEY,
+  <span class="hljs-attr">consumer_secret</span>: process.env.TWITTER_CONSUMER_SECRET,
+  <span class="hljs-attr">access_token_key</span>: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  <span class="hljs-attr">access_token_secret</span>: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 
 <span class="hljs-comment">// Set up connection to Redis</span>
@@ -287,7 +287,7 @@ gulp.task(<span class="hljs-string">'default'</span>, <span class="hljs-function
   redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
 }
 
-client.stream(<span class="hljs-string">'statuses/filter'</span>, {track: <span class="hljs-string">'javascript'</span>, lang: <span class="hljs-string">'en'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">stream</span>) </span>{
+client.stream(<span class="hljs-string">'statuses/filter'</span>, {<span class="hljs-attr">track</span>: <span class="hljs-string">'javascript'</span>, <span class="hljs-attr">lang</span>: <span class="hljs-string">'en'</span>}, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">stream</span>) </span>{
   stream.on(<span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">tweet</span>) </span>{
     <span class="hljs-comment">// Log it to console</span>
     <span class="hljs-built_in">console</span>.log(tweet);
@@ -417,10 +417,10 @@ app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span 
       });
 
       <span class="hljs-comment">// Render page</span>
-      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ data: tweet_list.reverse() }));
+      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ <span class="hljs-attr">data</span>: tweet_list.reverse() }));
       res.render(<span class="hljs-string">'index'</span>, {
-        markup: markup,
-        state: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
+        <span class="hljs-attr">markup</span>: markup,
+        <span class="hljs-attr">state</span>: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
       });
     }
   });
@@ -504,10 +504,10 @@ app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span 
       });
 
       <span class="hljs-comment">// Render page</span>
-      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ data: tweet_list.reverse() }));
+      <span class="hljs-keyword">var</span> markup = React.renderToString(Tweets({ <span class="hljs-attr">data</span>: tweet_list.reverse() }));
       res.render(<span class="hljs-string">'index'</span>, {
-        markup: markup,
-        state: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
+        <span class="hljs-attr">markup</span>: markup,
+        <span class="hljs-attr">state</span>: <span class="hljs-built_in">JSON</span>.stringify(tweet_list)
       });
     }
   });
@@ -548,7 +548,7 @@ React.render(
 <span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
 
 <span class="hljs-keyword">var</span> Tweets = React.createClass({
-  componentDidMount: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">componentDidMount</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-comment">// Get reference to this item</span>
     <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
 
@@ -563,13 +563,13 @@ React.render(
       tweets = _.sortBy(tweets, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
         <span class="hljs-keyword">return</span> item.created_at;
       }).reverse();
-      that.setProps({data: tweets});
+      that.setProps({<span class="hljs-attr">data</span>: tweets});
     });
   },
-  getInitialState: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> {data: <span class="hljs-keyword">this</span>.props.data};
+  <span class="hljs-attr">getInitialState</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">return</span> {<span class="hljs-attr">data</span>: <span class="hljs-keyword">this</span>.props.data};
   },
-  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">render</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> (
       <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Tweets<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
@@ -585,7 +585,7 @@ module.exports = Tweets;</span>
 <span class="hljs-keyword">var</span> TweetList = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetlist.jsx'</span>);
 <span class="hljs-keyword">var</span> _ = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lodash'</span>);
 </code></pre><p>Here we include React and the Socket.io client, as well as Lodash and our TweetList component. With React.js, it’s recommend that you break up each individual part of your interface into a single component - here <code>Tweets</code> is a wrapper for the tweets that includes a heading. <code>TweetList</code> will be a list of tweets, and <code>TweetItem</code> will be an individual tweet.</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> Tweets = React.createClass({
-  componentDidMount: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">componentDidMount</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-comment">// Get reference to this item</span>
     <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
 
@@ -600,11 +600,11 @@ module.exports = Tweets;</span>
       tweets = _.sortBy(tweets, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item</span>) </span>{
         <span class="hljs-keyword">return</span> item.created_at;
       }).reverse();
-      that.setProps({data: tweets});
+      that.setProps({<span class="hljs-attr">data</span>: tweets});
     });
   },
 </code></pre><p>Note the use of the <code>componentDidMount</code> method - this fires when a component has been rendered on the client side for the first time. You can therefore use it to set up events. Here, we’re setting up a callback so that when a new tweet is received, we get the existing tweets (stored in <code>this.props.data</code>, although we copy <code>this</code> to <code>that</code> so it works inside the callback), push the tweet to this list, sort it by the time created, and set <code>this.props.data</code> to the new value. This will result in the tweets being re-rendered.</p><pre><code class="hljs lang-javascript">  getInitialState: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-    <span class="hljs-keyword">return</span> {data: <span class="hljs-keyword">this</span>.props.data};
+    <span class="hljs-keyword">return</span> {<span class="hljs-attr">data</span>: <span class="hljs-keyword">this</span>.props.data};
   },
 </code></pre><p>Here we set the initial state of the component - it sets the value of <code>this.state</code> to the object passed through. In this case, we pass through an object with the attribute <code>data</code> defined as the value of <code>this.props.data</code>, meaning that <code>this.state.data</code> is the same as <code>this.props.data</code>.</p><pre><code class="hljs lang-javascript">  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> (
@@ -621,7 +621,7 @@ module.exports = Tweets;</span>
 <span class="hljs-keyword">var</span> TweetItem = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetitem.jsx'</span>);
 
 <span class="hljs-keyword">var</span> TweetList = React.createClass({
-  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">render</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">var</span> that = <span class="hljs-keyword">this</span>;
     <span class="hljs-keyword">var</span> tweetNodes = <span class="hljs-keyword">this</span>.props.data.map(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">item, index</span>) </span>{
       <span class="hljs-keyword">return</span> (
@@ -640,7 +640,7 @@ module.exports = Tweets;</span>
 </code></pre><p>This component is much simpler - it only has a <code>render</code> method. First, we get our individual tweets and for each one define a <code>TweetItem</code> component. Then we create an unordered list and insert the tweet items into it. We then export it as <code>TweetList</code>.</p><p>Our final component is the <code>TweetItem</code> component. Create the following file at <code>components/tweetitem.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
 
 <span class="hljs-keyword">var</span> TweetItem = React.createClass({
-  render: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-attr">render</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
     <span class="hljs-keyword">return</span> (
       <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"list-group-item"</span>&gt;</span>{this.props.text}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>
     );

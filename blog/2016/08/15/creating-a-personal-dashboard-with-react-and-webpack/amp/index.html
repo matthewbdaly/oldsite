@@ -187,36 +187,36 @@
 </code></pre><p>Then install the dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev babel-cli babel-register babel-core babel-eslint babel-loader babel-preset-es2015 babel-preset-react chai css-loader eslint eslint-loader eslint-plugin-react file-loader istanbul@^1.0.0-alpha.2 jquery jsdom mocha moment node-sass react react-addons-pure-render-mixin react-addons-test-utils react-dom react-hot-loader request sass-loader style-loader url-loader webpack webpack-dev-server
 </code></pre><p>Note that we need to install a specific version of Istanbul to get code coverage.</p><p>Next, we create our Webpack config. Save this as <code>webpack.config.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> webpack = <span class="hljs-built_in">require</span>(<span class="hljs-string">'webpack'</span>);  
 <span class="hljs-built_in">module</span>.exports = {  
-    entry: [
+    <span class="hljs-attr">entry</span>: [
       <span class="hljs-string">'webpack/hot/only-dev-server'</span>,
       <span class="hljs-string">"./js/app.js"</span>
     ],
-    debug: <span class="hljs-literal">true</span>,
-    devtool: <span class="hljs-string">'source-map'</span>,
-    output: {
-        path: __dirname + <span class="hljs-string">'/static'</span>,
-        filename: <span class="hljs-string">"bundle.js"</span>
+    <span class="hljs-attr">debug</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">devtool</span>: <span class="hljs-string">'source-map'</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">path</span>: __dirname + <span class="hljs-string">'/static'</span>,
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">"bundle.js"</span>
     },
-    <span class="hljs-built_in">module</span>: {
-        preLoaders: [
+    <span class="hljs-attr">module</span>: {
+        <span class="hljs-attr">preLoaders</span>: [
           {
-            test: <span class="hljs-regexp">/(\.js$|\.jsx$)/</span>, 
-            exclude: <span class="hljs-regexp">/node_modules/</span>, 
-            loader: <span class="hljs-string">"eslint-loader"</span>
+            <span class="hljs-attr">test</span>: <span class="hljs-regexp">/(\.js$|\.jsx$)/</span>, 
+            <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>, 
+            <span class="hljs-attr">loader</span>: <span class="hljs-string">"eslint-loader"</span>
           }
         ],
-        loaders: [
-            { test: <span class="hljs-regexp">/\.jsx?$/</span>, loaders: [<span class="hljs-string">'react-hot'</span>, <span class="hljs-string">'babel'</span>], exclude: <span class="hljs-regexp">/node_modules/</span> },
-            { test: <span class="hljs-regexp">/\.js$/</span>, exclude: <span class="hljs-regexp">/node_modules/</span>, loader: <span class="hljs-string">'babel-loader'</span>},
-            { test: <span class="hljs-regexp">/\.woff2?$/</span>, loader: <span class="hljs-string">"url-loader?limit=25000"</span> },
-            { test: <span class="hljs-regexp">/\.(eot|svg|ttf)?$/</span>, loader: <span class="hljs-string">"file-loader"</span> },
-            { test: <span class="hljs-regexp">/\.scss$/</span>, loader: <span class="hljs-string">"style!css!sass"</span> }
+        <span class="hljs-attr">loaders</span>: [
+            { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.jsx?$/</span>, <span class="hljs-attr">loaders</span>: [<span class="hljs-string">'react-hot'</span>, <span class="hljs-string">'babel'</span>], <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span> },
+            { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.js$/</span>, <span class="hljs-attr">exclude</span>: <span class="hljs-regexp">/node_modules/</span>, <span class="hljs-attr">loader</span>: <span class="hljs-string">'babel-loader'</span>},
+            { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.woff2?$/</span>, <span class="hljs-attr">loader</span>: <span class="hljs-string">"url-loader?limit=25000"</span> },
+            { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.(eot|svg|ttf)?$/</span>, <span class="hljs-attr">loader</span>: <span class="hljs-string">"file-loader"</span> },
+            { <span class="hljs-attr">test</span>: <span class="hljs-regexp">/\.scss$/</span>, <span class="hljs-attr">loader</span>: <span class="hljs-string">"style!css!sass"</span> }
         ]
     },
-    eslint: {
-      configFile: <span class="hljs-string">'.eslintrc.yml'</span>
+    <span class="hljs-attr">eslint</span>: {
+      <span class="hljs-attr">configFile</span>: <span class="hljs-string">'.eslintrc.yml'</span>
     },
-    plugins: [
+    <span class="hljs-attr">plugins</span>: [
       <span class="hljs-keyword">new</span> webpack.HotModuleReplacementPlugin(),
       <span class="hljs-keyword">new</span> webpack.NoErrorsPlugin()
     ]
@@ -285,7 +285,7 @@
 global.document = doc;
 global.window = win;
 
-<span class="hljs-built_in">Object</span>.keys(<span class="hljs-built_in">window</span>).forEach((key) =&gt; {
+<span class="hljs-built_in">Object</span>.keys(<span class="hljs-built_in">window</span>).forEach(<span class="hljs-function">(<span class="hljs-params">key</span>) =&gt;</span> {
   <span class="hljs-keyword">if</span> (!(key <span class="hljs-keyword">in</span> global)) {
     global[key] = <span class="hljs-built_in">window</span>[key];
   }
@@ -497,7 +497,7 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
   getInitialState() {
     <span class="hljs-keyword">return</span> {
-      time: <span class="hljs-keyword">this</span>.props.time || moment()
+      <span class="hljs-attr">time</span>: <span class="hljs-keyword">this</span>.props.time || moment()
     };
   },
   render() {
@@ -522,22 +522,22 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"wrapper"</span>&gt;</span>
           <span class="hljs-tag">&lt;<span class="hljs-name">ClockWidget</span> /&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
     );
   }
-});</span>
+});
 </code></pre><p>Now, if you try running <code>npm start</code> and viewing the dashboard in the browser, you will see that it displays the current time and date, but it’s not being updated. You can force the page to reload every now and then, but we can do better than that. We can set an interval in which the time will refresh. As the smallest unit we show is seconds, this interval should be 1 second.</p><p>Amend the clock component as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> moment <span class="hljs-keyword">from</span> <span class="hljs-string">'moment'</span>;
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
   getInitialState() {
     <span class="hljs-keyword">return</span> {
-      time: <span class="hljs-keyword">this</span>.props.time || moment()
+      <span class="hljs-attr">time</span>: <span class="hljs-keyword">this</span>.props.time || moment()
     };
   },
   tick() {
     <span class="hljs-keyword">this</span>.setState({
-      time: moment()
+      <span class="hljs-attr">time</span>: moment()
     });
   },
   componentDidMount() {
@@ -583,16 +583,16 @@ describe(<span class="hljs-string">'Feed Widget'</span>, () =&gt; {
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
   render() {
     <span class="hljs-keyword">return</span> (
-      &lt;div className="dashboard"&gt;
-        &lt;h1 ref="title"&gt;{this.props.title}&lt;/h1&gt;
-        &lt;div className="wrapper"&gt;
-          &lt;ClockWidget /&gt;
-          &lt;FeedWidget feed="http://feeds.bbci.co.uk/news/rss.xml?edition=uk" size="5" delay="60" /&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+      <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"dashboard"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"title"</span>&gt;</span>{this.props.title}<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"wrapper"</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">ClockWidget</span> /&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">FeedWidget</span> <span class="hljs-attr">feed</span>=<span class="hljs-string">"http://feeds.bbci.co.uk/news/rss.xml?edition=uk"</span> <span class="hljs-attr">size</span>=<span class="hljs-string">"5"</span> <span class="hljs-attr">delay</span>=<span class="hljs-string">"60"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
     );
   }
-});
+});</span>
 </code></pre><p>If we then create <code>js/components/feedwidget.js</code> and run <code>npm test</code>:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
 
 &gt; personal-dashboard@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/personal-dashboard
@@ -698,8 +698,8 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> React.createClass({
   getInitialState() {
     <span class="hljs-keyword">return</span> {
-      feed: [],
-      size: <span class="hljs-keyword">this</span>.props.size || <span class="hljs-number">5</span>
+      <span class="hljs-attr">feed</span>: [],
+      <span class="hljs-attr">size</span>: <span class="hljs-keyword">this</span>.props.size || <span class="hljs-number">5</span>
     };
   },
   componentDidMount() {
@@ -712,8 +712,8 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
   getFeed() {
     <span class="hljs-keyword">let</span> that = <span class="hljs-keyword">this</span>;
     jQuery.ajax({
-      url: <span class="hljs-keyword">this</span>.props.feed,
-      success: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+      <span class="hljs-attr">url</span>: <span class="hljs-keyword">this</span>.props.feed,
+      <span class="hljs-attr">success</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
         <span class="hljs-keyword">let</span> xml = jQuery(response);
         <span class="hljs-keyword">let</span> feed = [];
         xml.find(<span class="hljs-string">'item'</span>).each(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
@@ -723,7 +723,7 @@ npm ERR! Test failed.  See above <span class="hljs-keyword">for</span> more deta
           feed.push(item);
         });
         that.setState({
-          feed: feed.slice(<span class="hljs-number">0</span>,that.state.size)
+          <span class="hljs-attr">feed</span>: feed.slice(<span class="hljs-number">0</span>,that.state.size)
         });
       }
     });

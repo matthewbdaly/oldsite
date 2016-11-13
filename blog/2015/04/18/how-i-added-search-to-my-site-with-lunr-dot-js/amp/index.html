@@ -187,7 +187,7 @@
 </code></pre><p>I then imported it in the task, and set up the field names:</p><pre><code class="hljs lang-javascript">    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);
 
     searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { boost: <span class="hljs-number">10</span> });
+        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { <span class="hljs-attr">boost</span>: <span class="hljs-number">10</span> });
         <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);
         <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);
     });
@@ -214,8 +214,8 @@
     searchIndex.add(doc);
 </code></pre><p>Note that this is already inside the loop that generates the pages, so I don’t include that.</p><p>We then write the index to a file:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Write index</span>
     grunt.file.write(options.www.dest + <span class="hljs-string">'/lunr.json'</span>, <span class="hljs-built_in">JSON</span>.stringify({
-        index: searchIndex.toJSON(),
-        store: store
+        <span class="hljs-attr">index</span>: searchIndex.toJSON(),
+        <span class="hljs-attr">store</span>: store
     }));
 </code></pre><p>That takes care of generating our index, but we need to implement some client-side code to handle the search. We need to include Lunr.js on the client side as well, (I recommend using Bower to do so), alongside jQuery. If you include both, the following code should do the trick:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 <span class="hljs-meta">    'use strict'</span>;

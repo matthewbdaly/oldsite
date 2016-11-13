@@ -206,18 +206,18 @@
 <span class="hljs-meta">    'use strict'</span>;
 
     grunt.initConfig({
-        jshint: {
-            all: [
+        <span class="hljs-attr">jshint</span>: {
+            <span class="hljs-attr">all</span>: [
                 <span class="hljs-string">'test/*.js'</span>,
                 <span class="hljs-string">'index.js'</span>
             ]
         },
-        mocha_istanbul: {
-            coverage: {
-                src: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
+        <span class="hljs-attr">mocha_istanbul</span>: {
+            <span class="hljs-attr">coverage</span>: {
+                <span class="hljs-attr">src</span>: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
                 options: {
-                    mask: <span class="hljs-string">'*.js'</span>,
-                    reportFormats: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
+                    <span class="hljs-attr">mask</span>: <span class="hljs-string">'*.js'</span>,
+                    <span class="hljs-attr">reportFormats</span>: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
                 }
             }
         }
@@ -298,7 +298,7 @@ describe(<span class="hljs-string">'server'</span>, <span class="hljs-function">
     <span class="hljs-comment">// Test the index route</span>
     describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         it(<span class="hljs-string">'should return a page with the title Shortbread'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
-            request.get({ url: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+            request.get({ <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
                 expect(body).to.include(<span class="hljs-string">'Shortbread'</span>);
                 expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
                 expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
@@ -388,7 +388,7 @@ app.set(<span class="hljs-string">'base_url'</span>, base_url);
 <span class="hljs-comment">// Handle POST data</span>
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: <span class="hljs-literal">true</span>
+  <span class="hljs-attr">extended</span>: <span class="hljs-literal">true</span>
 }));
 
 <span class="hljs-comment">// Define index route</span>
@@ -444,7 +444,7 @@ Done, without errors.
 </code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting a URL</span>
     describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
-            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {form: {url: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {<span class="hljs-attr">form</span>: {<span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
                 expect(body).to.include(<span class="hljs-string">'Your shortened URL is'</span>);
                 expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
                 expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
@@ -515,7 +515,7 @@ app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span
     <span class="hljs-comment">// Store them in Redis</span>
     client.set(id, url, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         <span class="hljs-comment">// Display the response</span>
-        res.render(<span class="hljs-string">'output'</span>, { id: id, base_url: base_url });
+        res.render(<span class="hljs-string">'output'</span>, { <span class="hljs-attr">id</span>: id, <span class="hljs-attr">base_url</span>: base_url });
     });
 });
 </code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
@@ -559,8 +559,8 @@ Done, without errors.
             client.set(<span class="hljs-string">'testurl'</span>, <span class="hljs-string">'http://www.google.com'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
                 <span class="hljs-comment">// Follow the link</span>
                 request.get({
-                    url: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
-                    followRedirect: <span class="hljs-literal">false</span>
+                    <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
+                    <span class="hljs-attr">followRedirect</span>: <span class="hljs-literal">false</span>
                 }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
                     expect(response.headers.location).to.equal(<span class="hljs-string">'http://www.google.com'</span>);
                     expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
@@ -575,8 +575,8 @@ Done, without errors.
         it(<span class="hljs-string">'should return a 404 error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
             <span class="hljs-comment">// Follow the link</span>
             request.get({
-                url: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
-                followRedirect: <span class="hljs-literal">false</span>
+                <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
+                <span class="hljs-attr">followRedirect</span>: <span class="hljs-literal">false</span>
             }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
                 expect(response.statusCode).to.equal(<span class="hljs-number">404</span>);
                 expect(body).to.include(<span class="hljs-string">'Link not found'</span>);
