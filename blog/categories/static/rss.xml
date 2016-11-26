@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>static | Matthew Daly&apos;s Blog</title>
+        <description>static | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <link>http://matthewdaly.co.uk/blog/categories/static/</link>
+        <lastBuildDate>Sat, 26 Nov 2016 22:05:34 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <copyright>Matthew Daly 2016</copyright>
+        <generator>Feed for Node.js</generator>
+        <item>
+            <title><![CDATA[Easy static asset versioning in PHP]]></title>
+            <link>http://matthewdaly.co.uk/blog/2016/11/26/easy-static-asset-versioning-in-php/</link>
+            <guid>http://matthewdaly.co.uk/blog/2016/11/26/easy-static-asset-versioning-in-php/</guid>
+            <pubDate>Sat, 26 Nov 2016 21:40:39 GMT</pubDate>
+            <description><![CDATA[<p>It’s prudent to cache static assets such as images, Javascript and CSS to improve performance, but that raises the issue of changes not being reflected in your site due to visitor’s browsers retaining the cached versions. Many content management systems and frameworks already handle this for you (such as Laravel’s Elixir build system), but what if you have to work with a legacy application that doesn’t do this?</p>
+<p>Fortunately there’s a quite easy solution in PHP. Using the <code>filemtime()</code> function described <a href="http://php.net/manual/en/function.filemtime.php">here</a>, we can get a Unix timestamp for when a file was last altered. This is perfect to use to identify when a file last changed, because by appending a new query string to the file name when loading it, we can trick the browser into thinking it’s a new file when it’s not, as in this example for a CodeIgniter application:</p>
+<pre><code class="hljs lang-php singleline"><table>&lt;link rel=<span class="hljs-string">"stylesheet"</span> type=<span class="hljs-string">"text/css"</span> href=<span class="hljs-string">"&lt;?=$path?&gt;?v=&lt;?=filemtime($path)?&gt;"</span>&gt;</table></code></pre>
+<p>   Obviously, this is a bit repetitive, so you may want to refactor this into some kind of template helper to make it easier to use, but the underlying principle applies to most programming languages. For instance, if you wanted to do so in a Handlebars template, you might want to create a helper something like this:</p>
+<pre><code class="hljs lang-javascript"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">var</span> Handlebars = <span class="hljs-built_in">require</span>(<span class="hljs-string">'handlebars'</span>);</td><tr><td class="linenos" data-pseudo-content="3"></td><td>Handlebars.registerHelper(<span class="hljs-string">'version'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">path</span>) </span>{</td><tr><td class="linenos" data-pseudo-content="4"></td><td>   <span class="hljs-keyword">return</span> path + <span class="hljs-string">'?v='</span> + fs.statSync(path).mtime.getTime();</td><tr><td class="linenos" data-pseudo-content="5"></td><td>});</td></table></code></pre>
+<p>Where more robust solutions such as Elixir are already available, I’d advise making full use of them. However, this technique is a quick and easy way to implement versioning for static assets in existing projects.</p>
+]]></description>
+            <content:encoded/>
+        </item>
+    </channel>
+</rss>
