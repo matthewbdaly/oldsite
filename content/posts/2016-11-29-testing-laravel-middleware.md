@@ -167,7 +167,6 @@ class ETagMiddlewareTest extends TestCase
         });
     }
 
-
     public function teardown()
     {
         Mockery::close();
