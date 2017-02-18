@@ -1,0 +1,355 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Integrating Behat With Laravel - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2017/02/18/integrating-behat-with-laravel/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2017/02/18/integrating-behat-with-laravel/",
+         "headline": "Integrating Behat With Laravel",
+         "datePublished": "2017-02-18T21:25:57.000Z",
+         "dateModified": "2017-02-18T21:25:57.000Z",
+         "description": "&lt;p&gt;The Gherkin format used by tools like Cucumber is a really great way of specifying how your appli...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="//fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th February 2017 9:25 pm</p><h1>Integrating Behat With Laravel</h1><p>The Gherkin format used by tools like Cucumber is a really great way of specifying how your application will work. It’s easy for even non-technical stakeholders to understand, it makes it natural to break your tests into easily reusable steps, and it encourages you to think about the application from an end-user’s perspective. It’s also one of the easiest ways to get started writing automated tests when you first start out - it’s much more intuitive to a junior developer than lower-level unit tests, and is easier to add to a legacy project that may not have been built with testability in mind - if you can drive a browser, you can test it.</p><p><a href="http://behat.org/en/latest/">Behat</a> is a PHP equivalent. Combined with <a href="http://mink.behat.org/en/latest/">Mink</a>, it allows for easy automated acceptance tests of a PHP application. However, out of the box it doesn’t integrate well with Laravel. There is <a href="https://github.com/laracasts/Behat-Laravel-Extension">Jeffrey Way’s Behat Laravel extension</a>, but it doesn’t seem to be actively maintained and seems to be overkill for this purpose. I wanted something that I could use to run integration tests using PHPUnit’s assertions and Laravel’s testing utilities, and crucially, I wanted to do so as quickly as possible. That meant running a web server and using an automated web browser wasn’t an option. Also, I often work on REST API’s, and browser testing isn’t appropriate for those - in API tests I’m more interested in setting up the fixtures, making a single request, and verifying that it does what it’s meant to do, as quickly as possible.</p><p>As it turns out, integrating Behat and Laravel isn’t that hard. When using Behat, your <code>FeatureContext.php</code> file must implement the <code>Behat\Behat\Context\Context</code> interface, but as this interface does not implement any methods, you can extend any existing class and declare that it implements that interface. That means we can just extend the existing <code>Tests\TestCase</code> class in Laravel 5.4 and gain access to all the same testing utilities we have in our regular Laravel tests.</p><p>Then, in the constructor we can set environment variables using <code>putenv()</code> so that we can set it up to use an in-memory SQLite database for faster tests. We also use the <code>@BeforeScenario</code> hook to migrate the database before each scenario, and the <code>@AfterScenario</code> hook to roll it back afterwards.</p><p>Here’s the finished example:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Gherkin</span>\<span class="hljs-title">Node</span>\<span class="hljs-title">PyStringNode</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Gherkin</span>\<span class="hljs-title">Node</span>\<span class="hljs-title">TableNode</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">TestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Tester</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">PendingException</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Hook</span>\<span class="hljs-title">Scope</span>\<span class="hljs-title">BeforeScenarioScope</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Hook</span>\<span class="hljs-title">Scope</span>\<span class="hljs-title">AfterScenarioScope</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Kernel</span>;
+
+<span class="hljs-comment">/**
+ * Defines application features from the specific context.
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeatureContext</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Context</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+
+    <span class="hljs-keyword">protected</span> $content;
+
+    <span class="hljs-comment">/**
+     * Initializes context.
+     *
+     * Every scenario gets its own context instance.
+     * You can also pass arbitrary arguments to the
+     * context constructor through behat.yml.
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
+    </span>{
+        putenv(<span class="hljs-string">'DB_CONNECTION=sqlite'</span>);
+        putenv(<span class="hljs-string">'DB_DATABASE=:memory:'</span>);
+        <span class="hljs-keyword">parent</span>::setUp();
+    }
+
+    <span class="hljs-comment">/** <span class="hljs-doctag">@BeforeScenario</span> */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">before</span><span class="hljs-params">(BeforeScenarioScope $scope)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;artisan(<span class="hljs-string">'migrate'</span>);
+
+        <span class="hljs-keyword">$this</span>-&gt;app[Kernel::class]-&gt;setArtisan(<span class="hljs-keyword">null</span>);
+    }
+
+    <span class="hljs-comment">/** <span class="hljs-doctag">@AfterScenario</span> */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">after</span><span class="hljs-params">(AfterScenarioScope $scope)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;artisan(<span class="hljs-string">'migrate:rollback'</span>);
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Given</span> I visit the path :path
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iVisitThePath</span><span class="hljs-params">($path)</span>
+    </span>{
+        $response = <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'/'</span>);
+        <span class="hljs-keyword">$this</span>-&gt;assertEquals(<span class="hljs-number">200</span>, $response-&gt;getStatusCode());
+        <span class="hljs-keyword">$this</span>-&gt;content = $response-&gt;getContent();
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Then</span> I should see the text :text
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iShouldSeeTheText</span><span class="hljs-params">($text)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;assertContains($text, <span class="hljs-keyword">$this</span>-&gt;content);
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Given</span> a user called :user exists
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">aUserCalledExists</span><span class="hljs-params">($user)</span>
+    </span>{
+        $user = factory(App\User::class)-&gt;create([
+            <span class="hljs-string">'name'</span> =&gt; $user,
+        ]);
+    }
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@Given</span> I am logged in as :user
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iAmLoggedInAs</span><span class="hljs-params">($user)</span>
+    </span>{
+        $user = User::where(<span class="hljs-string">'name'</span>, $user)-&gt;first();
+        <span class="hljs-keyword">$this</span>-&gt;be($user);
+    }
+
+}
+</code></pre><p>Note that I’ve added a few basic example methods for our tests. As you can see, we can call the same methods we normally use in Laravel tests to make assertions and HTTP requests. If you’re using Dusk, you can also call that in the same way you usually would.</p><p>We might then write the following feature file to demonstrate our application at work:</p><pre><code class="hljs lang-gherkin"><span class="hljs-keyword">Feature</span>: Login
+
+    <span class="hljs-keyword">Background</span>:
+        <span class="hljs-keyword">Given</span> a user called <span class="hljs-string">"Alan"</span> exists
+        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Bob"</span> exists
+        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Clare"</span> exists
+        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Derek"</span> exists
+        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Eric"</span> exists
+
+    <span class="hljs-keyword">Scenario</span>: Log in as Alan
+        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Alan"</span>
+        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
+        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+
+    <span class="hljs-keyword">Scenario</span>: Log in as Bob
+        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Bob"</span>
+        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
+        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+
+    <span class="hljs-keyword">Scenario</span>: Log in as Clare
+        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Clare"</span>
+        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
+        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+
+    <span class="hljs-keyword">Scenario</span>: Log in as Derek
+        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Derek"</span>
+        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
+        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+
+    <span class="hljs-keyword">Scenario</span>: Log in as Eric
+        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Eric"</span>
+        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
+        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+</code></pre><p>We can then run these tests with <code>vendor/bin/behat</code>:</p><pre><code class="hljs lang-bash">$ vendor/bin/behat 
+Feature: Login
+
+  Background:                         <span class="hljs-comment"># features/auth.feature:3</span>
+    Given a user called <span class="hljs-string">"Alan"</span> exists <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+    And a user called <span class="hljs-string">"Bob"</span> exists    <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+    And a user called <span class="hljs-string">"Clare"</span> exists  <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+    And a user called <span class="hljs-string">"Derek"</span> exists  <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+    And a user called <span class="hljs-string">"Eric"</span> exists   <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+
+  Scenario: Log <span class="hljs-keyword">in</span> as Alan               <span class="hljs-comment"># features/auth.feature:10</span>
+    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Alan"</span>       <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
+    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
+    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+
+  Scenario: Log <span class="hljs-keyword">in</span> as Bob                <span class="hljs-comment"># features/auth.feature:15</span>
+    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Bob"</span>        <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
+    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
+    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+
+  Scenario: Log <span class="hljs-keyword">in</span> as Clare              <span class="hljs-comment"># features/auth.feature:20</span>
+    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Clare"</span>      <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
+    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
+    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+
+  Scenario: Log <span class="hljs-keyword">in</span> as Derek              <span class="hljs-comment"># features/auth.feature:25</span>
+    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Derek"</span>      <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
+    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
+    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+
+  Scenario: Log <span class="hljs-keyword">in</span> as Eric               <span class="hljs-comment"># features/auth.feature:30</span>
+    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Eric"</span>       <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
+    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
+    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+
+5 scenarios (5 passed)
+40 steps (40 passed)
+0m0.50s (19.87Mb)
+</code></pre><p>Higher level tests can get very tedious if you’re not careful - you wind up setting up the same fixtures and making the same requests many times over. By using Behat in this way, not only are you writing your tests in a way that is easy to understand, but you’re also breaking it down into logical, repeatable steps, and by passing arguments in each step you limit the amount of repetition. It’s also fast if you aren’t running browser-based tests, making it particularly well-suited to API testing.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/behat/">behat</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/bdd/">bdd</a></li><li><a href="/blog/categories/testing/">testing</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2017/02/18/integrating-behat-with-laravel/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/11/29/testing-laravel-middleware/amp/">Testing Laravel Middleware</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
