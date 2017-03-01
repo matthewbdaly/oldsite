@@ -1,6 +1,6 @@
 ---
 title: "An introduction to PHPSpec for API client testing"
-date: 2017-01-01 20:05:04 +0000
+date: 2017-02-19 20:05:04 +0000
 categories:
 - php
 - testing
@@ -678,6 +678,107 @@ $ vendor/bin/phpspec run
 5 examples (5 passed)
 9ms
 ```
+
+Our next step is to make sure that our driver allows us to pass through a Guzzle client and response object to the constructor. Amend it as follows:
+
+```php
+<?php
+
+namespace spec\Matthewbdaly\SMS\Drivers;
+
+use Matthewbdaly\SMS\Drivers\NullDriver;
+use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
+use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
+
+class NullDriverSpec extends ObjectBehavior
+{
+    function let(GuzzleClient $client, GuzzleResponse $response)
+    {
+        $this->beConstructedWith($client, $response);
+    }
+
+    function it_is_initializable()
+    {
+        $this->shouldHaveType(NullDriver::class);
+    }
+
+    function it_implements_interface()
+    {
+        $this->shouldImplement('Matthewbdaly\SMS\Contracts\Driver');
+    }
+}
+```
+
+Running PHPSpec again should allow us to set up the constructor:
+
+```bash
+$ vendor/bin/phpspec run
+                                      100%                                       5
+2 specs
+5 examples (5 passed)
+25ms
+
+matthew@matthew-XPS-13-9343:~/Projects/sms-client$ vendor/bin/phpspec run
+Matthewbdaly/SMS/Drivers/NullDriver                                             
+  18  - it is initializable
+      method Matthewbdaly\SMS\Drivers\NullDriver::__construct not found.
+
+Matthewbdaly/SMS/Drivers/NullDriver                                             
+  23  - it implements interface
+      method Matthewbdaly\SMS\Drivers\NullDriver::__construct not found.
+
+                      60%                                     40%                5
+2 specs
+5 examples (3 passed, 2 broken)
+34ms
+
+                                                                                
+  Do you want me to create                                                      
+  `Matthewbdaly\SMS\Drivers\NullDriver::__construct()` for you?                 
+                                                                         [Y/n]
+y
+  Method Matthewbdaly\SMS\Drivers\NullDriver::__construct() has been created.
+  
+                                      100%                                       5
+2 specs
+5 examples (5 passed)
+18ms
+```
+
+Now, the driver should look like this:
+
+```php
+<?php
+
+namespace Matthewbdaly\SMS\Drivers;
+
+use Matthewbdaly\SMS\Contracts\Driver;
+
+class NullDriver implements Driver
+{
+    public function __construct($argument1, $argument2)
+    {
+        // TODO: write logic here
+    }
+
+    public function getDriver()
+    {
+    }
+
+    public function getEndpoint()
+    {
+    }
+
+    public function sendRequest(array $message)
+    {
+    }
+}
+```
+
+The constructor accepts two arguments, but they are not the correct ones. Let's fix that.
+
 
 Next, let's get the `getDriver()` method working. Add this method to the spec:
 
