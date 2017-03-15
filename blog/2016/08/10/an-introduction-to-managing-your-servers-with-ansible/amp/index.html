@@ -26,7 +26,7 @@
             "height": 120,
             "width": 1200
          }
-      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="//fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
    background-color: #252525;
 }
       div.container {
@@ -289,32 +289,32 @@ testserver | SUCCESS =&gt; {
     <span class="hljs-string">"warnings"</span>: []
 }
 </code></pre><p>Here we check out a Git repository. We specify the repo, destination and version.</p><p>You can call any installed Ansible module in an ad-hoc fashion in the same way. Refer to the documentation for a list of modules.</p><h2 id="playbooks">Playbooks</h2><p>Ad-hoc commands are useful, but they don’t offer much extra over using SSH. Playbooks allow you to define a repeatable set of commands for a particular use case. In this example, I’ll show you how to write a playbook that does the following:</p><ul><li>Installs and configures Nginx</li><li>Clones the repository for my site into the web root</li></ul><p>This is sufficiently complex to demonstrate some more of the functionality of Ansible, while also demonstrating playbooks in action.</p><p>Create a new folder called <code>playbooks</code>, and inside it save the following as <code>sitecopy.yml</code>:</p><pre><code class="hljs lang-yml"><span class="hljs-meta">---</span>
-<span class="hljs-attr">- name:</span> Copy personal website
-<span class="hljs-attr">  hosts:</span> testserver
+<span class="hljs-attr">- name:</span> <span class="hljs-string">Copy</span> <span class="hljs-string">personal</span> <span class="hljs-string">website</span>
+<span class="hljs-attr">  hosts:</span> <span class="hljs-string">testserver</span>
 <span class="hljs-attr">  become:</span> <span class="hljs-literal">True</span>
 <span class="hljs-attr">  tasks:</span>
-<span class="hljs-attr">    - name:</span> Install Nginx
-<span class="hljs-attr">      apt:</span> name=nginx update_cache=<span class="hljs-literal">yes</span>
-<span class="hljs-attr">    - name:</span> Copy config
+<span class="hljs-attr">    - name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Nginx</span>
+<span class="hljs-attr">      apt:</span> <span class="hljs-string">name=nginx</span> <span class="hljs-string">update_cache=yes</span>
+<span class="hljs-attr">    - name:</span> <span class="hljs-string">Copy</span> <span class="hljs-string">config</span>
 <span class="hljs-attr">      copy:</span> <span class="hljs-string">&gt;
         src=files/nginx.conf
         dest=/etc/nginx/sites-available/default
-</span><span class="hljs-attr">    - name:</span> Activate config
+</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Activate</span> <span class="hljs-string">config</span>
 <span class="hljs-attr">      file:</span> <span class="hljs-string">&gt;
         dest=/etc/nginx/sites-enabled/default
         src=/etc/nginx/sites-available/default
         state=link
-</span><span class="hljs-attr">    - name:</span> Delete /var/www directory
+</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Delete</span> <span class="hljs-string">/var/www</span> <span class="hljs-string">directory</span>
 <span class="hljs-attr">      file:</span> <span class="hljs-string">&gt;
         path=/var/www
         state=absent
-</span><span class="hljs-attr">    - name:</span> Clone repository
+</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Clone</span> <span class="hljs-string">repository</span>
 <span class="hljs-attr">      git:</span> <span class="hljs-string">&gt;
         repo=https://github.com/matthewbdaly/matthewbdaly.github.io.git
         dest=/var/www
         version=HEAD
-</span><span class="hljs-attr">    - name:</span> Restart Nginx
-<span class="hljs-attr">      service:</span> name=nginx state=restarted
+</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Restart</span> <span class="hljs-string">Nginx</span>
+<span class="hljs-attr">      service:</span> <span class="hljs-string">name=nginx</span> <span class="hljs-string">state=restarted</span>
 </code></pre><p>Note the <code>name</code> fields - these are comments that will show up in the output when each step is run. First we use the <code>apt</code> module to install Nginx, then we copy over the config file and activate it, then we empty the existing <code>/var/www</code> and clone the repository, and finally we restart Nginx.</p><p>Also, note the following fields:</p><ul><li><code>hosts</code> defines the hosts affected</li><li><code>become</code> specifies that the commands are run using <code>sudo</code></li></ul><p>We also need to create the config for Nginx. Create the <code>files</code> directory under <code>playbooks</code> and save this file as <code>playbooks/files/nginx.conf</code>:</p><pre><code class="hljs lang-nginx"><span class="hljs-section">server</span> {
     <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default_server;
     <span class="hljs-attribute">listen</span> [::]:<span class="hljs-number">80</span> default_server ipv6only=<span class="hljs-literal">on</span>;
@@ -357,12 +357,12 @@ PLAY RECAP *********************************************************************
 testserver                 : ok=7    changed=6    unreachable=0    failed=0
 </code></pre><p>If we had a playbook that we wanted to run on only a subset of the hosts it applied to, we could use the <code>-l</code> flag, as in this example:</p><pre><code class="hljs lang-bash">$ ansible-playbook playbooks/sitecopy.yml <span class="hljs-_">-l</span> testserver
 </code></pre><p>Using these same basic concepts, you can invoke many different Ansible modules to achieve many different tasks. You can spin up new servers on supported cloud hosting companies, you can set up a known good fail2ban config, you can configure your firewall, and many more tasks. As your playbooks get bigger, it’s worth moving sections into separate roles that get invoked within multiple playbooks, in order to reduce repetition.</p><p>Finally, I mentioned earlier that you can use Ansible to update all of your servers regularly. Here’s the playbook I use for that:</p><pre><code class="hljs lang-yml"><span class="hljs-meta">---</span>
-<span class="hljs-attr">- name:</span> Update system
-<span class="hljs-attr">  hosts:</span> all
+<span class="hljs-attr">- name:</span> <span class="hljs-string">Update</span> <span class="hljs-string">system</span>
+<span class="hljs-attr">  hosts:</span> <span class="hljs-string">all</span>
 <span class="hljs-attr">  become:</span> <span class="hljs-literal">True</span>
 <span class="hljs-attr">  tasks:</span>
-<span class="hljs-attr">    - name:</span> update system
-<span class="hljs-attr">      apt:</span> upgrade=full update_cache=<span class="hljs-literal">yes</span>
+<span class="hljs-attr">    - name:</span> <span class="hljs-string">update</span> <span class="hljs-string">system</span>
+<span class="hljs-attr">      apt:</span> <span class="hljs-string">upgrade=full</span> <span class="hljs-string">update_cache=yes</span>
 </code></pre><p>This connects to all hosts using the <code>all</code> shortcut we saw earlier, and upgrades all existing packages. Using this method is a lot easier than connecting to each one in turn via SSH and updating it manually.</p><h2 id="summary">Summary</h2><p>Ansible is an extremely useful tool for managing servers, but to get the most out of it you have to put in a fair bit of work reading the <a href="https://docs.ansible.com/">documentation</a> and writing your own playbooks for your own use cases. It’s simple to get started with, and if you’re willing to put in the time writing your own playbooks then in the long run you’ll save yourself a lot of time and grief by making it easy to set up new servers and administer existing ones. Hopefully this has given you a taster of what you can do with Ansible - from here on the documentation is worth a look as it lists all of the modules that ship with Ansible. If there’s a particular task you dread, such as setting up a mail server, then Ansible is a very good way to automate that away so it’s easier next time.</p><p>My experience is that it’s best to make an effort to try to standardise on two or three different stacks for different purposes, and create Ansible playbooks for those stacks. For instance, I’ve tended to use PHP 5, Apache, MySQL, Memcached and Varnish for Wordpress sites, and PHP 7, Nginx, Redis and PostgreSQL for Laravel sites. That way I know that any sites I build with Laravel will be using that stack. Knowing my servers are more consistent makes it easier to work with them and identify problems.</p><section><ul class="categories"><li><a href="/blog/categories/ansible/">ansible</a></li><li><a href="/blog/categories/sysadmin/">sysadmin</a></li><li><a href="/blog/categories/python/">python</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2016/08/10/an-introduction-to-managing-your-servers-with-ansible/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/amp/">Creating a Personal Dashboard With React and Webpack</a> <a class="postlink" href="/blog/2016/08/08/testing-your-api-documentation-with-dredd/amp/">Testing Your API Documentation With Dredd</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

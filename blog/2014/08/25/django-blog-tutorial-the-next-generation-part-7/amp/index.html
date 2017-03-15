@@ -28,7 +28,7 @@
             "height": 120,
             "width": 1200
          }
-      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="//fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
    background-color: #252525;
 }
       div.container {
@@ -334,18 +334,18 @@ Ran 24 tests <span class="hljs-keyword">in</span> 8.473s
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>There are a number of signals available, and when you create one, you have access to the created object via the <code>instance</code> parameter. Using signals you can implement all kinds of functionality. For instance, you could implement the functionality to send an email when a new post is published.</p><p>If you’re using Travis CI, you’ll also need to update the config file:</p><pre><code class="hljs lang-yaml"><span class="hljs-attr">language:</span> python
+</code></pre><p>There are a number of signals available, and when you create one, you have access to the created object via the <code>instance</code> parameter. Using signals you can implement all kinds of functionality. For instance, you could implement the functionality to send an email when a new post is published.</p><p>If you’re using Travis CI, you’ll also need to update the config file:</p><pre><code class="hljs lang-yaml"><span class="hljs-attr">language:</span> <span class="hljs-string">python</span>
 <span class="hljs-attr">python:</span>
 <span class="hljs-bullet">-</span> <span class="hljs-string">"2.7"</span>
-<span class="hljs-attr">services:</span> memcached
+<span class="hljs-attr">services:</span> <span class="hljs-string">memcached</span>
 <span class="hljs-attr">before_install:</span>
-<span class="hljs-bullet">    -</span> sudo apt-get install -y libmemcached-dev
+<span class="hljs-bullet">    -</span> <span class="hljs-string">sudo</span> <span class="hljs-string">apt-get</span> <span class="hljs-string">install</span> <span class="hljs-bullet">-y</span> <span class="hljs-string">libmemcached-dev</span>
 <span class="hljs-comment"># command to install dependencies</span>
 <span class="hljs-attr">install:</span> <span class="hljs-string">"pip install -r requirements.txt"</span>
 <span class="hljs-comment"># command to run tests</span>
-<span class="hljs-attr">script:</span> coverage run --include=<span class="hljs-string">"blogengine/*"</span> --omit=<span class="hljs-string">"blogengine/migrations/*"</span> manage.py test blogengine
+<span class="hljs-attr">script:</span> <span class="hljs-string">coverage</span> <span class="hljs-string">run</span> <span class="hljs-bullet">--include="blogengine/*"</span> <span class="hljs-bullet">--omit="blogengine/migrations/*"</span> <span class="hljs-string">manage.py</span> <span class="hljs-string">test</span> <span class="hljs-string">blogengine</span>
 <span class="hljs-attr">after_success:</span>
-    coveralls
+    <span class="hljs-string">coveralls</span>
 </code></pre><p>Time to commit:</p><pre><code class="hljs lang-bash">$ git add blogengine/ .travis.yml
 $ git commit -m <span class="hljs-string">'Now clear cache when post added'</span>
 </code></pre><h1 id="formatting-for-rss-feeds">Formatting for RSS feeds</h1><p>Now, we want to offer more than one option for RSS feeds. For instance, if your blog is aggregated on a site such as <a href="http://planet.python.org/">Planet Python</a>, but you also blog about JavaScript, you may want to be able to provide a feed for posts in the <code>python</code> category only.</p><p>If you have written any posts that use any of Markdown’s custom formatting, you may notice that if you load your RSS feed in a reader, it isn’t formatted as Markdown. Let’s fix that. First we’ll amend our test:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedTest</span><span class="hljs-params">(BaseAcceptanceTest)</span>:</span>
