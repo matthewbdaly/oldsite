@@ -21,7 +21,7 @@ I've worked extensively with the following technologies:
   * Extensive use of Phonegap to build mobile applications using JavaScript for both iOS and Android
   * Unit testing JavaScript applications using Jest, Istanbul, QUnit, nodeunit, Jasmine, Mocha and Chai
   * Using Node.js to build real-time web applications, including use of the Express framework and the Socket.IO library
-  * Extensive use of Grunt to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/). Have also used Browserify, Gulp.js and Webpack
+  * Extensive use of Grunt and Gulp to improve workflow when building web apps, including [building Grunt plugins](http://www.sitepoint.com/building-static-site-generator-grunt-plugin/). Have also used Browserify and Webpack
   * Some use of Yeoman to generate boilerplate for projects
 * Python, including:
   * Commercial and personal use of the Django framework, including use of Django REST Framework, Celery, South, Python Social Auth and Tastypie
@@ -31,9 +31,10 @@ I've worked extensively with the following technologies:
 * Perl (primarily for systems administration purposes)
 * PHP, including:
   * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
-  * Building reusable libraries, including [an interface to PushWoosh](https://packagist.org/packages/astutech/pushwoosh-php-library)
+  * Building reusable libraries, including [an interface to PushWoosh](https://packagist.org/packages/matthewbdaly/pushwoosh-php-library) and [a Laravel middleware for adding ETags to responses](https://github.com/matthewbdaly/laravel-etag-middleware)
   * Building WordPress themes and plugins, and setting up and administering WordPress
-  * Some unit testing with PHPUnit and Mockery
+  * Extensive unit and integration testing with PHPSpec, PHPUnit and Mockery
+  * Extensive acceptance testing with Behat
   * Generating documentation with ApiGen
 * SQL (primarily MySQL, PostgreSQL and SQLite), as well as some use of CouchDB, MongoDB and Redis
 * Some experience with Ruby, including use of Cucumber for testing purposes
