@@ -25,13 +25,19 @@
               <section class="comments">
                   {{#if data.disqus }}
                   <div id="disqus_thread"></div>
-                  <script type="text/javascript">
-                    window.disqus_identifier="{{ data.url }}{{ path }}";
-                    window.disqus_url="{{ data.url }}{{ path }}";
-                    window.disqus_title="{{capitalize meta.title}}";
+                  <script>
+                     var disqus_config = function () {
+                        this.page.url = "{{ canonical }}";
+                        this.page.identifier = "{{ canonical }}";
+                     };
+                  (function() { // DON'T EDIT BELOW THIS LINE
+                     var d = document, s = d.createElement('script');
+                     s.src = 'https://matthewdaly.disqus.com/embed.js';
+                     s.setAttribute('data-timestamp', +new Date());
+                     (d.head || d.body).appendChild(s);
+                  })();
                   </script>
-                  <script type="text/javascript" src="http://disqus.com/forums/{{ data.disqus }}/embed.js"></script>
-                  <noscript><a href="http://{{ data.disqus }}.disqus.com/?url=ref">View the discussion thread.</a></noscript>
+                  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
                 {{/if}}
                 {{#if data.facebookcomments }}
                 <div class="fb-comments" data-href="{{ data.url }}{{ path }}/" data-width="470" data-num-posts="10"></div>
