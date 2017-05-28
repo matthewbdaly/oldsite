@@ -93,7 +93,7 @@ Let's commit our changes:
 
 ```bash
 $ git init
-$ git add .gitignore requirements/txt manage.py gigfinder
+$ git add .gitignore requirements.txt manage.py gigfinder
 $ git commit -m 'Initial commit'
 ```
 
