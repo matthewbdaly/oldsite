@@ -4,7 +4,7 @@
         <title>django | Matthew Daly&apos;s Blog</title>
         <description>django | I&apos;m a web developer in Norfolk. This is my blog...</description>
         <link>http://matthewdaly.co.uk/blog/categories/django/</link>
-        <lastBuildDate>Wed, 15 Mar 2017 22:32:28 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 28 May 2017 19:00:15 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <copyright>Matthew Daly 2017</copyright>
         <generator>Feed for Node.js</generator>
@@ -25,7 +25,7 @@
 <p>You’ll be prompted to enter a password for the new user. Next, we want to use the <code>psql</code> command-line client to interact with our new database:</p>
 <pre><code class="hljs lang-bash singleline"><table>$ psql gigfinder</table></code></pre>
 <p>This connects to the database. Run these commands to set up access to the database and install the PostGIS extension:</p>
-<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta"># GRANT ALL PRIVILEGES ON DATABASE gigfinder TO giguser;</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta"># CREATE EXTENSION postgis;</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-meta"># \q</span></td></table></code></pre>
+<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">#</span><span class="bash"> GRANT ALL PRIVILEGES ON DATABASE gigfinder TO giguser;</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta">#</span><span class="bash"> CREATE EXTENSION postgis;</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-meta">#</span><span class="bash"> \q</span></td></table></code></pre>
 <p>With our database set up, it’s time to start work on our project. Let’s create our virtualenv in a new folder:</p>
 <pre><code class="hljs lang-bash singleline"><table>$ pyvenv venv</table></code></pre>
 <p>Then activate it:</p>
@@ -39,7 +39,7 @@
 <p>We’ll also create a <code>.gitignore</code> file:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>venv/</td><tr><td class="linenos" data-pseudo-content="2"></td><td>.DS_Store</td><tr><td class="linenos" data-pseudo-content="3"></td><td>*.swp</td><tr><td class="linenos" data-pseudo-content="4"></td><td>node_modules/</td><tr><td class="linenos" data-pseudo-content="5"></td><td>*.pyc</td></table></code></pre>
 <p>Let’s commit our changes:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ git init</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ git add .gitignore requirements/txt manage.py gigfinder</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ git commit -m <span class="hljs-string">'Initial commit'</span></td></table></code></pre>
+<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ git init</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ git add .gitignore requirements.txt manage.py gigfinder</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ git commit -m <span class="hljs-string">'Initial commit'</span></td></table></code></pre>
 <p>Next, let’s create our first app, which we will call <code>gigs</code>:</p>
 <pre><code class="hljs lang-bash singleline"><table>$ python manage.py startapp gigs</table></code></pre>
 <p>We need to add our new app to the <code>INSTALLED_APPS</code> setting. While we’re there we’ll also add GIS support and set up the database connection. First, add the required apps to <code>INSTALLED_APPS</code>:</p>
@@ -238,7 +238,7 @@
 <p>You’ll be prompted for a password - I’m assuming this will just be <code>password</code> here. Next, we need to connect to PostgreSQL using the <code>psql</code> utility:</p>
 <pre><code class="hljs lang-bash singleline"><table>$ psql djangostore -U store -W</table></code></pre>
 <p>You’ll be prompted for your new password. Next, run the following command:</p>
-<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta"># CREATE EXTENSION hstore;</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta"># GRANT ALL PRIVILEGES ON DATABASE djangostore TO store;</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-meta"># \q</span></td></table></code></pre>
+<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">#</span><span class="bash"> CREATE EXTENSION hstore;</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta">#</span><span class="bash"> GRANT ALL PRIVILEGES ON DATABASE djangostore TO store;</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-meta">#</span><span class="bash"> \q</span></td></table></code></pre>
 <p>The first command installs the HStore extension. Next we make sure our new user has the privileges required on the new database:</p>
 <p>We’ve now created our database and a user to interact with it. Next, we’ll set up our Django install:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ <span class="hljs-built_in">cd</span> Projects</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ mkdir djangostore</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ <span class="hljs-built_in">cd</span> djangostore</td><tr><td class="linenos" data-pseudo-content="4"></td><td>$ pyvenv venv</td><tr><td class="linenos" data-pseudo-content="5"></td><td>$ <span class="hljs-built_in">source</span> venv/bin/activate</td><tr><td class="linenos" data-pseudo-content="6"></td><td>$ pip install Django psycopg2 ipdb</td><tr><td class="linenos" data-pseudo-content="7"></td><td>$ django-admin.py startproject djangostore</td><tr><td class="linenos" data-pseudo-content="8"></td><td>$ python manage.py startapp store</td></table></code></pre>
