@@ -1,0 +1,546 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Snapshot Test Your Vue Components With Jest - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="http://matthewdaly.co.uk/blog/2017/06/17/snapshot-test-your-vue-components-with-jest/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "http://matthewdaly.co.uk/blog/2017/06/17/snapshot-test-your-vue-components-with-jest/",
+         "headline": "Snapshot Test Your Vue Components With Jest",
+         "datePublished": "2017-06-17T13:12:02.000Z",
+         "dateModified": "2017-06-17T13:12:02.000Z",
+         "description": "&lt;p&gt;At work I’ve recently started using &lt;a href&#x3D;&quot;https://vuejs.org/&quot;&gt;Vue&lt;/a&gt; as my main front-end fra...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "http://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "http://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">17th June 2017 2:12 pm</p><h1>Snapshot Test Your Vue Components With Jest</h1><p>At work I’ve recently started using <a href="https://vuejs.org/">Vue</a> as my main front-end framework instead of Angular 1. It has a relatively shallow learning curve and has enough similarities with both React and Angular 1 that if you’re familiar with one or both of them it feels quite familiar. We’re a Laravel shop and Laravel comes out of the box with a basic scaffolding for using Vue, so not only is it the path of least resistance, but many of my colleagues knew it already and it’s used on some existing projects (one of which I’ve been helping out on this week), so it made sense to learn it. Add to that the fact that the main alternative is Angular 2, which I vehemently dislike, and learning Vue was a no-brainer.</p><p><a href="https://facebook.github.io/jest/docs/snapshot-testing.html">Snapshot tests</a> are a really useful way of making sure your user interface doesn’t change unexpectedly. Facebook introduced them to their Jest testing framework last year, and they’ve started to appear in other testing frameworks too. In their words…</p><blockquote><p>A typical snapshot test case for a mobile app renders a UI component, takes a screenshot, then compares it to a reference image stored alongside the test. The test will fail if the two images do not match: either the change is unexpected, or the screenshot needs to be updated to the new version of the UI component.</p></blockquote><p>This makes it easy to make sure than a UI component, such as a React or Vue component, does not unexpectedly change how it is rendered. In the event that it does change, it will fail the test, and it’s up to the developer to confirm whether or not that’s expected - if so they can generate a new version of the snapshot and be on their way. Without it, you’re stuck manually testing that the right HTML tags get generated, which is a chore.</p><p>Jest’s documentation is aimed pretty squarely at React, but it’s not hard to adapt it to work with Vue components. Here I’ll show you how I got it working with Vue.</p><h2 id="setting-up-a-new-project">Setting up a new project</h2><p>I used the <a href="https://github.com/vuejs/vue-cli">Vue CLI</a> boilerplate generator to set up my initial dependencies for this project. I then had to install some further packages:</p><pre><code class="hljs lang-bash">$ npm install --save-dev jest babel-jest jest-vue-preprocessor
+</code></pre><p>After that, I had to configure Jest to work with Vue. The finished <code>package.json</code> looked like this:</p><pre><code class="hljs lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"myproject"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">"A project"</span>,
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt;"</span>,
+  <span class="hljs-attr">"private"</span>: <span class="hljs-literal">true</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"dev"</span>: <span class="hljs-string">"node build/dev-server.js"</span>,
+    <span class="hljs-attr">"start"</span>: <span class="hljs-string">"node build/dev-server.js"</span>,
+    <span class="hljs-attr">"build"</span>: <span class="hljs-string">"node build/build.js"</span>,
+    <span class="hljs-attr">"lint"</span>: <span class="hljs-string">"eslint --ext .js,.vue src"</span>,
+    <span class="hljs-attr">"test"</span>: <span class="hljs-string">"jest __test__/ --coverage"</span>
+  },
+  <span class="hljs-attr">"dependencies"</span>: {
+    <span class="hljs-attr">"vue"</span>: <span class="hljs-string">"^2.3.3"</span>,
+    <span class="hljs-attr">"vue-router"</span>: <span class="hljs-string">"^2.3.1"</span>
+  },
+  <span class="hljs-attr">"devDependencies"</span>: {
+    <span class="hljs-attr">"autoprefixer"</span>: <span class="hljs-string">"^6.7.2"</span>,
+    <span class="hljs-attr">"babel-core"</span>: <span class="hljs-string">"^6.22.1"</span>,
+    <span class="hljs-attr">"babel-eslint"</span>: <span class="hljs-string">"^7.1.1"</span>,
+    <span class="hljs-attr">"babel-jest"</span>: <span class="hljs-string">"^20.0.3"</span>,
+    <span class="hljs-attr">"babel-loader"</span>: <span class="hljs-string">"^6.2.10"</span>,
+    <span class="hljs-attr">"babel-plugin-transform-runtime"</span>: <span class="hljs-string">"^6.22.0"</span>,
+    <span class="hljs-attr">"babel-preset-env"</span>: <span class="hljs-string">"^1.3.2"</span>,
+    <span class="hljs-attr">"babel-preset-stage-2"</span>: <span class="hljs-string">"^6.22.0"</span>,
+    <span class="hljs-attr">"babel-register"</span>: <span class="hljs-string">"^6.22.0"</span>,
+    <span class="hljs-attr">"chalk"</span>: <span class="hljs-string">"^1.1.3"</span>,
+    <span class="hljs-attr">"connect-history-api-fallback"</span>: <span class="hljs-string">"^1.3.0"</span>,
+    <span class="hljs-attr">"copy-webpack-plugin"</span>: <span class="hljs-string">"^4.0.1"</span>,
+    <span class="hljs-attr">"css-loader"</span>: <span class="hljs-string">"^0.28.0"</span>,
+    <span class="hljs-attr">"eslint"</span>: <span class="hljs-string">"^3.19.0"</span>,
+    <span class="hljs-attr">"eslint-config-standard"</span>: <span class="hljs-string">"^6.2.1"</span>,
+    <span class="hljs-attr">"eslint-friendly-formatter"</span>: <span class="hljs-string">"^2.0.7"</span>,
+    <span class="hljs-attr">"eslint-loader"</span>: <span class="hljs-string">"^1.7.1"</span>,
+    <span class="hljs-attr">"eslint-plugin-html"</span>: <span class="hljs-string">"^2.0.0"</span>,
+    <span class="hljs-attr">"eslint-plugin-promise"</span>: <span class="hljs-string">"^3.4.0"</span>,
+    <span class="hljs-attr">"eslint-plugin-standard"</span>: <span class="hljs-string">"^2.0.1"</span>,
+    <span class="hljs-attr">"eventsource-polyfill"</span>: <span class="hljs-string">"^0.9.6"</span>,
+    <span class="hljs-attr">"express"</span>: <span class="hljs-string">"^4.14.1"</span>,
+    <span class="hljs-attr">"extract-text-webpack-plugin"</span>: <span class="hljs-string">"^2.0.0"</span>,
+    <span class="hljs-attr">"file-loader"</span>: <span class="hljs-string">"^0.11.1"</span>,
+    <span class="hljs-attr">"friendly-errors-webpack-plugin"</span>: <span class="hljs-string">"^1.1.3"</span>,
+    <span class="hljs-attr">"html-webpack-plugin"</span>: <span class="hljs-string">"^2.28.0"</span>,
+    <span class="hljs-attr">"http-proxy-middleware"</span>: <span class="hljs-string">"^0.17.3"</span>,
+    <span class="hljs-attr">"jest"</span>: <span class="hljs-string">"^20.0.4"</span>,
+    <span class="hljs-attr">"jest-vue-preprocessor"</span>: <span class="hljs-string">"^1.0.1"</span>,
+    <span class="hljs-attr">"opn"</span>: <span class="hljs-string">"^4.0.2"</span>,
+    <span class="hljs-attr">"optimize-css-assets-webpack-plugin"</span>: <span class="hljs-string">"^1.3.0"</span>,
+    <span class="hljs-attr">"ora"</span>: <span class="hljs-string">"^1.2.0"</span>,
+    <span class="hljs-attr">"rimraf"</span>: <span class="hljs-string">"^2.6.0"</span>,
+    <span class="hljs-attr">"semver"</span>: <span class="hljs-string">"^5.3.0"</span>,
+    <span class="hljs-attr">"shelljs"</span>: <span class="hljs-string">"^0.7.6"</span>,
+    <span class="hljs-attr">"url-loader"</span>: <span class="hljs-string">"^0.5.8"</span>,
+    <span class="hljs-attr">"vue-loader"</span>: <span class="hljs-string">"^12.1.0"</span>,
+    <span class="hljs-attr">"vue-style-loader"</span>: <span class="hljs-string">"^3.0.1"</span>,
+    <span class="hljs-attr">"vue-template-compiler"</span>: <span class="hljs-string">"^2.3.3"</span>,
+    <span class="hljs-attr">"webpack"</span>: <span class="hljs-string">"^2.6.1"</span>,
+    <span class="hljs-attr">"webpack-bundle-analyzer"</span>: <span class="hljs-string">"^2.2.1"</span>,
+    <span class="hljs-attr">"webpack-dev-middleware"</span>: <span class="hljs-string">"^1.10.0"</span>,
+    <span class="hljs-attr">"webpack-hot-middleware"</span>: <span class="hljs-string">"^2.18.0"</span>,
+    <span class="hljs-attr">"webpack-merge"</span>: <span class="hljs-string">"^4.1.0"</span>
+  },
+  <span class="hljs-attr">"engines"</span>: {
+    <span class="hljs-attr">"node"</span>: <span class="hljs-string">"&gt;= 4.0.0"</span>,
+    <span class="hljs-attr">"npm"</span>: <span class="hljs-string">"&gt;= 3.0.0"</span>
+  },
+  <span class="hljs-attr">"browserslist"</span>: [
+    <span class="hljs-string">"&gt; 1%"</span>,
+    <span class="hljs-string">"last 2 versions"</span>,
+    <span class="hljs-string">"not ie &lt;= 8"</span>
+  ],
+  <span class="hljs-attr">"jest"</span>: {
+    <span class="hljs-attr">"testRegex"</span>: <span class="hljs-string">"spec.js$"</span>,
+    <span class="hljs-attr">"moduleFileExtensions"</span>: [
+      <span class="hljs-string">"js"</span>,
+      <span class="hljs-string">"vue"</span>
+    ],
+    <span class="hljs-attr">"transform"</span>: {
+      <span class="hljs-attr">"^.+\\.js$"</span>: <span class="hljs-string">"&lt;rootDir&gt;/node_modules/babel-jest"</span>,
+      <span class="hljs-attr">".*\\.(vue)$"</span>: <span class="hljs-string">"&lt;rootDir&gt;/node_modules/jest-vue-preprocessor"</span>
+    }
+  }
+}
+</code></pre><p>I won’t include things like the Webpack config, because that’s all generated by Vue CLI. Note that we need to tell Jest what file extensions it should work with, including <code>.vue</code>, and we need to specify the appropriate transforms for different types of files. We use <code>jest-vue-preprocessor</code> for <code>.vue</code> files and <code>babel-jest</code> for <code>.js</code> files.</p><p>With that done, we can create a basic component. We’ll assume we’re writing a simple issue tracker here, and our first component will be at <code>src/components/Issue.vue</code>:</p><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>An Issue<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  data () {
+    <span class="hljs-keyword">return</span> {}
+  }
+}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">scoped</span>&gt;</span><span class="undefined">
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+</code></pre><p>Next, we create a simple test for this component. Save this as <code>__test__/components/issue.spec.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> Issue <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/components/Issue.vue'</span>
+<span class="hljs-keyword">import</span> Vue <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+
+<span class="hljs-keyword">const</span> Constructor = Vue.extend(Issue)
+<span class="hljs-keyword">const</span> vm = <span class="hljs-keyword">new</span> Constructor().$mount()
+
+describe(<span class="hljs-string">'Issue'</span>, () =&gt; {
+  it(<span class="hljs-string">'should render'</span>, () =&gt; {
+    expect(vm.$el.querySelector(<span class="hljs-string">'h1'</span>).textContent).toEqual(<span class="hljs-string">'An Issue'</span>)
+  });
+
+  it(<span class="hljs-string">'should match the snapshot'</span>, () =&gt; {
+    expect(vm.$el).toMatchSnapshot()
+  });
+});
+</code></pre><p><code>Constructor</code> is what creates our Vue component, while <code>vm</code> is our actual newly-mounted Vue component. We can refer to the HTML inside the component through <code>vm.$el</code>, so we can then work with the virtual DOM easily.</p><p>In the first test we use the more traditional method of verifying our UI component has worked as expected - we fetch an HTML tag inside it and verify that the content inside is what we expect. This is fine for a small component, but as the components get larger we’ll find it more of a chore.</p><p>The second test is much simpler and more concise. We simply assert that it matches the snapshot. Not only is that easier, but it can scale to components of any size because we don’t have to check every little element.</p><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; myproject@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/myproject
+&gt; jest __test__/ --coverage
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (46ms)
+    ✓ should match the snapshot (14ms)
+
+Snapshot Summary
+ › 1 snapshot written <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite.
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 added, 1 total
+Time:        8.264s
+Ran all <span class="hljs-built_in">test</span> suites matching <span class="hljs-string">"__test__/"</span>.
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+</code></pre><p>Note this section:</p><pre><code class="hljs lang-bash">Snapshot Summary
+ › 1 snapshot written <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite.
+</code></pre><p>This tells us that the snapshot has been successfully written. If we run the tests again we should see that it checks against the existing snapshot:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; myproject@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/myproject
+&gt; jest __test__/ --coverage
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (40ms)
+    ✓ should match the snapshot (12ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 passed, 1 total
+Time:        3.554s
+Ran all <span class="hljs-built_in">test</span> suites matching <span class="hljs-string">"__test__/"</span>.
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+</code></pre><p>Great stuff. Now, if we make a minor change to our component, such as changing the text from <code>An Issue</code> to <code>My Issue</code>, does it pick that up?</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; myproject@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/myproject
+&gt; jest __test__/ --coverage
+
+ FAIL  __test__/components/issue.spec.js (5.252s)
+  ● Issue › should render
+
+    expect(received).toEqual(expected)
+
+    Expected value to equal:
+      <span class="hljs-string">"An Issue"</span>
+    Received:
+      <span class="hljs-string">"My Issue"</span>
+
+      at Object.&lt;anonymous&gt; (__test__/components/issue.spec.js:9:52)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  ● Issue › should match the snapshot
+
+    expect(value).toMatchSnapshot()
+
+    Received value does not match stored snapshot 1.
+
+    - Snapshot
+    + Received
+
+     &lt;div&gt;
+       &lt;h1&gt;
+    -    An Issue
+    +    My Issue
+       &lt;/h1&gt;
+     &lt;/div&gt;
+
+      at Object.&lt;anonymous&gt; (__test__/components/issue.spec.js:13:20)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  Issue
+    ✕ should render (48ms)
+    ✕ should match the snapshot (25ms)
+
+Snapshot Summary
+ › 1 snapshot <span class="hljs-built_in">test</span> failed <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite. Inspect your code changes or run with `npm <span class="hljs-built_in">test</span> -- -u` to update them.
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 total
+Snapshots:   1 failed, 1 total
+Time:        7.082s
+Ran all <span class="hljs-built_in">test</span> suites matching <span class="hljs-string">"__test__/"</span>.
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+</code></pre><p>Yes, we can see that it’s picked up on the change and thrown an error. Note this line:</p><pre><code class="hljs lang-bash"> › 1 snapshot <span class="hljs-built_in">test</span> failed <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite. Inspect your code changes or run with `npm <span class="hljs-built_in">test</span> -- -u` to update them.
+</code></pre><p>Jest is telling us that our snapshot has changed, but if we expect that, we can just run <code>npm test -- -u</code> to replace the existing one with our new one. Then, our tests will pass again.</p><p>Now, this component is pretty useless. It doesn’t accept any external input whatsoever, so the response is always going to be the same. How do we test a more dynamic component? Amend the component to look like this:</p><pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ issue.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+  <span class="hljs-attr">props</span>: {
+    <span class="hljs-attr">issue</span>: <span class="hljs-built_in">Object</span>
+  },
+  data () {
+    <span class="hljs-keyword">return</span> {}
+  }
+}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">scoped</span>&gt;</span><span class="undefined">
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span></span>
+</code></pre><p>We’re now passing the <code>issue</code> object into our component as a prop, and getting the name from that. That will break our test, so we need to amend it to pass through the props:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> Issue <span class="hljs-keyword">from</span> <span class="hljs-string">'../../src/components/Issue.vue'</span>
+<span class="hljs-keyword">import</span> Vue <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>
+
+<span class="hljs-keyword">const</span> Constructor = Vue.extend(Issue)
+<span class="hljs-keyword">const</span> issue = {
+  <span class="hljs-attr">name</span>: <span class="hljs-string">'My Issue'</span>
+}
+<span class="hljs-keyword">const</span> vm = <span class="hljs-keyword">new</span> Constructor({
+  <span class="hljs-attr">propsData</span>: { <span class="hljs-attr">issue</span>: issue }
+}).$mount()
+
+describe(<span class="hljs-string">'Issue'</span>, () =&gt; {
+  it(<span class="hljs-string">'should render'</span>, () =&gt; {
+    expect(vm.$el.querySelector(<span class="hljs-string">'h1'</span>).textContent).toEqual(<span class="hljs-string">'My Issue'</span>)
+  });
+
+  it(<span class="hljs-string">'should match the snapshot'</span>, () =&gt; {
+    expect(vm.$el).toMatchSnapshot()
+  });
+});
+</code></pre><p>Here we pass our prop into the constructor for the component. Now, let’s run the tests again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
+
+&gt; myproject@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/myproject
+&gt; jest __test__/ --coverage
+
+ FAIL  __test__/components/issue.spec.js
+  ● Issue › should match the snapshot
+
+    expect(value).toMatchSnapshot()
+
+    Received value does not match stored snapshot 1.
+
+    - Snapshot
+    + Received
+
+     &lt;div&gt;
+       &lt;h1&gt;
+    -    An Issue
+    +    My Issue
+       &lt;/h1&gt;
+     &lt;/div&gt;
+
+      at Object.&lt;anonymous&gt; (__test__/components/issue.spec.js:18:20)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  Issue
+    ✓ should render (39ms)
+    ✕ should match the snapshot (25ms)
+
+Snapshot Summary
+ › 1 snapshot <span class="hljs-built_in">test</span> failed <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite. Inspect your code changes or run with `npm <span class="hljs-built_in">test</span> -- -u` to update them.
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   1 failed, 1 total
+Time:        3.717s
+Ran all <span class="hljs-built_in">test</span> suites matching <span class="hljs-string">"__test__/"</span>.
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |     96.3 |       50 |      100 |    96.15 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+</code></pre><p>Jest has picked up on our changes and thrown an error. However, because we know the UI has changed, we’re happy with this situation, so we can tell Jest to replace the prior snapshot with <code>npm test -- -u</code> as mentioned earlier:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span> -- -u
+
+&gt; myproject@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/myproject
+&gt; jest __test__/ --coverage <span class="hljs-string">"-u"</span>
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (39ms)
+    ✓ should match the snapshot (14ms)
+
+Snapshot Summary
+ › 1 snapshot updated <span class="hljs-keyword">in</span> 1 <span class="hljs-built_in">test</span> suite.
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 updated, 1 total
+Time:        3.668s
+Ran all <span class="hljs-built_in">test</span> suites matching <span class="hljs-string">"__test__/"</span>.
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |     96.3 |       50 |      100 |    96.15 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+</code></pre><p>Great, we now have a passing test suite again! That’s all we need to make sure that any regressions in the generated HTML of a component get caught.</p><p>Of course, this won’t help with the actual functionality of the component. However, Jest is pretty easy to use to write tests for the actual functionality of the application. If you prefer another testing framework, it’s possible to do the same with them, although I will leave setting them up as an exercise for the reader.</p><section><ul class="categories"><li><a href="/blog/categories/vue/">vue</a></li><li><a href="/blog/categories/jest/">jest</a></li><li><a href="/blog/categories/testing/">testing</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="http://matthewdaly.co.uk/blog/2017/06/17/snapshot-test-your-vue-components-with-jest/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/03/15/enforcing-a-coding-standard-with-php-codesniffer/amp/">Enforcing a Coding Standard With PHP Codesniffer</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
