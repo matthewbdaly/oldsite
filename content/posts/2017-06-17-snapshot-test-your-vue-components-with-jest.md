@@ -1,0 +1,453 @@
+---
+title: "Snapshot test your Vue components with Jest"
+date: 2017-06-17 14:12:02 +0100
+categories:
+- vue
+- jest
+- testing
+- javascript
+- tdd
+comments: true
+---
+
+At work I've recently started using [Vue](https://vuejs.org/) as my main front-end framework instead of Angular 1. It has a relatively shallow learning curve and has enough similarities with both React and Angular 1 that if you're familiar with one or both of them it feels quite familiar. We're a Laravel shop and Laravel comes out of the box with a basic scaffolding for using Vue, so not only is it the path of least resistance, but many of my colleagues knew it already and it's used on some existing projects (one of which I've been helping out on this week), so it made sense to learn it. Add to that the fact that the main alternative is Angular 2, which I vehemently dislike, and learning Vue was a no-brainer.
+
+[Snapshot tests](https://facebook.github.io/jest/docs/snapshot-testing.html) are a really useful way of making sure your user interface doesn't change unexpectedly. Facebook introduced them to their Jest testing framework last year, and they've started to appear in other testing frameworks too. In their words...
+
+> A typical snapshot test case for a mobile app renders a UI component, takes a screenshot, then compares it to a reference image stored alongside the test. The test will fail if the two images do not match: either the change is unexpected, or the screenshot needs to be updated to the new version of the UI component.
+
+This makes it easy to make sure than a UI component, such as a React or Vue component, does not unexpectedly change how it is rendered. In the event that it does change, it will fail the test, and it's up to the developer to confirm whether or not that's expected - if so they can generate a new version of the snapshot and be on their way. Without it, you're stuck manually testing that the right HTML tags get generated, which is a chore.
+
+Jest's documentation is aimed pretty squarely at React, but it's not hard to adapt it to work with Vue components. Here I'll show you how I got it working with Vue.
+
+Setting up a new project
+------------------------
+
+I used the [Vue CLI](https://github.com/vuejs/vue-cli) boilerplate generator to set up my initial dependencies for this project. I then had to install some further packages:
+
+```bash
+$ npm install --save-dev jest babel-jest jest-vue-preprocessor
+```
+
+After that, I had to configure Jest to work with Vue. The finished `package.json` looked like this:
+
+```json
+{
+  "name": "myproject",
+  "version": "1.0.0",
+  "description": "A project",
+  "author": "Matthew Daly <matthew@matthewdaly.co.uk>",
+  "private": true,
+  "scripts": {
+    "dev": "node build/dev-server.js",
+    "start": "node build/dev-server.js",
+    "build": "node build/build.js",
+    "lint": "eslint --ext .js,.vue src",
+    "test": "jest __test__/ --coverage"
+  },
+  "dependencies": {
+    "vue": "^2.3.3",
+    "vue-router": "^2.3.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.7.2",
+    "babel-core": "^6.22.1",
+    "babel-eslint": "^7.1.1",
+    "babel-jest": "^20.0.3",
+    "babel-loader": "^6.2.10",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "babel-preset-env": "^1.3.2",
+    "babel-preset-stage-2": "^6.22.0",
+    "babel-register": "^6.22.0",
+    "chalk": "^1.1.3",
+    "connect-history-api-fallback": "^1.3.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.28.0",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-friendly-formatter": "^2.0.7",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-html": "^2.0.0",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1",
+    "eventsource-polyfill": "^0.9.6",
+    "express": "^4.14.1",
+    "extract-text-webpack-plugin": "^2.0.0",
+    "file-loader": "^0.11.1",
+    "friendly-errors-webpack-plugin": "^1.1.3",
+    "html-webpack-plugin": "^2.28.0",
+    "http-proxy-middleware": "^0.17.3",
+    "jest": "^20.0.4",
+    "jest-vue-preprocessor": "^1.0.1",
+    "opn": "^4.0.2",
+    "optimize-css-assets-webpack-plugin": "^1.3.0",
+    "ora": "^1.2.0",
+    "rimraf": "^2.6.0",
+    "semver": "^5.3.0",
+    "shelljs": "^0.7.6",
+    "url-loader": "^0.5.8",
+    "vue-loader": "^12.1.0",
+    "vue-style-loader": "^3.0.1",
+    "vue-template-compiler": "^2.3.3",
+    "webpack": "^2.6.1",
+    "webpack-bundle-analyzer": "^2.2.1",
+    "webpack-dev-middleware": "^1.10.0",
+    "webpack-hot-middleware": "^2.18.0",
+    "webpack-merge": "^4.1.0"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "jest": {
+    "testRegex": "spec.js$",
+    "moduleFileExtensions": [
+      "js",
+      "vue"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
+    }
+  }
+}
+```
+
+I won't include things like the Webpack config, because that's all generated by Vue CLI. Note that we need to tell Jest what file extensions it should work with, including `.vue`, and we need to specify the appropriate transforms for different types of files. We use `jest-vue-preprocessor` for `.vue` files and `babel-jest` for `.js` files.
+
+With that done, we can create a basic component. We'll assume we're writing a simple issue tracker here, and our first component will be at `src/components/Issue.vue`:
+
+```html
+<template>
+  <div>
+    <h1>An Issue</h1>
+  </div>
+</template>
+
+<script>
+export default {
+  data () {
+    return {}
+  }
+}
+</script>
+
+<style scoped>
+</style>
+```
+
+Next, we create a simple test for this component. Save this as `__test__/components/issue.spec.js`:
+
+```javascript
+import Issue from '../../src/components/Issue.vue'
+import Vue from 'vue'
+
+const Constructor = Vue.extend(Issue)
+const vm = new Constructor().$mount()
+
+describe('Issue', () => {
+  it('should render', () => {
+    expect(vm.$el.querySelector('h1').textContent).toEqual('An Issue')
+  });
+
+  it('should match the snapshot', () => {
+    expect(vm.$el).toMatchSnapshot()
+  });
+});
+```
+
+`Constructor` is what creates our Vue component, while `vm` is our actual newly-mounted Vue component. We can refer to the HTML inside the component through `vm.$el`, so we can then work with the virtual DOM easily.
+
+In the first test we use the more traditional method of verifying our UI component has worked as expected - we fetch an HTML tag inside it and verify that the content inside is what we expect. This is fine for a small component, but as the components get larger we'll find it more of a chore.
+
+The second test is much simpler and more concise. We simply assert that it matches the snapshot. Not only is that easier, but it can scale to components of any size because we don't have to check every little element.
+
+Let's run our tests:
+
+```bash
+$ npm test
+
+> myproject@1.0.0 test /home/matthew/Projects/myproject
+> jest __test__/ --coverage
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (46ms)
+    ✓ should match the snapshot (14ms)
+
+Snapshot Summary
+ › 1 snapshot written in 1 test suite.
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 added, 1 total
+Time:        8.264s
+Ran all test suites matching "__test__/".
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+```
+
+Note this section:
+
+```bash
+Snapshot Summary
+ › 1 snapshot written in 1 test suite.
+```
+
+This tells us that the snapshot has been successfully written. If we run the tests again we should see that it checks against the existing snapshot:
+
+```bash
+$ npm test
+
+> myproject@1.0.0 test /home/matthew/Projects/myproject
+> jest __test__/ --coverage
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (40ms)
+    ✓ should match the snapshot (12ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 passed, 1 total
+Time:        3.554s
+Ran all test suites matching "__test__/".
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+```
+
+Great stuff. Now, if we make a minor change to our component, such as changing the text from `An Issue` to `My Issue`, does it pick that up?
+
+```bash
+$ npm test
+
+> myproject@1.0.0 test /home/matthew/Projects/myproject
+> jest __test__/ --coverage
+
+ FAIL  __test__/components/issue.spec.js (5.252s)
+  ● Issue › should render
+
+    expect(received).toEqual(expected)
+
+    Expected value to equal:
+      "An Issue"
+    Received:
+      "My Issue"
+      
+      at Object.<anonymous> (__test__/components/issue.spec.js:9:52)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  ● Issue › should match the snapshot
+
+    expect(value).toMatchSnapshot()
+
+    Received value does not match stored snapshot 1.
+
+    - Snapshot
+    + Received
+
+     <div>
+       <h1>
+    -    An Issue
+    +    My Issue
+       </h1>
+     </div>
+      
+      at Object.<anonymous> (__test__/components/issue.spec.js:13:20)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  Issue
+    ✕ should render (48ms)
+    ✕ should match the snapshot (25ms)
+
+Snapshot Summary
+ › 1 snapshot test failed in 1 test suite. Inspect your code changes or run with `npm test -- -u` to update them.
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 total
+Snapshots:   1 failed, 1 total
+Time:        7.082s
+Ran all test suites matching "__test__/".
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |    96.15 |       50 |      100 |       96 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+```
+
+Yes, we can see that it's picked up on the change and thrown an error. Note this line:
+
+```bash
+ › 1 snapshot test failed in 1 test suite. Inspect your code changes or run with `npm test -- -u` to update them.
+```
+
+Jest is telling us that our snapshot has changed, but if we expect that, we can just run `npm test -- -u` to replace the existing one with our new one. Then, our tests will pass again.
+
+Now, this component is pretty useless. It doesn't accept any external input whatsoever, so the response is always going to be the same. How do we test a more dynamic component? Amend the component to look like this:
+
+```html
+<template>
+  <div>
+    <h1>{{ issue.name }}</h1>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    issue: Object
+  },
+  data () {
+    return {}
+  }
+}
+</script>
+
+<style scoped>
+</style>
+```
+
+We're now passing the `issue` object into our component as a prop, and getting the name from that. That will break our test, so we need to amend it to pass through the props:
+
+```javascript
+import Issue from '../../src/components/Issue.vue'
+import Vue from 'vue'
+
+const Constructor = Vue.extend(Issue)
+const issue = {
+  name: 'My Issue'
+}
+const vm = new Constructor({
+  propsData: { issue: issue }
+}).$mount()
+
+describe('Issue', () => {
+  it('should render', () => {
+    expect(vm.$el.querySelector('h1').textContent).toEqual('My Issue')
+  });
+
+  it('should match the snapshot', () => {
+    expect(vm.$el).toMatchSnapshot()
+  });
+});
+```
+
+Here we pass our prop into the constructor for the component. Now, let's run the tests again:
+
+```bash
+$ npm test
+
+> myproject@1.0.0 test /home/matthew/Projects/myproject
+> jest __test__/ --coverage
+
+ FAIL  __test__/components/issue.spec.js
+  ● Issue › should match the snapshot
+
+    expect(value).toMatchSnapshot()
+
+    Received value does not match stored snapshot 1.
+
+    - Snapshot
+    + Received
+
+     <div>
+       <h1>
+    -    An Issue
+    +    My Issue
+       </h1>
+     </div>
+      
+      at Object.<anonymous> (__test__/components/issue.spec.js:18:20)
+      at Promise.resolve.then.el (node_modules/p-map/index.js:42:16)
+
+  Issue
+    ✓ should render (39ms)
+    ✕ should match the snapshot (25ms)
+
+Snapshot Summary
+ › 1 snapshot test failed in 1 test suite. Inspect your code changes or run with `npm test -- -u` to update them.
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   1 failed, 1 total
+Time:        3.717s
+Ran all test suites matching "__test__/".
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |     96.3 |       50 |      100 |    96.15 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+```
+
+Jest has picked up on our changes and thrown an error. However, because we know the UI has changed, we're happy with this situation, so we can tell Jest to replace the prior snapshot with `npm test -- -u` as mentioned earlier:
+
+```bash
+$ npm test -- -u
+
+> myproject@1.0.0 test /home/matthew/Projects/myproject
+> jest __test__/ --coverage "-u"
+
+ PASS  __test__/components/issue.spec.js
+  Issue
+    ✓ should render (39ms)
+    ✓ should match the snapshot (14ms)
+
+Snapshot Summary
+ › 1 snapshot updated in 1 test suite.
+
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   1 updated, 1 total
+Time:        3.668s
+Ran all test suites matching "__test__/".
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+File                                                       |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+All files                                                  |     96.3 |       50 |      100 |    96.15 |                |
+ root                                                      |      100 |      100 |      100 |      100 |                |
+  unknown                                                  |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/__test__/components  |      100 |      100 |      100 |      100 |                |
+  issue.spec.js                                            |      100 |      100 |      100 |      100 |                |
+ root/home/matthew/Projects/myproject/src/components       |    94.44 |       50 |      100 |    94.12 |                |
+  Issue.vue                                                |    94.44 |       50 |      100 |    94.12 |             39 |
+-----------------------------------------------------------|----------|----------|----------|----------|----------------|
+```
+
+Great, we now have a passing test suite again! That's all we need to make sure that any regressions in the generated HTML of a component get caught.
+
+Of course, this won't help with the actual functionality of the component. However, Jest is pretty easy to use to write tests for the actual functionality of the application. If you prefer another testing framework, it's possible to do the same with them, although I will leave setting them up as an exercise for the reader.
