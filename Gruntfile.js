@@ -22,7 +22,7 @@ module.exports = function (grunt) {
               data: {
                 author: "Matthew Daly",
                 email: "matthew@matthewdaly.co.uk",
-                url: "http://matthewdaly.co.uk",
+                url: "https://matthewdaly.co.uk",
                 addthis: "MattBD",
                 googleanalytics: "UA-17043630-1",
                 disqus: "matthewdaly",
@@ -328,7 +328,7 @@ module.exports = function (grunt) {
                     'blogbuilderoutput/**/*.html',
                     'blogbuilderoutput/**/rss.xml'
                 ],
-                homepage: 'http://matthewdaly.co.uk/'
+                homepage: 'https://matthewdaly.co.uk/'
             }
         },
         'gh-pages': {
