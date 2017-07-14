@@ -338,6 +338,12 @@ module.exports = function (grunt) {
             },
             src: ['**']
         },
+        cloudflare: {
+            a: 'fpurge_ts',
+            tkn: process.env.CLOUDFLARE_API_KEY,
+            email: process.env.CLOUDFLARE_EMAIL,
+            z: process.env.CLOUDFLARE_DOMAIN
+        },
         rsync: {
           options: {
             args: ["--verbose"],
@@ -367,6 +373,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-gh-pages');
+    grunt.loadNpmTasks('grunt-cloudflare');
     grunt.loadNpmTasks('grunt-sitemap');
     grunt.loadNpmTasks('grunt-rsync');
     grunt.loadNpmTasks('grunt-contrib-imagemin');
@@ -398,6 +405,7 @@ module.exports = function (grunt) {
     ]);
     grunt.registerTask('deploy', [
         'default',
-        'gh-pages'
+        'gh-pages',
+        'cloudflare'
     ]);
 };
