@@ -196,7 +196,7 @@ module.exports = function (grunt) {
                     'app/sass/*.scss',
                 ],
                 tasks: [
-                    'compass',
+                    'sass',
                     'cssmin',
                     'copy:css'
                 ],
@@ -274,11 +274,10 @@ module.exports = function (grunt) {
                 livereload: true
             }
         },
-        compass: {
+        sass: {
             dist: {
-                options: {
-                    sassDir: 'app/sass',
-                    cssDir: 'build/css'
+                files: {
+                   'build/css/style.css': 'app/sass/style.scss'
                 }
             }
         },
@@ -368,7 +367,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-contrib-compass');
+    grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -387,7 +386,7 @@ module.exports = function (grunt) {
         'browserify',
         'blogbuilder',
         'sitemap',
-        'compass',
+        'sass',
         'cssmin',
         'htmlmin',
         'uglify',
