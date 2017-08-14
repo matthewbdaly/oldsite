@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>profiling | Matthew Daly&apos;s Blog</title>
+        <description>profiling | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <link>https://matthewdaly.co.uk/blog/categories/profiling/</link>
+        <lastBuildDate>Mon, 14 Aug 2017 11:39:48 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <copyright>Matthew Daly 2017</copyright>
+        <generator>Feed for Node.js</generator>
+        <item>
+            <title><![CDATA[Profiling your Laravel application with Clockwork]]></title>
+            <link>https://matthewdaly.co.uk/blog/2017/08/14/profiling-your-laravel-application-with-clockwork/</link>
+            <guid>https://matthewdaly.co.uk/blog/2017/08/14/profiling-your-laravel-application-with-clockwork/</guid>
+            <pubDate>Mon, 14 Aug 2017 11:40:00 GMT</pubDate>
+            <description><![CDATA[<p>If you’re building any non-trivial application, it’s always a good idea to profile it to find performance problems. <a href="https://github.com/barryvdh/laravel-debugbar">Laravel Debugbar</a> is the usual solution for profiling Laravel web applications, but it isn’t really much use for REST API’s or single-page web apps that consume them.</p>
+<p>Recently I was introduced to <a href="https://github.com/itsgoingd/clockwork">Clockwork</a>, which is a server-side extension for profiling PHP applications. It’s made it a whole lot easier to track down issues like excessive numbers of queries when building an API, and as a result I’ve been able to dramatically improve the performance of an API I’ve been working on. Here I’ll show you how you can use it on a project.</p>
+<h2 id="installing-clockwork">Installing Clockwork</h2>
+<p>Clockwork is available via Composer:</p>
+<pre><code class="hljs lang-bash singleline"><table>$ composer require itsgoingd/clockwork</table></code></pre>
+<p>You also need to register the service provider in <code>config/app.php</code>:</p>
+<pre><code class="hljs lang-php singleline"><table>   Clockwork\Support\Laravel\ClockworkServiceProvider::class,</table></code></pre>
+<p>And register the middleware globally in <code>app/Http/Kernel.php</code>:</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">protected</span> $middleware = [</td><tr><td class="linenos" data-pseudo-content="2"></td><td>      \Clockwork\Support\Laravel\ClockworkMiddleware::class,</td><tr><td class="linenos" data-pseudo-content="3"></td><td>]</td></table></code></pre>
+<p>Note that it only works when <code>APP_DEBUG</code> is set to true in your <code>.env</code> file. This means that you can keep it in your application without worrying about exposing too much data in production, as long as debug mode is not active on your production server (which it shouldn’t be anyway).</p>
+<p>You will also need to install the <a href="https://chrome.google.com/webstore/detail/clockwork/dmggabnehkmmfmdffgajcflpdjlnoemp?hl=en">Chrome extension</a> in order to actually work with the returned data. Clockwork works by adding its own route to your Laravel application, and this extension makes sure that it makes the appropriate request on loading a page, and then displays the data in the dev tools.</p>
+<p>Once it’s all installed and your application is running, open the dev tools and you should see the new <strong>Clockwork</strong> tab in there. On the left of this tab is a list of requests - if you make a request, you’ll see it added to the list. When you click on each request, you’ll see the following tabs, where applicable:</p>
+<h2 id="request">Request</h2>
+<p><img src="/static/images/clockwork1.png" alt="Request tab"></p>
+<p>This is similar to Chrome’s network tab in that it shows all of the headers for a given request. It’s not anything you can’t get using Chrome’s existing dev tools, but because it doesn’t show any static content it’s arguably a bit easier to navigate.</p>
+<h2 id="timeline">Timeline</h2>
+<p><img src="/static/images/clockwork2.png" alt="Timeline tab"></p>
+<p>This shows how long the response takes to respond, which can be helpful in identifying slower requests.</p>
+<p>In addition, you can create your own events using the <code>clock()</code> helper, which will appear in the timeline, as in this example:</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>clock()-&gt;startEvent(<span class="hljs-string">'email_sent'</span>, <span class="hljs-string">'Email sent.'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td>clock()-&gt;endEvent(<span class="hljs-string">'email_sent'</span>);</td></table></code></pre>
+<h2 id="log">Log</h2>
+<p><img src="/static/images/clockwork8.png" alt="Log tab"></p>
+<p>The log tab is only displayed if you use the <code>clock()</code> helper to log data. You can log text or JSON objects as appropriate:</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>clock(<span class="hljs-string">'Message text.'</span>); <span class="hljs-comment">// 'Message text.' appears in Clockwork log tab</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>clock([<span class="hljs-string">'hello'</span> =&gt; <span class="hljs-string">'world'</span>]); <span class="hljs-comment">// logs json representation of the array</span></td></table></code></pre>
+<p>This is arguably more convenient than using the <code>Log</code> facade to write to the application log, since it’s kept in the browser and you can easily see what request caused what message to be logged.</p>
+<h2 id="database">Database</h2>
+<p><img src="/static/images/clockwork3.png" alt="Database tab"></p>
+<p>The database tab displays details of the queries made by a request. This is useful for identifying things such as:</p>
+<ul>
+<li>Repeated queries that should be cached</li>
+<li>The n+1 problem (which can be resolved by use of eager loading)</li>
+<li>Slow queries that need to be optimised</li>
+</ul>
+<p>Note that if a particular endpoint does not trigger a query, this tab will not be visible.</p>
+<h2 id="cookies">Cookies</h2>
+<p><img src="/static/images/clockwork4.png" alt="Cookies tab"></p>
+<p>For a REST API, you shouldn’t really have much use for cookies, but if you do, this tab lets you view the cookies set on the request.</p>
+<h2 id="session">Session</h2>
+<p><img src="/static/images/clockwork5.png" alt="Session tab"></p>
+<p>As with cookies, the session isn’t normally something you’d use for an API, but this tab lets you view it.</p>
+<h2 id="views">Views</h2>
+<p><img src="/static/images/clockwork6.png" alt="Views tab"></p>
+<p>This tab shows the views used on the page, and all of the data passed to them.</p>
+<h2 id="routes">Routes</h2>
+<p><img src="/static/images/clockwork7.png" alt="Routes tab"></p>
+<p>This tab shows all of the routes defined within your application.</p>
+<p>Clockwork isn’t limited to Laravel - you can also use it with Lumen, Slim 2, and CodeIgniter 2.1, and it’s possible to write your own integration for other frameworks. It’s still fundamentally browser-based, so it’s difficult to use it if your API doesn’t have at least some kind of web front end (whether that’s a single page web app or Phonegap app that consumes the API, or that the API is itself browseable and returns HTML in a web browser), but I’ve found it to be superior to Laravel Debugbar for most of what I do.</p>
+]]></description>
+            <content:encoded/>
+        </item>
+    </channel>
+</rss>
