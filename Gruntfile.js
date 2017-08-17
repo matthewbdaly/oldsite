@@ -84,6 +84,14 @@ module.exports = function (grunt) {
                 ],
                 dest: 'www/'
             },
+            opensearch: {
+                cwd: 'app/',
+                expand: true,
+                src: [
+                    '**/opensearch.xml'
+                ],
+                dest: 'www/'
+            },
             favicon: {
                 expand: true,
                 cwd: 'static/',
