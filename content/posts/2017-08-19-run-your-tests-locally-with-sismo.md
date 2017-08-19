@@ -62,6 +62,8 @@ $ touch ~/.sismo/config.php
 $ chmod -R a+w ~/.sismo/
 ```
 
+Then, [download Sismo](https://sismo.symfony.com/get/sismo.php) and put it in your web root (here it's at `/var/www/html/sismo.php`).
+
 Now, say you have a project you want to test (I'm using my [Laravel ETag middleware](https://github.com/matthewbdaly/laravel-etag-middleware) for this example). We need to specify the projects we want to test in `~/.sismo/config.php`:
 
 ```php
