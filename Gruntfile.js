@@ -352,6 +352,28 @@ module.exports = function (grunt) {
             email: process.env.CLOUDFLARE_EMAIL,
             z: process.env.CLOUDFLARE_DOMAIN
         },
+        http: {
+          'Atom': {
+             options: {
+                url: 'https://pubsubhubbub.appspot.com/',
+                method: 'POST',
+                json: {
+                   'hub.mode': 'publish',
+                   'hub.url': 'https://matthewdaly.co.uk/atom.xml'
+                }
+             }
+          },
+          'RSS': {
+             options: {
+                url: 'https://pubsubhubbub.appspot.com/',
+                method: 'POST',
+                json: {
+                   'hub.mode': 'publish',
+                   'hub.url': 'https://matthewdaly.co.uk/rss.xml',
+                }
+             }
+          }
+        },
         rsync: {
           options: {
             args: ["--verbose"],
@@ -387,6 +409,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-imagemin');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-http');
 
     // Register tasks
     grunt.registerTask('default', [
@@ -414,6 +437,7 @@ module.exports = function (grunt) {
     grunt.registerTask('deploy', [
         'default',
         'gh-pages',
-        'cloudflare'
+         'cloudflare',
+        'http'
     ]);
 };
