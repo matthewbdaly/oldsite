@@ -23,6 +23,7 @@ module.exports = function (grunt) {
                 author: "Matthew Daly",
                 email: "matthew@matthewdaly.co.uk",
                 url: "https://matthewdaly.co.uk",
+                hub: 'https://pubsubhubbub.appspot.com/',
                 addthis: "MattBD",
                 googleanalytics: "UA-17043630-1",
                 disqus: "matthewdaly",
