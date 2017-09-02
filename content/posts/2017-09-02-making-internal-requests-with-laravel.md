@@ -41,7 +41,7 @@ interface MakesInternalRequests
 
 That way you can resolve the service using dependency injection, making it trivial to replace it with a mock when testing.
 
-Now, actually making an internal request is pretty easy. You get the app instance (you can do so by resolving it using dependency injection as I do below, or call the `app()` helper. Then you put together the request you want to make and pass it as an argument to the app's `handle()` method:
+Now, actually making an internal request is pretty easy. You get the app instance (you can do so by resolving it using dependency injection as I do below, or call the `app()` helper). Then you put together the request you want to make and pass it as an argument to the app's `handle()` method:
 
 ```php
 <?php
