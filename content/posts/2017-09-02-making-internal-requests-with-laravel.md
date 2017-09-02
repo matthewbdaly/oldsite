@@ -169,6 +169,6 @@ class FailedInternalRequestException extends \Exception
 }
 ```
 
-You can catch this exception in an appropriate place and handle it as you wish.
+You can catch this exception in an appropriate place and handle it as you wish. Now, if you import the internal request class as `$dispatcher`, you can just call `$dispatcher->request($action, $resource, $data)`, where `$action` is the HTTP verb, `$resource` is the API resource to send to, and `$data` is the data to send.
 
 It's actually quite rare to have to do this. In this case, because this was a REST API and every request made to it was changing the state of the application (there were no GET requests, only POST, PUT, PATCH and DELETE), it made sense to just break down the request body and do internal requests against the existing API, since otherwise I'd have to duplicate the existing functionality. I would not recommend this approach for something like fetching data to render a page on the server side, as there are more efficient ways of accomplishing it. In all honesty I can't think of any other scenario where this would genuinely be the best option. However, it worked well for my use case and allowed me to implement this functionality quickly and simply.
