@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>ruby | Matthew Daly&apos;s Blog</title>
-    <updated>2017-08-28T13:12:26Z</updated>
+    <updated>2017-09-02T13:46:05Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -32,27 +32,27 @@
 <p>When searching for a tutorial on getting Cucumber working with PHP, I only found <a href="http://jamieonsoftware.com/journal/2011/1/2/high-level-testing-php-applications-with-cucumber.html">one good one</a>, and that didn’t cover a lot of the issues I’d have liked to cover, not did it cover actually using Cucumber as part of the development process, so I had to puzzle out much of it myself. So hopefully, by covering more of the ground that your average PHP developer is likely to need, I can show you just how useful Cucumber can be when added to your PHP development toolkit.</p>
 <p>In this tutorial, we’ll build a very simple todo-list application using the Slim framework, but we’ll use Cucumber to test it throughout to ensure that it works the way we want it to. Hopefully, by doing this, we’ll get a rock-solid web app that meets our requirements exactly.</p>
 <p>First of all, you’ll want to install RVM to make it easier to manage multiple Ruby installs. You may be able to use your system’s Ruby install, but RVM is usually a safer bet:</p>
-<pre><code class="hljs lang-bash singleline"><table>\curl -L https://get.rvm.io | bash -s stable --ruby</table></code></pre>
+<pre><code class="hljs lang-bash singleline">\curl -L https://get.rvm.io | bash <span class="hljs-_">-s</span> stable --ruby</code></pre>
 <p>This was sufficient to install RVM on Mac OS X. On Ubuntu, I also had to install the openssl and zlib packages. Before installing RVM, use apt-get to install the required packages:</p>
-<pre><code class="hljs lang-bash singleline"><table>sudo apt-get install curl git git-core zlib1g-dev zlibc libxml2-dev libxslt1-dev libyaml-dev build-essential checkinstall openssl libreadline6 libreadline6-dev zlib1g libssl-dev libsqlite3-dev sqlite3 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config</table></code></pre>
+<pre><code class="hljs lang-bash singleline">sudo apt-get install curl git git-core zlib1g-dev zlibc libxml2-dev libxslt1-dev libyaml-dev build-essential checkinstall openssl libreadline6 libreadline6-dev zlib1g libssl-dev libsqlite3-dev sqlite3 autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config</code></pre>
 <p>Once RVM is installed, then close and reopen your terminal so that RVM is loaded. Then, install the correct packages:</p>
-<pre><code class="hljs lang-bash singleline"><table>rvm pkg install openssl zlib</table></code></pre>
+<pre><code class="hljs lang-bash singleline">rvm pkg install openssl zlib</code></pre>
 <p>Now we can install our new copy of Ruby. On Ubuntu, I had to install Ruby 1.8.7 first:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>rvm install 1.8.7</td><tr><td class="linenos" data-pseudo-content="2"></td><td>rvm use 1.8.7</td></table></code></pre>
 <p>Then I installed Ruby 1.9.3:</p>
-<pre><code class="hljs lang-bash singleline"><table>rvm install 1.9.3 --with-openssl-dir=<span class="hljs-variable">$HOME</span>/.rvm/usr</table></code></pre>
+<pre><code class="hljs lang-bash singleline">rvm install 1.9.3 --with-openssl-dir=<span class="hljs-variable">$HOME</span>/.rvm/usr</code></pre>
 <p>Whereas on OS X, this is all that was required:</p>
-<pre><code class="hljs lang-bash singleline"><table>rvm install 1.9.3</table></code></pre>
+<pre><code class="hljs lang-bash singleline">rvm install 1.9.3</code></pre>
 <p>Once that’s done, run the following to set the version of Ruby being used</p>
-<pre><code class="hljs lang-bash singleline"><table>rvm use 1.9.3</table></code></pre>
+<pre><code class="hljs lang-bash singleline">rvm use 1.9.3</code></pre>
 <p>With that done, you should be able to install the required Ruby gems. Now, you could install these manually, like this:</p>
 <pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>gem install cucumber</td><tr><td class="linenos" data-pseudo-content="2"></td><td>gem install rspec</td><tr><td class="linenos" data-pseudo-content="3"></td><td>gem install mechanize</td><tr><td class="linenos" data-pseudo-content="4"></td><td>gem install capybara</td><tr><td class="linenos" data-pseudo-content="5"></td><td>gem install selenium-webdriver</td><tr><td class="linenos" data-pseudo-content="6"></td><td>gem install capybara-mechanize</td></table></code></pre>
 <p>However, there’s a more convenient way. First, create a file in the project’s root directory called Gemfile and put the following content into it:</p>
 <pre><code class="hljs lang-ruby"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>source <span class="hljs-string">"http://rubygems.org"</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>gem <span class="hljs-string">"cucumber"</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>gem <span class="hljs-string">"rspec"</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>gem <span class="hljs-string">"mechanize"</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>gem <span class="hljs-string">"capybara"</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>gem <span class="hljs-string">"selenium-webdriver"</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>gem <span class="hljs-string">"capybara-mechanize"</span></td></table></code></pre>
 <p>Then install the Bundler gem:</p>
-<pre><code class="hljs lang-bash singleline"><table>gem install bundler</table></code></pre>
+<pre><code class="hljs lang-bash singleline">gem install bundler</code></pre>
 <p>Then use Bundler to install the required gems:</p>
-<pre><code class="hljs lang-bash singleline"><table>bundle install</table></code></pre>
+<pre><code class="hljs lang-bash singleline">bundle install</code></pre>
 <p>This makes it easier to get your project set up somewhere else because you can put the Gemfile under version control, making it easier to duplicate this setup elsewhere.</p>
 <p>With that out of the way, let’s start work on our app. To save time, we’ll use the Slim framework to do some of the heavy lifting for our application. Download <a href="http://www.slimframework.com/">Slim</a> and put it in a folder on your local web server.</p>
 <p>Now, before we actually write any code, we’ll set out our first Cucumber scenario. Create a folder inside the folder you put Slim inside and call it <code>features</code>. Inside it, create a new file called <code>todo.feature</code> and put the following content into it:</p>

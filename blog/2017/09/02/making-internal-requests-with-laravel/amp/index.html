@@ -1,0 +1,330 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Making Internal Requests With Laravel - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2017/09/02/making-internal-requests-with-laravel/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2017/09/02/making-internal-requests-with-laravel/",
+         "headline": "Making Internal Requests With Laravel",
+         "datePublished": "2017-09-02T13:45:27.000Z",
+         "dateModified": "2017-09-02T13:45:27.000Z",
+         "description": "&lt;p&gt;Recently I’ve been working on a Phonegap app that needs to work offline. The nature of relational...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd September 2017 2:45 pm</p><h1>Making Internal Requests With Laravel</h1><p>Recently I’ve been working on a Phonegap app that needs to work offline. The nature of relational databases can often make this tricky if you’re dealing with related objects and you’re trying to retrofit it to something that wasn’t built with this use case in mind.</p><p>Originally my plan was to push each request that would have been made to a queue in WebSQL, and then on reconnect, make every request individually. It quickly became apparent, however, that this approach had a few problems:</p><ul><li>If one request failed, the remaining requests had to be stopped from executing</li><li>It didn’t allow for storing the failed transactions in a way that made them easy to retrieve</li></ul><p>Instead, I decided to create a single <code>sync</code> endpoint for the API that would accept an object containing all the requests that would be made, and then step through each one. If it failed, it would get the failed request and all subsequent ones in the object, and store them in the database. That way, even if the data didn’t sync correctly, it wasn’t lost, and if necessary it could be resolved manually.</p><p>Since the necessary API endpoints already existed, and were thoroughly tested, it was not a good idea to start duplicating that functionality. Instead, I implemented the functionality to carry out internal requests, and I thought I’d share how you can do this.</p><p>For any service you may build for your Laravel applications, it’s a good idea to create an interface for it first:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">MakesInternalRequests</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Make an internal request
+     *
+     * <span class="hljs-doctag">@param</span> string $action   The HTTP verb to use.
+     * <span class="hljs-doctag">@param</span> string $resource The API resource to look up.
+     * <span class="hljs-doctag">@param</span> array  $data     The request body.
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">request</span><span class="hljs-params">(string $action, string $resource, array $data = [])</span></span>;
+}
+</code></pre><p>That way you can resolve the service using dependency injection, making it trivial to replace it with a mock when testing.</p><p>Now, actually making an internal request is pretty easy. You get the app instance (you can do so by resolving it using dependency injection as I do below, or call the <code>app()</code> helper. Then you put together the request you want to make and pass it as an argument to the app’s <code>handle()</code> method:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">MakesInternalRequests</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Application</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">FailedInternalRequestException</span>;
+
+<span class="hljs-comment">/**
+ * Internal request service
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InternalRequest</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MakesInternalRequests</span>
+</span>{
+    <span class="hljs-comment">/**
+     * The app instance
+     *
+     * <span class="hljs-doctag">@var</span> $app
+     */</span>
+    <span class="hljs-keyword">protected</span> $app;
+
+    <span class="hljs-comment">/**
+     * Constructor
+     *
+     * <span class="hljs-doctag">@param</span> Application $app        The app instance.
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Application $app)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;app = $app;
+    }
+
+    <span class="hljs-comment">/**
+     * Make an internal request
+     *
+     * <span class="hljs-doctag">@param</span> string $action   The HTTP verb to use.
+     * <span class="hljs-doctag">@param</span> string $resource The API resource to look up.
+     * <span class="hljs-doctag">@param</span> array  $data     The request body.
+     * <span class="hljs-doctag">@throws</span> FailedInternalRequestException Request could not be synced.
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">request</span><span class="hljs-params">(string $action, string $resource, array $data = [])</span>
+    </span>{
+        <span class="hljs-comment">// Create request</span>
+        $request = Request::create(<span class="hljs-string">'/api/'</span> . $resource, $action, $data, [], [], [
+            <span class="hljs-string">'HTTP_Accept'</span>             =&gt; <span class="hljs-string">'application/json'</span>,
+        ]);
+
+        <span class="hljs-comment">// Get response</span>
+        $response = <span class="hljs-keyword">$this</span>-&gt;app-&gt;handle($request);
+        <span class="hljs-keyword">if</span> ($response-&gt;getStatusCode() &gt;= <span class="hljs-number">400</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> FailedInternalRequestException($request, $response);
+        }
+
+        <span class="hljs-comment">// Dispatch the request</span>
+        <span class="hljs-keyword">return</span> $response;
+    }
+}
+</code></pre><p>Also note that I’ve created a custom exception, called <code>FailedInternalRequestException</code>. This is fired if the status code returned from the internal requests is greater than or equal to 400 (thus denoting an error):</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Exceptions</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+
+<span class="hljs-comment">/**
+ * Exception for when a bulk sync job fails
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FailedInternalRequestException</span> <span class="hljs-keyword">extends</span> \<span class="hljs-title">Exception</span>
+</span>{
+    <span class="hljs-comment">/**
+     * Request instance
+     *
+     * <span class="hljs-doctag">@var</span> $request
+     */</span>
+    <span class="hljs-keyword">protected</span> $request;
+
+    <span class="hljs-comment">/**
+     * Response instance
+     *
+     * <span class="hljs-doctag">@var</span> $response
+     */</span>
+    <span class="hljs-keyword">protected</span> $response;
+
+    <span class="hljs-comment">/**
+     * Constructor
+     *
+     * <span class="hljs-doctag">@param</span> Request  $request  The request object.
+     * <span class="hljs-doctag">@param</span> Response $response The response object.
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Request $request, Response $response)</span>
+    </span>{
+        <span class="hljs-keyword">parent</span>::__construct();
+        <span class="hljs-keyword">$this</span>-&gt;request = $request;
+        <span class="hljs-keyword">$this</span>-&gt;response = $response;
+    }
+
+    <span class="hljs-comment">/**
+     * Get request object
+     *
+     * <span class="hljs-doctag">@return</span> Request
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getRequest</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;request;
+    }
+
+    <span class="hljs-comment">/**
+     * Get response object
+     *
+     * <span class="hljs-doctag">@return</span> Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getResponse</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;response;
+    }
+}
+</code></pre><p>You can catch this exception in an appropriate place and handle it as you wish.</p><p>It’s actually quite rare to have to do this. In this case, because this was a REST API and every request made to it was changing the state of the application (there were no GET requests, only POST, PUT, PATCH and DELETE), it made sense to just break down the request body and do internal requests against the existing API, since otherwise I’d have to duplicate the existing functionality. I would not recommend this approach for something like fetching data to render a page on the server side, as there are more efficient ways of accomplishing it. In all honesty I can’t think of any other scenario where this would genuinely be the best option. However, it worked well for my use case and allowed me to implement this functionality quickly and simply.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/09/02/making-internal-requests-with-laravel/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/08/19/run-your-tests-locally-with-sismo/amp/">Run Your Tests Locally With Sismo</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>

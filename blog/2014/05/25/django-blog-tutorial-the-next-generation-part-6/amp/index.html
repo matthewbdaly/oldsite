@@ -272,7 +272,7 @@ register = template.Library()
 $ git commit -m <span class="hljs-string">'Now use Markdown2 to allow for syntax highlighting'</span>
 </code></pre><p>Now, if you examine the markup for your code blocks using your browser’s developer tools, you’ll notice that the code is wrapped in many different spans with various classes. Pygments can generate a CSS file that uses those classes to highlight your code.</p><p>First, let’s create a folder to store our CSS files in:</p><pre><code class="hljs lang-bash">$ mkdir blogengine/static/css
 </code></pre><p>Next, we’ll add a blank CSS file for any other styling we may want to apply:</p><pre><code class="hljs lang-bash">$ touch blogengine/static/css/main.css
-</code></pre><p>Then, we generate our CSS file:</p><pre><code class="hljs lang-bash">$ pygmentize -S default -f html &gt; blogengine/static/css/code.css
+</code></pre><p>Then, we generate our CSS file:</p><pre><code class="hljs lang-bash">$ pygmentize -S default <span class="hljs-_">-f</span> html &gt; blogengine/static/css/code.css
 </code></pre><p>We need to include our CSS files in our HTML template:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
@@ -364,11 +364,11 @@ $ git commit -m <span class="hljs-string">'Now use Markdown2 to allow for syntax
     <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
 </code></pre><p>Now, if you run the development server and reload the page, your code will be highlighted using the default Pygments style. If you don’t like it, there are plenty to choose from. Run the following command:</p><pre><code class="hljs lang-bash">$ pygmentize -L styles
-</code></pre><p>That will list the various styles available. For instance, let’s say we want to try the Tango style:</p><pre><code class="hljs lang-bash">$ pygmentize -S tango -f html &gt; blogengine/static/css/code.css
-</code></pre><p>If you like the Monokai theme in Sublime Text, there’s a Pygments version of that:</p><pre><code class="hljs lang-bash">$ pygmentize -S monokai -f html &gt; blogengine/static/css/code.css
+</code></pre><p>That will list the various styles available. For instance, let’s say we want to try the Tango style:</p><pre><code class="hljs lang-bash">$ pygmentize -S tango <span class="hljs-_">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre><p>If you like the Monokai theme in Sublime Text, there’s a Pygments version of that:</p><pre><code class="hljs lang-bash">$ pygmentize -S monokai <span class="hljs-_">-f</span> html &gt; blogengine/static/css/code.css
 </code></pre><p>If you like the Solarized theme, that’s not bundled with Pygments, but can be installed separately:</p><pre><code class="hljs lang-bash">$ pip install pygments-style-solarized
-</code></pre><p>Then run this for the light version:</p><pre><code class="hljs lang-bash">$ pygmentize -S solarizedlight -f html &gt; blogengine/static/css/code.css
-</code></pre><p>And this for the dark version:</p><pre><code class="hljs lang-bash">$ pygmentize -S solarizeddark -f html &gt; blogengine/static/css/code.css
+</code></pre><p>Then run this for the light version:</p><pre><code class="hljs lang-bash">$ pygmentize -S solarizedlight <span class="hljs-_">-f</span> html &gt; blogengine/static/css/code.css
+</code></pre><p>And this for the dark version:</p><pre><code class="hljs lang-bash">$ pygmentize -S solarizeddark <span class="hljs-_">-f</span> html &gt; blogengine/static/css/code.css
 </code></pre><p>Pick one that you like - I’m going to go for the dark version of Solarized.</p><p>Note that this doesn’t actually change the background colour of the code blocks. You will therefore need to set this manually using the CSS file we created earlier. If you’re using Solarized Dark like I am, then this should set it correctly:</p><pre><code class="hljs lang-css"><span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.codehilite</span> <span class="hljs-selector-tag">pre</span> {
     <span class="hljs-attribute">background-color</span>: <span class="hljs-number">#002b36</span>;
 }

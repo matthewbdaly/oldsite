@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>nodejs | Matthew Daly&apos;s Blog</title>
-    <updated>2017-08-28T13:12:26Z</updated>
+    <updated>2017-09-02T13:46:05Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -21,7 +21,7 @@
         <updated>2015-04-18T14:05:41Z</updated>
         <summary type="html"><![CDATA[<p>As I mentioned a while back, I recently switched the search on my site from Google’s site-specific search to <a href="http://lunrjs.com/">Lunr.js</a>. Since my site is built with a static site generator, I can’t implement search using database queries, and I was keen to have an integrated search method that would be fast and not require server-side scripting, and Lunr.js seemed to fit the bill.</p>
 <p>The first task in implementing it was to generate the index. As I wrote the Grunt task that generates the blog, I amended that task to generate an index at the same time as I generated the posts. I installed Lunr.js with the following command:</p>
-<pre><code class="hljs lang-bash singleline"><table>npm install lunr --save</table></code></pre>
+<pre><code class="hljs lang-bash singleline">npm install lunr --save</code></pre>
 <p>I then imported it in the task, and set up the field names:</p>
 <pre><code class="hljs lang-javascript"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>    <span class="hljs-keyword">var</span> lunr = <span class="hljs-built_in">require</span>(<span class="hljs-string">'lunr'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td>    searchIndex = lunr(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'title'</span>, { <span class="hljs-attr">boost</span>: <span class="hljs-number">10</span> });</td><tr><td class="linenos" data-pseudo-content="5"></td><td>        <span class="hljs-keyword">this</span>.field(<span class="hljs-string">'body'</span>);</td><tr><td class="linenos" data-pseudo-content="6"></td><td>        <span class="hljs-keyword">this</span>.ref(<span class="hljs-string">'href'</span>);</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    });</td></table></code></pre>
 <p>This defined fields for the title, body, and hyperlink, and set the hyperlink as the reference. The variable <code>searchIndex</code> represents the Lunr index.</p>

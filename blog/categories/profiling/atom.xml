@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>profiling | Matthew Daly&apos;s Blog</title>
-    <updated>2017-08-28T13:12:26Z</updated>
+    <updated>2017-09-02T13:46:04Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -23,9 +23,9 @@
 <p>Recently I was introduced to <a href="https://github.com/itsgoingd/clockwork">Clockwork</a>, which is a server-side extension for profiling PHP applications. It’s made it a whole lot easier to track down issues like excessive numbers of queries when building an API, and as a result I’ve been able to dramatically improve the performance of an API I’ve been working on. Here I’ll show you how you can use it on a project.</p>
 <h2 id="installing-clockwork">Installing Clockwork</h2>
 <p>Clockwork is available via Composer:</p>
-<pre><code class="hljs lang-bash singleline"><table>$ composer require itsgoingd/clockwork</table></code></pre>
+<pre><code class="hljs lang-bash singleline">$ composer require itsgoingd/clockwork</code></pre>
 <p>You also need to register the service provider in <code>config/app.php</code>:</p>
-<pre><code class="hljs lang-php singleline"><table>   Clockwork\Support\Laravel\ClockworkServiceProvider::class,</table></code></pre>
+<pre><code class="hljs lang-php singleline">   Clockwork\Support\Laravel\ClockworkServiceProvider::class,</code></pre>
 <p>And register the middleware globally in <code>app/Http/Kernel.php</code>:</p>
 <pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">protected</span> $middleware = [</td><tr><td class="linenos" data-pseudo-content="2"></td><td>      \Clockwork\Support\Laravel\ClockworkMiddleware::class,</td><tr><td class="linenos" data-pseudo-content="3"></td><td>]</td></table></code></pre>
 <p>Note that it only works when <code>APP_DEBUG</code> is set to true in your <code>.env</code> file. This means that you can keep it in your application without worrying about exposing too much data in production, as long as debug mode is not active on your production server (which it shouldn’t be anyway).</p>
