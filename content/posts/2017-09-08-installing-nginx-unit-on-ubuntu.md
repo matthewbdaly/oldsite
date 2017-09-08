@@ -153,7 +153,7 @@ It's also possible to update and delete existing applications via the API using 
 Final thoughts
 --------------
 
-This is *way* to early to be considering seriously using Unit in production. It's only just been released as a public beta, and it's a bit fiddly to set up. However, it has an enormous amount of promise.
+This is *way* too early to be seriously considering using Unit in production. It's only just been released as a public beta, and it's a bit fiddly to set up. However, it has an enormous amount of promise.
 
 One thing I can't really see right now is whether it's possible to use a virtualenv with it for Python applications. In the Python community it's standard practice to use Virtualenv to isolate the dependencies for individual applications, and it's not clear how I'd be able to go about using this, if it is possible. For deploying Python applications, lack of virtualenv support would be a deal breaker, and I hope this gets clarified soon.
 
