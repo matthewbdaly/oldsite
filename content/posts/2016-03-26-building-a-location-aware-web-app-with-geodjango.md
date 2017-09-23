@@ -802,7 +802,7 @@ $ pip install django-floppyforms
 And add it to our requirements:
 
 ```bash
-$ pip install -r requirements.txt
+$ pip freeze -r requirements.txt
 ```
 
 Then add it to `INSTALLED_APPS` in `gigfinder/setttings.py`:
