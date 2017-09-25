@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id></id>
+    <title>sms | Matthew Daly&apos;s Blog</title>
+    <updated>2017-09-25T21:19:35Z</updated>
+    <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
+    <author>
+        <name>Matthew Daly</name>
+        <email>matthew@matthewdaly.co.uk</email>
+        <uri>https://matthewdaly.co.uk</uri>
+    </author>
+    <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/sms/"/>
+    <subtitle>sms | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
+    <rights>Matthew Daly 2017</rights>
+    <entry>
+        <title type="html"><![CDATA[A generic PHP SMS library]]></title>
+        <id>https://matthewdaly.co.uk/blog/2017/09/25/a-generic-php-sms-library/</id>
+        <link href="https://matthewdaly.co.uk/blog/2017/09/25/a-generic-php-sms-library/">
+        </link>
+        <updated>2017-09-25T21:18:18Z</updated>
+        <summary type="html"><![CDATA[<p>This weekend I published <a href="https://github.com/matthewbdaly/sms-client">sms-client</a>, a generic PHP library for sending SMS notifications. It’s intended to offer a consistent interface when sending SMS notifications by using swappable drivers. That way, if your SMS service provider suddenly goes out of business or bumps up their prices, it’s easy to switch to a new one.</p>
+<p>Out of the box it comes with drivers for the following services:</p>
+<ul>
+<li>Nexmo</li>
+<li>ClockworkSMS</li>
+</ul>
+<p>In addition, it provides the following test drivers:</p>
+<ul>
+<li>Null</li>
+<li>Log</li>
+<li>RequestBin</li>
+</ul>
+<p>Here’s an example of how you might use it with the ClockworkSMS driver:</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Client</span> <span class="hljs-title">as</span> <span class="hljs-title">GuzzleClient</span>;</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Psr7</span>\<span class="hljs-title">Response</span>;</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">SMS</span>\<span class="hljs-title">Drivers</span>\<span class="hljs-title">Clockwork</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">SMS</span>\<span class="hljs-title">Client</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td>$guzzle = <span class="hljs-keyword">new</span> GuzzleClient;</td><tr><td class="linenos" data-pseudo-content="7"></td><td>$resp = <span class="hljs-keyword">new</span> Response;</td><tr><td class="linenos" data-pseudo-content="8"></td><td>$driver = <span class="hljs-keyword">new</span> Clockwork($guzzle, $resp, [</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-string">'api_key'</span> =&gt; <span class="hljs-string">'MY_CLOCKWORK_API_KEY'</span>,</td><tr><td class="linenos" data-pseudo-content="10"></td><td>]);</td><tr><td class="linenos" data-pseudo-content="11"></td><td>$client = <span class="hljs-keyword">new</span> Client($driver);</td><tr><td class="linenos" data-pseudo-content="12"></td><td>$msg = [</td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-string">'to'</span>      =&gt; <span class="hljs-string">'+44 01234 567890'</span>,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-string">'content'</span> =&gt; <span class="hljs-string">'Just testing'</span>,</td><tr><td class="linenos" data-pseudo-content="15"></td><td>];</td><tr><td class="linenos" data-pseudo-content="16"></td><td>$client-&gt;send($msg);</td></table></code></pre>
+<p>If you want to roll your own driver for it, it should be easy - just create a class that implements the <code>Matthewbdaly\SMS\Contracts\Driver</code> interface. Most of the existing drivers work using Guzzle to send HTTP requests to an API, but you don’t necessarily have to do that - for instance, you could create a driver for a mail-to-SMS gateway by using Swiftmailer or the PHP mail class. If you create a driver for it, please feel free to submit a pull request so I can add it to the repository.</p>
+<p>For Laravel or Lumen users, there’s <a href="https://github.com/matthewbdaly/laravel-sms">an integration package</a> that should make it easier to use. For users of other frameworks, it should still be fairly straightforward to integrate.</p>
+]]></summary>
+    </entry>
+</feed>
