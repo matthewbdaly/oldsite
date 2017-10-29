@@ -6,7 +6,7 @@ sharing: true
 footer: true
 ---
 
-I'm a web and mobile app developer based in East Anglia in the UK.
+I'm a web and mobile app developer based in Oxford in the UK.
 
 I've worked extensively with the following technologies:
 
