@@ -44,8 +44,7 @@ First we'll create a `composer.json` to specify our initial dependencies:
         "php-http/client-implementation": "^1.0",
         "php-http/httplug": "^1.0",
         "php-http/message-factory": "^1.0",
-        "php-http/discovery": "^1.0",
-        "php-http/guzzle6-adapter": "^1.1"
+        "php-http/discovery": "^1.0"
     },
     "require-dev": {
         "psy/psysh": "^0.8.0",
