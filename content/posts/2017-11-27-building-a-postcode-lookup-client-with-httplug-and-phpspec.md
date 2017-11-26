@@ -10,7 +10,7 @@ categories:
 comments: true
 ---
 
-While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior. I've found that it makes for a better flow when doing test-driven development
+While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior, in particular API clients. I've found that it makes for a better flow when doing test-driven development.
 
 In this tutorial I'll show you how to build a lookup client for UK postcodes. In the process of doing so, we'll use PHPSpec to drive our development process. We'll also use [HTTPlug](http://docs.php-http.org/en/latest/httplug/tutorial.html) as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.
 
@@ -31,7 +31,7 @@ For those of you outside the UK, this may not be of much immediate use, but the 
 Setting up
 ----------
 
-First we'll create a `composer.json` to specify our initial dependencies:
+First we'll create a `composer.json` to specify our dependencies:
 
 ```json
 {
@@ -68,6 +68,7 @@ First we'll create a `composer.json` to specify our initial dependencies:
     }
 }
 ```
+
 Then we install them:
 
 ```bash
@@ -92,7 +93,7 @@ Introducing HTTPlug
 
 In the past I've usually used either Curl or Guzzle to carry out HTTP requests. However, the problem with this approach is that you're forcing whoever uses your library to use whatever HTTP client, and whatever version of that client, that you deem appropriate. If they're also using another library that someone else has written and they made different choices, you could have problems.
 
-HTTPlug is a very good way of solving this problem. By requiring only an interface and not a concrete implementation, HTTPlug means that you can merely specify that the consumer of the library must provide a suitable implementation of that library, but leave the choice of implementation up to them. This means that they can choose whatever implementation best fits their use case. There are [adapters for many different clients](http://docs.php-http.org/en/latest/clients.html), so it's unlikely that they won't be able to find one that meets their needs.
+HTTPlug is an excellent way of solving this problem. By requiring only an interface and not a concrete implementation, using HTTPlug means that you can specify that the consumer of the library must provide a suitable implementation of that library, but leave the choice of implementation up to them. This means that they can choose whatever implementation best fits their use case. There are [adapters for many different clients](http://docs.php-http.org/en/latest/clients.html), so it's unlikely that they won't be able to find one that meets their needs.
 
 Getting started
 ---------------
