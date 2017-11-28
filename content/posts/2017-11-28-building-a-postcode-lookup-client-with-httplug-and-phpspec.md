@@ -1,6 +1,6 @@
 ---
 title: "Building a postcode lookup client with HTTPlug and PHPSpec"
-date: 2017-11-28 11:45:39 +0000
+date: 2017-11-28 11:40:39 +0000
 categories:
 - php
 - tdd
@@ -10,9 +10,9 @@ categories:
 comments: true
 ---
 
-While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior, in particular API clients. I've found that it makes for a better flow when doing test-driven development.
+While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior, in particular REST API clients. I've found that it makes for a better flow when doing test-driven development, because it makes it very natural to write a test first, then run it, then make the test place.
 
-In this tutorial I'll show you how to build a lookup client for UK postcodes. In the process of doing so, we'll use PHPSpec to drive our development process. We'll also use [HTTPlug](http://docs.php-http.org/en/latest/httplug/tutorial.html) as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.
+In this tutorial I'll show you how to build a lookup API client for UK postcodes. In the process of doing so, we'll use PHPSpec to drive our development process. We'll also use [HTTPlug](http://docs.php-http.org/en/latest/httplug/tutorial.html) as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.
 
 Background
 ----------
@@ -22,9 +22,9 @@ If you're unfamiliar with it, the UK postcode system is our equivalent of a zip 
 * The codes themselves are alphanumeric instead of numeric, with the first part including one or two letters usually (but not always) derived from the nearest large town or city (eg L for Liverpool, B for Birmingham, OX for Oxford), or for London, based on the part of the city (eg NW for the north-west of London)
 * A full postcode is in two parts (eg NW1 8TQ), and the first part narrows the location down to a similar area to a US-style zip code, while the second part usually narrows it down to a street (although sometimes large organisations that receive a lot of mail will have a postcode to themselves).
 
-This means that if you have someone's postcode and house name or address, you can use those details to look up the rest of their address details. This obviously makes it easier for users to fill out a form, such as when placing an order on an e-commerce site.
+This means that if you have someone's postcode and house name or address, you can use those details to look up the rest of their address details. This obviously makes it easier for users to fill out a form, such as when placing an order on an e-commerce site - you can just request those two details and then autofill the rest from them.
 
-Unfortunately, it's not quite that simple. The data is owned by Royal Mail, and they charge through the nose for access to the raw data, which places this data well outside the budgets of many web app developers. Fortunately, [Ideal Postcodes](https://ideal-postcodes.co.uk/) offer a REST API for querying this data. It's not free, but at 2.5p per request it's not going to break the bank unless used excessively.
+Unfortunately, it's not quite that simple. The data is owned by Royal Mail, and they charge through the nose for access to the raw data, which places this data well outside the budgets of many web app developers. Fortunately, [Ideal Postcodes](https://ideal-postcodes.co.uk/) offer a REST API for querying this data. It's not free, but at 2.5p per request it's not going to break the bank unless used excessively, and they offer some dummy postcodes that are free to query, which is perfectly fine for testing.
 
 For those of you outside the UK, this may not be of much immediate use, but the underlying principles will still be useful, and you can probably build a similar client for your own nation's postal code system. For instance, there's a [Zipcode API](https://www.zipcodeapi.com/API) that those of you in the US can use, and if you understand what's going on here it shouldn't be hard to adapt it to work with that. If you do produce a similar client for your country's postal code system, submit a pull request to update the README with a link to it and I'll include it.
 
@@ -69,7 +69,9 @@ First we'll create a `composer.json` to specify our dependencies:
 }
 ```
 
-Then we install them:
+Note that we don't install an actual HTTPlug client, other than the mock one, which is only useful for testing. This is deliberate - we're giving developers working with this library the choice of working with whatever HTTP client they see fit. We do use the Guzzle PSR7 library, but that's just for the PSR7 library.
+
+Then we install our dependencies:
 
 ```bash
 $ composer install
@@ -95,6 +97,8 @@ In the past I've usually used either Curl or Guzzle to carry out HTTP requests. 
 
 HTTPlug is an excellent way of solving this problem. By requiring only an interface and not a concrete implementation, using HTTPlug means that you can specify that the consumer of the library must provide a suitable implementation of that library, but leave the choice of implementation up to them. This means that they can choose whatever implementation best fits their use case. There are [adapters for many different clients](http://docs.php-http.org/en/latest/clients.html), so it's unlikely that they won't be able to find one that meets their needs.
 
+In addition, HTTPlug provides the means to automatically determine what HTTP client to use, so that if one is not explicitly provided, it can be resolved without any action on the part of the developer. As long as a suitable HTTP adapter is installed, it will be used.
+
 Getting started
 ---------------
 
@@ -105,7 +109,7 @@ $ vendor/bin/phpspec desc Matthewbdaly/Postcode/Client
 Specification for Matthewbdaly\Postcode\Client created in /home/matthew/Projects/postcode-client/spec/ClientSpec.php.
 ```
 
-Now the we have a spec for our client, we can generate the client itself:
+Now that we have a spec for our client, we can generate the client itself:
 
 ```bash
 $ vendor/bin/phpspec run
@@ -130,7 +134,7 @@ Class Matthewbdaly\Postcode\Client created in /home/matthew/Projects/postcode-cl
 16ms
 ```
 
-You will need to enter `Y` when prompted.
+You will need to enter `Y` when prompted. We now have an empty class for our client.
 
 Next, we need to make sure that the constructor for our client accepts two parameters:
 
@@ -165,6 +169,8 @@ class ClientSpec extends ObjectBehavior
 ```
 
 Note the use of the `let()` method here. This lets us specify how the object is constructed, with the `beConstructedWith()` method. Also, note that `$this` refers not to the test, but to the object being tested - this takes a bit of getting used to if you're used to working with PHPUnit.
+
+Also, note that the objects passed through are not actual instances of those objects - instead they are mocks created automatically by PHPSpec. This makes mocking extremely easy, and you can easily set up your own expectations on those mock objects in the test. If you want to use a real object, you can instantiate it in the spec as usual. If we need any other mocks, we can typehint them in our method in exactly the same way.
 
 If we once again use `vendor/bin/phpspec run` we can now generate a constructor:
 
@@ -240,6 +246,12 @@ Next, we want to have a method for retrieving the endpoint. Add the following me
     }
 ```
 
+Here we're asserting that fetching the base URL returns the given result. Note how much simpler and more intuitive this syntax is than PHPUnit would be:
+
+```php
+$this->assertEquals('https://api.ideal-postcodes.co.uk/v1/postcodes/', $client->getBaseUrl());
+```
+
 Running the tests again should prompt us to create the boilerplate for the new method:
 
 ```bash
@@ -303,6 +315,8 @@ Next, we need to be able to get and set the API key. Add the following to `spec/
         $this->getKey()->shouldReturn('foo');
     }
 ```
+
+Note that we expect `$this->setKey('foo')` to return `$this`. This is an example of a *fluent* interface - by returning an instance of the object, it enables methods to be chained, eg `$client->setKey('foo')->get()`. Obviously it won't work for anything that has to return a value, but it's a useful way of making your classes more intuitive to use.
 
 Next, run the tests again and agree to the prompts as before:
 
@@ -375,7 +389,7 @@ $ vendor/bin/phpspec run
 38ms
 ```
 
-Our final task is to be able to handle sending requests. Add the following imports at the top of `spec/ClientSpec.php`:
+With that done, our final task is to be able to handle sending requests. Add the following imports at the top of `spec/ClientSpec.php`:
 
 ```php
 use Psr\Http\Message\RequestInterface;
@@ -435,6 +449,14 @@ And add the following method at the bottom of the same file:
     }
 ```
 
+This test is by far the biggest so far, so it merits some degree of explanation.
+
+Note that we don't make a real HTTP request against the API. This may sound strange, but bear with me. We have no control whatsoever over that API, and it could in theory become inaccessible or be subject to breaking changes at any time. We also don't want to be shelling out for a paid service just to test our API client works. All we can do is test that our implementation will send the request we expect it to send - we don't want our test suite reporting a bug when the API goes down.
+
+We therefore typehint not just the dependencies for the constructor, but a request, response and stream instance. We mock our our responses from those instances using the `willReturn()` method, so we have complete control over what we pass to our client. That way we can return any appropriate response or throw any exception we deem fit to test the behaviour under those circumstances. For the message factory, we specify what arguments it should receive to create the request, and return our mocked-out request object.
+
+Also, note we use `shouldBeLike()` to verify the response - this is effectively using the `==` operator, whereas `shouldBe()` uses the `===` operator, making it stricter.
+
 Let's run the tests, and don't forget the prompt:
 
 ```php
@@ -464,7 +486,7 @@ Matthewbdaly/Postcode/Client
 56ms
 ```
 
-Now we can implement this method:
+Now we can implement the `get()` method:
 
 ```php
     public function get(string $postcode)
@@ -485,6 +507,8 @@ Now we can implement this method:
     }
 ```
 
+We first build up our URL, before using the message factory to create a request object. We then pass the built request to our client to send, before decoding the response into the format we want.
+
 This should make our tests pass:
 
 ```bash
@@ -495,7 +519,7 @@ $ vendor/bin/phpspec run
 307ms
 ```
 
-Finally, the API will raise a 402 if you make a request without having paid. We need to catch this:
+Our client now works, but there are a couple of situations we need to account for. First, the API will raise a 402 if you make a request for a real postcode without having paid. We need to catch this and throw an exception. Add this to `spec/ClientSpec.php`:
 
 ```php
 use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
@@ -513,6 +537,8 @@ use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
     }
 ```
 
+With that done, run the tests again:
+
 ```bash
 $ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                      
@@ -528,6 +554,8 @@ Matthewbdaly/Postcode/Client
 5 examples (4 passed, 1 failed)
 130ms
 ```
+
+Let's amend the client to throw this exception:
 
 ```php
 use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
@@ -555,6 +583,8 @@ use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
     }
 ```
 
+And let's re-run the tests:
+
 ```bash
 $ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                    
@@ -568,6 +598,8 @@ Matthewbdaly/Postcode/Client
 389ms
 ```
 
+It fails now because the exception doesn't exist. Let's create it at `src/Exceptions/PaymentRequired.php`:
+
 ```php
 <?php
 
@@ -578,6 +610,8 @@ class PaymentRequired extends \Exception
 }
 ```
 
+That should be enough to make our tests pass:
+
 ```bash
 $ vendor/bin/phpspec run
                                       100%                                       5
@@ -586,7 +620,7 @@ $ vendor/bin/phpspec run
 89ms
 ```
 
-We also need to raise an exception when the postcode is not found. Add the following spec:
+We also need to raise an exception when the postcode is not found, which raises a 404 error. Add the following spec:
 
 ```php
 use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
@@ -620,7 +654,7 @@ Matthewbdaly/Postcode/Client
 538ms
 ```
 
-Create the exception class at `src/Exceptions/PostcodeNotFound.php`:
+This time we'll create the exception class before updating the client. Create the following class at `src/Exceptions/PostcodeNotFound.php`:
 
 ```php
 <?php
@@ -636,7 +670,7 @@ class PostcodeNotFound extends \Exception
 }
 ```
 
-Update the client:
+And update the client:
 
 ```php
 use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
@@ -675,4 +709,11 @@ $ vendor/bin/phpspec run
 103ms
 ```
 
-Source code [here](https://github.com/matthewbdaly/postcode-client).
+And our API client is feature complete! You can find the source code of the finished client [here](https://github.com/matthewbdaly/postcode-client).
+
+Summary
+-------
+
+Personally, I find that while PHPSpec isn't appropriate for every use case, it's particularly handy for API clients and it's generally my go-to testing solution for them. It handles producing a lot of the boilerplate for me, and it results in a much better workflow for test-driven development as it makes it very natural to write the test first, then make it pass.
+
+HTTPlug has been a revelation for me. While it takes a bit of getting used to if you're used to something like Guzzle, it means that you're giving consumers of your library the freedom to choose the HTTP client of their choice, meaning they don't have to fight with several different libraries requiring different versions of Guzzle. It also allows for easy resolution of the HTTP client, rather than having to explicitly pass through an instance when instantiating your client. I'm planning to use it extensively in the future.
