@@ -1,6 +1,6 @@
 ---
 title: "Building a postcode lookup client with HTTPlug and PHPSpec"
-date: 2017-11-27 11:45:39 +0000
+date: 2017-11-28 11:45:39 +0000
 categories:
 - php
 - tdd
@@ -584,6 +584,95 @@ $ vendor/bin/phpspec run
 1 specs
 5 examples (5 passed)
 89ms
+```
+
+We also need to raise an exception when the postcode is not found. Add the following spec:
+
+```php
+use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
+    ...
+    function it_throws_an_exception_if_postcode_not_found(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)
+    {
+        $this->beConstructedWith($client, $messageFactory);
+        $this->setKey('foo');
+        $messageFactory->createRequest('GET', 'https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo', [], null, '1.1')->willReturn($request);
+        $client->sendRequest($request)->willReturn($response);
+        $response->getStatusCode()->willReturn(404);
+        $this->shouldThrow(PostcodeNotFound::class)->duringGet('SW1A 2AA');
+    }
+```
+
+Run the tests:
+
+```bash
+$ vendor/bin/phpspec run
+Matthewbdaly/Postcode/Client                                                    
+  98  - it throws an exception if postcode not found
+      expected exception of class "Matthewbdaly\Postcode\Exc...", but got
+      [exc:Prophecy\Exception\Call\UnexpectedCallException("Method call:
+        - getBody()
+      on Double\ResponseInterface\P20 was not expected, expected calls were:
+        - getStatusCode()")].
+
+                                83%                                     16%      6
+1 specs
+6 examples (5 passed, 1 failed)
+538ms
+```
+
+Create the exception class at `src/Exceptions/PostcodeNotFound.php`:
+
+```php
+<?php
+
+namespace Matthewbdaly\Postcode\Exceptions;
+
+/**
+ * Postcode not found exception
+ *
+ */
+class PostcodeNotFound extends \Exception
+{
+}
+```
+
+Update the client:
+
+```php
+use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
+    ...
+    public function get(string $postcode)
+    {
+        $url = $this->getBaseUrl() . rawurlencode($postcode) . '?' . http_build_query([
+            'api_key' => $this->getKey()
+        ]);
+        $request = $this->messageFactory->createRequest(
+            'GET',
+            $url,
+            [],
+            null,
+            '1.1'
+        );
+        $response = $this->client->sendRequest($request);
+        if ($response->getStatusCode() == 402) {
+            throw new PaymentRequired;
+        }
+        if ($response->getStatusCode() == 404) {
+            throw new PostcodeNotFound;
+        }
+        $data = json_decode($response->getBody()->getContents(), true);
+        return $data;
+    }
+```
+
+Re-run the tests:
+
+```bash
+$ vendor/bin/phpspec run
+                                      100%                                       6
+1 specs
+6 examples (6 passed)
+103ms
 ```
 
 Source code [here](https://github.com/matthewbdaly/postcode-client).
