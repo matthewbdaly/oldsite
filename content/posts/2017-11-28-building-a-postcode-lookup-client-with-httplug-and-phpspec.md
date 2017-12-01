@@ -10,7 +10,7 @@ categories:
 comments: true
 ---
 
-While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior, in particular REST API clients. I've found that it makes for a better flow when doing test-driven development, because it makes it very natural to write a test first, then run it, then make the test place.
+While PHPUnit is my normal go-to PHP testing framework, for some applications I find [PHPSpec](http://www.phpspec.net/en/stable/) superior, in particular REST API clients. I've found that it makes for a better flow when doing test-driven development, because it makes it very natural to write a test first, then run it, then make the test pass.
 
 In this tutorial I'll show you how to build a lookup API client for UK postcodes. In the process of doing so, we'll use PHPSpec to drive our development process. We'll also use [HTTPlug](http://docs.php-http.org/en/latest/httplug/tutorial.html) as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.
 
