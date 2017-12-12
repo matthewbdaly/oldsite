@@ -102,7 +102,11 @@ $location = Location::whereRaw("'hendrad' % name")->get();
 
 This query will match `East Hendred` or `West Hendred` successfully. As you can see, we can match strings at any point in the name string, and handle slight mis-spellings without any problems.
 
-In practice, rather than using `whereRaw()` every time, you'll probably want to create a local scope that accepts the name you want to match against.
+In practice, rather than using `whereRaw()` every time, you'll probably want to create a local scope that accepts the name you want to match against. You'll also want to use query parameters to prevent SQL injection:
+
+```php
+$location = Location::whereRaw("? % name", [$name])->get();
+```
 
 Improving performance with an index
 -----------------------------------
