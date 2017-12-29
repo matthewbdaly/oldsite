@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>laravel | Matthew Daly&apos;s Blog</title>
-    <updated>2017-12-07T19:36:00Z</updated>
+    <updated>2017-12-29T18:02:21Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,20 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/laravel/"/>
     <subtitle>laravel | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2017</rights>
+    <entry>
+        <title type="html"><![CDATA[Using UUIDs as primary keys with Laravel and PostgreSQL]]></title>
+        <id>https://matthewdaly.co.uk/blog/2017/12/29/using-uuids-as-primary-keys-with-laravel-and-postgresql/</id>
+        <link href="https://matthewdaly.co.uk/blog/2017/12/29/using-uuids-as-primary-keys-with-laravel-and-postgresql/">
+        </link>
+        <updated>2017-12-29T18:01:04Z</updated>
+        <summary type="html"><![CDATA[<p>For many applications, using UUID’s as the primary keys on a database table can make a lot of sense. For mobile or offline apps, in particular, they mean you can create new objects locally and assign them a primary key without having to worry about it colliding with another object that was created in the meantime once it gets synchronised to the server. Also, they are less informative to nefarious users - an autoincrementing value in a URL tells a user that that value is the primary key, and means the app may potentially allow gathering of information via user enumeration (eg calling <code>/api/v1/users/1</code>, <code>/api/v1/users/2</code> etc).</p>
+<p>It’s fairly straightforward to use UUID’s as primary keys on your models when using PostgreSQL. First, you need to set up your migrations to use the <code>uuid-ossp</code> extension and set up the <code>id</code> field as both a UUID and the primary key. You also need to set a default value manually so that if it’s left empty it will generate a UUID for it.</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Schema::create(<span class="hljs-string">'items'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    $table-&gt;uuid(<span class="hljs-string">'id'</span>)-&gt;primary();</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    $table-&gt;text(<span class="hljs-string">'text'</span>)-&gt;nullable();</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    $table-&gt;timestamps();</td><tr><td class="linenos" data-pseudo-content="6"></td><td>});</td><tr><td class="linenos" data-pseudo-content="7"></td><td>DB::statement(<span class="hljs-string">'ALTER TABLE items ALTER COLUMN id SET DEFAULT uuid_generate_v4();'</span>);</td></table></code></pre>
+<p>Then, in the model definition, you need to tell Laravel to cast the <code>id</code> field to a string, and explicitly set the primary key to <code>id</code>:</p>
+<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Item</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-keyword">protected</span> $casts = [</td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-string">'id'</span> =&gt; <span class="hljs-string">'string'</span>,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    ];</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td>    <span class="hljs-keyword">protected</span> $primaryKey = <span class="hljs-string">"id"</span>;</td><tr><td class="linenos" data-pseudo-content="8"></td><td>}</td></table></code></pre>
+<p>Once this is done, the model should generate the primary keys for you as usual, except as UUID’s. If your application needs to accept UUID primary keys that were created offline, such as in a mobile app, you will probably want to add the <code>id</code> field to the <code>$fillable</code> array on the model to allow this.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Full text search with Laravel and PostgreSQL]]></title>
         <id>https://matthewdaly.co.uk/blog/2017/12/02/full-text-search-with-laravel-and-postgresql/</id>
