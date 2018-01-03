@@ -1,0 +1,198 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Adding Dynamic Flat Pages to Your Laravel App - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/01/03/adding-dynamic-flat-pages-to-your-laravel-app/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/01/03/adding-dynamic-flat-pages-to-your-laravel-app/",
+         "headline": "Adding Dynamic Flat Pages to Your Laravel App",
+         "datePublished": "2018-01-03T11:49:11.000Z",
+         "dateModified": "2018-01-03T11:49:11.000Z",
+         "description": "&lt;p&gt;Most web apps have at least some need for some additional flat pages, for purposes such as:&lt;/p&gt;
+&lt;...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">3rd January 2018 11:49 am</p><h1>Adding Dynamic Flat Pages to Your Laravel App</h1><p>Most web apps have at least some need for some additional flat pages, for purposes such as:</p><ul><li>Terms and conditions</li><li>Cookie/privacy policy</li><li>FAQ</li></ul><p>You can of course hard-code this content in a view file, but if this content is likely to change often it may be useful to give the site owners the capability to manage this themselves.</p><p><a href="https://github.com/matthewbdaly/laravel-flatpages">Laravel Flatpages</a> is a package I wrote that adds a flatpage model, controller and view to your application. It’s loosely inspired by Django’s flatpages app. Using it, you can quickly and easily build a very simple brochure-style CMS. Each page contains fields for the title, content, slug, and an optional template field that specifies which view to use.</p><p>Note that it doesn’t include any kind of admin functionality, so you’ll need to add this yourself or find a package for it. It uses my <a href="http://github.com/matthewbdaly/laravel-repositories">repositories package</a> to access the database, and this has caching built in, so when you create, update or delete a flatpage, you should either resolve <code>Matthewbdaly\LaravelFlatpages\Contracts\Repositories\Flatpage</code> and use the methods on that to make the changes (in which case the appropriate caches should be flushed automatically), or flush the cache. It also requires a cache backend that supports tags, such as Memcached or Redis.</p><p>It does not include routing in the package itself because I couldn’t find a way to guarantee that it would always be the last route, so instead you should put this in your <code>routes/web.php</code> and make sure it’s always the last route:</p><pre><code class="hljs lang-php">Route::get(<span class="hljs-string">'{path}'</span>, <span class="hljs-string">'\Matthewbdaly\LaravelFlatpages\Http\Controllers\FlatpageController@page'</span>);
+</code></pre><p>Otherwise you could wind up with problems. The reason for that is that it has to check the path against the slugs of the flat pages in the database, and if it doesn’t find any it raises a 404.</p><p>Or, if you prefer, you can use the middleware at <code>Matthewbdaly\LaravelFlatpages\Http\Middleware\FlatpageMiddleware</code>, which may be more convenient in many case. This should be added as the last global middleware in <code>app\Http\Kernel.php</code>.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/flatpages/">flatpages</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/01/03/adding-dynamic-flat-pages-to-your-laravel-app/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/01/02/a-laravel-package-boilerplate/amp/">A Laravel Package Boilerplate</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
