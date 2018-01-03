@@ -88,7 +88,7 @@ server {
 }
 ```
 
-This setup proxies all dynamic requests to the Unit backed in a similar fashion to how it would normally pass it to PHP-FPM.
+This setup proxies all dynamic requests to the Unit backend in a similar fashion to how it would normally pass it to PHP-FPM.
 
 There were still a few little issues. It doesn't exactly help that the Nginx package provided with this repository isn't quite the same as the one in Ubuntu by default - not only is it the unstable version, but it doesn't set up the `sites-available` and `sites-enabled` folders, so I had to do that manually. I also had an issue with Systemd starting the process (at `/run/control.unit.sock`) with permissions that didn't allow Nginx to access it. I'm not that familiar with Systemd so I wound up just setting the permissions of the file manually, but that doesn't persist between restarts. I expect this issue isn't that big a deal to someone more familiar with Systemd, but I haven't been able to resolve it yet.
 
