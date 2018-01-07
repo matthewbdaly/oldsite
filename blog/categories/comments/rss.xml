@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>comments | Matthew Daly&apos;s Blog</title>
+        <link>https://matthewdaly.co.uk/blog/categories/comments/</link>
+        <description>comments | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <lastBuildDate>Sun, 07 Jan 2018 17:22:21 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
+        <copyright>Matthew Daly 2018</copyright>
+        <item>
+            <title><![CDATA[Adding comments to models in Laravel]]></title>
+            <link>https://matthewdaly.co.uk/blog/2018/01/07/adding-comments-to-models-in-laravel/</link>
+            <guid>https://matthewdaly.co.uk/blog/2018/01/07/adding-comments-to-models-in-laravel/</guid>
+            <pubDate>Sun, 07 Jan 2018 17:21:50 GMT</pubDate>
+            <description><![CDATA[<p><a href="https://github.com/matthewbdaly/laravel-comments">Laravel Comments</a> is a package I recently released that allows you to add comments to any model in your application. Possible models you could use it to enable comments on might include:</p>
+<ul>
+<li>Blog posts</li>
+<li>Forum posts</li>
+<li>Issues on an issue tracker</li>
+</ul>
+<p>It’s loosely inspired by Django’s comments system.</p>
+<h2 id="installation">Installation</h2>
+<p>Run this command to install it:</p>
+<pre><code class="hljs lang-bash singleline">$ composer require matthewbdaly/laravel-comments</code></pre>
+<p>You will also need to run <code>php artisan migrate</code> to create the appropriate tables.</p>
+<h2 id="making-a-model-commentable">Making a model commentable</h2>
+<p>Add the following trait to a model to make it commentable:</p>
+<pre><code class="hljs lang-php singleline">Matthewbdaly\LaravelComments\Eloquent\Traits\Commentable</code></pre>
+<p>The comments table uses a polymorphic relation, so it should be possible to attach it to pretty much any model. The model should now have a <code>comments</code> relation, allowing you to get the comments for a model instance.</p>
+<h2 id="displaying-the-comments">Displaying the comments</h2>
+<p>Obviously you can just render the comments in a view you can create yourself, but it’s usually going to be more convenient to use the existing view, even if just as a starting point, which includes the ability to submit new comments and flag existing ones. Include it in your views as follows:</p>
+<pre><code class="hljs lang-php singleline">@<span class="hljs-keyword">include</span>(<span class="hljs-string">'comments::comments'</span>, [<span class="hljs-string">'parent'</span> =&gt; $post])</code></pre>
+<p>The argument passed to <code>parent</code> should be the model instance for which you want to display the comments form. Obviously, you can easily override this to use your own custom form instead.</p>
+<p>The package also contains the following views:</p>
+<ul>
+<li><code>comments::commentsubmitted</code></li>
+<li><code>comments::flagsubmitted</code></li>
+</ul>
+<p>These are basically just acknowledgement screens for when a comment has been submitted or flagged, and you’ll probably want to override them.</p>
+<p>The package also has its own routes and controller included for submitting comments and flags.</p>
+<h2 id="using-the-models-directly">Using the models directly</h2>
+<p>Of course there’s nothing stopping you creating your own routes and controllers for creating, viewing and flagging comments, and if, for instance, you wish to build a REST API that allows for adding comments to objects you can just use these models directly:</p>
+<ul>
+<li><code>Matthewbdaly\LaravelComments\Eloquent\Models\Comment</code></li>
+<li><code>Matthewbdaly\LaravelComments\Eloquent\Models\Comment\Flag</code></li>
+</ul>
+<p>I recommend that you use my repositories, which are as follows:</p>
+<ul>
+<li><code>Matthewbdaly\LaravelComments\Contracts\Repositories\Comment</code></li>
+<li><code>Matthewbdaly\LaravelComments\Contracts\Repositories\Comment\Flag</code></li>
+</ul>
+<p>These use <code>matthewbdaly/laravel-repositories</code> and so implement caching on the decorated repository, making it simple to ensure your models get cached appropriately. However, they aren’t compulsory.</p>
+<h2 id="events">Events</h2>
+<p>You can set up listeners for the following events:</p>
+<ul>
+<li><code>Matthewbdaly\LaravelComments\Events\CommentReceived</code></li>
+</ul>
+<p>Fired when a new comment is submitted. The package does not include any kind of validation of comments, so you can instead listen for this event and implement your own functionality to validate them (eg, check it with Akismet, check for links). That way you can easily customise how it handles potentially spammy comments for your own particular use case.</p>
+<ul>
+<li><code>Matthewbdaly\LaravelComments\Events\CommentFlagged</code></li>
+</ul>
+<p>This event indicates that a comment has been flagged for moderator attention. You can use this event to send whatever notification is most appropriate (eg, email, Slack, SMS).</p>
+]]></description>
+        </item>
+    </channel>
+</rss>
