@@ -17,7 +17,7 @@ Fortunately, it's possible to register custom field type mappings easily enough.
 ```php
 <?php
 
-namespace LaravelBlog\Providers;
+namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
