@@ -50,3 +50,24 @@ class AppServiceProvider extends ServiceProvider
 ```
 
 We register a Doctrine type mapping that maps the `tsvector` type to a string. Now Doctrine will just treat it as a string.
+
+We can then retrieve the field types as follows:
+
+```php
+        $table = $this->model->getTable();
+        $fields = array_values(Schema::getColumnListing($table));
+        $fielddata = [];
+        foreach ($fields as $field){
+            if ($field != 'id' && $field != 'created_at' && $field != 'updated_at' && $field != 'deleted_at') {
+                try {
+                    $fielddata[$field] = Schema::getColumnType($table, $field);
+                } catch (\Exception $e) {
+                    $fielddata[$field] = 'unknown';
+                }
+            }
+        }
+```
+
+Note that we specifically don't want to retrieve the ID or timestamps, so we exclude them - the user should never really have the need to update them manually. We fetch the table from the model and then call `Schema::getColumnListing()` to retrieve a list of fields for that table. Finally we call `Schema::getColumnType()` to actually get the type of each column.
+
+Now, I suspect the performance of this admin interface is going to be inferior to a more specific one because it has to retrieve the fields all the time, but that's not the point here - with a non-user facing admin interface, performance isn't quite as much of an issue. For the same reason the admin doesn't do any caching at all. It's still useful under certain circumstances to be able to reverse-engineer the table structure and render an appropriate form dynamically.
