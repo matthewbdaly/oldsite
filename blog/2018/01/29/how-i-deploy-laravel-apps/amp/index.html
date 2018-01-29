@@ -1,0 +1,289 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>How I Deploy Laravel Apps - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/01/29/how-i-deploy-laravel-apps/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/01/29/how-i-deploy-laravel-apps/",
+         "headline": "How I Deploy Laravel Apps",
+         "datePublished": "2018-01-29T22:00:35.000Z",
+         "dateModified": "2018-01-29T22:00:35.000Z",
+         "description": "&lt;p&gt;A while back I provided details of the web server setup I used for Django applications. Nowadays ...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th January 2018 10:00 pm</p><h1>How I Deploy Laravel Apps</h1><p>A while back I provided details of the web server setup I used for Django applications. Nowadays I tend to use Laravel most of the time, so I thought I’d share an example of the sort of setup I use to deploy that.</p><h2 id="server-os">Server OS</h2><p>As before I generally prefer Debian Stable where possible. If that’s not possible for any reason then the current Ubuntu LTS is an acceptable substitute.</p><h2 id="web-server">Web server</h2><p>My usual web server these days is Nginx with PHP 7 or better via FPM. I generally use HTTP2 where possible, with SSL via Let’s Encrypt.</p><p>Here’s my typical Nginx config:</p><pre><code class="hljs lang-json">fastcgi_cache_path /etc/nginx/cache levels=1:2 keys_zone=my-app:100m inactive=60m;
+fastcgi_cache_key &quot;$scheme$request_method$host$request_uri&quot;;
+add_header Content-Security-Policy &quot;default-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-inline&#39; &#39;unsafe-eval&#39;; img-src &#39;self&#39; https://placehold.it; style-src &#39;self&#39; &#39;unsafe-inline&#39; https://fonts.googleapis.com ; font-src &#39;self&#39; https://themes.googleusercontent.com; frame-src &#39;none&#39;; object-src &#39;none&#39;&quot;;
+server_tokens off;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name my-app.domain;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    include snippets/ssl-my-app.domain.conf;
+    include snippets/ssl-params.conf;
+    client_max_body_size 50M;
+    fastcgi_param HTTP_PROXY &quot;&quot;;
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    root /var/www/my-app.domain/current/public;
+    index index.php index.html index.htm;
+
+    server_name my-app.domain;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri /index.php =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/var/run/php/php7.0-fpm-my-app.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+         fastcgi_cache my-app;
+        fastcgi_cache_valid 200 60m;
+    }
+
+    location ~ /.well-known {
+        allow all;
+    }
+
+    location ~* \.(?:manifest|appcache|html?|xml|json)$ {
+        expires -1;
+        gzip on;
+        gzip_vary on;
+        gzip_types application/json text/xml application/xml;
+    }
+
+    location ~* \.(?:rss|atom)$ {
+        expires 1h;
+        add_header Cache-Control &quot;public&quot;;
+        gzip on;
+        gzip_vary on;
+        gzip_types application/xml+rss;
+    }
+
+    location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc)$ {
+        expires 1M;
+        access_log off;
+        add_header Cache-Control &quot;public&quot;;
+    }
+
+    location ~* \.(?:css|js)$ {
+        expires 1y;
+        access_log off;
+        add_header Cache-Control &quot;public&quot;;
+        gzip on;
+        gzip_vary on;
+        gzip_types text/css application/javascript text/javascript;
+    }
+}
+</code></pre><p>The times for FastCGI caching tend to vary in practice - sometimes it’s not appropriate to use it all, while for others it can be cached for some time.</p><p>It’s generally fairly safe to cache CSS and JS for a long time with a Laravel app if you’re using Mix to version those assets, so I feel comfortable caching them for a year. Images are a bit dicier, but still don’t change often so a month seems good enough.</p><p>I’ll typically give each application its own pool, which means copying the file at <code>/etc/php/7.0/fpm/pool.d/www.conf</code> to another file in the same directory, amending the pool name and path to set a new location for the socket, and then restarting Nginx and PHP-FPM. Here are the fields that should be changed:</p><pre><code class="hljs lang-ini">; Start a new pool named &#39;www&#39;.
+; the variable $pool can be used in any directive and will be replaced by the
+; pool name (&#39;www&#39; here)
+[my-app.domain]
+...
+listen = /var/run/php/php7.0-fpm-my-app.sock
+</code></pre><h2 id="database">Database</h2><p>I’m a fan of PostgreSQL - it’s stricter than MySQL/MariaDB, and has some very useful additional field types, so where possible I prefer to use it over MySQL or MariaDB.</p><h2 id="cache-and-session-backend">Cache and session backend</h2><p>Redis is my usual choice here - I make heavy use of cache tags so I need a backend for the cache that supports them, and Memcached doesn’t seem to have as much inertia as Redis these days. Neither needs much in the way of configuration, but you can get a slight speed boost by using phpiredis.</p><h2 id="queue">Queue</h2><p>I sometimes use Redis for this too, but it can be problematic if you’re using Redis as the queue and broadcast backend, so these days I’m more likely to use Beanstalk and keep Redis for other stuff. I use Supervisor for running the queue worker, and this is an example of the sort of configuration I would use:</p><pre><code class="hljs lang-ini"><span class="hljs-section">[program:laravel-worker]</span>
+<span class="hljs-attr">process_name</span>=%(program_name)s_%(process_num)<span class="hljs-number">02</span>d
+<span class="hljs-attr">command</span>=php /var/www/artisan queue:work --sleep=<span class="hljs-number">3</span> --tries=<span class="hljs-number">3</span>
+<span class="hljs-attr">autostart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">autorestart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">user</span>=www-data
+<span class="hljs-attr">numprocs</span>=<span class="hljs-number">8</span>
+<span class="hljs-attr">redirect_stderr</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">stdout_logfile</span>=/var/log/worker.log
+</code></pre><p>This is fairly standard for Laravel applications.</p><h2 id="scheduler">Scheduler</h2><p>I often make use of the Laravel scheduled tasks system. Here’s the typical cron job that would be used for that:</p><pre><code class="hljs lang-cron"><span class="hljs-bullet">* </span><span class="hljs-bullet">* *</span> <span class="hljs-bullet">* *</span> php /var/www/artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+</code></pre><p>Again, this is standard for Laravel applications. It runs the scheduler every minute, and the scheduler then determines if it needs to do something.</p><h2 id="provisioning">Provisioning</h2><p>To set all this up, I’ll generally use Ansible. In addition to this, I’ll generally also set up fail2ban to block various attacks via both HTTP and SSH.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/01/29/how-i-deploy-laravel-apps/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/01/28/why-the-speed-of-your-mvc-framework-is-usually-a-red-herring/amp/">Why the Speed of Your MVC Framework Is Usually a Red Herring</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
