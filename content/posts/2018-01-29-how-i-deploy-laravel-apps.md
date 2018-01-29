@@ -1,6 +1,6 @@
 ---
 title: "How I deploy Laravel apps"
-date: 2018-01-28 21:03:35 +0000
+date: 2018-01-29 21:03:35 +0000
 categories:
 - php
 - laravel
@@ -15,6 +15,9 @@ My usual web server these days is Nginx with PHP 7 or better via FPM. I generall
 Here's my typical Nginx config:
 
 ```json
+fastcgi_cache_path /etc/nginx/cache levels=1:2 keys_zone=laravel-blog:100m inactive=60m;
+fastcgi_cache_key "$scheme$request_method$host$request_uri";
+
 server {
     listen 80;
     listen [::]:80;
@@ -49,6 +52,8 @@ server {
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_cache laravel-blog;
+        fastcgi_cache_valid 200 60m;
     }
 
     location ~ /.well-known {
