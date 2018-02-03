@@ -21,7 +21,7 @@ My usual web server these days is Nginx with PHP 7 or better via FPM. I generall
 
 Here's my typical Nginx config:
 
-```json
+```nginx
 fastcgi_cache_path /etc/nginx/cache levels=1:2 keys_zone=my-app:100m inactive=60m;
 fastcgi_cache_key "$scheme$request_method$host$request_uri";
 add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' https://placehold.it; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ; font-src 'self' https://themes.googleusercontent.com; frame-src 'none'; object-src 'none'";
@@ -160,5 +160,3 @@ Provisioning
 ------------
 
 To set all this up, I'll generally use Ansible. In addition to this, I'll generally also set up fail2ban to block various attacks via both HTTP and SSH.
-
-
