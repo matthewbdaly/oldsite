@@ -24,7 +24,7 @@ Here's my typical Nginx config:
 ```nginx
 fastcgi_cache_path /etc/nginx/cache levels=1:2 keys_zone=my-app:100m inactive=60m;
 fastcgi_cache_key "$scheme$request_method$host$request_uri";
-add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' https://placehold.it; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ; font-src 'self' https://themes.googleusercontent.com; frame-src 'none'; object-src 'none'";
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; img-src 'self' https://placehold.it; style-src 'self' https://fonts.googleapis.com ; font-src 'self' https://themes.googleusercontent.com; frame-src 'none'; object-src 'none'";
 server_tokens off;
 
 server {
