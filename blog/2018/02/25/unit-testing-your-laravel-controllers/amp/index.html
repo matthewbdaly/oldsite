@@ -1,0 +1,227 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Unit Testing Your Laravel Controllers - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/02/25/unit-testing-your-laravel-controllers/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/02/25/unit-testing-your-laravel-controllers/",
+         "headline": "Unit Testing Your Laravel Controllers",
+         "datePublished": "2018-02-25T15:50:44.000Z",
+         "dateModified": "2018-02-25T15:50:44.000Z",
+         "description": "&lt;p&gt;In &lt;a href&#x3D;&quot;/blog/2018/02/18/put-your-laravel-controllers-on-a-diet/&quot;&gt;my previous post&lt;/a&gt; I ment...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">25th February 2018 3:50 pm</p><h1>Unit Testing Your Laravel Controllers</h1><p>In <a href="/blog/2018/02/18/put-your-laravel-controllers-on-a-diet/">my previous post</a> I mentioned some strategies for refactoring Laravel controllers to move unnecessary functionality elsewhere. However, I didn’t cover testing them. In this post I will demonstrate the methodology I use for testing Laravel controllers.</p><p>Say we have the following method in a controller:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request)</span>
+</span>{    
+        $document = <span class="hljs-keyword">new</span> Document($request-&gt;only([
+            <span class="hljs-string">'title'</span>, 
+            <span class="hljs-string">'text'</span>, 
+        ]));
+        $document-&gt;save();
+
+        event(<span class="hljs-keyword">new</span> DocumentCreated($document));
+
+        <span class="hljs-keyword">return</span> redirect()-&gt;route(<span class="hljs-string">'/'</span>);
+}
+</code></pre><p>This controller method does three things:</p><ul><li>Return a response</li><li>Create a model instance</li><li>Fire an event</li></ul><p>Our tests therefore need to pass it all its external dependencies and check it carries out the required actions.</p><p>First we fake the event facade:</p><pre><code class="hljs lang-php">    Event::fake();
+</code></pre><p>Next, we create an instance of <code>Illuminate\Http\Request</code> to represent the HTTP request passed to the controller:</p><pre><code class="hljs lang-php">    $request = Request::create(<span class="hljs-string">'/store'</span>, <span class="hljs-string">'POST'</span>,[
+        <span class="hljs-string">'title'</span>     =&gt;     <span class="hljs-string">'foo'</span>,
+        <span class="hljs-string">'text'</span>     =&gt;     <span class="hljs-string">'bar'</span>,
+    ]);
+</code></pre><p>If you’re using a custom form request class, you should instantiate that in exactly the same way.</p><p>Then, instantiate the controller, and call the method, passing it the request object:</p><pre><code class="hljs lang-php">    $controller = <span class="hljs-keyword">new</span> MyController();
+    $response = $controller-&gt;store($request);
+</code></pre><p>You can then test the response from the controller. You can test the status code like this:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">$this</span>-&gt;assertEquals(<span class="hljs-number">302</span>, $response-&gt;getStatusCode());
+</code></pre><p>You may also need to check the content of the response matches what you expect to see, by retrieving <code>$response-&gt;getBody()-&gt;getContent()</code>.</p><p>Next, retrieve the newly created model instance, and verify it exists:</p><pre><code class="hljs lang-php">    $document = Document::where(<span class="hljs-string">'title'</span>, <span class="hljs-string">'foo'</span>)-&gt;first();
+    <span class="hljs-keyword">$this</span>-&gt;assertNotNull($document);
+</code></pre><p>You can also use <code>assertEquals()</code> to check the attributes on the model if appropriate. Finally, you check the event was fired:</p><pre><code class="hljs lang-php">    Event::assertDispatched(DocumentCreated::class, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($event)</span> <span class="hljs-title">use</span> <span class="hljs-params">($document)</span> </span>{ 
+        <span class="hljs-keyword">return</span> $event-&gt;document-&gt;id === $document-&gt;id; 
+    });
+</code></pre><p>This test should not concern itself with any functionality triggered by the event, only that the event gets triggered. The event should have separate unit tests in which the event is triggered, and then the test verifies it carried out the required actions.</p><p>Technically, these don’t quite qualify as being unit tests because they hit the database, but they should cover the controller adequately. To make them true unit tests, you’d need to implement the repository pattern for the database queries rather than using Eloquent directly, and mock the repository, so you can assert that the mocked repository receive the right data and have it return the expected response.</p><p>Here is how you might do that with Mockery:</p><pre><code class="hljs lang-php">$mock = Mockery::mock(<span class="hljs-string">'App\Contracts\Repositories\Document'</span>);
+$mock-&gt;shouldReceive(<span class="hljs-string">'create'</span>)-&gt;with([
+    <span class="hljs-string">'title'</span>    =&gt;        <span class="hljs-string">'foo'</span>,
+    <span class="hljs-string">'text'</span>    =&gt;        <span class="hljs-string">'bar'</span>,
+])-&gt;once()-&gt;andReturn(<span class="hljs-keyword">true</span>);
+$controller = <span class="hljs-keyword">new</span> MyController($mock);
+</code></pre><p>As long as your controllers are kept as small as possible, it’s generally not too hard to test them. Unfortunately, fat controllers become almost impossible to test, which is another good reason to avoid them.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/02/25/unit-testing-your-laravel-controllers/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/02/18/put-your-laravel-controllers-on-a-diet/amp/">Put Your Laravel Controllers on a Diet</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
