@@ -121,7 +121,7 @@ interface Foo
      * @param array $data
      * @return Model
      */
-    protected function create(array $data);
+    public function create(array $data);
 
     /**
      * Update the given Model
@@ -130,7 +130,7 @@ interface Foo
      * @param Model $model
      * @return Model
      */
-    protected function update(array $data, Model $model);
+    public function update(array $data, Model $model);
 }
 ```
 
@@ -165,7 +165,7 @@ class Foo implements FooContract
      * @param array $data
      * @return Model
      */
-    protected function create(array $data)
+    public function create(array $data)
     {
         $this->db->beginTransaction();
         $model = $this->repository->create([
@@ -182,7 +182,7 @@ class Foo implements FooContract
      * @param Model $model
      * @return Model
      */
-    protected function update(array $data, Model $model)
+    public function update(array $data, Model $model)
     {
         $this->db->beginTransaction();
         $updatedmodel = $this->repository->update([
@@ -289,12 +289,12 @@ class Api
       $data = $this->client->get('http://api.com/api/items');
       $items = [];
       foreach ($data as $k => $v) {
-			$item = [
-           'name' => $v['name'],
-			  'description' => $v['data']['description'],
-			  'tags' => $v['data']['metadata']['tags']
-		 	];
-		 	$items[] = $item;
+         $item = [
+            'name' => $v['name'],
+            'description' => $v['data']['description'],
+            'tags' => $v['data']['metadata']['tags']
+         ];
+         $items[] = $item;
       }
       return $items;
 	}
@@ -308,6 +308,7 @@ public function __construct(App\Services\Api $api)
 {
     $this->api = $api;
 }
+
 public function index(Request $request)
 {
    $items = $this->api->fetch();
