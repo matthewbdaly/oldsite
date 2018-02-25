@@ -24,12 +24,12 @@ Then update your `phpcs.xml` to look something like this:
 
 ```xml
 <ruleset name="PHP_CodeSniffer">
-	 <description>The coding standard for my app.</description>
-    <file>./</file>
-	 <arg value="np"/>
-	 <rule ref="PSR2"/>
-    <rule ref="PHPCompatibility"/>
-    <config name="testVersion" value="7.2-"/>
+   <description>The coding standard for my app.</description>
+   <file>./</file>
+   <arg value="np"/>
+   <rule ref="PSR2"/>
+   <rule ref="PHPCompatibility"/>
+   <config name="testVersion" value="7.2-"/>
 </ruleset>
 ```
 
