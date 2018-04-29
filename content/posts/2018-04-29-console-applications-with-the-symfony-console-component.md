@@ -63,6 +63,8 @@ This displays the available commands, but you'll note that there are none except
 $app->add(new App\Console\ClearCacheCommand);
 ```
 
+This has to be done in `console`, after we create `$app`, but before we run it.
+
 Don't forget to update the autoload section of your `composer.json` to register the namespace:
 
 ```json
