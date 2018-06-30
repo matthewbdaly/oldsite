@@ -205,10 +205,10 @@ testserver | SUCCESS =&gt; {
     <span class="hljs-string">"changed"</span>: <span class="hljs-literal">false</span>,
     <span class="hljs-string">"ping"</span>: <span class="hljs-string">"pong"</span>
 }
-</code></pre><p>We called Ansible with the hosts set to <code>all</code>, therefore every host in the inventory was contacted. We used the <code>-m</code> flag to say we were calling a module, and then specified the <code>ping</code> module. Ansible therefore pinged each server in turn.</p><p>We can call ad-hoc commands using the <code>-a</code> flag, as in this example:</p><pre><code class="hljs lang-bash">$ ansible all <span class="hljs-_">-a</span> <span class="hljs-string">"uptime"</span>
+</code></pre><p>We called Ansible with the hosts set to <code>all</code>, therefore every host in the inventory was contacted. We used the <code>-m</code> flag to say we were calling a module, and then specified the <code>ping</code> module. Ansible therefore pinged each server in turn.</p><p>We can call ad-hoc commands using the <code>-a</code> flag, as in this example:</p><pre><code class="hljs lang-bash">$ ansible all -a <span class="hljs-string">"uptime"</span>
 testserver | SUCCESS | rc=0 &gt;&gt;
  17:26:57 up 19 min,  1 user,  load average: 0.00, 0.04, 0.13
-</code></pre><p>This command gets the uptime for the server. If you only want to run the command on a single server, you can specify it by name:</p><pre><code class="hljs lang-bash">$ ansible testserver <span class="hljs-_">-a</span> <span class="hljs-string">"uptime"</span>
+</code></pre><p>This command gets the uptime for the server. If you only want to run the command on a single server, you can specify it by name:</p><pre><code class="hljs lang-bash">$ ansible testserver -a <span class="hljs-string">"uptime"</span>
 testserver | SUCCESS | rc=0 &gt;&gt;
  17:28:21 up 20 min,  1 user,  load average: 0.02, 0.04, 0.13
 </code></pre><p>Here we specified the server as <code>testserver</code>. What about if you want to specify more than one server, but not all of them? You can create groups of servers in <code>inventory</code>, as in this example:</p><pre><code class="hljs lang-conf">[webservers]
@@ -216,10 +216,10 @@ testserver ansible_ssh_host=<span class="hljs-number">127.0</span><span class="h
 example.com ansible_ssh_host=<span class="hljs-number">192.168</span><span class="hljs-number">.56</span><span class="hljs-number">.101</span>
 </code></pre><p>You could then call the following to run the <code>uptime</code> command on all the servers in the <code>webservers</code> group:</p><pre><code class="hljs lang-perl">$ ansible webservers -a <span class="hljs-string">'uptime'</span>
 </code></pre><p>If you want to run the command as a different user, you can do so:</p><pre><code class="hljs lang-perl">$ ansible webservers -a <span class="hljs-string">'uptime'</span> -u bob
-</code></pre><p>Note that for running <code>uptime</code> we haven’t specified the <code>-m</code> flag. This is because the <code>command</code> module is the default, but it’s very basic and doesn’t support shell variables. For more complex interactions you might need to use the <code>shell</code> module, as in this example:</p><pre><code class="hljs lang-bash">$ ansible testserver -m shell <span class="hljs-_">-a</span> <span class="hljs-string">'echo $PATH'</span>
+</code></pre><p>Note that for running <code>uptime</code> we haven’t specified the <code>-m</code> flag. This is because the <code>command</code> module is the default, but it’s very basic and doesn’t support shell variables. For more complex interactions you might need to use the <code>shell</code> module, as in this example:</p><pre><code class="hljs lang-bash">$ ansible testserver -m shell -a <span class="hljs-string">'echo $PATH'</span>
 testserver | SUCCESS | rc=0 &gt;&gt;
 /usr/<span class="hljs-built_in">local</span>/bin:/usr/bin:/bin:/usr/games
-</code></pre><p>For installing a package on Debian or Ubuntu, you might use the <code>apt</code> module:</p><pre><code class="hljs lang-bash">$ ansible testserver -m apt <span class="hljs-_">-a</span> <span class="hljs-string">"name=git state=present"</span> --become
+</code></pre><p>For installing a package on Debian or Ubuntu, you might use the <code>apt</code> module:</p><pre><code class="hljs lang-bash">$ ansible testserver -m apt -a <span class="hljs-string">"name=git state=present"</span> --become
 testserver | SUCCESS =&gt; {
     <span class="hljs-string">"cache_update_time"</span>: 0,
     <span class="hljs-string">"cache_updated"</span>: <span class="hljs-literal">false</span>,
@@ -281,40 +281,40 @@ testserver | SUCCESS =&gt; {
         <span class="hljs-string">"Setting up git (1:2.1.4-2.1+deb8u2) ..."</span>
     ]
 }
-</code></pre><p>Here we specify that a particular package should be <code>state=present</code> or <code>state=absent</code>. Also, note the <code>--become</code> flag, which allows us to become root. If you’re using an RPM-based Linux distro, you can use the <code>yum</code> module in the same way.</p><p>Finally, let’s use the <code>git</code> module to check out a project on the server:</p><pre><code class="hljs lang-bash">$ ansible testserver -m git <span class="hljs-_">-a</span> <span class="hljs-string">"repo=https://github.com/matthewbdaly/django_tutorial_blog_ng.git dest=/home/vagrant/example version=HEAD"</span>
+</code></pre><p>Here we specify that a particular package should be <code>state=present</code> or <code>state=absent</code>. Also, note the <code>--become</code> flag, which allows us to become root. If you’re using an RPM-based Linux distro, you can use the <code>yum</code> module in the same way.</p><p>Finally, let’s use the <code>git</code> module to check out a project on the server:</p><pre><code class="hljs lang-bash">$ ansible testserver -m git -a <span class="hljs-string">"repo=https://github.com/matthewbdaly/django_tutorial_blog_ng.git dest=/home/vagrant/example version=HEAD"</span>
 testserver | SUCCESS =&gt; {
     <span class="hljs-string">"after"</span>: <span class="hljs-string">"3542098e3b01103db4d9cfc724ba3c71c45cb314"</span>,
     <span class="hljs-string">"before"</span>: null,
     <span class="hljs-string">"changed"</span>: <span class="hljs-literal">true</span>,
     <span class="hljs-string">"warnings"</span>: []
 }
-</code></pre><p>Here we check out a Git repository. We specify the repo, destination and version.</p><p>You can call any installed Ansible module in an ad-hoc fashion in the same way. Refer to the documentation for a list of modules.</p><h2 id="playbooks">Playbooks</h2><p>Ad-hoc commands are useful, but they don’t offer much extra over using SSH. Playbooks allow you to define a repeatable set of commands for a particular use case. In this example, I’ll show you how to write a playbook that does the following:</p><ul><li>Installs and configures Nginx</li><li>Clones the repository for my site into the web root</li></ul><p>This is sufficiently complex to demonstrate some more of the functionality of Ansible, while also demonstrating playbooks in action.</p><p>Create a new folder called <code>playbooks</code>, and inside it save the following as <code>sitecopy.yml</code>:</p><pre><code class="hljs lang-yml"><span class="hljs-meta">---</span>
-<span class="hljs-attr">- name:</span> <span class="hljs-string">Copy</span> <span class="hljs-string">personal</span> <span class="hljs-string">website</span>
-<span class="hljs-attr">  hosts:</span> <span class="hljs-string">testserver</span>
-<span class="hljs-attr">  become:</span> <span class="hljs-literal">True</span>
-<span class="hljs-attr">  tasks:</span>
-<span class="hljs-attr">    - name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Nginx</span>
-<span class="hljs-attr">      apt:</span> <span class="hljs-string">name=nginx</span> <span class="hljs-string">update_cache=yes</span>
-<span class="hljs-attr">    - name:</span> <span class="hljs-string">Copy</span> <span class="hljs-string">config</span>
-<span class="hljs-attr">      copy:</span> <span class="hljs-string">&gt;
-        src=files/nginx.conf
-        dest=/etc/nginx/sites-available/default
-</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Activate</span> <span class="hljs-string">config</span>
-<span class="hljs-attr">      file:</span> <span class="hljs-string">&gt;
-        dest=/etc/nginx/sites-enabled/default
-        src=/etc/nginx/sites-available/default
-        state=link
-</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Delete</span> <span class="hljs-string">/var/www</span> <span class="hljs-string">directory</span>
-<span class="hljs-attr">      file:</span> <span class="hljs-string">&gt;
-        path=/var/www
-        state=absent
-</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Clone</span> <span class="hljs-string">repository</span>
-<span class="hljs-attr">      git:</span> <span class="hljs-string">&gt;
-        repo=https://github.com/matthewbdaly/matthewbdaly.github.io.git
-        dest=/var/www
-        version=HEAD
-</span><span class="hljs-attr">    - name:</span> <span class="hljs-string">Restart</span> <span class="hljs-string">Nginx</span>
-<span class="hljs-attr">      service:</span> <span class="hljs-string">name=nginx</span> <span class="hljs-string">state=restarted</span>
+</code></pre><p>Here we check out a Git repository. We specify the repo, destination and version.</p><p>You can call any installed Ansible module in an ad-hoc fashion in the same way. Refer to the documentation for a list of modules.</p><h2 id="playbooks">Playbooks</h2><p>Ad-hoc commands are useful, but they don’t offer much extra over using SSH. Playbooks allow you to define a repeatable set of commands for a particular use case. In this example, I’ll show you how to write a playbook that does the following:</p><ul><li>Installs and configures Nginx</li><li>Clones the repository for my site into the web root</li></ul><p>This is sufficiently complex to demonstrate some more of the functionality of Ansible, while also demonstrating playbooks in action.</p><p>Create a new folder called <code>playbooks</code>, and inside it save the following as <code>sitecopy.yml</code>:</p><pre><code class="hljs lang-yml">---
+- name: Copy personal website
+  hosts: testserver
+  become: <span class="hljs-literal">True</span>
+  tasks:
+    - name: Install Nginx
+      apt: <span class="hljs-attribute">name</span>=nginx <span class="hljs-attribute">update_cache</span>=<span class="hljs-literal">yes</span>
+    - name: Copy<span class="hljs-built_in"> config
+</span>      copy: &gt;
+        <span class="hljs-attribute">src</span>=files/nginx.conf
+        <span class="hljs-attribute">dest</span>=/etc/nginx/sites-available/default
+    - name: Activate<span class="hljs-built_in"> config
+</span>      file: &gt;
+        <span class="hljs-attribute">dest</span>=/etc/nginx/sites-enabled/default
+        <span class="hljs-attribute">src</span>=/etc/nginx/sites-available/default
+        <span class="hljs-attribute">state</span>=link
+    - name: Delete /var/www directory
+      file: &gt;
+        <span class="hljs-attribute">path</span>=/var/www
+        <span class="hljs-attribute">state</span>=absent
+    - name: Clone repository
+      git: &gt;
+        <span class="hljs-attribute">repo</span>=https://github.com/matthewbdaly/matthewbdaly.github.io.git
+        <span class="hljs-attribute">dest</span>=/var/www
+        <span class="hljs-attribute">version</span>=HEAD
+    - name: Restart Nginx
+      service: <span class="hljs-attribute">name</span>=nginx <span class="hljs-attribute">state</span>=restarted
 </code></pre><p>Note the <code>name</code> fields - these are comments that will show up in the output when each step is run. First we use the <code>apt</code> module to install Nginx, then we copy over the config file and activate it, then we empty the existing <code>/var/www</code> and clone the repository, and finally we restart Nginx.</p><p>Also, note the following fields:</p><ul><li><code>hosts</code> defines the hosts affected</li><li><code>become</code> specifies that the commands are run using <code>sudo</code></li></ul><p>We also need to create the config for Nginx. Create the <code>files</code> directory under <code>playbooks</code> and save this file as <code>playbooks/files/nginx.conf</code>:</p><pre><code class="hljs lang-nginx"><span class="hljs-section">server</span> {
     <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default_server;
     <span class="hljs-attribute">listen</span> [::]:<span class="hljs-number">80</span> default_server ipv6only=<span class="hljs-literal">on</span>;
@@ -355,14 +355,15 @@ changed: [testserver]
 
 PLAY RECAP *********************************************************************
 testserver                 : ok=7    changed=6    unreachable=0    failed=0
-</code></pre><p>If we had a playbook that we wanted to run on only a subset of the hosts it applied to, we could use the <code>-l</code> flag, as in this example:</p><pre><code class="hljs lang-bash">$ ansible-playbook playbooks/sitecopy.yml <span class="hljs-_">-l</span> testserver
-</code></pre><p>Using these same basic concepts, you can invoke many different Ansible modules to achieve many different tasks. You can spin up new servers on supported cloud hosting companies, you can set up a known good fail2ban config, you can configure your firewall, and many more tasks. As your playbooks get bigger, it’s worth moving sections into separate roles that get invoked within multiple playbooks, in order to reduce repetition.</p><p>Finally, I mentioned earlier that you can use Ansible to update all of your servers regularly. Here’s the playbook I use for that:</p><pre><code class="hljs lang-yml"><span class="hljs-meta">---</span>
-<span class="hljs-attr">- name:</span> <span class="hljs-string">Update</span> <span class="hljs-string">system</span>
-<span class="hljs-attr">  hosts:</span> <span class="hljs-string">all</span>
-<span class="hljs-attr">  become:</span> <span class="hljs-literal">True</span>
-<span class="hljs-attr">  tasks:</span>
-<span class="hljs-attr">    - name:</span> <span class="hljs-string">update</span> <span class="hljs-string">system</span>
-<span class="hljs-attr">      apt:</span> <span class="hljs-string">upgrade=full</span> <span class="hljs-string">update_cache=yes</span>
+
+</code></pre><p>If we had a playbook that we wanted to run on only a subset of the hosts it applied to, we could use the <code>-l</code> flag, as in this example:</p><pre><code class="hljs lang-bash">$ ansible-playbook playbooks/sitecopy.yml -l testserver
+</code></pre><p>Using these same basic concepts, you can invoke many different Ansible modules to achieve many different tasks. You can spin up new servers on supported cloud hosting companies, you can set up a known good fail2ban config, you can configure your firewall, and many more tasks. As your playbooks get bigger, it’s worth moving sections into separate roles that get invoked within multiple playbooks, in order to reduce repetition.</p><p>Finally, I mentioned earlier that you can use Ansible to update all of your servers regularly. Here’s the playbook I use for that:</p><pre><code class="hljs lang-yml">---
+- name: Update<span class="hljs-built_in"> system
+</span>  hosts: all
+  become: <span class="hljs-literal">True</span>
+  tasks:
+    - name: update<span class="hljs-built_in"> system
+</span>      apt: <span class="hljs-attribute">upgrade</span>=full <span class="hljs-attribute">update_cache</span>=<span class="hljs-literal">yes</span>
 </code></pre><p>This connects to all hosts using the <code>all</code> shortcut we saw earlier, and upgrades all existing packages. Using this method is a lot easier than connecting to each one in turn via SSH and updating it manually.</p><h2 id="summary">Summary</h2><p>Ansible is an extremely useful tool for managing servers, but to get the most out of it you have to put in a fair bit of work reading the <a href="https://docs.ansible.com/">documentation</a> and writing your own playbooks for your own use cases. It’s simple to get started with, and if you’re willing to put in the time writing your own playbooks then in the long run you’ll save yourself a lot of time and grief by making it easy to set up new servers and administer existing ones. Hopefully this has given you a taster of what you can do with Ansible - from here on the documentation is worth a look as it lists all of the modules that ship with Ansible. If there’s a particular task you dread, such as setting up a mail server, then Ansible is a very good way to automate that away so it’s easier next time.</p><p>My experience is that it’s best to make an effort to try to standardise on two or three different stacks for different purposes, and create Ansible playbooks for those stacks. For instance, I’ve tended to use PHP 5, Apache, MySQL, Memcached and Varnish for Wordpress sites, and PHP 7, Nginx, Redis and PostgreSQL for Laravel sites. That way I know that any sites I build with Laravel will be using that stack. Knowing my servers are more consistent makes it easier to work with them and identify problems.</p><section><ul class="categories"><li><a href="/blog/categories/ansible/">ansible</a></li><li><a href="/blog/categories/sysadmin/">sysadmin</a></li><li><a href="/blog/categories/python/">python</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/08/10/an-introduction-to-managing-your-servers-with-ansible/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/amp/">Creating a Personal Dashboard With React and Webpack</a> <a class="postlink" href="/blog/2016/08/08/testing-your-api-documentation-with-dredd/amp/">Testing Your API Documentation With Dredd</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

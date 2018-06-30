@@ -186,7 +186,7 @@
       }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">11th September 2016 7:33 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 1</h1><p>A lot of my work over the last few years has been on Phonegap apps. Phonegap isn’t terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you’ve used client-side Javascript frameworks before it can be a struggle.</p><p>In this series of tutorials I’ll show you how I might build a Phonegap app. The work involved will include:</p><ul><li>Building a REST API using Laravel to expose the data</li><li>Building an admin interface to manage the data</li><li>Building a Phonegap app using Angular.js</li><li>Testing and deploying it</li></ul><p>In the process we’ll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p><h2 id="the-brief">The brief</h2><p>Let’s say our new client is an animal shelter. The brief for the app is as follows:</p><blockquote><p>My New Animal Friend will be an app for finding a new pet. Once a user signs in, they’ll be able to choose what type of pet they’re looking for, then look through a list of pets available to adopt. They can reject them by swiping left or save them by swiping right. They can see more about the ones they swipe right on, and arrange to meet them, from within the app. Users can also message the staff to ask questions about a pet.</p></blockquote><p>Nice idea, but there’s a lot of work involved! Our very first task is to build the REST API, since everything else relies on that. Before starting, make sure you have the following installed:</p><ul><li>PHP (I’m using PHP 7, but 5.6 should be fine)</li><li>Composer</li><li>Git</li><li>A compatible relational database (I use PostgreSQL)</li><li>Redis</li><li>Your usual text editor</li><li>Node.js</li></ul><p>As long as you have this, you should be ready to go. Using <a href="https://laravel.com/docs/5.3/homestead">Homestead</a> is the simplest way to get started if you don’t have all this stuff already.</p><h2 id="starting-the-api">Starting the API</h2><p>To start building our REST API, run the following command from the shell:</p><pre><code class="hljs lang-bash">$ composer create-project --prefer-dist laravel/laravel mynewanimalfriend-backend
 </code></pre><p>We also have some other dependencies we need to install, so switch into the new directory and run the following command:</p><pre><code class="hljs lang-bash">$ composer require barryvdh/laravel-cors tymon/jwt-auth predis/predis
 </code></pre><p>Next, we need to add the new packages to the Laravel config. Open up <code>config/app.php</code> and add the following to the <code>providers</code> array:</p><pre><code class="hljs lang-php">   Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,                                                                                                                                              
-   Barryvdh\Cors\ServiceProvider::class,
+   Barryvdh\Cors\ServiceProvider::class,   
 </code></pre><p>And the following to the <code>aliases</code> array:</p><pre><code class="hljs lang-php">   <span class="hljs-string">'JWTAuth'</span> =&gt; Tymon\JWTAuth\Facades\JWTAuth::class,
 </code></pre><p>We also need to ensure that the CORS middleware is applied to all API routes. Open up <code>app/Http/Kernel.php</code> and under the <code>api</code> array in <code>protected $middlewareGroups</code> paste the following:</p><pre><code class="hljs lang-php">   \Barryvdh\Cors\HandleCors::class,
 </code></pre><p>Now that the packages are included, we can publish the files for them:</p><pre><code class="hljs lang-bash">$ php artisan vendor:publish
@@ -323,14 +323,14 @@ Time: 328 ms, Memory: 14.00MB
 
 There were 2 failures:
 
-1) AuthTest::<span class="hljs-built_in">test</span>Auth
+1) AuthTest::testAuth
 Expected status code 200, got 404.
 Failed asserting that 404 matches expected 200.
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:648
 /home/matthew/Projects/mynewanimalfriend-backend/tests/AuthTest.php:29
 
-2) AuthTest::<span class="hljs-built_in">test</span>AuthFailure
+2) AuthTest::testAuthFailure
 Expected status code 401, got 404.
 Failed asserting that 404 matches expected 401.
 
@@ -486,7 +486,7 @@ Time: 414 ms, Memory: 16.00MB
 
 There was 1 error:
 
-1) PetModelTest::<span class="hljs-built_in">test</span>CreatingAUser
+1) PetModelTest::testCreatingAUser
 InvalidArgumentException: Unable to locate factory with name [default] [AnimalFriend\Pet].
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Database/Eloquent/FactoryBuilder.php:126
@@ -631,14 +631,14 @@ Time: 509 ms, Memory: 16.00MB
 
 There were 2 failures:
 
-1) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPetsWhenUnauthorised
+1) PetControllerTest::testFetchingPetsWhenUnauthorised
 Expected status code 400, got 404.
 Failed asserting that 404 matches expected 400.
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:648
 /home/matthew/Projects/mynewanimalfriend-backend/tests/PetControllerTest.php:25
 
-2) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPets
+2) PetControllerTest::testFetchingPets
 Failed asserting that null is of <span class="hljs-built_in">type</span> <span class="hljs-string">"array"</span>.
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:295
@@ -691,7 +691,7 @@ Time: 511 ms, Memory: 16.00MB
 
 There were 2 errors:
 
-1) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPetsWhenUnauthorised
+1) PetControllerTest::testFetchingPetsWhenUnauthorised
 ReflectionException: Class jwt.auth does not exist
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Container/Container.php:734
@@ -701,7 +701,7 @@ ReflectionException: Class jwt.auth does not exist
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:517
 /home/matthew/Projects/mynewanimalfriend-backend/tests/PetControllerTest.php:24
 
-2) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPets
+2) PetControllerTest::testFetchingPets
 ReflectionException: Class jwt.auth does not exist
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Container/Container.php:734
@@ -817,7 +817,7 @@ Time: 974 ms, Memory: 16.00MB
 
 There was 1 error:
 
-1) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPet
+1) PetControllerTest::testFetchingPet
 PHPUnit_Framework_Exception: Argument <span class="hljs-comment">#2 (No Value) of PHPUnit_Framework_Assert::assertArrayHasKey() must be a array or ArrayAccess</span>
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:304
@@ -827,7 +827,7 @@ PHPUnit_Framework_Exception: Argument <span class="hljs-comment">#2 (No Value) o
 
 There was 1 failure:
 
-1) PetControllerTest::<span class="hljs-built_in">test</span>FetchingPetDoesNotExist
+1) PetControllerTest::testFetchingPetDoesNotExist
 Expected status code 404, got 400.
 Failed asserting that 400 matches expected 404.
 
