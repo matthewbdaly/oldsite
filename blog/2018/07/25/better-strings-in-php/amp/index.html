@@ -1,0 +1,356 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Better Strings in PHP - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/07/25/better-strings-in-php/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/07/25/better-strings-in-php/",
+         "headline": "Better Strings in PHP",
+         "datePublished": "2018-07-25T21:25:17.000Z",
+         "dateModified": "2018-07-25T21:25:17.000Z",
+         "description": "&lt;p&gt;One of the weaknesses of PHP as a programming language is the limitations of some of the fundamen...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">25th July 2018 10:25 pm</p><h1>Better Strings in PHP</h1><p>One of the weaknesses of PHP as a programming language is the limitations of some of the fundamental types. For instance, a string in PHP is a simple value, rather than an object, and doesn’t have any methods associated with it. Instead, to manipulate a string, you have to call all manner of functions. By comparison, in Python, not only can you call methods on a string, and receive a new string as the response, making them easily chainable, but you can also iterate through a string, as in this example:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = <span class="hljs-string">'foo'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a.upper()
+<span class="hljs-string">'FOO'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a.lower()
+<span class="hljs-string">'foo'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> letter <span class="hljs-keyword">in</span> a:
+<span class="hljs-meta">... </span>  print(letter)
+<span class="hljs-meta">... </span>
+f
+o
+o
+</code></pre><p>A little while back, I read Adam Wathan’s excellent book <em>Refactoring to Collections</em>, which describes how you can use a collection implementation (such as the one included with Laravel) to replace convoluted array manipulation with simpler, chainable calls to a collection object. Using this approach, you can turn something like this:</p><pre><code class="hljs lang-php">$result = array_filter(
+    array_map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+        <span class="hljs-keyword">return</span> $item-&gt;get(<span class="hljs-string">'foo'</span>);
+    }, $items),
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+        <span class="hljs-keyword">return</span> $item-&gt;bar == <span class="hljs-keyword">true</span>;
+});
+</code></pre><p>Or, even worse, this:</p><pre><code class="hljs lang-php">$result1 = array_map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+    <span class="hljs-keyword">return</span> $item-&gt;get(<span class="hljs-string">'foo'</span>);
+}, $items);
+$result2 = array_filter($result1, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+    <span class="hljs-keyword">return</span> $item-&gt;bar == <span class="hljs-keyword">true</span>;
+});
+</code></pre><p>Into this:</p><pre><code class="hljs lang-php">$result = Collection::make($items)
+    -&gt;map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+        <span class="hljs-keyword">return</span> $item-&gt;get(<span class="hljs-string">'foo'</span>);
+    })-&gt;filter(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
+        <span class="hljs-keyword">return</span> $item-&gt;bar == <span class="hljs-keyword">true</span>;
+    })-&gt;toArray();
+</code></pre><p>Much cleaner, more elegant, and far easier to understand.</p><p>A while back, after some frustration with PHP’s native strings, I started wondering how practical it would be to produce a string implementation that was more like the string objects in languages like Python and Javascript, with inspiration from collection implementations such as that used by Laravel. I soon discovered that it was very practical, and with a bit of work it’s not hard to produce your own, more elegant string class.</p><p>The most fundamental functionality required is to be able to create a string object, either by passing a string to the constructor or calling a static method. Our string class should be able to do both:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Str</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $string;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(string $string = <span class="hljs-string">''</span>)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;string = $string;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">make</span><span class="hljs-params">(string $string)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>($string);
+    }
+}
+</code></pre><h2 id="making-it-iterable">Making it iterable</h2><p>To be able to get the length of a string, it needs to implement the <a href="http://php.net/manual/en/class.countable.php"><code>Countable</code></a> interface:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Countable</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Str</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Countable</span>
+</span>{
+    ...
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">count</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> strlen(<span class="hljs-keyword">$this</span>-&gt;string);
+    }
+}
+</code></pre><p>To access it as an array, it needs to implement the <a href="http://php.net/manual/en/class.arrayaccess.php"><code>ArrayAccess</code></a> interface:</p><pre><code class="hljs lang-php">...
+<span class="hljs-keyword">use</span> <span class="hljs-title">ArrayAccess</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Str</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Countable</span>, <span class="hljs-title">ArrayAccess</span>
+</span>{
+    ...
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offsetExists</span><span class="hljs-params">($offset)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">isset</span>(<span class="hljs-keyword">$this</span>-&gt;string[$offset]);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offsetGet</span><span class="hljs-params">($offset)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">isset</span>(<span class="hljs-keyword">$this</span>-&gt;string[$offset]) ? <span class="hljs-keyword">$this</span>-&gt;string[$offset] : <span class="hljs-keyword">null</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offsetSet</span><span class="hljs-params">($offset, $value)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (is_null($offset)) {
+            <span class="hljs-keyword">$this</span>-&gt;string[] = $value;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">$this</span>-&gt;string[$offset] = $value;
+        }
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">offsetUnset</span><span class="hljs-params">($offset)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;string = substr_replace(<span class="hljs-keyword">$this</span>-&gt;string, <span class="hljs-string">''</span>, $offset, <span class="hljs-number">1</span>);
+    }
+}
+</code></pre><p>And to make it iterable, it needs to implement the <a href="http://php.net/manual/en/class.iterator.php"><code>Iterator</code></a> interface:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Iterator</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Str</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Countable</span>, <span class="hljs-title">ArrayAccess</span>, <span class="hljs-title">Iterator</span>
+</span>{
+    ...
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">current</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;string[<span class="hljs-keyword">$this</span>-&gt;position];
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">key</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;position;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">next</span><span class="hljs-params">()</span>
+    </span>{
+        ++<span class="hljs-keyword">$this</span>-&gt;position;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rewind</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;position = <span class="hljs-number">0</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">valid</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">isset</span>(<span class="hljs-keyword">$this</span>-&gt;string[<span class="hljs-keyword">$this</span>-&gt;position]);
+    }
+}
+</code></pre><h2 id="making-it-work-as-a-string">Making it work as a string</h2><p>To be useful, it also needs to be possible to actually use it as a string - for instance, you should be able to do this:</p><pre><code class="hljs lang-php">$foo = Str::make(<span class="hljs-string">'I am the very model of a modern major general'</span>);
+<span class="hljs-keyword">echo</span> $foo;
+</code></pre><p>Fortunately, the <a href="http://php.net/manual/en/language.oop5.magic.php#object.tostring"><code>__toString()</code></a> magic method allows this:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__toString</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;string;
+    }
+</code></pre><h2 id="adding-methods">Adding methods</h2><p>With that functionality in place, you can then start adding support for the methods you need in your string objects. If you’re looking to be able to use the same functionality as existing PHP methods, you can call those functions inside your methods. However, be sure to return a new instance of your string object from each method - that way, you can continually chain them:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">replace</span><span class="hljs-params">($find, $replace)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(str_replace($find, $replace, <span class="hljs-keyword">$this</span>-&gt;string));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toUpper</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(strtoupper(<span class="hljs-keyword">$this</span>-&gt;string));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">toLower</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(strtolower(<span class="hljs-keyword">$this</span>-&gt;string));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">trim</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(trim(<span class="hljs-keyword">$this</span>-&gt;string));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ltrim</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(ltrim(<span class="hljs-keyword">$this</span>-&gt;string));
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rtrim</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">static</span>(rtrim(<span class="hljs-keyword">$this</span>-&gt;string));
+    }
+</code></pre><p>Now, you can write something like this:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">return</span> Str::make(<span class="hljs-string">'I am the very model of a modern major general  '</span>)
+    -&gt;trim()
+    -&gt;replace(<span class="hljs-string">'modern major general'</span>, <span class="hljs-string">'scientist Salarian'</span>)
+    -&gt;toLower();
+</code></pre><p>While you could do this with PHP’s native string functions alone, it would be a lot less elegant. In addition, if you have other, more complex string manipulations that you often do in a particular application, it may make sense to write a method for that so that your string objects can encapsulate that functionality for easier reuse.</p><p>As our string objects are iterable, we can also do this:</p><pre><code class="hljs lang-php">&gt;&gt;&gt; $foo = Str::make(<span class="hljs-string">'foo'</span>);
+&gt;&gt;&gt; <span class="hljs-keyword">foreach</span> ($foo <span class="hljs-keyword">as</span> $letter) { <span class="hljs-keyword">echo</span> <span class="hljs-string">"$letter\n"</span>; }
+f
+o
+o
+</code></pre><p>If you have an application that does some complex string manipulation, having a string utility class like this can make for much more expressive, elegant and easy-to-comprehend code than PHP’s native string functions. If you want to see a working implementation for this, check out my proof of concept collection and string utility library <a href="https://github.com/matthewbdaly/proper">Proper</a>.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/07/25/better-strings-in-php/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/06/23/forcing-ssl-in-codeigniter/amp/">Forcing SSL in Codeigniter</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
