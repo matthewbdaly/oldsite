@@ -7,7 +7,7 @@ categories:
 comments: true
 ---
 
-Writing automated tests is an excellent way of catching bugs during development and maintenace of your application, not to mention the other benefits. However, it's hard to gauge the quality of your tests, particularly when you first start out. Coverage will give you a good idea of what code was actually run during the test, but it won't tell you if the test itself actually tests anything worthwhile.
+Writing automated tests is an excellent way of catching bugs during development and maintenance of your application, not to mention the other benefits. However, it's hard to gauge the quality of your tests, particularly when you first start out. Coverage will give you a good idea of what code was actually run during the test, but it won't tell you if the test itself actually tests anything worthwhile.
 
 [Infection](https://infection.github.io/) is a mutation testing framework. The documentation defines mutation testing as follows:
 
