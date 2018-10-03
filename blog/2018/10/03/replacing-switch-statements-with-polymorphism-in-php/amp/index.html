@@ -1,0 +1,285 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Replacing Switch Statements With Polymorphism in PHP - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/",
+         "headline": "Replacing Switch Statements With Polymorphism in PHP",
+         "datePublished": "2018-10-03T22:07:33.000Z",
+         "dateModified": "2018-10-03T22:07:33.000Z",
+         "description": "&lt;p&gt;For the last few months, I’ve been making a point of picking up on certain antipatterns, and ways...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">3rd October 2018 11:07 pm</p><h1>Replacing Switch Statements With Polymorphism in PHP</h1><p>For the last few months, I’ve been making a point of picking up on certain antipatterns, and ways to avoid or remove them. One I’ve seen a lot recently is unnecessary large switch-case or if-else statements. For instance, here is a simplified example of one of these, which renders links to different objects:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">switch</span> ($item-&gt;getType()) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'audio'</span>:
+        $media = <span class="hljs-keyword">new</span> stdClass;
+        $media-&gt;type = <span class="hljs-string">'audio'</span>;
+        $media-&gt;duration = $item-&gt;getLength();
+        $media-&gt;name = $item-&gt;getName();
+        $media-&gt;url = $item-&gt;getUrl();
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'video'</span>:
+        $media = <span class="hljs-keyword">new</span> stdClass;
+        $media-&gt;type = <span class="hljs-string">'video'</span>;
+        $media-&gt;duration = $item-&gt;getVideoLength();
+        $media-&gt;name = $item-&gt;getTitle();
+        $media-&gt;url = $item-&gt;getUrl();
+}
+<span class="hljs-keyword">return</span> <span class="hljs-string">'&lt;a href="'</span>.$media-&gt;url.<span class="hljs-string">'" class="'</span>.$media-&gt;type.<span class="hljs-string">'" data-duration="'</span>.$media-&gt;duration.<span class="hljs-string">'"&gt;'</span>.$media-&gt;name.<span class="hljs-string">'&lt;/a&gt;'</span>;
+</code></pre><p>There are a number of problems with this, most notably the fact that it’s doing a lot of work to try and create a new set of objects that behave consistently. Instead, your objects should be polymorphic - in other words, you should be able to treat the original objects the same.</p><p>While strictly speaking you don’t need one, it’s a good idea to create an interface that defines the required methods. That way, you can have those objects implement that interface, and be certain that they have all the required methods:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">MediaItem</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLength</span><span class="hljs-params">()</span>: <span class="hljs-title">int</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getType</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUrl</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span></span>;
+}
+</code></pre><p>Then, you need to implement that interface in your objects. It doesn’t matter if the implementations are different, as long as the methods exist. That way, objects can define how they return a particular value, which is simpler and more logical than defining it in a large switch-case statement elsewhere. It also helps to prevent duplication. Here’s what the audio object might look like:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Models</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">MediaItem</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Audio</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MediaItem</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLength</span><span class="hljs-params">()</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;length;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;name;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getType</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;type;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUrl</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;url;
+    }
+}
+</code></pre><p>And here’s a similar example of the video object:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Models</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">MediaItem</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Video</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MediaItem</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLength</span><span class="hljs-params">()</span>: <span class="hljs-title">int</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;getVideoLength();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getName</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;getTitle();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getType</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;type;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getUrl</span><span class="hljs-params">()</span>: <span class="hljs-title">string</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;url;
+    }
+}
+</code></pre><p>With that done, the code to render the links can be greatly simplified:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">return</span> <span class="hljs-string">'&lt;a href="'</span>.$item-&gt;getUrl().<span class="hljs-string">'" class="'</span>.$item-&gt;getType().<span class="hljs-string">'" data-duration="'</span>.$item-&gt;getLength().<span class="hljs-string">'"&gt;'</span>.$media-&gt;getName().<span class="hljs-string">'&lt;/a&gt;'</span>;
+</code></pre><p>Because we can use the exact same methods and get consistent responses, yet also allow for the different implementations within the objects, this approach allows for much more elegant and readable code. Different objects can be treated in the same way without the need for writing extensive if or switch statements.</p><p>I haven’t had the occasion to do so, but in theory this approach is applicable in other languages, such as Javascript or Python (although these languages don’t have the concept of interfaces). Since discovering the swtch statement antipattern and how to replace it with polymorphism, I’ve been able to remove a lot of overly complex code.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/designpatterns/">designpatterns</a></li><li><a href="/blog/categories/refactoring/">refactoring</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/09/25/career-direction-after-seven-years/amp/">Career Direction After Seven Years</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
