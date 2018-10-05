@@ -74,7 +74,7 @@ Refactoring code out of the fat controllers
 
 Fat controllers are an antipattern I've seen, and indeed been responsible for myself, in the past, and this project has them in spades - running PHP Mess Detector on them is pretty sobering. The overwhelming majority of the code base is concentrated in the controllers, and it's going to take a long time to refactor it into other classes.
 
-Zend 1 does have the concept of controller helpers, and that's been useful for removing some duplicate code, while more shared coded has been refactored out into traits. In addition, the utilities I've added include a Laravel-style collection class, and using that I've been able to refactor a lot of quite complex array handling into much simpler chained collection handling. However, this is still going to take a lot of effort.
+Zend 1 does have the concept of controller helpers, and that's been useful for removing some duplicate code, while more shared code has been refactored out into traits. In addition, the utilities I've added include a Laravel-style collection class, and using that I've been able to refactor a lot of quite complex array handling into much simpler chained collection handling. However, this is still going to take a lot of effort.
 
 Adding events
 =============
