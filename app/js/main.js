@@ -31,7 +31,7 @@ $(document).ready(function () {
             } else {
                 // Show results
                 resultdiv.empty();
-                for (var item in result) {
+                for (var item in result.slice(0,4)) {
                     var ref = result[item].ref;
                     var searchitem = '<li><a href="' + ref + '">' + store[ref].title + '</a></li>';
                     resultdiv.append(searchitem);
