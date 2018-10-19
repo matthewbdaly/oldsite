@@ -1,5 +1,5 @@
 var $ = window.$ = window.jQuery = require('jquery');
-var bootstrapjs = require('bootstrap-sass');
+var bootstrapjs = require('bootstrap');
 var lunr = require('lunr');
 
 $(document).ready(function () {
