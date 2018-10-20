@@ -1,0 +1,271 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Simplify Your Tests With Anonymous Classes - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/",
+         "headline": "Simplify Your Tests With Anonymous Classes",
+         "datePublished": "2018-10-20T13:48:05.000Z",
+         "dateModified": "2018-10-20T13:48:05.000Z",
+         "description": "&lt;p&gt;Anonymous classes were added in PHP7, but so far I haven’t made all that much use of them. Howeve...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th October 2018 2:48 pm</p><h1>Simplify Your Tests With Anonymous Classes</h1><p>Anonymous classes were added in PHP7, but so far I haven’t made all that much use of them. However, recently I’ve been working on building a simple dependency injection container for learning purposes. This uses the PHP Reflection API to determine how to resolve dependencies. For instance, if it’s asked for a class for which one of the dependencies required by the constructor is an instance of the <code>DateTime</code> class, it should create an instance, and then pass it into the constructor automatically when instantiating the class. Then it should return the newly created class.</p><p>Mocking isn’t really a suitable approach for this use case because the container needs to return a concrete class instance to do its job properly. You could just create a series of fixture classes purely for testing purposes, but that would mean either defining more than one class in a file (violating PSR-2), or defining a load of fixture classes in separate files, meaning you’d have to write a lot of boilerplate, and you’d have to move between several different files to understand what’s going on in the test.</p><p>Anonymous classes allow you a means to write simple classes for tests inline, as in this example for retrieving a very basic class. The tests use PHPSpec:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">spec</span>\<span class="hljs-title">Vendor</span>\<span class="hljs-title">Package</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Vendor</span>\<span class="hljs-title">Package</span>\<span class="hljs-title">MyClass</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PhpSpec</span>\<span class="hljs-title">ObjectBehavior</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Prophecy</span>\<span class="hljs-title">Argument</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">DateTime</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
+</span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_registered_dependencies</span><span class="hljs-params">()</span>
+    </span>{
+        $toResolve = <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span> </span>{
+        };
+        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
+        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf($toResolve);
+    }
+}
+</code></pre><p>You can also define your own methods inline. Here we implement the <code>invoke()</code> magic method so that the class is a callable:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
+</span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_registered_invokable</span><span class="hljs-params">()</span>
+    </span>{
+        $toResolve = <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span> </span>{
+            <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DateTime;
+            }
+        };
+        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
+        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf(<span class="hljs-string">'DateTime'</span>);
+    }
+}
+</code></pre><p>You can also define a constructor. Here, we’re getting the class name of a newly created anonymous class that accepts an instance of <code>DateTime</code> as an argument to the constructor. Then, we can resolve a new instance out of the container:</p><pre><code class="hljs lang-php">&lt;?php
+
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_dependencies()
+    {
+        $toResolve = get_class(new class(new DateTime) {
+            public $datetime;
+            public function __construct(DateTime $datetime)
+            {
+                $this-&gt;datetime = $datetime;
+            }
+        });
+        $this-&gt;set('Foo\Bar', $toResolve);
+        $this-&gt;get('Foo\Bar')-&gt;shouldReturnAnInstanceOf($toResolve);
+    }
+}
+</code></pre><p>For classes that will extend an existing class or implement an interface, you can define those inline too. Or you can include a trait:</p><pre><code class="hljs lang-php">&lt;?php
+
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_dependencies()
+    {
+        $toResolve = get_class(new class(new DateTime) extends Foo implements Bar {
+            public $datetime;
+            public function __construct(DateTime $datetime)
+            {
+                $this-&gt;datetime = $datetime;
+            }
+
+            use MyTrait;
+        });
+        $this-&gt;set('Foo\Bar', $toResolve);
+        $this-&gt;get('Foo\Bar')-&gt;shouldReturnAnInstanceOf($toResolve);
+    }
+}
+</code></pre><p>In cases where the functionality is contained in a trait or abstract class, and you might need to add little or no additional functionality, this is a lot less verbose than creating a class the conventional way.</p><p>None of this is stuff you can’t do without anonymous classes, but by defining these sort of disposable fixture classes inline in your tests, you’re writing the minimum amount of code necessary to implement your test, and it’s logical to define it inline since it’s only ever used in the tests. One thing to bear in mind is that anonymous classes are created and instantiated at the same time, so you can’t easily create a class and then instantiate an instance of it separately. However, you can instantiate one, then use the <code>get_class()</code> function to get its class name and use that to resolve it, which worked well for my use case.</p><p>Another use case for anonymous classes is testing traits or abstract classes. I generally use Mockery as my mocking solution with PHPUnit tests, but I’ve sometimes missed the <code>getMockForTrait()</code> method from PHPUnit. However, another option is to instantiate an anonymous class that includes that trait for testing purposes:</p><pre><code class="hljs lang-php">&lt;?php
+
+$item = new class() {
+    use MyTrait;
+};
+</code></pre><p>This way, your test class is as minimal as possible, and you can test the trait/abstract class in a fairly isolated fashion.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/10/16/adding-react-to-a-legacy-project/amp/">Adding React to a Legacy Project</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
