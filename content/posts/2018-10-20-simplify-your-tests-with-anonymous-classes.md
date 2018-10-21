@@ -12,7 +12,7 @@ Mocking isn't really a suitable approach for this use case because the container
 
 Anonymous classes allow you a means to write simple classes for tests inline, as in this example for retrieving a very basic class. The tests use PHPSpec:
 
-```php
+```php7
 <?php
 
 namespace spec\Vendor\Package;
@@ -36,7 +36,7 @@ class MyClassSpec extends ObjectBehavior
     
 You can also define your own methods inline. Here we implement the `invoke()` magic method so that the class is a callable:
 
-```php
+```php7
 <?php
 
 class MyClassSpec extends ObjectBehavior
@@ -56,7 +56,7 @@ class MyClassSpec extends ObjectBehavior
     
 You can also define a constructor. Here, we're getting the class name of a newly created anonymous class that accepts an instance of `DateTime` as an argument to the constructor. Then, we can resolve a new instance out of the container:
 
-```php
+```php7
 <?php
 
 class MyClassSpec extends ObjectBehavior
@@ -78,7 +78,7 @@ class MyClassSpec extends ObjectBehavior
 
 For classes that will extend an existing class or implement an interface, you can define those inline too. Or you can include a trait:
 
-```php
+```php7
 <?php
 
 class MyClassSpec extends ObjectBehavior
@@ -106,7 +106,7 @@ None of this is stuff you can't do without anonymous classes, but by defining th
 
 Another use case for anonymous classes is testing traits or abstract classes. I generally use Mockery as my mocking solution with PHPUnit tests, but I've sometimes missed the `getMockForTrait()` method from PHPUnit. However, another option is to instantiate an anonymous class that includes that trait for testing purposes:
 
-```php
+```php7
 <?php
 
 $item = new class() {
