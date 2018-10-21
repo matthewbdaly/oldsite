@@ -183,46 +183,46 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th September 2017 10:05 pm</p><h1>Installing Nginx Unit on Ubuntu</h1><p>Recently Nginx announced the release of the first beta of <a href="https://www.nginx.com/products/nginx-unit/">Unit</a>, an application server that supports Python, PHP and Go, with support coming for Java, Node.js and Ruby.</p><p>The really interesting part is that not only does it support more than one language, but Unit can be configured by making HTTP requests, rather than by editing config files. This makes it potentially very interesting to web developers like myself who have worked in multiple languages - I could use it to serve a Python or PHP web app, simply by making different requests during the setup process. I can see this being a boon for SaaS providers - you could pick up the language from a file, much like the <code>runtime.txt</code> used by Heroku, and set up the application on the fly.</p><p>It’s currently in public beta, and there are packages for Ubuntu, so I decided to try it out. I’ve created the Ansible role below to set up Unit on an Ubuntu 16.04 server or VM:</p><pre><code class="hljs lang-yml">-<span class="ruby">--
-</span>-<span class="ruby"> <span class="hljs-symbol">name:</span> Install keys
-</span>  apt_key: url=http://nginx.org/keys/nginx_signing.key state=present
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th September 2017 10:05 pm</p><h1>Installing Nginx Unit on Ubuntu</h1><p>Recently Nginx announced the release of the first beta of <a href="https://www.nginx.com/products/nginx-unit/">Unit</a>, an application server that supports Python, PHP and Go, with support coming for Java, Node.js and Ruby.</p><p>The really interesting part is that not only does it support more than one language, but Unit can be configured by making HTTP requests, rather than by editing config files. This makes it potentially very interesting to web developers like myself who have worked in multiple languages - I could use it to serve a Python or PHP web app, simply by making different requests during the setup process. I can see this being a boon for SaaS providers - you could pick up the language from a file, much like the <code>runtime.txt</code> used by Heroku, and set up the application on the fly.</p><p>It’s currently in public beta, and there are packages for Ubuntu, so I decided to try it out. I’ve created the Ansible role below to set up Unit on an Ubuntu 16.04 server or VM:</p><pre><code class="hljs lang-yml">---
+- name: Install keys
+  apt_key: <span class="hljs-attribute">url</span>=http://nginx.org/keys/nginx_signing.key <span class="hljs-attribute">state</span>=present
 
--<span class="ruby"> <span class="hljs-symbol">name:</span> Setup main repo
-</span>  apt_repository: repo='deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx' state=present
+- name: Setup main repo
+  apt_repository: <span class="hljs-attribute">repo</span>=<span class="hljs-string">'deb http://nginx.org/packages/mainline/ubuntu/ xenial nginx'</span> <span class="hljs-attribute">state</span>=present
 
--<span class="ruby"> <span class="hljs-symbol">name:</span> Setup source rep
-</span>  apt_repository: repo='deb-src http://nginx.org/packages/mainline/ubuntu/ xenial nginx' state=present
+- name: Setup source rep
+  apt_repository: <span class="hljs-attribute">repo</span>=<span class="hljs-string">'deb-src http://nginx.org/packages/mainline/ubuntu/ xenial nginx'</span> <span class="hljs-attribute">state</span>=present
 
--<span class="ruby"> <span class="hljs-symbol">name:</span> Update system
-</span>  apt: upgrade=full update_cache=yes
+- name: Update<span class="hljs-built_in"> system
+</span>  apt: <span class="hljs-attribute">upgrade</span>=full <span class="hljs-attribute">update_cache</span>=<span class="hljs-literal">yes</span>
 
--<span class="ruby"> <span class="hljs-symbol">name:</span> Install dependencies
-</span>  apt: name={{ item }} state=present
+- name: Install dependencies
+  apt: name={{ item }} <span class="hljs-attribute">state</span>=present
   with_items:
-    -<span class="ruby"> nginx
-</span>    -<span class="ruby"> unit
-</span>    -<span class="ruby"> golang
-</span>    -<span class="ruby"> php-dev
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-dev
-</span>    -<span class="ruby"> libphp-embed
-</span>    -<span class="ruby"> libphp7.<span class="hljs-number">0</span>-embed
-</span>    -<span class="ruby"> python-dev
-</span>    -<span class="ruby"> python3
-</span>    -<span class="ruby"> python3-dev
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-cli
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-mcrypt
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-pgsql
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-sqlite3
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-opcache
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-curl
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-mbstring
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-dom
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-xml
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-zip
-</span>    -<span class="ruby"> php7.<span class="hljs-number">0</span>-bcmath
-</span>
--<span class="ruby"> <span class="hljs-symbol">name:</span> Copy over Nginx configuration
-</span>  copy: src=nginx.conf dest=/etc/nginx/sites-available/default owner=root group=root mode=0644
+    - nginx
+    - unit
+    - golang
+    - php-dev
+    - php7.0-dev
+    - libphp-embed
+    - libphp7.0-embed
+    - python-dev
+    - python3
+    - python3-dev
+    - php7.0-cli
+    - php7.0-mcrypt
+    - php7.0-pgsql
+    - php7.0-sqlite3
+    - php7.0-opcache
+    - php7.0-curl
+    - php7.0-mbstring
+    - php7.0-dom
+    - php7.0-xml
+    - php7.0-zip
+    - php7.0-bcmath
+
+- name: Copy over Nginx configuration
+  copy: <span class="hljs-attribute">src</span>=nginx.conf <span class="hljs-attribute">dest</span>=/etc/nginx/sites-available/default <span class="hljs-attribute">owner</span>=root <span class="hljs-attribute">group</span>=root <span class="hljs-attribute">mode</span>=0644
 </code></pre><p>Note the section that copies over the Nginx config file. Here is that file:</p><pre><code class="hljs lang-nginx"><span class="hljs-attribute">upstream</span> unit_backend {
     <span class="hljs-attribute">server</span> <span class="hljs-number">127.0.0.1:8300</span>;
 }
