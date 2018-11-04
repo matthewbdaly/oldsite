@@ -14,7 +14,7 @@ However, more and more I think it's probably unnecessary for two main use cases:
 jQuery is probably unnecessary for many web apps with simple Javascript
 -----------------------------------------------------------------------
 
-When jQuery first appeared, IE6 was commonplace, and browser API's were notoriously inconsistent. jQuery was very useful in ironing out those inconsistencies and helping to make
+When jQuery first appeared, IE6 was commonplace, and browser API's were notoriously inconsistent. jQuery was very useful in ironing out those inconsistencies and helping to make the developer's experience a bit better.
 
 Nowadays, that's no longer the case. Internet Explorer is on its way out, with IE11 being the only version still supported by Microsoft, and it's becoming increasingly hard to justify support for older versions, especially with mobile browsers forming a bigger than ever chunk of the market. We'll probably need to continue supporting IE11 for a good long while, and possibly IE10 for some time too, but these aren't anything like as bad to work with as IE6. It's worth noting that newer versions of jQuery are also dropping support for these older browsers, so in many ways it actually does less than it used to.
 
