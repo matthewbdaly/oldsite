@@ -32,7 +32,7 @@ While there is more than one implementation of this available, and it wouldn't b
 * Save the data
 * Push it to a third party service.
 
-We therefor need to write a stage for each step in the process. Each one must be a callable, such as a closure, a callback, or a class that implements the `__invoke()` magic method. I usually go for the latter as it allows you to more easily inject dependencies into the stage via its constructor, making it easier to use and test. Here's what our first stage might look like:
+We therefore need to write a stage for each step in the process. Each one must be a callable, such as a closure, a callback, or a class that implements the `__invoke()` magic method. I usually go for the latter as it allows you to more easily inject dependencies into the stage via its constructor, making it easier to use and test. Here's what our first stage might look like:
 
 ```php
 <?php
