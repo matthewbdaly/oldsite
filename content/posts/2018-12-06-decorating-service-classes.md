@@ -1,6 +1,6 @@
 ---
 title: "Decorating service classes"
-date: 2018-12-06 16:07:16 +0000
+date: 2018-12-06 18:34:16 +0000
 categories:
 - php
 comments: true
