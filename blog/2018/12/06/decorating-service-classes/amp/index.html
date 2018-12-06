@@ -1,0 +1,356 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Decorating Service Classes - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2018/12/06/decorating-service-classes/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2018/12/06/decorating-service-classes/",
+         "headline": "Decorating Service Classes",
+         "datePublished": "2018-12-06T16:07:16.000Z",
+         "dateModified": "2018-12-06T16:07:16.000Z",
+         "description": "&lt;p&gt;I’ve written before about using decorators to extend the functionality of existing classes, in th...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">6th December 2018 4:07 pm</p><h1>Decorating Service Classes</h1><p>I’ve written before about using decorators to extend the functionality of existing classes, in the context of the repository pattern when working with Eloquent. However, the same practice is applicable in many other contexts.</p><p>Recently, I was asked to add RSS feeds to the home page of the legacy project that is my main focus these days. The resulting service class looked something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Rss</span>\<span class="hljs-title">Feed</span>\<span class="hljs-title">Reader</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RssFetcher</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> Reader::import($url);
+    }
+}
+</code></pre><p>In accordance with the principle of loose coupling, I also created an interface for it:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">FeedFetcher</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span></span>;
+}
+</code></pre><p>I was recently able to add dependency injection to the project using PHP-DI, so now I can inject an instance of the feed fetcher into the controller by typehinting the interface and having it resolve to the <code>RssFetcher</code> class.</p><p>However, there was an issue. I didn’t want the application to make multiple HTTP requests to fetch those feeds every time the page loads. At the same time, it was also a bit much to have a scheduled task running to fetch those feeds and store them in the database, since many times that would be unnecessary. The obvious solution was to cache the feed content for a specified length of time, in this case five minutes.</p><p>I <em>could</em> have integrated the caching into the service class itself, but that wasn’t the best practice, because it would be tied to that implementation. If in future we needed to switch to a different feed handler, we’d have to re-implement the caching functionality. So I decided it made sense to decorate the service class.</p><p>The decorator class implemented the same interface as the feed fetcher, and accepted another instance of that interface in the constructor, along with a PSR6-compliant caching library. It looked something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FetcherCachingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $fetcher;
+
+    <span class="hljs-keyword">protected</span> $cache;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(FeedFetcher $fetcher, CacheItemPoolInterface $cache)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;fetcher = $fetcher;
+        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
+    </span>{
+        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'feed_'</span>.$url);
+        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
+            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;fetcher-&gt;fetch($url));
+            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+        }
+        <span class="hljs-keyword">return</span> $item-&gt;get();
+    }
+}
+</code></pre><p>Now, when you instantiate the feed fetcher, you wrap it in the decorator as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+$fetcher = <span class="hljs-keyword">new</span> FetcherCachingDecorator(
+        <span class="hljs-keyword">new</span> App\Services\RssFetcher,
+        $cache
+);
+</code></pre><p>As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don’t have to touch the caching layer at all. As long as we’re using dependency injection to resolve this interface, we’re only looking at a little more code to instantiate it.</p><p>In addition, this same approach can be applied for other purposes, and you can wrap the fetcher as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedLoggingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $fetcher;
+
+    <span class="hljs-keyword">protected</span> logger;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(FeedFetcher $fetcher, LoggerInterface $logger)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;fetcher = $fetcher;
+        <span class="hljs-keyword">$this</span>-&gt;logger = $logger;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
+    </span>{
+        $response = <span class="hljs-keyword">$this</span>-&gt;fetcher-&gt;fetch($url);
+        <span class="hljs-keyword">$this</span>-&gt;logger-&gt;info($response);
+        <span class="hljs-keyword">return</span> $response;
+    }
+}
+</code></pre><p>The same idea can be applied to an API client. For instance, say we have the following interface for an API client:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Contracts</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Objects</span>\<span class="hljs-title">Item</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Objects</span>\<span class="hljs-title">ItemCollection</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Client</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getAll</span><span class="hljs-params">()</span>: <span class="hljs-title">ItemCollection</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">find</span><span class="hljs-params">(int $id)</span>: <span class="hljs-title">Item</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span>: <span class="hljs-title">Item</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(int $id, array $data)</span>: <span class="hljs-title">Item</span></span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">delete</span><span class="hljs-params">(int $id)</span></span>;
+}
+</code></pre><p>Now, of course any good API client should respect HTTP headers and use those to do some caching itself, but depending on the use case, you may also want to cache these requests yourself. For instance, if the only changes to the entities stored by the third party API will be ones you’ve made, or they don’t need to be 100% up to date, you may be better off caching those responses before they reach the actual API client. Under those circumstances, you might write a decorator like this to do the caching:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Services</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Client</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CachingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Client</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $client;
+
+    <span class="hljs-keyword">protected</span> $cache;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Client $client, CacheItemPoolInterface $cache)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;client = $client;
+        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getAll</span><span class="hljs-params">()</span>: <span class="hljs-title">ItemCollection</span>
+    </span>{
+        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'item_all'</span>);
+        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
+            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;client-&gt;getAll());
+            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+        }
+        <span class="hljs-keyword">return</span> $item-&gt;get();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">find</span><span class="hljs-params">(int $id)</span>: <span class="hljs-title">Item</span>
+    </span>{
+        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'item_'</span>.$id);
+        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
+            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;client-&gt;find($id));
+            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+        }
+        <span class="hljs-keyword">return</span> $item-&gt;get();
+
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span>: <span class="hljs-title">Item</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;create($data);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(int $id, array $data)</span>: <span class="hljs-title">Item</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;update($id, $data);
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">delete</span><span class="hljs-params">(int $id)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;delete($id);
+    }
+}
+</code></pre><p>Any methods that change the state of the data on the remote API will clear the cache, while any that fetch data will first check the cache, only explicitly fetching data from the API when the cache is empty, and caching it again. I won’t go into how you might write a logging decorator for this, but it should be straightforward to figure out for yourself.</p><p>The decorator pattern is a very powerful way of adding functionality to a class without tying it to a specific implementation. If you’re familiar with how middleware works, decorators work in a very similar fashion in that you can wrap your service in as many layers as you wish in order to accomplish specific tasks, and they adhere to the single responsibility principle by allowing you to use different decorators for different tasks.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/12/06/decorating-service-classes/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/amp/">Simplify Your Tests With Anonymous Classes</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
