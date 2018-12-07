@@ -240,7 +240,7 @@ $fetcher = <span class="hljs-keyword">new</span> FetcherCachingDecorator(
         <span class="hljs-keyword">new</span> App\Services\RssFetcher,
         $cache
 );
-</code></pre><p>As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don’t have to touch the caching layer at all. As long as we’re using dependency injection to resolve this interface, we’re only looking at a little more code to instantiate it.</p><p>In addition, this same approach can be applied for other purposes, and you can wrap the fetcher as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don’t have to touch the caching layer at all. As long as we’re using dependency injection to resolve this interface, we’re only looking at a little more code to instantiate it.</p><p>In addition, this same approach can be applied for other purposes, and you can wrap the service class as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
 
@@ -251,7 +251,7 @@ $fetcher = <span class="hljs-keyword">new</span> FetcherCachingDecorator(
 </span>{
     <span class="hljs-keyword">protected</span> $fetcher;
 
-    <span class="hljs-keyword">protected</span> logger;
+    <span class="hljs-keyword">protected</span> $logger;
 
     <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(FeedFetcher $fetcher, LoggerInterface $logger)</span>
     </span>{
