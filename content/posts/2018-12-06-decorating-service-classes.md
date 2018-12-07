@@ -93,7 +93,7 @@ $fetcher = new FetcherCachingDecorator(
 
 As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don't have to touch the caching layer at all. As long as we're using dependency injection to resolve this interface, we're only looking at a little more code to instantiate it.
 
-In addition, this same approach can be applied for other purposes, and you can wrap the fetcher as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:
+In addition, this same approach can be applied for other purposes, and you can wrap the service class as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:
 
 ```php
 <?php
@@ -107,7 +107,7 @@ class FeedLoggingDecorator implements FeedFetcher
 {
     protected $fetcher;
 
-    protected logger;
+    protected $logger;
 
     public function __construct(FeedFetcher $fetcher, LoggerInterface $logger)
     {
