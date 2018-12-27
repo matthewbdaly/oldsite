@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>editor | Matthew Daly&apos;s Blog</title>
+        <link>https://matthewdaly.co.uk/blog/categories/editor/</link>
+        <description>editor | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <lastBuildDate>Thu, 27 Dec 2018 18:44:42 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
+        <copyright>Matthew Daly 2018</copyright>
+        <item>
+            <title><![CDATA[Improving search in Vim and Neovim with FZF and Ripgrep]]></title>
+            <link>https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/</link>
+            <guid>https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/</guid>
+            <pubDate>Thu, 27 Dec 2018 18:37:09 GMT</pubDate>
+            <description><![CDATA[<p>A while back I was asked to make some changes to a legacy project that was still using Subversion. This was troublesome because my usual method of searching in files is to use Tim Pope’s Fugitive Vim plugin as a frontend for <code>git grep</code>, and so it would be harder than usual to navigate the project. I therefore started looking around for alternative search systems, and one combination that kept on coming up was FZF and Ripgrep, so I decided to give them a try. FZF is a fuzzy file finder, written in Go, while Ripgrep is an extremely fast grep, written in Rust, that respects gitignore rules by default. Both have proven so useful they’re now a permanent part of my setup.</p>
+<p>On Mac OS X, both are available via Homebrew, so they’re easy to install. On Ubuntu, Ripgrep is in the repositories, but FZF isn’t, so it was necessary to install it in my home directory. There’s a <a href="https://github.com/junegunn/fzf.vim">Vim plugin for FZF and Ripgrep integration</a>, which, since I use vim-plugged, I could install by adding the following to my <code>init.vim</code>, then running <code>PlugUpdate</code> from Neovim:</p>
+<pre><code class="lang-viml">&quot; Search
+Plug &#39;~/.fzf&#39;
+Plug &#39;junegunn/fzf.vim&#39;
+</code></pre>
+<p>The plugin exposes a number of commands that are very useful, and I’ll go through the ones I use most often:</p>
+<ul>
+<li><code>:Files</code> is for finding files by name. I used to use Ctrl-P for this, but FZF is so much better and quicker that I ditched Ctrl-P almost immediately (though you can map <code>:Files</code> to it if you want to use the same key).</li>
+<li><code>:Rg</code> uses Ripgrep to search for content in files, so you can search for a specific string. This makes it an excellent replacement for the <code>Ggrep</code> command from Fugitive.</li>
+<li><code>:Snippets</code> works with Ultisnips to provide a filterable list of available snippets you can insert, making it much more useful</li>
+<li><code>:Tags</code> allows you to filter and search tags in the project as a whole</li>
+<li><code>:BTags</code> does the same, but solely in the current buffer</li>
+<li><code>:Lines</code> allows you to find lines in the project and navigate to them.</li>
+<li><code>:BLines</code> does the same, but solely in the current buffer.</li>
+</ul>
+<p>In addition to being useful in Neovim, FZF can also be helpful in Bash. You can use <code>Ctrl-T</code> to find file paths, and it enhances the standard <code>Ctrl-R</code> history search, making it faster and more easily navigable. The performance of both is also excellent - they work very fast, even on the very large legacy project I maintain, or on slower machines, and I never find myself waiting for them to finish. Both tools have quickly become an indispensible part of my workflow.</p>
+]]></description>
+        </item>
+    </channel>
+</rss>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>Matthew Daly&apos;s Blog</title>
-    <updated>2018-12-27T16:01:37Z</updated>
+    <updated>2018-12-27T18:44:41Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,31 @@
     <link rel="alternate" href="https://matthewdaly.co.uk"/>
     <subtitle>I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2018</rights>
+    <entry>
+        <title type="html"><![CDATA[Improving search in Vim and Neovim with FZF and Ripgrep]]></title>
+        <id>https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/</id>
+        <link href="https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/">
+        </link>
+        <updated>2018-12-27T18:37:09Z</updated>
+        <summary type="html"><![CDATA[<p>A while back I was asked to make some changes to a legacy project that was still using Subversion. This was troublesome because my usual method of searching in files is to use Tim Pope’s Fugitive Vim plugin as a frontend for <code>git grep</code>, and so it would be harder than usual to navigate the project. I therefore started looking around for alternative search systems, and one combination that kept on coming up was FZF and Ripgrep, so I decided to give them a try. FZF is a fuzzy file finder, written in Go, while Ripgrep is an extremely fast grep, written in Rust, that respects gitignore rules by default. Both have proven so useful they’re now a permanent part of my setup.</p>
+<p>On Mac OS X, both are available via Homebrew, so they’re easy to install. On Ubuntu, Ripgrep is in the repositories, but FZF isn’t, so it was necessary to install it in my home directory. There’s a <a href="https://github.com/junegunn/fzf.vim">Vim plugin for FZF and Ripgrep integration</a>, which, since I use vim-plugged, I could install by adding the following to my <code>init.vim</code>, then running <code>PlugUpdate</code> from Neovim:</p>
+<pre><code class="lang-viml">&quot; Search
+Plug &#39;~/.fzf&#39;
+Plug &#39;junegunn/fzf.vim&#39;
+</code></pre>
+<p>The plugin exposes a number of commands that are very useful, and I’ll go through the ones I use most often:</p>
+<ul>
+<li><code>:Files</code> is for finding files by name. I used to use Ctrl-P for this, but FZF is so much better and quicker that I ditched Ctrl-P almost immediately (though you can map <code>:Files</code> to it if you want to use the same key).</li>
+<li><code>:Rg</code> uses Ripgrep to search for content in files, so you can search for a specific string. This makes it an excellent replacement for the <code>Ggrep</code> command from Fugitive.</li>
+<li><code>:Snippets</code> works with Ultisnips to provide a filterable list of available snippets you can insert, making it much more useful</li>
+<li><code>:Tags</code> allows you to filter and search tags in the project as a whole</li>
+<li><code>:BTags</code> does the same, but solely in the current buffer</li>
+<li><code>:Lines</code> allows you to find lines in the project and navigate to them.</li>
+<li><code>:BLines</code> does the same, but solely in the current buffer.</li>
+</ul>
+<p>In addition to being useful in Neovim, FZF can also be helpful in Bash. You can use <code>Ctrl-T</code> to find file paths, and it enhances the standard <code>Ctrl-R</code> history search, making it faster and more easily navigable. The performance of both is also excellent - they work very fast, even on the very large legacy project I maintain, or on slower machines, and I never find myself waiting for them to finish. Both tools have quickly become an indispensible part of my workflow.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Decorating service classes]]></title>
         <id>https://matthewdaly.co.uk/blog/2018/12/06/decorating-service-classes/</id>
@@ -2233,54 +2258,6 @@ if (!function_exists(&#39;is_desktop&#39;)) {
 <p>I’m not a fan of the idea the Wordpress developers seem to have of trying to make it some kind of all-singing, all-dancing universal platform for the web, and the REST API seems to be part of that idea, but it does make it a lot easier than it was in the past to do something a bit out of the ordinary with Wordpress. In some cases it might be worth using Wordpress as the backend for a <a href="https://en.wikipedia.org/wiki/Headless_CMS">headless CMS</a>, and the REST API makes that a practical approach. For simpler applications that just need to make a few AJAX calls, using the REST API is generally going to be more elegant and practical than any other approach to AJAX with Wordpress. It’s never going to perform as well or be as elegant as a custom-built REST API, but it’s definitely a step forward compared to the hoops you used to have to jump through to handle AJAX requests in Wordpress.</p>
 <h2 id="summary">Summary</h2>
 <p>Wordpress is, and will remain for the foreseeable future, a pain in the backside to develop for compared to something like Laravel, and I remain completely mystified by the number of people who seem to think it’s the greatest thing since sliced bread. However, it is possible to make things better if you know how - it’s just that some of this stuff seems to be relatively obscure. In particular, discovering Bedrock is potentially game-changing because it makes it so much easier to keep the site under version control.</p>
-]]></summary>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Using stored procedures in your web app]]></title>
-        <id>https://matthewdaly.co.uk/blog/2018/03/10/using-stored-procedures-in-your-web-app/</id>
-        <link href="https://matthewdaly.co.uk/blog/2018/03/10/using-stored-procedures-in-your-web-app/">
-        </link>
-        <updated>2018-03-10T15:10:16Z</updated>
-        <summary type="html"><![CDATA[<p>In the last few days I’ve done something I’ve never done before, namely written a stored procedure for a web app. Like most web developers, I know enough about SQL to be able to formulate some fairly complex queries, but I hadn’t really touched on control flow functions or stored procedures, and in my experience they tend to be the province of the dedicated database administrator, not us web devs, who will typically delegate more complex functionality to our application code.</p>
-<p>In this case, there were a number of factors influencing my decision to use a stored procedure for this:</p>
-<ul>
-<li>The application was a legacy application which had been worked on by developers of, shall we say, varying skill levels. As a result the database schema was badly designed, with no prospect of changing it without causing huge numbers of breakages</li>
-<li>The query in question was used to generate a complex report that was quite time-consuming, therefore the optimisations from using a stored procedure were worthwhile.</li>
-<li>The report required that data be grouped by a set of categories which were stored in a separate table, which meant the table had to be pivoted (transformed from rows to columns), resulting in an incredibly complex dynamic query that had to be constructed on the fly by concatenating different SQL strings. In PostgreSQL, this can be done fairly easily using the <code>crosstab</code> function, but MySQL doesn’t have native support for anything like this.</li>
-</ul>
-<p>Historically, one issue with using stored procedures has been that it kept business logic out of the application code, meaning they are not stored in version control. However, most modern frameworks provide some support for migrations, and since they are intended to be used to make changes to the database, they are the obvious place to define the stored procedure. This particular application was built with an older framework that didn’t come with migrations, so we’d installed <a href="https://phinx.org/">Phinx</a> to handle those for us. Initially, I defined the stored procedure inside a migration that ran a raw query to create the stored procedure, as in this example:</p>
-<pre><code class="lang-php">public function up()
-{
-   $query = &lt;&lt;&lt;EOF
-CREATE PROCEDURE IF NOT EXISTS foo
-BEGIN
-   SELECT * FROM foo;
-END
-EOF;
-   $this-&gt;execute($query);
-}
-
-public function down()
-{
-   $this-&gt;execute(&#39;DROP PROCEDURE IF EXISTS foo&#39;);
-}
-</code></pre>
-<p>Once this is done, you can then use your framework’s particular support for raw queries to call <code>CALL foo()</code> whenever your stored procedure needs to be executed.</p>
-<p>However, we soon ran into an issue. It turns out <code>mysqldump</code> doesn’t export stored procedures by default, so there was a risk that anyone working on the code base might import the database from an SQL file and not get the migrations. I’d used the Symfony Console component to create a simple command-line tool, reminiscent of Laravel’s Artisan, so I used that to create a command to set up the stored procedure, amended the migration to call that command, and placed a check in the application where the procedure was called so that if it was not defined the command would be called and the procedure would be created. In most cases this wouldn’t be an issue.</p>
-<p>Having now had experience using stored procedures in a web application, there are a number of issues they raise:</p>
-<ul>
-<li>It’s hard to make queries flexible, whereas with something like Eloquent it’s straightforward to conditionally apply <code>WHERE</code> statements.</li>
-<li>While storing them in migrations is a practical solution, if the database is likely to be imported rather than created from scratch during development it can be problematic.</li>
-<li>They aren’t easily portable, not just between database management systems, but between different versions - the production server was using an older version of MySQL, and it failed to create the procedure. It’s therefore good practice for your migrations to check the procedure was created successfully and raise a noisy exception if they failed.</li>
-</ul>
-<p>Conversely, they do bring certain benefits:</p>
-<ul>
-<li>For particularly complex transactions that don’t change, such as generating reports, they are a good fit since they reduce the amount of data that needs to be sent to the database and allow the query to be pre-optimised somewhat.</li>
-<li>If a particular query is unusually expensive, is called often, and can’t be cached, it may improve performance to make it a stored procedure.</li>
-<li>Doing a query in a for loop is usually a very big no-no. However, if there really is no way to avoid it (and this should almost never happen), it would make sense to try to do it in a stored procedure using SQL rather than in application code since that would minimise the overhead.</li>
-<li>If multiple applications need to work with the same database, using stored procedures for queries in more than one application removes the need to reimplement or copy over the code for the query in the second application - they can just call the same procedure, and if it needs to be changed it need only be done once.</li>
-</ul>
-<p>Honestly, I’m not sure I’m ever likely to again come across a scenario where using a stored procedure in a web application would be beneficial, but it’s been very interesting delving into aspects of SQL that I don’t normally touch on and I’ve picked up on some rarely-used SQL statements that I haven’t used before, such as <code>GROUP_CONCAT()</code> and <code>CASE</code>. With the widespread adoption of migrations in most frameworks, I think that the argument that using stored procedures keeps application logic out of version control no longer holds any water, since developers can generally be trusted to store changes to database structure in their migrations and not start messing them around, so the same applies for stored procedures. Report generation seems to be the ideal use case since this invariably involves complex queries that run regularly and don’t change often, and this is where I expect it would be most likely I’d have cause to use them again.</p>
 ]]></summary>
     </entry>
 </feed>
