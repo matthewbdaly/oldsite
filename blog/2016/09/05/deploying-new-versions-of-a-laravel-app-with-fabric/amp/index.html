@@ -183,56 +183,56 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th September 2016 10:22 pm</p><h1>Deploying New Versions of a Laravel App With Fabric</h1><p><a href="https://laravel.com/docs/5.3/envoy">Envoy</a> is the official way to run tasks on a remote server for Laravel apps. A typical Envoy task for deploying a new version might look like this:</p><pre><code class="hljs lang-blade"><span class="hljs-variable">@servers</span>([<span class="hljs-string">'web'</span> =&gt; <span class="hljs-string">'matthew@server1.example.com'</span>])
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th September 2016 10:22 pm</p><h1>Deploying New Versions of a Laravel App With Fabric</h1><p><a href="https://laravel.com/docs/5.3/envoy">Envoy</a> is the official way to run tasks on a remote server for Laravel apps. A typical Envoy task for deploying a new version might look like this:</p><pre><code class="lang-blade">@servers([&#39;web&#39; =&gt; &#39;matthew@server1.example.com&#39;])
 
-<span class="hljs-variable">@task</span>(<span class="hljs-string">'deploy'</span>, [<span class="hljs-string">'on'</span> =&gt; <span class="hljs-string">'web'</span>])
+@task(&#39;deploy&#39;, [&#39;on&#39; =&gt; &#39;web&#39;])
     cd /var/www
-    sudo chown -R <span class="hljs-attribute">matthew</span>:matthew .
+    sudo chown -R matthew:matthew .
     git pull origin master
     php artisan migrate
-    php artisan <span class="hljs-attribute">view</span>:clear
+    php artisan view:clear
     composer dump-autoload
-    sudo chown -R <span class="hljs-attribute">www-data</span>:www-data .
+    sudo chown -R www-data:www-data .
     sudo supervisorctl restart mail-queue
-<span class="hljs-variable">@endtask</span>
-</code></pre><p>This would be defined in <code>Envoy.blade.php</code>. With this in place, and Envoy set up globally, you can then run <code>envoy run deploy</code> to run the <code>deploy</code> command.</p><p>However, Envoy requires the PHP SSH library, which I haven’t been able to get working with PHP 7. Fortunately I was already familiar with <a href="http://www.fabfile.org/">Fabric</a>, which makes an excellent alternative as long as you don’t mind writing the task in Python.</p><p>The same kind of task might look like this in a Fabric script, saved as <code>fabfile.py</code>:</p><pre><code class="hljs lang-python"><span class="hljs-comment">#!/usr/bin/env python</span>
-<span class="hljs-keyword">from</span> fabric.api <span class="hljs-keyword">import</span> local, env, run, sudo
-<span class="hljs-keyword">from</span> fabric.context_managers <span class="hljs-keyword">import</span> cd, prefix
+@endtask
+</code></pre><p>This would be defined in <code>Envoy.blade.php</code>. With this in place, and Envoy set up globally, you can then run <code>envoy run deploy</code> to run the <code>deploy</code> command.</p><p>However, Envoy requires the PHP SSH library, which I haven’t been able to get working with PHP 7. Fortunately I was already familiar with <a href="http://www.fabfile.org/">Fabric</a>, which makes an excellent alternative as long as you don’t mind writing the task in Python.</p><p>The same kind of task might look like this in a Fabric script, saved as <code>fabfile.py</code>:</p><pre><code class="lang-python">#!/usr/bin/env python
+from fabric.api import local, env, run, sudo
+from fabric.context_managers import cd, prefix
 
-env.hosts = [<span class="hljs-string">'server1.example.com'</span>]
-env.path = <span class="hljs-string">"/var/www"</span>
-env.user = <span class="hljs-string">"matthew"</span>
-env.password = <span class="hljs-string">"password"</span>
-<span class="hljs-comment"># Or...</span>
-env.key_filename = <span class="hljs-string">'/path/to/ssh/key'</span>
+env.hosts = [&#39;server1.example.com&#39;]
+env.path = &quot;/var/www&quot;
+env.user = &quot;matthew&quot;
+env.password = &quot;password&quot;
+# Or...
+env.key_filename = &#39;/path/to/ssh/key&#39;
 
-<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deploy</span><span class="hljs-params">()</span>:</span>
-    <span class="hljs-string">"""
+def deploy():
+    &quot;&quot;&quot;
     Deploy the latest version
-    """</span>
-    <span class="hljs-comment"># Push changes to Bitbucket</span>
-    local(<span class="hljs-string">"git push origin master"</span>)
+    &quot;&quot;&quot;
+    # Push changes to Bitbucket
+    local(&quot;git push origin master&quot;)
 
-    <span class="hljs-comment"># Switch to project directory</span>
-    <span class="hljs-keyword">with</span> cd(env.path):
-        <span class="hljs-comment"># Change owner</span>
-        sudo(<span class="hljs-string">'chown -R matthew:matthew .'</span>)
+    # Switch to project directory
+    with cd(env.path):
+        # Change owner
+        sudo(&#39;chown -R matthew:matthew .&#39;)
 
-        <span class="hljs-comment"># Pull changes to server</span>
-        run(<span class="hljs-string">'git pull origin master'</span>)
+        # Pull changes to server
+        run(&#39;git pull origin master&#39;)
 
-        <span class="hljs-comment"># Run migrations</span>
-        run(<span class="hljs-string">'php artisan migrate'</span>)
+        # Run migrations
+        run(&#39;php artisan migrate&#39;)
 
-        <span class="hljs-comment"># Clear cached files</span>
-        run(<span class="hljs-string">'php artisan view:clear'</span>)
-        run(<span class="hljs-string">'composer dump-autoload'</span>)
+        # Clear cached files
+        run(&#39;php artisan view:clear&#39;)
+        run(&#39;composer dump-autoload&#39;)
 
-        <span class="hljs-comment"># Change owner back</span>
-        sudo(<span class="hljs-string">'chown -R www-data:www-data .'</span>)
+        # Change owner back
+        sudo(&#39;chown -R www-data:www-data .&#39;)
 
-        <span class="hljs-comment"># restart mail queue</span>
-        sudo(<span class="hljs-string">'supervisorctl restart mail-queue'</span>)
+        # restart mail queue
+        sudo(&#39;supervisorctl restart mail-queue&#39;)
 </code></pre><p>Then, assuming Fabric is already installed locally, you can run <code>fab deploy</code> to push up the latest revision.</p><p>Either of these solutions will do a fine job of deploying your app. If you do need to store user-specific data in your Fabric script, it’s probably prudent to keep it out of version control.</p><p>Whichever way you choose, it’s a really good idea to do what you can to automate deployment. It can be a boring, repetitive job, and both of these solutions make it much easier.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/fabric/">fabric</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/deployment/">deployment</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/09/11/building-a-phonegap-app-with-laravel-and-angular-part-1/amp/">Building a Phonegap App With Laravel and Angular - Part 1</a> <a class="postlink" href="/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/amp/">Maintaining Your CV With Markdown and Emacs</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

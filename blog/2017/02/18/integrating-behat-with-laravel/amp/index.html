@@ -183,161 +183,161 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th February 2017 9:25 pm</p><h1>Integrating Behat With Laravel</h1><p>The Gherkin format used by tools like Cucumber is a really great way of specifying how your application will work. It’s easy for even non-technical stakeholders to understand, it makes it natural to break your tests into easily reusable steps, and it encourages you to think about the application from an end-user’s perspective. It’s also one of the easiest ways to get started writing automated tests when you first start out - it’s much more intuitive to a junior developer than lower-level unit tests, and is easier to add to a legacy project that may not have been built with testability in mind - if you can drive a browser, you can test it.</p><p><a href="http://behat.org/en/latest/">Behat</a> is a PHP equivalent. Combined with <a href="http://mink.behat.org/en/latest/">Mink</a>, it allows for easy automated acceptance tests of a PHP application. However, out of the box it doesn’t integrate well with Laravel. There is <a href="https://github.com/laracasts/Behat-Laravel-Extension">Jeffrey Way’s Behat Laravel extension</a>, but it doesn’t seem to be actively maintained and seems to be overkill for this purpose. I wanted something that I could use to run integration tests using PHPUnit’s assertions and Laravel’s testing utilities, and crucially, I wanted to do so as quickly as possible. That meant running a web server and using an automated web browser wasn’t an option. Also, I often work on REST API’s, and browser testing isn’t appropriate for those - in API tests I’m more interested in setting up the fixtures, making a single request, and verifying that it does what it’s meant to do, as quickly as possible.</p><p>As it turns out, integrating Behat and Laravel isn’t that hard. When using Behat, your <code>FeatureContext.php</code> file must implement the <code>Behat\Behat\Context\Context</code> interface, but as this interface does not implement any methods, you can extend any existing class and declare that it implements that interface. That means we can just extend the existing <code>Tests\TestCase</code> class in Laravel 5.4 and gain access to all the same testing utilities we have in our regular Laravel tests.</p><p>Then, in the constructor we can set environment variables using <code>putenv()</code> so that we can set it up to use an in-memory SQLite database for faster tests. We also use the <code>@BeforeScenario</code> hook to migrate the database before each scenario, and the <code>@AfterScenario</code> hook to roll it back afterwards.</p><p>Here’s the finished example:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th February 2017 9:25 pm</p><h1>Integrating Behat With Laravel</h1><p>The Gherkin format used by tools like Cucumber is a really great way of specifying how your application will work. It’s easy for even non-technical stakeholders to understand, it makes it natural to break your tests into easily reusable steps, and it encourages you to think about the application from an end-user’s perspective. It’s also one of the easiest ways to get started writing automated tests when you first start out - it’s much more intuitive to a junior developer than lower-level unit tests, and is easier to add to a legacy project that may not have been built with testability in mind - if you can drive a browser, you can test it.</p><p><a href="http://behat.org/en/latest/">Behat</a> is a PHP equivalent. Combined with <a href="http://mink.behat.org/en/latest/">Mink</a>, it allows for easy automated acceptance tests of a PHP application. However, out of the box it doesn’t integrate well with Laravel. There is <a href="https://github.com/laracasts/Behat-Laravel-Extension">Jeffrey Way’s Behat Laravel extension</a>, but it doesn’t seem to be actively maintained and seems to be overkill for this purpose. I wanted something that I could use to run integration tests using PHPUnit’s assertions and Laravel’s testing utilities, and crucially, I wanted to do so as quickly as possible. That meant running a web server and using an automated web browser wasn’t an option. Also, I often work on REST API’s, and browser testing isn’t appropriate for those - in API tests I’m more interested in setting up the fixtures, making a single request, and verifying that it does what it’s meant to do, as quickly as possible.</p><p>As it turns out, integrating Behat and Laravel isn’t that hard. When using Behat, your <code>FeatureContext.php</code> file must implement the <code>Behat\Behat\Context\Context</code> interface, but as this interface does not implement any methods, you can extend any existing class and declare that it implements that interface. That means we can just extend the existing <code>Tests\TestCase</code> class in Laravel 5.4 and gain access to all the same testing utilities we have in our regular Laravel tests.</p><p>Then, in the constructor we can set environment variables using <code>putenv()</code> so that we can set it up to use an in-memory SQLite database for faster tests. We also use the <code>@BeforeScenario</code> hook to migrate the database before each scenario, and the <code>@AfterScenario</code> hook to roll it back afterwards.</p><p>Here’s the finished example:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Context</span>\<span class="hljs-title">Context</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Gherkin</span>\<span class="hljs-title">Node</span>\<span class="hljs-title">PyStringNode</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Gherkin</span>\<span class="hljs-title">Node</span>\<span class="hljs-title">TableNode</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">TestCase</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Tester</span>\<span class="hljs-title">Exception</span>\<span class="hljs-title">PendingException</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">User</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Hook</span>\<span class="hljs-title">Scope</span>\<span class="hljs-title">BeforeScenarioScope</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Behat</span>\<span class="hljs-title">Behat</span>\<span class="hljs-title">Hook</span>\<span class="hljs-title">Scope</span>\<span class="hljs-title">AfterScenarioScope</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Kernel</span>;
+use Behat\Behat\Context\Context;
+use Behat\Gherkin\Node\PyStringNode;
+use Behat\Gherkin\Node\TableNode;
+use Tests\TestCase;
+use Behat\Behat\Tester\Exception\PendingException;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use App\User;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
+use Behat\Behat\Hook\Scope\AfterScenarioScope;
+use Illuminate\Contracts\Console\Kernel;
 
-<span class="hljs-comment">/**
+/**
  * Defines application features from the specific context.
- */</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeatureContext</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Context</span>
-</span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+ */
+class FeatureContext extends TestCase implements Context
+{
+    use DatabaseMigrations;
 
-    <span class="hljs-keyword">protected</span> $content;
+    protected $content;
 
-    <span class="hljs-comment">/**
+    /**
      * Initializes context.
      *
      * Every scenario gets its own context instance.
      * You can also pass arbitrary arguments to the
      * context constructor through behat.yml.
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
-    </span>{
-        putenv(<span class="hljs-string">'DB_CONNECTION=sqlite'</span>);
-        putenv(<span class="hljs-string">'DB_DATABASE=:memory:'</span>);
-        <span class="hljs-keyword">parent</span>::setUp();
+     */
+    public function __construct()
+    {
+        putenv(&#39;DB_CONNECTION=sqlite&#39;);
+        putenv(&#39;DB_DATABASE=:memory:&#39;);
+        parent::setUp();
     }
 
-    <span class="hljs-comment">/** <span class="hljs-doctag">@BeforeScenario</span> */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">before</span><span class="hljs-params">(BeforeScenarioScope $scope)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;artisan(<span class="hljs-string">'migrate'</span>);
+    /** @BeforeScenario */
+    public function before(BeforeScenarioScope $scope)
+    {
+        $this-&gt;artisan(&#39;migrate&#39;);
 
-        <span class="hljs-keyword">$this</span>-&gt;app[Kernel::class]-&gt;setArtisan(<span class="hljs-keyword">null</span>);
+        $this-&gt;app[Kernel::class]-&gt;setArtisan(null);
     }
 
-    <span class="hljs-comment">/** <span class="hljs-doctag">@AfterScenario</span> */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">after</span><span class="hljs-params">(AfterScenarioScope $scope)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;artisan(<span class="hljs-string">'migrate:rollback'</span>);
+    /** @AfterScenario */
+    public function after(AfterScenarioScope $scope)
+    {
+        $this-&gt;artisan(&#39;migrate:rollback&#39;);
     }
 
-    <span class="hljs-comment">/**
-     * <span class="hljs-doctag">@Given</span> I visit the path :path
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iVisitThePath</span><span class="hljs-params">($path)</span>
-    </span>{
-        $response = <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'/'</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals(<span class="hljs-number">200</span>, $response-&gt;getStatusCode());
-        <span class="hljs-keyword">$this</span>-&gt;content = $response-&gt;getContent();
+    /**
+     * @Given I visit the path :path
+     */
+    public function iVisitThePath($path)
+    {
+        $response = $this-&gt;get(&#39;/&#39;);
+        $this-&gt;assertEquals(200, $response-&gt;getStatusCode());
+        $this-&gt;content = $response-&gt;getContent();
     }
 
-    <span class="hljs-comment">/**
-     * <span class="hljs-doctag">@Then</span> I should see the text :text
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iShouldSeeTheText</span><span class="hljs-params">($text)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;assertContains($text, <span class="hljs-keyword">$this</span>-&gt;content);
+    /**
+     * @Then I should see the text :text
+     */
+    public function iShouldSeeTheText($text)
+    {
+        $this-&gt;assertContains($text, $this-&gt;content);
     }
 
-    <span class="hljs-comment">/**
-     * <span class="hljs-doctag">@Given</span> a user called :user exists
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">aUserCalledExists</span><span class="hljs-params">($user)</span>
-    </span>{
+    /**
+     * @Given a user called :user exists
+     */
+    public function aUserCalledExists($user)
+    {
         $user = factory(App\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; $user,
+            &#39;name&#39; =&gt; $user,
         ]);
     }
 
-    <span class="hljs-comment">/**
-     * <span class="hljs-doctag">@Given</span> I am logged in as :user
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">iAmLoggedInAs</span><span class="hljs-params">($user)</span>
-    </span>{
-        $user = User::where(<span class="hljs-string">'name'</span>, $user)-&gt;first();
-        <span class="hljs-keyword">$this</span>-&gt;be($user);
+    /**
+     * @Given I am logged in as :user
+     */
+    public function iAmLoggedInAs($user)
+    {
+        $user = User::where(&#39;name&#39;, $user)-&gt;first();
+        $this-&gt;be($user);
     }
 
 }
-</code></pre><p>Note that I’ve added a few basic example methods for our tests. As you can see, we can call the same methods we normally use in Laravel tests to make assertions and HTTP requests. If you’re using Dusk, you can also call that in the same way you usually would.</p><p>We might then write the following feature file to demonstrate our application at work:</p><pre><code class="hljs lang-gherkin"><span class="hljs-keyword">Feature</span>: Login
+</code></pre><p>Note that I’ve added a few basic example methods for our tests. As you can see, we can call the same methods we normally use in Laravel tests to make assertions and HTTP requests. If you’re using Dusk, you can also call that in the same way you usually would.</p><p>We might then write the following feature file to demonstrate our application at work:</p><pre><code class="lang-gherkin">Feature: Login
 
-    <span class="hljs-keyword">Background</span>:
-        <span class="hljs-keyword">Given</span> a user called <span class="hljs-string">"Alan"</span> exists
-        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Bob"</span> exists
-        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Clare"</span> exists
-        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Derek"</span> exists
-        <span class="hljs-keyword">And</span> a user called <span class="hljs-string">"Eric"</span> exists
+    Background:
+        Given a user called &quot;Alan&quot; exists
+        And a user called &quot;Bob&quot; exists
+        And a user called &quot;Clare&quot; exists
+        And a user called &quot;Derek&quot; exists
+        And a user called &quot;Eric&quot; exists
 
-    <span class="hljs-keyword">Scenario</span>: Log in as Alan
-        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Alan"</span>
-        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
-        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+    Scenario: Log in as Alan
+        Given I am logged in as &quot;Alan&quot;
+        And I visit the path &quot;/&quot;
+        Then I should see the text &quot;Laravel&quot;
 
-    <span class="hljs-keyword">Scenario</span>: Log in as Bob
-        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Bob"</span>
-        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
-        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+    Scenario: Log in as Bob
+        Given I am logged in as &quot;Bob&quot;
+        And I visit the path &quot;/&quot;
+        Then I should see the text &quot;Laravel&quot;
 
-    <span class="hljs-keyword">Scenario</span>: Log in as Clare
-        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Clare"</span>
-        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
-        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+    Scenario: Log in as Clare
+        Given I am logged in as &quot;Clare&quot;
+        And I visit the path &quot;/&quot;
+        Then I should see the text &quot;Laravel&quot;
 
-    <span class="hljs-keyword">Scenario</span>: Log in as Derek
-        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Derek"</span>
-        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
-        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
+    Scenario: Log in as Derek
+        Given I am logged in as &quot;Derek&quot;
+        And I visit the path &quot;/&quot;
+        Then I should see the text &quot;Laravel&quot;
 
-    <span class="hljs-keyword">Scenario</span>: Log in as Eric
-        <span class="hljs-keyword">Given</span> I am logged in as <span class="hljs-string">"Eric"</span>
-        <span class="hljs-keyword">And</span> I visit the path <span class="hljs-string">"/"</span>
-        <span class="hljs-keyword">Then</span> I should see the text <span class="hljs-string">"Laravel"</span>
-</code></pre><p>We can then run these tests with <code>vendor/bin/behat</code>:</p><pre><code class="hljs lang-bash">$ vendor/bin/behat 
+    Scenario: Log in as Eric
+        Given I am logged in as &quot;Eric&quot;
+        And I visit the path &quot;/&quot;
+        Then I should see the text &quot;Laravel&quot;
+</code></pre><p>We can then run these tests with <code>vendor/bin/behat</code>:</p><pre><code class="lang-bash">$ vendor/bin/behat 
 Feature: Login
 
-  Background:                         <span class="hljs-comment"># features/auth.feature:3</span>
-    Given a user called <span class="hljs-string">"Alan"</span> exists <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
-    And a user called <span class="hljs-string">"Bob"</span> exists    <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
-    And a user called <span class="hljs-string">"Clare"</span> exists  <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
-    And a user called <span class="hljs-string">"Derek"</span> exists  <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
-    And a user called <span class="hljs-string">"Eric"</span> exists   <span class="hljs-comment"># FeatureContext::aUserCalledExists()</span>
+  Background:                         # features/auth.feature:3
+    Given a user called &quot;Alan&quot; exists # FeatureContext::aUserCalledExists()
+    And a user called &quot;Bob&quot; exists    # FeatureContext::aUserCalledExists()
+    And a user called &quot;Clare&quot; exists  # FeatureContext::aUserCalledExists()
+    And a user called &quot;Derek&quot; exists  # FeatureContext::aUserCalledExists()
+    And a user called &quot;Eric&quot; exists   # FeatureContext::aUserCalledExists()
 
-  Scenario: Log <span class="hljs-keyword">in</span> as Alan               <span class="hljs-comment"># features/auth.feature:10</span>
-    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Alan"</span>       <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
-    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
-    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+  Scenario: Log in as Alan               # features/auth.feature:10
+    Given I am logged in as &quot;Alan&quot;       # FeatureContext::iAmLoggedInAs()
+    And I visit the path &quot;/&quot;             # FeatureContext::iVisitThePath()
+    Then I should see the text &quot;Laravel&quot; # FeatureContext::iShouldSeeTheText()
 
-  Scenario: Log <span class="hljs-keyword">in</span> as Bob                <span class="hljs-comment"># features/auth.feature:15</span>
-    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Bob"</span>        <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
-    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
-    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+  Scenario: Log in as Bob                # features/auth.feature:15
+    Given I am logged in as &quot;Bob&quot;        # FeatureContext::iAmLoggedInAs()
+    And I visit the path &quot;/&quot;             # FeatureContext::iVisitThePath()
+    Then I should see the text &quot;Laravel&quot; # FeatureContext::iShouldSeeTheText()
 
-  Scenario: Log <span class="hljs-keyword">in</span> as Clare              <span class="hljs-comment"># features/auth.feature:20</span>
-    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Clare"</span>      <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
-    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
-    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+  Scenario: Log in as Clare              # features/auth.feature:20
+    Given I am logged in as &quot;Clare&quot;      # FeatureContext::iAmLoggedInAs()
+    And I visit the path &quot;/&quot;             # FeatureContext::iVisitThePath()
+    Then I should see the text &quot;Laravel&quot; # FeatureContext::iShouldSeeTheText()
 
-  Scenario: Log <span class="hljs-keyword">in</span> as Derek              <span class="hljs-comment"># features/auth.feature:25</span>
-    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Derek"</span>      <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
-    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
-    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+  Scenario: Log in as Derek              # features/auth.feature:25
+    Given I am logged in as &quot;Derek&quot;      # FeatureContext::iAmLoggedInAs()
+    And I visit the path &quot;/&quot;             # FeatureContext::iVisitThePath()
+    Then I should see the text &quot;Laravel&quot; # FeatureContext::iShouldSeeTheText()
 
-  Scenario: Log <span class="hljs-keyword">in</span> as Eric               <span class="hljs-comment"># features/auth.feature:30</span>
-    Given I am logged <span class="hljs-keyword">in</span> as <span class="hljs-string">"Eric"</span>       <span class="hljs-comment"># FeatureContext::iAmLoggedInAs()</span>
-    And I visit the path <span class="hljs-string">"/"</span>             <span class="hljs-comment"># FeatureContext::iVisitThePath()</span>
-    Then I should see the text <span class="hljs-string">"Laravel"</span> <span class="hljs-comment"># FeatureContext::iShouldSeeTheText()</span>
+  Scenario: Log in as Eric               # features/auth.feature:30
+    Given I am logged in as &quot;Eric&quot;       # FeatureContext::iAmLoggedInAs()
+    And I visit the path &quot;/&quot;             # FeatureContext::iVisitThePath()
+    Then I should see the text &quot;Laravel&quot; # FeatureContext::iShouldSeeTheText()
 
 5 scenarios (5 passed)
 40 steps (40 passed)

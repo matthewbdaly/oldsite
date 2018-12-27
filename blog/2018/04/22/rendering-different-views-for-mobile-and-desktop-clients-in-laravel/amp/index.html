@@ -183,61 +183,61 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">22nd April 2018 11:50 pm</p><h1>Rendering Different Views for Mobile and Desktop Clients in Laravel</h1><p>This was a bit of a weird post to write. It started out explaining how I resolved an issue years ago on a CodeIgniter site, but amended to work for Laravel. In the process, I realised it made sense to implement it as middleware, and I ended up pulling it out into <a href="https://github.com/matthewbdaly/laravel-dynamic-serving">a package</a>. However, it’s still useful to understand the concept behind it, even if you prefer to just install the complete package, because your needs might be slightly different to mine.</p><p>On web development forums, it’s quite common to see variants of the following question:</p><blockquote><p>How do I redirect a user on a mobile device to a mobile version of the site?</p></blockquote><p>It’s quite surprising that this is still an issue that crops up. For many years, it’s been widely accepted that the correct solution for this problem is responsive design. However, there are ways in which this may not be adequate for certain applications. For instance, you may have an application where certain functionality only makes sense in a certain context, or your user interface may need to be optimised for specific environments.</p><p>The trouble is that a dedicated mobile site isn’t a good idea either. Among other things, it means that users can’t easily use the same bookmarks between desktop and mobile versions, and can result in at least some of the server-side logic being duplicated.</p><p>Fortunately, there is another way - <a href="https://developers.google.com/search/mobile-sites/mobile-seo/dynamic-serving">dynamic serving</a> allows you to render different content based on the user agent. You can also easily enable users to switch between desktop and mobile versions themselves if their client isn’t detected correctly or they just prefer the other one. I’ve implemented this years ago for a CodeIgniter site. Here’s how you might implement it in Laravel, although if you understand the principle behind it, it should be easy to adapt for any other framework.</p><p>Don’t try to implement mobile user agent detection yourself. Instead, find an implementation that’s actively maintained and install it with Composer. That way you can be reasonably sure that as new mobile devices come onto the market the package will detect them correctly as long as you keep it up to date. I would be inclined to go for <a href="https://github.com/jenssegers/agent">Agent</a>, since it has Laravel support baked in.</p><p>We could just use Agent to serve up different content based on the user agent. However, user agent strings are notoriously unreliable - if a new mobile device appears and it doesn’t show up correctly in Agent, users could find themselves forced to use the wrong UI. Instead, we need to check for a flag in the session that indicates if the session is mobile or not. If it’s not set, we set it based on the user agent. That way, if you need to offer functionality to override the detected session type, you can just update that session variable to correct that elsewhere in the application. I would be inclined to use a button in the footer that makes an AJAX request to toggle the flag, then reloads the page.</p><p>You also need to set the HTTP response header <code>Vary: User-Agent</code> to notify clients (including not only search engines, but also proxies at either end of the connection, such as Varnish or Squid) that the response will differ by user agent, in order to prevent users being served the wrong version.</p><p>Middleware is the obvious place to do this. Here’s a middleware that sets the session variable and the appropriate response headers:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">22nd April 2018 11:50 pm</p><h1>Rendering Different Views for Mobile and Desktop Clients in Laravel</h1><p>This was a bit of a weird post to write. It started out explaining how I resolved an issue years ago on a CodeIgniter site, but amended to work for Laravel. In the process, I realised it made sense to implement it as middleware, and I ended up pulling it out into <a href="https://github.com/matthewbdaly/laravel-dynamic-serving">a package</a>. However, it’s still useful to understand the concept behind it, even if you prefer to just install the complete package, because your needs might be slightly different to mine.</p><p>On web development forums, it’s quite common to see variants of the following question:</p><blockquote><p>How do I redirect a user on a mobile device to a mobile version of the site?</p></blockquote><p>It’s quite surprising that this is still an issue that crops up. For many years, it’s been widely accepted that the correct solution for this problem is responsive design. However, there are ways in which this may not be adequate for certain applications. For instance, you may have an application where certain functionality only makes sense in a certain context, or your user interface may need to be optimised for specific environments.</p><p>The trouble is that a dedicated mobile site isn’t a good idea either. Among other things, it means that users can’t easily use the same bookmarks between desktop and mobile versions, and can result in at least some of the server-side logic being duplicated.</p><p>Fortunately, there is another way - <a href="https://developers.google.com/search/mobile-sites/mobile-seo/dynamic-serving">dynamic serving</a> allows you to render different content based on the user agent. You can also easily enable users to switch between desktop and mobile versions themselves if their client isn’t detected correctly or they just prefer the other one. I’ve implemented this years ago for a CodeIgniter site. Here’s how you might implement it in Laravel, although if you understand the principle behind it, it should be easy to adapt for any other framework.</p><p>Don’t try to implement mobile user agent detection yourself. Instead, find an implementation that’s actively maintained and install it with Composer. That way you can be reasonably sure that as new mobile devices come onto the market the package will detect them correctly as long as you keep it up to date. I would be inclined to go for <a href="https://github.com/jenssegers/agent">Agent</a>, since it has Laravel support baked in.</p><p>We could just use Agent to serve up different content based on the user agent. However, user agent strings are notoriously unreliable - if a new mobile device appears and it doesn’t show up correctly in Agent, users could find themselves forced to use the wrong UI. Instead, we need to check for a flag in the session that indicates if the session is mobile or not. If it’s not set, we set it based on the user agent. That way, if you need to offer functionality to override the detected session type, you can just update that session variable to correct that elsewhere in the application. I would be inclined to use a button in the footer that makes an AJAX request to toggle the flag, then reloads the page.</p><p>You also need to set the HTTP response header <code>Vary: User-Agent</code> to notify clients (including not only search engines, but also proxies at either end of the connection, such as Varnish or Squid) that the response will differ by user agent, in order to prevent users being served the wrong version.</p><p>Middleware is the obvious place to do this. Here’s a middleware that sets the session variable and the appropriate response headers:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Middleware</span>;
+namespace App\Http\Middleware;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Closure</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Jenssegers</span>\<span class="hljs-title">Agent</span>\<span class="hljs-title">Agent</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Session</span>\<span class="hljs-title">Session</span>;
+use Closure;
+use Jenssegers\Agent\Agent;
+use Illuminate\Contracts\Session\Session;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DetectMobile</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $agent;
+class DetectMobile
+{
+    protected $agent;
 
-    <span class="hljs-keyword">protected</span> $session;
+    protected $session;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Agent $agent, Session $session)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;agent = $agent;
-        <span class="hljs-keyword">$this</span>-&gt;session = $session;
+    public function __construct(Agent $agent, Session $session)
+    {
+        $this-&gt;agent = $agent;
+        $this-&gt;session = $session;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Handle an incoming request.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  \Closure  $next
-     * <span class="hljs-doctag">@return</span> mixed
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">($request, Closure $next)</span>
-    </span>{
-        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">$this</span>-&gt;session-&gt;exists(<span class="hljs-string">'mobile'</span>)) {
-            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">$this</span>-&gt;agent-&gt;isMobile() || <span class="hljs-keyword">$this</span>-&gt;agent-&gt;isTablet()) {
-                <span class="hljs-keyword">$this</span>-&gt;session-&gt;put(<span class="hljs-string">'mobile'</span>, <span class="hljs-keyword">true</span>);
-            } <span class="hljs-keyword">else</span> {
-                <span class="hljs-keyword">$this</span>-&gt;session-&gt;put(<span class="hljs-string">'mobile'</span>, <span class="hljs-keyword">false</span>);
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        if (!$this-&gt;session-&gt;exists(&#39;mobile&#39;)) {
+            if ($this-&gt;agent-&gt;isMobile() || $this-&gt;agent-&gt;isTablet()) {
+                $this-&gt;session-&gt;put(&#39;mobile&#39;, true);
+            } else {
+                $this-&gt;session-&gt;put(&#39;mobile&#39;, false);
             }
         }
         $response = $next($request);
-        <span class="hljs-keyword">return</span> $response-&gt;setVary(<span class="hljs-string">'User-Agent'</span>);
+        return $response-&gt;setVary(&#39;User-Agent&#39;);
     }
 }
-</code></pre><p>Now, you could then work with the session directly to retrieve the <code>mobile</code> flag, but as you may be working in the view, it makes sense to create helpers for this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Now, you could then work with the session directly to retrieve the <code>mobile</code> flag, but as you may be working in the view, it makes sense to create helpers for this:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">if</span> (!function_exists(<span class="hljs-string">'is_mobile'</span>)) {
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">is_mobile</span><span class="hljs-params">()</span>
-    </span>{
-        $session = app()-&gt;make(<span class="hljs-string">'Illuminate\Contracts\Session\Session'</span>);
-        <span class="hljs-keyword">return</span> $session-&gt;get(<span class="hljs-string">'mobile'</span>) == <span class="hljs-keyword">true</span>;
+if (!function_exists(&#39;is_mobile&#39;)) {
+    function is_mobile()
+    {
+        $session = app()-&gt;make(&#39;Illuminate\Contracts\Session\Session&#39;);
+        return $session-&gt;get(&#39;mobile&#39;) == true;
     }
 }
 
-<span class="hljs-keyword">if</span> (!function_exists(<span class="hljs-string">'is_desktop'</span>)) {
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">is_desktop</span><span class="hljs-params">()</span>
-    </span>{
-        $session = app()-&gt;make(<span class="hljs-string">'Illuminate\Contracts\Session\Session'</span>);
-        <span class="hljs-keyword">return</span> $session-&gt;get(<span class="hljs-string">'mobile'</span>) == <span class="hljs-keyword">false</span>;
+if (!function_exists(&#39;is_desktop&#39;)) {
+    function is_desktop()
+    {
+        $session = app()-&gt;make(&#39;Illuminate\Contracts\Session\Session&#39;);
+        return $session-&gt;get(&#39;mobile&#39;) == false;
     }
 }
 </code></pre><p>Now, if you want to serve up completely different views, you can use these helpers in your controllers. If you instead want to selectively show and hide parts of the UI based on the user agent, you can instead use these in the views to determine what parts of the page should be shown.</p><p>Agent offers more functionality than just detecting if a user agent is a mobile or desktop device, and you may find this useful as a starting point for developing middleware for detecting bots, or showing different content to users based on their device type or operating system. If you just need to detect if a user is a mobile or desktop client, this middleware should be sufficient.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/04/22/rendering-different-views-for-mobile-and-desktop-clients-in-laravel/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/04/29/console-applications-with-the-symfony-console-component/amp/">Console Applications With the Symfony Console Component</a> <a class="postlink" href="/blog/2018/04/12/making-wordpress-less-shit/amp/">Making Wordpress Less Shit</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

@@ -183,35 +183,35 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">23rd June 2018 1:03 pm</p><h1>Forcing SSL in Codeigniter</h1><p>I haven’t started a new CodeIgniter project since 2014, and don’t intend to, but on occasion I’ve been asked to do maintenance work on legacy CodeIgniter projects. This week I was asked to help out with a situation where a CodeIgniter site was being migrated to HTTPS and there were issues resulting from the migration.</p><p>Back in 2012, when working on my first solo project, I’d built a website using CodeIgniter that used HTTPS, but also needed to support an affiliate marketing system that did not support it, so certain pages had to force HTTP, and others had to force HTTPS, so I’d used the hook system to create hooks to enforce this. This kind of requirement is unlikely to reoccur now because HTTPS is becoming more prevalent, but sometimes it may be easier to enforce HTTPS at application level than in the web server configuration or using htaccess. It’s relatively straightforward to do that in CodeIgniter.</p><p>The first step is to create the hook. Save this as <code>application/hooks/ssl.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">force_ssl</span><span class="hljs-params">()</span>
-</span>{
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">23rd June 2018 1:03 pm</p><h1>Forcing SSL in Codeigniter</h1><p>I haven’t started a new CodeIgniter project since 2014, and don’t intend to, but on occasion I’ve been asked to do maintenance work on legacy CodeIgniter projects. This week I was asked to help out with a situation where a CodeIgniter site was being migrated to HTTPS and there were issues resulting from the migration.</p><p>Back in 2012, when working on my first solo project, I’d built a website using CodeIgniter that used HTTPS, but also needed to support an affiliate marketing system that did not support it, so certain pages had to force HTTP, and others had to force HTTPS, so I’d used the hook system to create hooks to enforce this. This kind of requirement is unlikely to reoccur now because HTTPS is becoming more prevalent, but sometimes it may be easier to enforce HTTPS at application level than in the web server configuration or using htaccess. It’s relatively straightforward to do that in CodeIgniter.</p><p>The first step is to create the hook. Save this as <code>application/hooks/ssl.php</code>:</p><pre><code class="lang-php">&lt;?php
+function force_ssl()
+{
     $CI =&amp; get_instance();
-    $CI-&gt;config-&gt;config[<span class="hljs-string">'base_url'</span>] = str_replace(<span class="hljs-string">'http://'</span>, <span class="hljs-string">'https://'</span>, $CI-&gt;config-&gt;config[<span class="hljs-string">'base_url'</span>]);
-    <span class="hljs-keyword">if</span> ($_SERVER[<span class="hljs-string">'SERVER_PORT'</span>] != <span class="hljs-number">443</span>) redirect($CI-&gt;uri-&gt;uri_string());
+    $CI-&gt;config-&gt;config[&#39;base_url&#39;] = str_replace(&#39;http://&#39;, &#39;https://&#39;, $CI-&gt;config-&gt;config[&#39;base_url&#39;]);
+    if ($_SERVER[&#39;SERVER_PORT&#39;] != 443) redirect($CI-&gt;uri-&gt;uri_string());
 }
-<span class="hljs-meta">?&gt;</span>
-</code></pre><p>Next, we register the hook. Update <code>application/configs/hooks.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>  <span class="hljs-keyword">if</span> ( ! defined(<span class="hljs-string">'BASEPATH'</span>)) <span class="hljs-keyword">exit</span>(<span class="hljs-string">'No direct script access allowed'</span>);
-<span class="hljs-comment">/*
+?&gt;
+</code></pre><p>Next, we register the hook. Update <code>application/configs/hooks.php</code> as follows:</p><pre><code class="lang-php">&lt;?php  if ( ! defined(&#39;BASEPATH&#39;)) exit(&#39;No direct script access allowed&#39;);
+/*
 | -------------------------------------------------------------------------
 | Hooks
 | -------------------------------------------------------------------------
-| This file lets you define "hooks" to extend CI without hacking the core
+| This file lets you define &quot;hooks&quot; to extend CI without hacking the core
 | files.  Please see the user guide for info:
 |
 |    http://codeigniter.com/user_guide/general/hooks.html
 |
-*/</span>
+*/
 
-$hook[<span class="hljs-string">'post_controller_constructor'</span>][] = <span class="hljs-keyword">array</span>(
-                                <span class="hljs-string">'function'</span> =&gt; <span class="hljs-string">'force_ssl'</span>,
-                                <span class="hljs-string">'filename'</span> =&gt; <span class="hljs-string">'ssl.php'</span>,
-                                <span class="hljs-string">'filepath'</span> =&gt; <span class="hljs-string">'hooks'</span>
+$hook[&#39;post_controller_constructor&#39;][] = array(
+                                &#39;function&#39; =&gt; &#39;force_ssl&#39;,
+                                &#39;filename&#39; =&gt; &#39;ssl.php&#39;,
+                                &#39;filepath&#39; =&gt; &#39;hooks&#39;
                                 );
 
-<span class="hljs-comment">/* End of file hooks.php */</span>
-<span class="hljs-comment">/* Location: ./application/config/hooks.php */</span>
-</code></pre><p>This tells CodeIgniter that it should looks in the <code>application/hooks</code> directory for a file called <code>ssl.php</code>, and return the function <code>force_ssl</code>.</p><p>Finally, we enable hooks. Update <code>application/config/config.php</code>:</p><pre><code class="hljs lang-php">$config[<span class="hljs-string">'enable_hooks'</span>] = <span class="hljs-keyword">TRUE</span>;
+/* End of file hooks.php */
+/* Location: ./application/config/hooks.php */
+</code></pre><p>This tells CodeIgniter that it should looks in the <code>application/hooks</code> directory for a file called <code>ssl.php</code>, and return the function <code>force_ssl</code>.</p><p>Finally, we enable hooks. Update <code>application/config/config.php</code>:</p><pre><code class="lang-php">$config[&#39;enable_hooks&#39;] = TRUE;
 </code></pre><p>If you only want to force SSL in production, not development, you may want to amend the <code>ssl.php</code> file to only perform the redirect in non-development environments, perhaps by using an environment variable via DotEnv.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/codeigniter/">codeigniter</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/06/23/forcing-ssl-in-codeigniter/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/07/25/better-strings-in-php/amp/">Better Strings in PHP</a> <a class="postlink" href="/blog/2018/06/03/logging-to-the-elk-stack-with-laravel/amp/">Logging to the ELK Stack With Laravel</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

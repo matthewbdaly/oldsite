@@ -4,7 +4,7 @@
         <title>jenkins | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/jenkins/</link>
         <description>jenkins | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -20,7 +20,26 @@
 </ul>
 <p>However, we also use Travis CI for testing one or two open-source projects, and one distinct advantage Travis has is the way you can configure it using a single text file.</p>
 <p>With the Pipeline plugin, it’s possible to define the steps required to run your tests in a <code>Jenkinsfile</code> and then set up a Pipeline job which reads that file from the version control system and runs it accordingly. Here’s a sample <code>Jenkinsfile</code> for a Laravel project:</p>
-<pre><code class="hljs lang-groovy"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>node {</td><tr><td class="linenos" data-pseudo-content="2"></td><td>   <span class="hljs-comment">// Mark the code checkout 'stage'....</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>   stage <span class="hljs-string">'Checkout'</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>   <span class="hljs-comment">// Get some code from a Bitbucket repository</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>   git <span class="hljs-string">credentialsId:</span> <span class="hljs-string">'5239c33e-10ab-4c1b-a4a0-91b96a07955e'</span>, <span class="hljs-string">url:</span> <span class="hljs-string">'git@bitbucket.org:matthewbdaly/my-app.git'</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td>   <span class="hljs-comment">// Install dependencies</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td>   stage <span class="hljs-string">'Install dependencies'</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td></td><tr><td class="linenos" data-pseudo-content="11"></td><td>   <span class="hljs-comment">// Run Composer</span></td><tr><td class="linenos" data-pseudo-content="12"></td><td>   sh <span class="hljs-string">'composer install'</span></td><tr><td class="linenos" data-pseudo-content="13"></td><td></td><tr><td class="linenos" data-pseudo-content="14"></td><td>   <span class="hljs-comment">// Test stage</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>   stage <span class="hljs-string">'Test'</span></td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>   <span class="hljs-comment">// Run the tests</span></td><tr><td class="linenos" data-pseudo-content="18"></td><td>   sh <span class="hljs-string">"vendor/bin/phpunit"</span></td><tr><td class="linenos" data-pseudo-content="19"></td><td>}</td></table></code></pre>
+<pre><code class="lang-groovy">node {
+   // Mark the code checkout &#39;stage&#39;....
+   stage &#39;Checkout&#39;
+
+   // Get some code from a Bitbucket repository
+   git credentialsId: &#39;5239c33e-10ab-4c1b-a4a0-91b96a07955e&#39;, url: &#39;git@bitbucket.org:matthewbdaly/my-app.git&#39;
+
+   // Install dependencies
+   stage &#39;Install dependencies&#39;
+
+   // Run Composer
+   sh &#39;composer install&#39;
+
+   // Test stage
+   stage &#39;Test&#39;
+
+   // Run the tests
+   sh &quot;vendor/bin/phpunit&quot;
+}
+</code></pre>
 <p>Note the steps it’s broken down into:</p>
 <ul>
 <li><code>stage</code> defines the start of a new stage in the build</li>

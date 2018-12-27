@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>mariadb | Matthew Daly&apos;s Blog</title>
-    <updated>2018-12-07T12:13:50Z</updated>
+    <updated>2018-12-27T16:01:38Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -20,17 +20,55 @@
         <updated>2018-05-13T13:55:42Z</updated>
         <summary type="html"><![CDATA[<p>Recently I had the occasion to check out MariaDB’s implementation of full-text search. As it’s a relatively recent arrival in MySQL and MariaDB, it doesn’t seem to get all that much attention. In this post I’ll show you how to use it, with a few Laravel-specific pointers. We’ll be using the default <code>User</code> model in a new Laravel installation, which has columns for <code>name</code> and <code>email</code>.</p>
 <p>Our first task is to create the fulltext index, which is necessary to perform the query. Run the following command:</p>
-<pre><code class="hljs lang-sql singleline"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">ADD</span> FULLTEXT (<span class="hljs-keyword">name</span>, email);</code></pre>
+<pre><code class="lang-sql">ALTER TABLE users ADD FULLTEXT (name, email);
+</code></pre>
 <p>As you can see, we can specify multiple columns in our table to index.</p>
 <p>If you’re using Laravel, you’ll want to create the following migration for this:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddFulltextIndexForUsers</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     * Run the migrations.</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        DB::statement(<span class="hljs-string">'ALTER TABLE users ADD FULLTEXT(name, email)'</span>);</td><tr><td class="linenos" data-pseudo-content="17"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="18"></td><td></td><tr><td class="linenos" data-pseudo-content="19"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="20"></td><td>     * Reverse the migrations.</td><tr><td class="linenos" data-pseudo-content="21"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="22"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="23"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="24"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="25"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="26"></td><td>        DB::statement(<span class="hljs-string">'ALTER TABLE users DROP INDEX IF EXISTS name'</span>);</td><tr><td class="linenos" data-pseudo-content="27"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="28"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddFulltextIndexForUsers extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        DB::statement(&#39;ALTER TABLE users ADD FULLTEXT(name, email)&#39;);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        DB::statement(&#39;ALTER TABLE users DROP INDEX IF EXISTS name&#39;);
+    }
+}
+</code></pre>
 <p>Note that the index is named after the first field passed to it, so when we drop it we refer to it as <code>name</code>. Then, to actually query the index, you should run a command something like this:</p>
-<pre><code class="hljs lang-sql singleline"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">users</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">MATCH</span>(<span class="hljs-keyword">name</span>, email) AGAINST (<span class="hljs-string">'jeff'</span> <span class="hljs-keyword">IN</span> <span class="hljs-keyword">NATURAL</span> <span class="hljs-keyword">LANGUAGE</span> <span class="hljs-keyword">MODE</span>);</code></pre>
+<pre><code class="lang-sql">SELECT * FROM users WHERE MATCH(name, email) AGAINST (&#39;jeff&#39; IN NATURAL LANGUAGE MODE);
+</code></pre>
 <p>Note that <code>NATURAL LANGUAGE MODE</code> is actually the default, so you can leave it off if you wish. We also have to specify the columns to match against.</p>
 <p>If you’re using Laravel, you may want to create a reusable local scope for it:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scopeSearch</span><span class="hljs-params">($query, $search)</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>        <span class="hljs-keyword">if</span> (!$search) {</td><tr><td class="linenos" data-pseudo-content="4"></td><td>            <span class="hljs-keyword">return</span> $query;</td><tr><td class="linenos" data-pseudo-content="5"></td><td>        }</td><tr><td class="linenos" data-pseudo-content="6"></td><td>        <span class="hljs-keyword">return</span> $query-&gt;whereRaw(<span class="hljs-string">'MATCH(name, email) AGAINST (?)'</span>, [$search]);</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    }</td></table></code></pre>
+<pre><code class="lang-php">    public function scopeSearch($query, $search)
+    {
+        if (!$search) {
+            return $query;
+        }
+        return $query-&gt;whereRaw(&#39;MATCH(name, email) AGAINST (?)&#39;, [$search]);
+    }
+</code></pre>
 <p>Then you can call it as follows:</p>
-<pre><code class="hljs lang-php singleline">User::search(<span class="hljs-string">'jeff'</span>)-&gt;get();</code></pre>
+<pre><code class="lang-php">User::search(&#39;jeff&#39;)-&gt;get();
+</code></pre>
 <p>I personally have noticed that the query using the <code>MATCH</code> keywords seems to be far more performant, with the response time being between five and ten times less than a similar command using <code>LIKE</code>, however this observation isn’t very scientific (plus, we are talking about queries that still run in a fraction of a second). However, if you’re doing a particularly expensive query that currently uses a <code>LIKE</code> statement, it’s possible you may get better results by switching to a <code>MATCH</code> statement. Full-text search probably isn’t all that useful in this context - it’s only once we’re talking about longer text, such as blog posts, that some of the advantages like support for stopwords comes into play.</p>
 <p>From what I’ve seen this implementation of full-text search is a lot simpler than in PostgreSQL, which has ups and downs. On the one hand, it’s a lot easier to implement, but conversely it’s less useful - there’s no obvious way to perform a full-text search against joined tables. However, it does seem to be superior to using a <code>LIKE</code> statement, so it’s probably a good fit for smaller sites where something like Elasticsearch would be overkill.</p>
 ]]></summary>

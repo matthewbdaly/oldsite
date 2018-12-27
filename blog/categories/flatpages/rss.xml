@@ -4,7 +4,7 @@
         <title>flatpages | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/flatpages/</link>
         <description>flatpages | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -23,7 +23,8 @@
 <p><a href="https://github.com/matthewbdaly/laravel-flatpages">Laravel Flatpages</a> is a package I wrote that adds a flatpage model, controller and view to your application. It’s loosely inspired by Django’s flatpages app. Using it, you can quickly and easily build a very simple brochure-style CMS. Each page contains fields for the title, content, slug, and an optional template field that specifies which view to use.</p>
 <p>Note that it doesn’t include any kind of admin functionality, so you’ll need to add this yourself or find a package for it. It uses my <a href="http://github.com/matthewbdaly/laravel-repositories">repositories package</a> to access the database, and this has caching built in, so when you create, update or delete a flatpage, you should either resolve <code>Matthewbdaly\LaravelFlatpages\Contracts\Repositories\Flatpage</code> and use the methods on that to make the changes (in which case the appropriate caches should be flushed automatically), or flush the cache. It also requires a cache backend that supports tags, such as Memcached or Redis.</p>
 <p>It does not include routing in the package itself because I couldn’t find a way to guarantee that it would always be the last route, so instead you should put this in your <code>routes/web.php</code> and make sure it’s always the last route:</p>
-<pre><code class="hljs lang-php singleline">Route::get(<span class="hljs-string">'{path}'</span>, <span class="hljs-string">'\Matthewbdaly\LaravelFlatpages\Http\Controllers\FlatpageController@page'</span>);</code></pre>
+<pre><code class="lang-php">Route::get(&#39;{path}&#39;, &#39;\Matthewbdaly\LaravelFlatpages\Http\Controllers\FlatpageController@page&#39;);
+</code></pre>
 <p>Otherwise you could wind up with problems. The reason for that is that it has to check the path against the slugs of the flat pages in the database, and if it doesn’t find any it raises a 404.</p>
 <p>Or, if you prefer, you can use the middleware at <code>Matthewbdaly\LaravelFlatpages\Http\Middleware\FlatpageMiddleware</code>, which may be more convenient in many case. This should be added as the last global middleware in <code>app\Http\Kernel.php</code>.</p>
 ]]></description>

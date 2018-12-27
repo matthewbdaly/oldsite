@@ -183,47 +183,47 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th January 2018 2:00 pm</p><h1>Getting the Type of An Unsupported Postgres Field in Laravel</h1><p>Today I’ve been working on a generic, reusable Laravel admin interface, loosely inspired by the Django admin, that dynamically picks up the field types and generates an appropriate input field accordingly.</p><p>One problem I’ve run into is that getting a representation of a database table’s fields relies on <code>doctrine/dbal</code>, and its support for the more unusual PostgreSQL field types is spotty at best. I’ve been testing it out on a Laravel-based blogging engine, which has full-text search using the <code>TSVECTOR</code> field type, which isn’t supported, and it threw a nasty <code>Unknown database type tsvector requested</code> error.</p><p>Fortunately, it’s possible to register custom field type mappings easily enough. In this case we can safely treat a <code>TSVECTOR</code> field as a string` type anyway, so we can map it to the string type. We can do so in the boot method of a service provider:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th January 2018 2:00 pm</p><h1>Getting the Type of An Unsupported Postgres Field in Laravel</h1><p>Today I’ve been working on a generic, reusable Laravel admin interface, loosely inspired by the Django admin, that dynamically picks up the field types and generates an appropriate input field accordingly.</p><p>One problem I’ve run into is that getting a representation of a database table’s fields relies on <code>doctrine/dbal</code>, and its support for the more unusual PostgreSQL field types is spotty at best. I’ve been testing it out on a Laravel-based blogging engine, which has full-text search using the <code>TSVECTOR</code> field type, which isn’t supported, and it threw a nasty <code>Unknown database type tsvector requested</code> error.</p><p>Fortunately, it’s possible to register custom field type mappings easily enough. In this case we can safely treat a <code>TSVECTOR</code> field as a string` type anyway, so we can map it to the string type. We can do so in the boot method of a service provider:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
+namespace App\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class AppServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Register the TSVECTOR column</span>
-        $conn = <span class="hljs-keyword">$this</span>-&gt;app-&gt;make(<span class="hljs-string">'Illuminate\Database\ConnectionInterface'</span>);
+     * @return void
+     */
+    public function boot()
+    {
+        // Register the TSVECTOR column
+        $conn = $this-&gt;app-&gt;make(&#39;Illuminate\Database\ConnectionInterface&#39;);
         $conn-&gt;getDoctrineSchemaManager()
             -&gt;getDatabasePlatform()
-            -&gt;registerDoctrineTypeMapping(<span class="hljs-string">'tsvector'</span>, <span class="hljs-string">'string'</span>);
+            -&gt;registerDoctrineTypeMapping(&#39;tsvector&#39;, &#39;string&#39;);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-       <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function register()
+    {
+       //
     }
 }
-</code></pre><p>We register a Doctrine type mapping that maps the <code>tsvector</code> type to a string. Now Doctrine will just treat it as a string.</p><p>We can then retrieve the field types as follows:</p><pre><code class="hljs lang-php">        $table = <span class="hljs-keyword">$this</span>-&gt;model-&gt;getTable();
+</code></pre><p>We register a Doctrine type mapping that maps the <code>tsvector</code> type to a string. Now Doctrine will just treat it as a string.</p><p>We can then retrieve the field types as follows:</p><pre><code class="lang-php">        $table = $this-&gt;model-&gt;getTable();
         $fields = array_values(Schema::getColumnListing($table));
         $fielddata = [];
-        <span class="hljs-keyword">foreach</span> ($fields <span class="hljs-keyword">as</span> $field){
-            <span class="hljs-keyword">if</span> ($field != <span class="hljs-string">'id'</span> &amp;&amp; $field != <span class="hljs-string">'created_at'</span> &amp;&amp; $field != <span class="hljs-string">'updated_at'</span> &amp;&amp; $field != <span class="hljs-string">'deleted_at'</span>) {
-                <span class="hljs-keyword">try</span> {
+        foreach ($fields as $field){
+            if ($field != &#39;id&#39; &amp;&amp; $field != &#39;created_at&#39; &amp;&amp; $field != &#39;updated_at&#39; &amp;&amp; $field != &#39;deleted_at&#39;) {
+                try {
                     $fielddata[$field] = Schema::getColumnType($table, $field);
-                } <span class="hljs-keyword">catch</span> (\<span class="hljs-keyword">Exception</span> $e) {
-                    $fielddata[$field] = <span class="hljs-string">'unknown'</span>;
+                } catch (\Exception $e) {
+                    $fielddata[$field] = &#39;unknown&#39;;
                 }
             }
         }

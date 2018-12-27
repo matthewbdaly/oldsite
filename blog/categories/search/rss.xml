@@ -4,7 +4,7 @@
         <title>search | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/search/</link>
         <description>search | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -15,7 +15,16 @@
             <pubDate>Wed, 10 Jan 2018 22:07:27 GMT</pubDate>
             <description><![CDATA[<p>For the uninitiated, OpenSearch is the technology that lets you enter a site’s URL, and then press Tab to start searching on that site - you can see it in action on this site. It’s really useful, and quite easy to implement if you know how.</p>
 <p>OpenSearch relies on having a particular XML file available. Here’s the <code>opensearch.xml</code> file for this site:</p>
-<pre><code class="hljs lang-xml"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-tag">&lt;<span class="hljs-name">OpenSearchDescription</span> <span class="hljs-attr">xmlns:moz</span>=<span class="hljs-string">"http://www.mozilla.org/2006/browser/search/"</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>   <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://a9.com/-/spec/opensearch/1.1/"</span>&gt;</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>   <span class="hljs-tag">&lt;<span class="hljs-name">ShortName</span>&gt;</span>matthewdaly.co.uk<span class="hljs-tag">&lt;/<span class="hljs-name">ShortName</span>&gt;</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>   <span class="hljs-tag">&lt;<span class="hljs-name">Description</span>&gt;</span>Search matthewdaly.co.uk<span class="hljs-tag">&lt;/<span class="hljs-name">Description</span>&gt;</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>   <span class="hljs-tag">&lt;<span class="hljs-name">InputEncoding</span>&gt;</span>UTF-8<span class="hljs-tag">&lt;/<span class="hljs-name">InputEncoding</span>&gt;</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>   <span class="hljs-tag">&lt;<span class="hljs-name">Url</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"get"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/html"</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>      <span class="hljs-attr">template</span>=<span class="hljs-string">"http://www.google.com/search?q={searchTerms}&amp;amp;sitesearch=matthewdaly.co.uk"</span>/&gt;</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td><span class="hljs-tag">&lt;/<span class="hljs-name">OpenSearchDescription</span>&gt;</span></td></table></code></pre>
+<pre><code class="lang-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;OpenSearchDescription xmlns:moz=&quot;http://www.mozilla.org/2006/browser/search/&quot;
+   xmlns=&quot;http://a9.com/-/spec/opensearch/1.1/&quot;&gt;
+   &lt;ShortName&gt;matthewdaly.co.uk&lt;/ShortName&gt;
+   &lt;Description&gt;Search matthewdaly.co.uk&lt;/Description&gt;
+   &lt;InputEncoding&gt;UTF-8&lt;/InputEncoding&gt;
+   &lt;Url method=&quot;get&quot; type=&quot;text/html&quot;
+      template=&quot;http://www.google.com/search?q={searchTerms}&amp;amp;sitesearch=matthewdaly.co.uk&quot;/&gt;
+&lt;/OpenSearchDescription&gt;
+</code></pre>
 <p>In this case, as this site uses a static site generator I can’t really do the search on the site, so it’s handed off to a Google site-specific search, but the principle is the same. The three relevant fields are as follows:</p>
 <ul>
 <li><code>ShortName</code> - The short name of the site (this should usually just be the domain name)</li>
@@ -23,10 +32,13 @@
 <li><code>Url</code> - Specifies the HTTP method that should be used to search (<code>GET</code> or <code>POST</code>), and a template for the URL. The search is automatically inserted where <code>{searchTerms}</code> appears</li>
 </ul>
 <p>A more typical example of the <code>Url</code> field might be as follows:</p>
-<pre><code class="hljs lang-xml"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>   <span class="hljs-tag">&lt;<span class="hljs-name">Url</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"get"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/html"</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>      <span class="hljs-attr">template</span>=<span class="hljs-string">"http://www.example.com/search?q={searchTerms}"</span>/&gt;</span></td></table></code></pre>
+<pre><code class="lang-xml">   &lt;Url method=&quot;get&quot; type=&quot;text/html&quot;
+      template=&quot;http://www.example.com/search?q={searchTerms}&quot;/&gt;
+</code></pre>
 <p>Normally you will be pointing the template to your site’s own search page. Note that OpenSearch doesn’t actually do any searching itself - it just tells your browser where to send your search request.</p>
 <p>With that file saved as <code>opensearch.xml</code>, all you have to do is add it to the <code>&lt;head&gt;</code> in your HTML:</p>
-<pre><code class="hljs lang-html singleline">&lt;link <span class="hljs-attribute">href</span>=<span class="hljs-string">"/opensearch.xml"</span> <span class="hljs-attribute">rel</span>=<span class="hljs-string">"search"</span> <span class="hljs-attribute">title</span>=<span class="hljs-string">"Search title"</span> <span class="hljs-attribute">type</span>=<span class="hljs-string">"application/opensearchdescription+xml"</span>&gt;</code></pre>
+<pre><code class="lang-html">&lt;link href=&quot;/opensearch.xml&quot; rel=&quot;search&quot; title=&quot;Search title&quot; type=&quot;application/opensearchdescription+xml&quot;&gt;
+</code></pre>
 <p>And that should be all you need to do to get OpenSearch working.</p>
 <p>For Laravel sites, I’ve recently created a <a href="https://github.com/matthewbdaly/laravel-opensearch">package for implementing Opensearch</a> that should help as well. With that you need only install the package, and set the fields in the config to point at your existing search page, in order to get OpenSearch working.</p>
 ]]></description>

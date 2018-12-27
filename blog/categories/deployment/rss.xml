@@ -4,7 +4,7 @@
         <title>deployment | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/deployment/</link>
         <description>deployment | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -18,20 +18,96 @@
 <p>A while back I heard of <a href="https://deployer.org/">Deployer</a>, but I didn’t have the opportunity to try it until recently on a personal project as I was working somewhere that had its own in-house deployment process. It’s a PHP-specific deployment tool with recipes for deploying applications built with various frameworks and CMS’s, including Laravel, Symfony, CodeIgniter and Drupal.</p>
 <h2 id="installing-deployer">Installing Deployer</h2>
 <p>Deployer is installed as a <code>.phar</code> file, much like you would with Composer:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ curl -LO https://deployer.org/deployer.phar</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ mv deployer.phar /usr/<span class="hljs-built_in">local</span>/bin/dep</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ chmod +x /usr/<span class="hljs-built_in">local</span>/bin/dep</td></table></code></pre>
+<pre><code class="lang-bash">$ curl -LO https://deployer.org/deployer.phar
+$ mv deployer.phar /usr/local/bin/dep
+$ chmod +x /usr/local/bin/dep
+</code></pre>
 <p>With that done, you should be able to run the following command in your project’s directory to create a Deployer script:</p>
-<pre><code class="hljs lang-bash singleline">$ dep init</code></pre>
+<pre><code class="lang-bash">$ dep init
+</code></pre>
 <p>In response, you should see a list of project types:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>  Welcome to the Deployer config generator  </td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td></td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td> This utility will walk you through creating a deploy.php file.</td><tr><td class="linenos" data-pseudo-content="6"></td><td> It only covers the most common items, and tries to guess sensible defaults.</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td> Press ^C at any time to quit.</td><tr><td class="linenos" data-pseudo-content="9"></td><td></td><tr><td class="linenos" data-pseudo-content="10"></td><td> Please select your project <span class="hljs-built_in">type</span> [Common]:</td><tr><td class="linenos" data-pseudo-content="11"></td><td>  [0] Common</td><tr><td class="linenos" data-pseudo-content="12"></td><td>  [1] Laravel</td><tr><td class="linenos" data-pseudo-content="13"></td><td>  [2] Symfony</td><tr><td class="linenos" data-pseudo-content="14"></td><td>  [3] Yii</td><tr><td class="linenos" data-pseudo-content="15"></td><td>  [4] Yii2 Basic App</td><tr><td class="linenos" data-pseudo-content="16"></td><td>  [5] Yii2 Advanced App</td><tr><td class="linenos" data-pseudo-content="17"></td><td>  [6] Zend Framework</td><tr><td class="linenos" data-pseudo-content="18"></td><td>  [7] CakePHP</td><tr><td class="linenos" data-pseudo-content="19"></td><td>  [8] CodeIgniter</td><tr><td class="linenos" data-pseudo-content="20"></td><td>  [9] Drupal</td><tr><td class="linenos" data-pseudo-content="21"></td><td> &gt;</td></table></code></pre>
+<pre><code class="lang-bash">  Welcome to the Deployer config generator  
+
+
+
+ This utility will walk you through creating a deploy.php file.
+ It only covers the most common items, and tries to guess sensible defaults.
+
+ Press ^C at any time to quit.
+
+ Please select your project type [Common]:
+  [0] Common
+  [1] Laravel
+  [2] Symfony
+  [3] Yii
+  [4] Yii2 Basic App
+  [5] Yii2 Advanced App
+  [6] Zend Framework
+  [7] CakePHP
+  [8] CodeIgniter
+  [9] Drupal
+ &gt;
+</code></pre>
 <p>Here I chose Laravel as I was deploying a Laravel project. I was then prompted for the repository URL - this will be filled in with the origin remote if the current folder is already a Git repository:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>Repository [git@gitlab.com:Group/Project.git]:</td><tr><td class="linenos" data-pseudo-content="2"></td><td> &gt; </td></table></code></pre>
+<pre><code class="lang-bash">Repository [git@gitlab.com:Group/Project.git]:
+ &gt; 
+</code></pre>
 <p>You’ll also see a message about contributing anonymous usage data. After answering this, the file <code>deploy.php</code> will be generated:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">Deployer</span>;</td><tr><td class="linenos" data-pseudo-content="3"></td><td></td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">require</span> <span class="hljs-string">'recipe/laravel.php'</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-comment">// Configuration</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td>set(<span class="hljs-string">'repository'</span>, <span class="hljs-string">'git@gitlab.com:Group/Project.git'</span>);</td><tr><td class="linenos" data-pseudo-content="9"></td><td>set(<span class="hljs-string">'git_tty'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// [Optional] Allocate tty for git on first deployment</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td>add(<span class="hljs-string">'shared_files'</span>, []);</td><tr><td class="linenos" data-pseudo-content="11"></td><td>add(<span class="hljs-string">'shared_dirs'</span>, []);</td><tr><td class="linenos" data-pseudo-content="12"></td><td>add(<span class="hljs-string">'writable_dirs'</span>, []);</td><tr><td class="linenos" data-pseudo-content="13"></td><td></td><tr><td class="linenos" data-pseudo-content="14"></td><td></td><tr><td class="linenos" data-pseudo-content="15"></td><td><span class="hljs-comment">// Hosts</span></td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>host(<span class="hljs-string">'project.com'</span>)</td><tr><td class="linenos" data-pseudo-content="18"></td><td>    -&gt;stage(<span class="hljs-string">'production'</span>)</td><tr><td class="linenos" data-pseudo-content="19"></td><td>    -&gt;set(<span class="hljs-string">'deploy_path'</span>, <span class="hljs-string">'/var/www/project.com'</span>);</td><tr><td class="linenos" data-pseudo-content="20"></td><td></td><tr><td class="linenos" data-pseudo-content="21"></td><td>host(<span class="hljs-string">'beta.project.com'</span>)</td><tr><td class="linenos" data-pseudo-content="22"></td><td>    -&gt;stage(<span class="hljs-string">'beta'</span>)</td><tr><td class="linenos" data-pseudo-content="23"></td><td>    -&gt;set(<span class="hljs-string">'deploy_path'</span>, <span class="hljs-string">'/var/www/project.com'</span>);  </td><tr><td class="linenos" data-pseudo-content="24"></td><td></td><tr><td class="linenos" data-pseudo-content="25"></td><td></td><tr><td class="linenos" data-pseudo-content="26"></td><td><span class="hljs-comment">// Tasks</span></td><tr><td class="linenos" data-pseudo-content="27"></td><td></td><tr><td class="linenos" data-pseudo-content="28"></td><td>desc(<span class="hljs-string">'Restart PHP-FPM service'</span>);</td><tr><td class="linenos" data-pseudo-content="29"></td><td>task(<span class="hljs-string">'php-fpm:restart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</td><tr><td class="linenos" data-pseudo-content="30"></td><td>    <span class="hljs-comment">// The user must have rights for restart service</span></td><tr><td class="linenos" data-pseudo-content="31"></td><td>    <span class="hljs-comment">// /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service</span></td><tr><td class="linenos" data-pseudo-content="32"></td><td>    run(<span class="hljs-string">'sudo systemctl restart php-fpm.service'</span>);</td><tr><td class="linenos" data-pseudo-content="33"></td><td>});</td><tr><td class="linenos" data-pseudo-content="34"></td><td>after(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'php-fpm:restart'</span>);</td><tr><td class="linenos" data-pseudo-content="35"></td><td></td><tr><td class="linenos" data-pseudo-content="36"></td><td><span class="hljs-comment">// [Optional] if deploy fails automatically unlock.</span></td><tr><td class="linenos" data-pseudo-content="37"></td><td>after(<span class="hljs-string">'deploy:failed'</span>, <span class="hljs-string">'deploy:unlock'</span>);</td><tr><td class="linenos" data-pseudo-content="38"></td><td></td><tr><td class="linenos" data-pseudo-content="39"></td><td><span class="hljs-comment">// Migrate database before symlink new release.</span></td><tr><td class="linenos" data-pseudo-content="40"></td><td></td><tr><td class="linenos" data-pseudo-content="41"></td><td>before(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'artisan:migrate'</span>);</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+namespace Deployer;
+
+require &#39;recipe/laravel.php&#39;;
+
+// Configuration
+
+set(&#39;repository&#39;, &#39;git@gitlab.com:Group/Project.git&#39;);
+set(&#39;git_tty&#39;, true); // [Optional] Allocate tty for git on first deployment
+add(&#39;shared_files&#39;, []);
+add(&#39;shared_dirs&#39;, []);
+add(&#39;writable_dirs&#39;, []);
+
+
+// Hosts
+
+host(&#39;project.com&#39;)
+    -&gt;stage(&#39;production&#39;)
+    -&gt;set(&#39;deploy_path&#39;, &#39;/var/www/project.com&#39;);
+
+host(&#39;beta.project.com&#39;)
+    -&gt;stage(&#39;beta&#39;)
+    -&gt;set(&#39;deploy_path&#39;, &#39;/var/www/project.com&#39;);  
+
+
+// Tasks
+
+desc(&#39;Restart PHP-FPM service&#39;);
+task(&#39;php-fpm:restart&#39;, function () {
+    // The user must have rights for restart service
+    // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service
+    run(&#39;sudo systemctl restart php-fpm.service&#39;);
+});
+after(&#39;deploy:symlink&#39;, &#39;php-fpm:restart&#39;);
+
+// [Optional] if deploy fails automatically unlock.
+after(&#39;deploy:failed&#39;, &#39;deploy:unlock&#39;);
+
+// Migrate database before symlink new release.
+
+before(&#39;deploy:symlink&#39;, &#39;artisan:migrate&#39;);
+</code></pre>
 <p>By default it has two hosts, <code>beta</code> and <code>production</code>, and you can refer to them by these names. You can also add or remove hosts, and amend the existing ones. Note the deploy path as well - this sets the place where the application gets deployed to.</p>
 <p>Note that it’s set up to expect the server to be using PHP-FPM and Nginx by default, so if you’re using Apache you may need to amend the command to restart the server. Also, note that if like me you’re using PHP 7 on a distro like Debian that also has PHP 5 around, you’ll probably need to change the references to <code>php-fpm</code> as follows:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>desc(<span class="hljs-string">'Restart PHP-FPM service'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td>task(<span class="hljs-string">'php-fpm:restart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-comment">// The user must have rights for restart service</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-comment">// /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>    run(<span class="hljs-string">'sudo systemctl restart php7.0-fpm.service'</span>);</td><tr><td class="linenos" data-pseudo-content="6"></td><td>});</td><tr><td class="linenos" data-pseudo-content="7"></td><td>after(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'php-fpm:restart'</span>);</td></table></code></pre>
+<pre><code class="lang-php">desc(&#39;Restart PHP-FPM service&#39;);
+task(&#39;php-fpm:restart&#39;, function () {
+    // The user must have rights for restart service
+    // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service
+    run(&#39;sudo systemctl restart php7.0-fpm.service&#39;);
+});
+after(&#39;deploy:symlink&#39;, &#39;php-fpm:restart&#39;);
+</code></pre>
 <p>You will also need to make sure the <code>acl</code> package is installed - on Debian and Ubuntu you can install it as follows:</p>
-<pre><code class="hljs lang-bash singleline">$ sudo apt-get install acl</code></pre>
+<pre><code class="lang-bash">$ sudo apt-get install acl
+</code></pre>
 <p>Now, the recipe for deploying a Laravel app will include the following:</p>
 <ul>
 <li>Pulling from the Git remote</li>
@@ -41,12 +117,39 @@
 </ul>
 <p>In addition, one really great feature Deployer offers is rollbacks. Rather than checking out your application directly into the project root you specify, it numbers each release and deploys it in a separate folder, before symlinking that folder to the project root as <code>current</code>. That way, if a release cannot be deployed successfully, rather than leaving your application in an unfinished state, Deployer will symlink the previous version so that you still have a working version of your application.</p>
 <p>If you have configured Deployer for that project, you can deploy using the following command where <code>production</code> is the name of the host you’re deploying to:</p>
-<pre><code class="hljs lang-bash singleline">$ dep deploy production</code></pre>
+<pre><code class="lang-bash">$ dep deploy production
+</code></pre>
 <p>The output will look something like this:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>✔ Executing task deploy:prepare</td><tr><td class="linenos" data-pseudo-content="2"></td><td>✔ Executing task deploy:lock</td><tr><td class="linenos" data-pseudo-content="3"></td><td>✔ Executing task deploy:release</td><tr><td class="linenos" data-pseudo-content="4"></td><td>➤ Executing task deploy:update_code</td><tr><td class="linenos" data-pseudo-content="5"></td><td>Counting objects: 761, <span class="hljs-keyword">done</span>.</td><tr><td class="linenos" data-pseudo-content="6"></td><td>Compressing objects: 100% (313/313), <span class="hljs-keyword">done</span>.</td><tr><td class="linenos" data-pseudo-content="7"></td><td>Writing objects: 100% (761/761), <span class="hljs-keyword">done</span>.</td><tr><td class="linenos" data-pseudo-content="8"></td><td>Total 761 (delta 384), reused 757 (delta 380)</td><tr><td class="linenos" data-pseudo-content="9"></td><td>Connection to linklater.shellshocked.info closed.</td><tr><td class="linenos" data-pseudo-content="10"></td><td>✔ Ok</td><tr><td class="linenos" data-pseudo-content="11"></td><td>✔ Executing task deploy:shared</td><tr><td class="linenos" data-pseudo-content="12"></td><td>✔ Executing task deploy:vendors</td><tr><td class="linenos" data-pseudo-content="13"></td><td>✔ Executing task deploy:writable</td><tr><td class="linenos" data-pseudo-content="14"></td><td>✔ Executing task artisan:storage:link</td><tr><td class="linenos" data-pseudo-content="15"></td><td>✔ Executing task artisan:view:clear</td><tr><td class="linenos" data-pseudo-content="16"></td><td>✔ Executing task artisan:cache:clear</td><tr><td class="linenos" data-pseudo-content="17"></td><td>✔ Executing task artisan:config:cache</td><tr><td class="linenos" data-pseudo-content="18"></td><td>✔ Executing task artisan:optimize</td><tr><td class="linenos" data-pseudo-content="19"></td><td>✔ Executing task artisan:migrate</td><tr><td class="linenos" data-pseudo-content="20"></td><td>✔ Executing task deploy:symlink</td><tr><td class="linenos" data-pseudo-content="21"></td><td>✔ Executing task php-fpm:restart</td><tr><td class="linenos" data-pseudo-content="22"></td><td>✔ Executing task deploy:unlock</td><tr><td class="linenos" data-pseudo-content="23"></td><td>✔ Executing task cleanup</td><tr><td class="linenos" data-pseudo-content="24"></td><td>✔ Executing task success</td><tr><td class="linenos" data-pseudo-content="25"></td><td>Successfully deployed!</td></table></code></pre>
+<pre><code class="lang-bash">✔ Executing task deploy:prepare
+✔ Executing task deploy:lock
+✔ Executing task deploy:release
+➤ Executing task deploy:update_code
+Counting objects: 761, done.
+Compressing objects: 100% (313/313), done.
+Writing objects: 100% (761/761), done.
+Total 761 (delta 384), reused 757 (delta 380)
+Connection to linklater.shellshocked.info closed.
+✔ Ok
+✔ Executing task deploy:shared
+✔ Executing task deploy:vendors
+✔ Executing task deploy:writable
+✔ Executing task artisan:storage:link
+✔ Executing task artisan:view:clear
+✔ Executing task artisan:cache:clear
+✔ Executing task artisan:config:cache
+✔ Executing task artisan:optimize
+✔ Executing task artisan:migrate
+✔ Executing task deploy:symlink
+✔ Executing task php-fpm:restart
+✔ Executing task deploy:unlock
+✔ Executing task cleanup
+✔ Executing task success
+Successfully deployed!
+</code></pre>
 <p>As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the <code>.env</code> file, the <code>storage/</code> directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimize our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.</p>
 <p>In the event you discover a problem after deploy and need to rollback manually, you can do so with the following command:</p>
-<pre><code class="hljs lang-bash singleline">$ dep rollback production</code></pre>
+<pre><code class="lang-bash">$ dep rollback production
+</code></pre>
 <p>That makes it easy to ensure that in the event of something going wrong, you can quickly switch back to an earlier version with zero downtime.</p>
 <p>Deployer has made deployments a lot less painful for me than any other solution I’ve tried. The support for rollbacks means that if something goes wrong it’s trivial to switch back to an earlier revision.</p>
 ]]></description>
@@ -57,11 +160,61 @@
             <guid>https://matthewdaly.co.uk/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/</guid>
             <pubDate>Mon, 05 Sep 2016 21:22:16 GMT</pubDate>
             <description><![CDATA[<p><a href="https://laravel.com/docs/5.3/envoy">Envoy</a> is the official way to run tasks on a remote server for Laravel apps. A typical Envoy task for deploying a new version might look like this:</p>
-<pre><code class="hljs lang-blade"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-variable">@servers</span>([<span class="hljs-string">'web'</span> =&gt; <span class="hljs-string">'matthew@server1.example.com'</span>])</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-variable">@task</span>(<span class="hljs-string">'deploy'</span>, [<span class="hljs-string">'on'</span> =&gt; <span class="hljs-string">'web'</span>])</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    cd /var/www</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    sudo chown -R <span class="hljs-attribute">matthew</span>:matthew .</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    git pull origin master</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    php artisan migrate</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    php artisan <span class="hljs-attribute">view</span>:clear</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    composer dump-autoload</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    sudo chown -R <span class="hljs-attribute">www-data</span>:www-data .</td><tr><td class="linenos" data-pseudo-content="11"></td><td>    sudo supervisorctl restart mail-queue</td><tr><td class="linenos" data-pseudo-content="12"></td><td><span class="hljs-variable">@endtask</span></td></table></code></pre>
+<pre><code class="lang-blade">@servers([&#39;web&#39; =&gt; &#39;matthew@server1.example.com&#39;])
+
+@task(&#39;deploy&#39;, [&#39;on&#39; =&gt; &#39;web&#39;])
+    cd /var/www
+    sudo chown -R matthew:matthew .
+    git pull origin master
+    php artisan migrate
+    php artisan view:clear
+    composer dump-autoload
+    sudo chown -R www-data:www-data .
+    sudo supervisorctl restart mail-queue
+@endtask
+</code></pre>
 <p>This would be defined in <code>Envoy.blade.php</code>. With this in place, and Envoy set up globally, you can then run <code>envoy run deploy</code> to run the <code>deploy</code> command.</p>
 <p>However, Envoy requires the PHP SSH library, which I haven’t been able to get working with PHP 7. Fortunately I was already familiar with <a href="http://www.fabfile.org/">Fabric</a>, which makes an excellent alternative as long as you don’t mind writing the task in Python.</p>
 <p>The same kind of task might look like this in a Fabric script, saved as <code>fabfile.py</code>:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-comment">#!/usr/bin/env python</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> fabric.api <span class="hljs-keyword">import</span> local, env, run, sudo</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">from</span> fabric.context_managers <span class="hljs-keyword">import</span> cd, prefix</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>env.hosts = [<span class="hljs-string">'server1.example.com'</span>]</td><tr><td class="linenos" data-pseudo-content="6"></td><td>env.path = <span class="hljs-string">"/var/www"</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>env.user = <span class="hljs-string">"matthew"</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>env.password = <span class="hljs-string">"password"</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td><span class="hljs-comment"># Or...</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td>env.key_filename = <span class="hljs-string">'/path/to/ssh/key'</span></td><tr><td class="linenos" data-pseudo-content="11"></td><td></td><tr><td class="linenos" data-pseudo-content="12"></td><td><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deploy</span><span class="hljs-params">()</span>:</span></td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-string">"""</td><tr><td class="linenos" data-pseudo-content="14"></td><td>    Deploy the latest version</td><tr><td class="linenos" data-pseudo-content="15"></td><td>    """</span></td><tr><td class="linenos" data-pseudo-content="16"></td><td>    <span class="hljs-comment"># Push changes to Bitbucket</span></td><tr><td class="linenos" data-pseudo-content="17"></td><td>    local(<span class="hljs-string">"git push origin master"</span>)</td><tr><td class="linenos" data-pseudo-content="18"></td><td></td><tr><td class="linenos" data-pseudo-content="19"></td><td>    <span class="hljs-comment"># Switch to project directory</span></td><tr><td class="linenos" data-pseudo-content="20"></td><td>    <span class="hljs-keyword">with</span> cd(env.path):</td><tr><td class="linenos" data-pseudo-content="21"></td><td>        <span class="hljs-comment"># Change owner</span></td><tr><td class="linenos" data-pseudo-content="22"></td><td>        sudo(<span class="hljs-string">'chown -R matthew:matthew .'</span>)</td><tr><td class="linenos" data-pseudo-content="23"></td><td></td><tr><td class="linenos" data-pseudo-content="24"></td><td>        <span class="hljs-comment"># Pull changes to server</span></td><tr><td class="linenos" data-pseudo-content="25"></td><td>        run(<span class="hljs-string">'git pull origin master'</span>)</td><tr><td class="linenos" data-pseudo-content="26"></td><td></td><tr><td class="linenos" data-pseudo-content="27"></td><td>        <span class="hljs-comment"># Run migrations</span></td><tr><td class="linenos" data-pseudo-content="28"></td><td>        run(<span class="hljs-string">'php artisan migrate'</span>)</td><tr><td class="linenos" data-pseudo-content="29"></td><td></td><tr><td class="linenos" data-pseudo-content="30"></td><td>        <span class="hljs-comment"># Clear cached files</span></td><tr><td class="linenos" data-pseudo-content="31"></td><td>        run(<span class="hljs-string">'php artisan view:clear'</span>)</td><tr><td class="linenos" data-pseudo-content="32"></td><td>        run(<span class="hljs-string">'composer dump-autoload'</span>)</td><tr><td class="linenos" data-pseudo-content="33"></td><td></td><tr><td class="linenos" data-pseudo-content="34"></td><td>        <span class="hljs-comment"># Change owner back</span></td><tr><td class="linenos" data-pseudo-content="35"></td><td>        sudo(<span class="hljs-string">'chown -R www-data:www-data .'</span>)</td><tr><td class="linenos" data-pseudo-content="36"></td><td></td><tr><td class="linenos" data-pseudo-content="37"></td><td>        <span class="hljs-comment"># restart mail queue</span></td><tr><td class="linenos" data-pseudo-content="38"></td><td>        sudo(<span class="hljs-string">'supervisorctl restart mail-queue'</span>)</td></table></code></pre>
+<pre><code class="lang-python">#!/usr/bin/env python
+from fabric.api import local, env, run, sudo
+from fabric.context_managers import cd, prefix
+
+env.hosts = [&#39;server1.example.com&#39;]
+env.path = &quot;/var/www&quot;
+env.user = &quot;matthew&quot;
+env.password = &quot;password&quot;
+# Or...
+env.key_filename = &#39;/path/to/ssh/key&#39;
+
+def deploy():
+    &quot;&quot;&quot;
+    Deploy the latest version
+    &quot;&quot;&quot;
+    # Push changes to Bitbucket
+    local(&quot;git push origin master&quot;)
+
+    # Switch to project directory
+    with cd(env.path):
+        # Change owner
+        sudo(&#39;chown -R matthew:matthew .&#39;)
+
+        # Pull changes to server
+        run(&#39;git pull origin master&#39;)
+
+        # Run migrations
+        run(&#39;php artisan migrate&#39;)
+
+        # Clear cached files
+        run(&#39;php artisan view:clear&#39;)
+        run(&#39;composer dump-autoload&#39;)
+
+        # Change owner back
+        sudo(&#39;chown -R www-data:www-data .&#39;)
+
+        # restart mail queue
+        sudo(&#39;supervisorctl restart mail-queue&#39;)
+</code></pre>
 <p>Then, assuming Fabric is already installed locally, you can run <code>fab deploy</code> to push up the latest revision.</p>
 <p>Either of these solutions will do a fine job of deploying your app. If you do need to store user-specific data in your Fabric script, it’s probably prudent to keep it out of version control.</p>
 <p>Whichever way you choose, it’s a really good idea to do what you can to automate deployment. It can be a boring, repetitive job, and both of these solutions make it much easier.</p>

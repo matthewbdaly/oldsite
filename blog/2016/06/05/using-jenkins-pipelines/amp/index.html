@@ -184,24 +184,24 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th June 2016 4:32 pm</p><h1>Using Jenkins Pipelines</h1><p>I use Jenkins as my main continuous integration solution at work, largely for two reasons:</p><ul><li>It generally works out cheaper to host it ourselves than to use one of the paid CI solutions for closed-source projects</li><li>The size of the plugin ecosystem</li></ul><p>However, we also use Travis CI for testing one or two open-source projects, and one distinct advantage Travis has is the way you can configure it using a single text file.</p><p>With the Pipeline plugin, it’s possible to define the steps required to run your tests in a <code>Jenkinsfile</code> and then set up a Pipeline job which reads that file from the version control system and runs it accordingly. Here’s a sample <code>Jenkinsfile</code> for a Laravel project:</p><pre><code class="hljs lang-groovy">node {
-   <span class="hljs-comment">// Mark the code checkout 'stage'....</span>
-   stage <span class="hljs-string">'Checkout'</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th June 2016 4:32 pm</p><h1>Using Jenkins Pipelines</h1><p>I use Jenkins as my main continuous integration solution at work, largely for two reasons:</p><ul><li>It generally works out cheaper to host it ourselves than to use one of the paid CI solutions for closed-source projects</li><li>The size of the plugin ecosystem</li></ul><p>However, we also use Travis CI for testing one or two open-source projects, and one distinct advantage Travis has is the way you can configure it using a single text file.</p><p>With the Pipeline plugin, it’s possible to define the steps required to run your tests in a <code>Jenkinsfile</code> and then set up a Pipeline job which reads that file from the version control system and runs it accordingly. Here’s a sample <code>Jenkinsfile</code> for a Laravel project:</p><pre><code class="lang-groovy">node {
+   // Mark the code checkout &#39;stage&#39;....
+   stage &#39;Checkout&#39;
 
-   <span class="hljs-comment">// Get some code from a Bitbucket repository</span>
-   git <span class="hljs-string">credentialsId:</span> <span class="hljs-string">'5239c33e-10ab-4c1b-a4a0-91b96a07955e'</span>, <span class="hljs-string">url:</span> <span class="hljs-string">'git@bitbucket.org:matthewbdaly/my-app.git'</span>
+   // Get some code from a Bitbucket repository
+   git credentialsId: &#39;5239c33e-10ab-4c1b-a4a0-91b96a07955e&#39;, url: &#39;git@bitbucket.org:matthewbdaly/my-app.git&#39;
 
-   <span class="hljs-comment">// Install dependencies</span>
-   stage <span class="hljs-string">'Install dependencies'</span>
+   // Install dependencies
+   stage &#39;Install dependencies&#39;
 
-   <span class="hljs-comment">// Run Composer</span>
-   sh <span class="hljs-string">'composer install'</span>
+   // Run Composer
+   sh &#39;composer install&#39;
 
-   <span class="hljs-comment">// Test stage</span>
-   stage <span class="hljs-string">'Test'</span>
+   // Test stage
+   stage &#39;Test&#39;
 
-   <span class="hljs-comment">// Run the tests</span>
-   sh <span class="hljs-string">"vendor/bin/phpunit"</span>
+   // Run the tests
+   sh &quot;vendor/bin/phpunit&quot;
 }
 </code></pre><p>Note the steps it’s broken down into:</p><ul><li><code>stage</code> defines the start of a new stage in the build</li><li><code>git</code> defines a point where we check out the code from the repository</li><li><code>sh</code> defines a point where we run a shell command</li></ul><p>Using these three commands it’s straightforward to define a fairly simple build process for your application in a way that’s more easily repeatable when creating new projects - for instance, you can copy this over to a new project and change the source repository URL and you’re pretty much ready to go.</p><p>Unfortunately, support for the Pipeline plugin is missing from a lot of Jenkins plugins - for instance, I can’t publish the XML coverage reports. This is something of a deal-breaker for most of my projects as I use these kind of report plugins a lot - it’s one of the reasons I chose Jenkins over Travis. Still, this is definitely a big step forward, and if you don’t need this kind of reporting then there’s no reason not to consider using the Pipeline plugin for your Jenkins jobs. Hopefully in future more plugins will be amended to work with Pipeline so that it’s more widely usable.</p><section><ul class="categories"><li><a href="/blog/categories/jenkins/">jenkins</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/06/05/using-jenkins-pipelines/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/08/08/testing-your-api-documentation-with-dredd/amp/">Testing Your API Documentation With Dredd</a> <a class="postlink" href="/blog/2016/05/22/adding-google-amp-support-to-my-site/amp/">Adding Google AMP Support to My Site</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {

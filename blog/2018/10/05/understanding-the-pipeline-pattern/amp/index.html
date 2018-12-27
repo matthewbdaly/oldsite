@@ -183,106 +183,106 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th October 2018 7:36 pm</p><h1>Understanding the Pipeline Pattern</h1><p>In a previous post, I used the pipeline pattern to demonstrate processing letters using optical recognition and machine learning. The pipeline pattern is something I’ve found very useful in recent months. For a sequential series of tasks, this approach can make your code easier to understand by allowing you to break it up into simple, logical steps which are easy to test and understand individually. If you’re familiar with pipes and redirection in Unix, you’ll be aware of how you can chain together multiple, relatively simple commands to carry out some very complex transformations on data.</p><p>A few months back, I was asked to build a webhook for a Facebook lead form at work. One of my colleagues was having to manually export CSV data from Facebook for the data, and then import it into a MySQL database and a Campaign Monitor mailing list, which was an onerous task, so they asked me to look at more automated solutions. I wound up building a webhook with Lumen that would go through the following steps:</p><ul><li>Get the lead ID’s from the webhook</li><li>Pull the leads from the Facebook API using those ID’s</li><li>Process the raw data into a more suitable format</li><li>Save the data to the database</li><li>Push the data to Campaign Monitor</li></ul><p>Since this involved a number of discrete steps, I chose to implement each step as a separate stage. That way, each step was easy to test in isolation, and it was easily reusable. As it turned out, this approach saved us because Facebook needed to approve this app (and ended up rejecting it - their documentation at the time wasn’t clear on implementing server-to-server apps, making it hard to meet their guidelines), so we needed an interim solution. I instead wrote an Artisan task for importing the file from a CSV, which involved the following steps:</p><ul><li>Read the rows from the CSV file</li><li>Format the CSV data into the desired format</li><li>Save the data to the database</li><li>Push the data to Campaign Monitor</li></ul><p>This meant that two of the existing steps could be reused, as is, without touching the code or tests. I just added two new classes to read the data and format the data, and the Artisan command, which simply called the various pipeline stages, <em>and that was all</em>. In this post, I’ll demonstrate how I implemented this.</p><p>While there is more than one implementation of this available, and it wouldn’t be hard to roll your own, I generally use the PHP League’s <a href="https://pipeline.thephpleague.com/">Pipeline package</a>, since it’s simple, solid and well-tested. Let’s say our application has three steps:</p><ul><li>Format the request data</li><li>Save the data</li><li>Push it to a third party service.</li></ul><p>We therefore need to write a stage for each step in the process. Each one must be a callable, such as a closure, a callback, or a class that implements the <code>__invoke()</code> magic method. I usually go for the latter as it allows you to more easily inject dependencies into the stage via its constructor, making it easier to use and test. Here’s what our first stage might look like:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">5th October 2018 7:36 pm</p><h1>Understanding the Pipeline Pattern</h1><p>In a previous post, I used the pipeline pattern to demonstrate processing letters using optical recognition and machine learning. The pipeline pattern is something I’ve found very useful in recent months. For a sequential series of tasks, this approach can make your code easier to understand by allowing you to break it up into simple, logical steps which are easy to test and understand individually. If you’re familiar with pipes and redirection in Unix, you’ll be aware of how you can chain together multiple, relatively simple commands to carry out some very complex transformations on data.</p><p>A few months back, I was asked to build a webhook for a Facebook lead form at work. One of my colleagues was having to manually export CSV data from Facebook for the data, and then import it into a MySQL database and a Campaign Monitor mailing list, which was an onerous task, so they asked me to look at more automated solutions. I wound up building a webhook with Lumen that would go through the following steps:</p><ul><li>Get the lead ID’s from the webhook</li><li>Pull the leads from the Facebook API using those ID’s</li><li>Process the raw data into a more suitable format</li><li>Save the data to the database</li><li>Push the data to Campaign Monitor</li></ul><p>Since this involved a number of discrete steps, I chose to implement each step as a separate stage. That way, each step was easy to test in isolation, and it was easily reusable. As it turned out, this approach saved us because Facebook needed to approve this app (and ended up rejecting it - their documentation at the time wasn’t clear on implementing server-to-server apps, making it hard to meet their guidelines), so we needed an interim solution. I instead wrote an Artisan task for importing the file from a CSV, which involved the following steps:</p><ul><li>Read the rows from the CSV file</li><li>Format the CSV data into the desired format</li><li>Save the data to the database</li><li>Push the data to Campaign Monitor</li></ul><p>This meant that two of the existing steps could be reused, as is, without touching the code or tests. I just added two new classes to read the data and format the data, and the Artisan command, which simply called the various pipeline stages, <em>and that was all</em>. In this post, I’ll demonstrate how I implemented this.</p><p>While there is more than one implementation of this available, and it wouldn’t be hard to roll your own, I generally use the PHP League’s <a href="https://pipeline.thephpleague.com/">Pipeline package</a>, since it’s simple, solid and well-tested. Let’s say our application has three steps:</p><ul><li>Format the request data</li><li>Save the data</li><li>Push it to a third party service.</li></ul><p>We therefore need to write a stage for each step in the process. Each one must be a callable, such as a closure, a callback, or a class that implements the <code>__invoke()</code> magic method. I usually go for the latter as it allows you to more easily inject dependencies into the stage via its constructor, making it easier to use and test. Here’s what our first stage might look like:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>;
+namespace App\Stages;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Collection</span>;
+use Illuminate\Support\Collection;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FormatData</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(Collection $data)</span>: <span class="hljs-title">Collection</span>
-    </span>{
-        <span class="hljs-keyword">return</span> $data-&gt;map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
-            <span class="hljs-keyword">return</span> [
-                <span class="hljs-string">'name'</span> =&gt; $item-&gt;fullname,
-                <span class="hljs-string">'email'</span> =&gt; $item-&gt;email
+class FormatData
+{
+    public function __invoke(Collection $data): Collection
+    {
+        return $data-&gt;map(function ($item) {
+            return [
+                &#39;name&#39; =&gt; $item-&gt;fullname,
+                &#39;email&#39; =&gt; $item-&gt;email
             ];
         });
     }
 }
-</code></pre><p>This class does nothing more than receive a collection, and format the data as expected. We could have it accept a request object instead, but I opted not to because I felt it made more sense to pass the data in as a collection so it’s not tied to an HTTP request. That way, it can also handle data passed through from a CSV file using an Artisan task, and the details of how it receives the data in the first place are deferred to the class that calls the pipeline in the first place. Note this stage also returns a collection, for handling by the next step:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>This class does nothing more than receive a collection, and format the data as expected. We could have it accept a request object instead, but I opted not to because I felt it made more sense to pass the data in as a collection so it’s not tied to an HTTP request. That way, it can also handle data passed through from a CSV file using an Artisan task, and the details of how it receives the data in the first place are deferred to the class that calls the pipeline in the first place. Note this stage also returns a collection, for handling by the next step:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>;
+namespace App\Stages;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Lead</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Collection</span>;
+use App\Lead;
+use Illuminate\Support\Collection;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">SaveData</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(Collection $data)</span>: <span class="hljs-title">Collection</span>
-    </span>{
-        <span class="hljs-keyword">return</span> $data-&gt;map(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
-            $lead = <span class="hljs-keyword">new</span> Lead;
+class SaveData
+{
+    public function __invoke(Collection $data): Collection
+    {
+        return $data-&gt;map(function ($item) {
+            $lead = new Lead;
             $lead-&gt;name = $item-&gt;name;
             $lead-&gt;email = $item-&gt;email;
             $lead-&gt;save();
-            <span class="hljs-keyword">return</span> $lead;
+            return $lead;
         }
     }
 }
-</code></pre><p>This step saves each lead as an Eloquent model, and returns a collection of the saved models, which are passed to the final step:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>This step saves each lead as an Eloquent model, and returns a collection of the saved models, which are passed to the final step:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>;
+namespace App\Stages;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">MailingList</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Collection</span>;
+use App\Contracts\Services\MailingList;
+use Illuminate\Support\Collection;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddDataToList</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $list;
+class AddDataToList
+{
+    protected $list;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(MailingList $list)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;list = $list;
+    public function __construct(MailingList $list)
+    {
+        $this-&gt;list = $list;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(Collection $data)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> $data-&gt;each(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($item)</span> </span>{
-            <span class="hljs-keyword">$this</span>-&gt;list-&gt;add([
-                <span class="hljs-string">'name'</span> =&gt; $item-&gt;name,
-                <span class="hljs-string">'email'</span> =&gt; $item-&gt;email
+    public function __invoke(Collection $data)
+    {
+        return $data-&gt;each(function ($item) {
+            $this-&gt;list-&gt;add([
+                &#39;name&#39; =&gt; $item-&gt;name,
+                &#39;email&#39; =&gt; $item-&gt;email
             ]);
         });
     }
 }
-</code></pre><p>This step uses a wrapper class for a mailing service, which is passed through as a dependency in the constructor. The <code>__invoke()</code> method then loops through each Eloquent model and uses it to fetch the data, which is then added to the list. With our stages complete, we can now put them together in our controller:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>This step uses a wrapper class for a mailing service, which is passed through as a dependency in the constructor. The <code>__invoke()</code> method then loops through each Eloquent model and uses it to fetch the data, which is then added to the list. With our stages complete, we can now put them together in our controller:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace App\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>\<span class="hljs-title">FormatData</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>\<span class="hljs-title">SaveData</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Stages</span>\<span class="hljs-title">AddDataToList</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Pipeline</span>\<span class="hljs-title">Pipeline</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Collection</span>;
+use Illuminate\Http\Request;
+use App\Stages\FormatData;
+use App\Stages\SaveData;
+use App\Stages\AddDataToList;
+use League\Pipeline\Pipeline;
+use Illuminate\Support\Collection;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">WebhookController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request, Pipeline $pipeline, FormatData $formatData, SaveData $savedata, AddDataToList $addData)</span>
-    </span>{
-        <span class="hljs-keyword">try</span> {
-            $data = Collection::make($request-&gt;get(<span class="hljs-string">'data'</span>));
+class WebhookController extends Controller
+{
+    public function store(Request $request, Pipeline $pipeline, FormatData $formatData, SaveData $savedata, AddDataToList $addData)
+    {
+        try {
+            $data = Collection::make($request-&gt;get(&#39;data&#39;));
             $pipe = $pipeline-&gt;pipe($formatData)
                 -&gt;pipe($saveData)
                 -&gt;pipe($addData);
             $pipe-&gt;process($data);
-        } <span class="hljs-keyword">catch</span> (\<span class="hljs-keyword">Exception</span> $e) {
-            <span class="hljs-comment">// Handle exception</span>
+        } catch (\Exception $e) {
+            // Handle exception
         }
     }
 }
-</code></pre><p>As mentioned above, we extract the request data (assumed to be an array of data for a webhook), and convert it into a collection. Then, we put together our pipeline. Note that we use dependency injection to fetch the steps - feel free to use method or constructor injection as appropriate. We instantiate our pipeline, and call the <code>pipe()</code> method multiple times to add new stages.</p><p>Finally we pass the data through to our pipe for processing by calling the <code>process()</code> method, passing in the initial data. Note that we can wrap the whole thing in a <code>try...catch</code> statement to handle exceptions, so if something happens that would mean we would want to cease processing at that point, we can throw an exception in the stage and handle it outside the pipeline.</p><p>This means that our controller is kept very simple. It just gets the data as a collection, then puts the pipeline together and passes the data through. If we subsequently had to write an Artisan task to do something similar from the command line, we could fetch the data via a CSV reader class, and then pass it to the same pipeline. If we needed to change the format of the initial data, we could replace the <code>FormatData</code> class with a single separate class with very little trouble.</p><p>Another thing you can do with the League pipeline package, but I haven’t yet had the occasion to try, is use <code>League\Pipeline\PipelineBuilder</code> to build pipelines in a more dynamic fashion. You can make steps conditional, as in this example:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>As mentioned above, we extract the request data (assumed to be an array of data for a webhook), and convert it into a collection. Then, we put together our pipeline. Note that we use dependency injection to fetch the steps - feel free to use method or constructor injection as appropriate. We instantiate our pipeline, and call the <code>pipe()</code> method multiple times to add new stages.</p><p>Finally we pass the data through to our pipe for processing by calling the <code>process()</code> method, passing in the initial data. Note that we can wrap the whole thing in a <code>try...catch</code> statement to handle exceptions, so if something happens that would mean we would want to cease processing at that point, we can throw an exception in the stage and handle it outside the pipeline.</p><p>This means that our controller is kept very simple. It just gets the data as a collection, then puts the pipeline together and passes the data through. If we subsequently had to write an Artisan task to do something similar from the command line, we could fetch the data via a CSV reader class, and then pass it to the same pipeline. If we needed to change the format of the initial data, we could replace the <code>FormatData</code> class with a single separate class with very little trouble.</p><p>Another thing you can do with the League pipeline package, but I haven’t yet had the occasion to try, is use <code>League\Pipeline\PipelineBuilder</code> to build pipelines in a more dynamic fashion. You can make steps conditional, as in this example:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Pipeline</span>\<span class="hljs-title">PipelineBuilder</span>;
+use League\Pipeline\PipelineBuilder;
 
-$builder = (<span class="hljs-keyword">new</span> PipelineBuilder)
-    -&gt;add(<span class="hljs-keyword">new</span> FormatData);
-<span class="hljs-keyword">if</span> ($data[<span class="hljs-string">'type'</span>] = <span class="hljs-string">'foo'</span>) {
-    $builder-&gt;add(<span class="hljs-keyword">new</span> HandleFooType);
+$builder = (new PipelineBuilder)
+    -&gt;add(new FormatData);
+if ($data[&#39;type&#39;] = &#39;foo&#39;) {
+    $builder-&gt;add(new HandleFooType);
 }
-$builder-&gt;add(<span class="hljs-keyword">new</span> SaveData);
+$builder-&gt;add(new SaveData);
 $pipeline = $builder-&gt;build();
 $pipeline-&gt;process($data);
 </code></pre><p>The pipeline pattern isn’t appropriate for every situation, but for anything that involves a set of operations on the same data, it makes a lot of sense, and can make it easy to break larger operations into smaller steps that are easier to understand, test, and re-use.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/designpatterns/">designpatterns</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/10/05/understanding-the-pipeline-pattern/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/10/08/an-approach-to-writing-golden-master-tests-for-php-web-applications/amp/">An Approach to Writing Golden Master Tests for PHP Web Applications</a> <a class="postlink" href="/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/amp/">Replacing Switch Statements With Polymorphism in PHP</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

@@ -183,112 +183,112 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th August 2016 4:40 pm</p><h1>Maintaining Your CV With Markdown and Emacs</h1><p>I’ve recently been jobhunting, so that has meant having to update my CV. Fortunately, I’ve got into the habit of keeping it up to date easily by writing it in Markdown and generating it in the required format on demand. That way I can easily convert it to HTML, PDF or Microsoft DocX format as and when I need it. I thought I’d share this method as it works very well for me.</p><h2 id="maintaining-your-cv-in-emacs-">Maintaining your CV in Emacs?</h2><p>Yes, you read that right! Although I’m a die-hard Vim user, I do use Emacs for a few things. One of them is time-tracking using <code>org-mode</code>, and another is maintaining my CV.</p><p>First of all you’ll need to install <code>pandoc</code>, <code>texlive</code> and <code>markdown</code>. On Ubuntu this is easily done using <code>apt-get</code>:</p><pre><code class="hljs lang-bash">$ sudo apt-get install pandoc markdown texlive
-</code></pre><p>You’ll also need to install Emacs and the appropriate packages, namely <code>markdown-mode</code> and <code>markdown-mode+</code>. To do so, first ensure this is in your <code>.emacs.d/init.el</code>:</p><pre><code class="hljs lang-lisp">(<span class="hljs-name">require</span> 'package)
-(<span class="hljs-name">add-to-list</span> 'package-archives '(<span class="hljs-string">"melpa"</span> . <span class="hljs-string">"http://melpa.org/packages/"</span>))
-(<span class="hljs-name">package-initialize</span>)
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th August 2016 4:40 pm</p><h1>Maintaining Your CV With Markdown and Emacs</h1><p>I’ve recently been jobhunting, so that has meant having to update my CV. Fortunately, I’ve got into the habit of keeping it up to date easily by writing it in Markdown and generating it in the required format on demand. That way I can easily convert it to HTML, PDF or Microsoft DocX format as and when I need it. I thought I’d share this method as it works very well for me.</p><h2 id="maintaining-your-cv-in-emacs-">Maintaining your CV in Emacs?</h2><p>Yes, you read that right! Although I’m a die-hard Vim user, I do use Emacs for a few things. One of them is time-tracking using <code>org-mode</code>, and another is maintaining my CV.</p><p>First of all you’ll need to install <code>pandoc</code>, <code>texlive</code> and <code>markdown</code>. On Ubuntu this is easily done using <code>apt-get</code>:</p><pre><code class="lang-bash">$ sudo apt-get install pandoc markdown texlive
+</code></pre><p>You’ll also need to install Emacs and the appropriate packages, namely <code>markdown-mode</code> and <code>markdown-mode+</code>. To do so, first ensure this is in your <code>.emacs.d/init.el</code>:</p><pre><code class="lang-lisp">(require &#39;package)
+(add-to-list &#39;package-archives &#39;(&quot;melpa&quot; . &quot;http://melpa.org/packages/&quot;))
+(package-initialize)
 
-<span class="hljs-comment">;; Markdown support</span>
-(<span class="hljs-name">require</span> 'markdown-mode)
-(<span class="hljs-name">require</span> 'markdown-mode+)
-(<span class="hljs-name">setq</span> markdown-command <span class="hljs-string">"/usr/bin/markdown"</span>)
-(<span class="hljs-name">add-to-list</span> 'auto-mode-alist '(<span class="hljs-string">"\\.markdown$"</span> . markdown-mode))
-(<span class="hljs-name">add-to-list</span> 'auto-mode-alist '(<span class="hljs-string">"\\.md$"</span> . markdown-mode))
-(<span class="hljs-name">setq</span> markdown-css-paths `(,(expand-file-name <span class="hljs-string">"Documents/markdown.css"</span>)))
-</code></pre><p>Then fire up Emacs, ignoring the warnings you get, and run <code>M-x package-list-packages</code> to load the list of available packages. I’ll leave navigating and installing this list of packages to you, but once they’re done you should have everything you need.</p><p>This assumes the stylesheet you wish to use is at <code>~/Documents/markdown.css</code> - adjust the path if necessary. You may also need to amend the path to your Markdown install if the location differs. You can put what you like in the stylesheet, but my advice is to keep it as simple as you can - it’s your CV, not a web page. Here’s what I use:</p><pre><code class="hljs lang-css"><span class="hljs-selector-tag">body</span> {
-    <span class="hljs-attribute">font-family</span>: <span class="hljs-string">"Helvetica Neue"</span>, Helvetica, Arial, sans-serif;
-    <span class="hljs-attribute">width</span>: <span class="hljs-number">80%</span>;
-    <span class="hljs-attribute">margin</span>: auto;
-    <span class="hljs-attribute">background</span>: <span class="hljs-number">#ffffff</span>;
-    <span class="hljs-attribute">padding</span>: <span class="hljs-number">10px</span>;
+;; Markdown support
+(require &#39;markdown-mode)
+(require &#39;markdown-mode+)
+(setq markdown-command &quot;/usr/bin/markdown&quot;)
+(add-to-list &#39;auto-mode-alist &#39;(&quot;\\.markdown$&quot; . markdown-mode))
+(add-to-list &#39;auto-mode-alist &#39;(&quot;\\.md$&quot; . markdown-mode))
+(setq markdown-css-paths `(,(expand-file-name &quot;Documents/markdown.css&quot;)))
+</code></pre><p>Then fire up Emacs, ignoring the warnings you get, and run <code>M-x package-list-packages</code> to load the list of available packages. I’ll leave navigating and installing this list of packages to you, but once they’re done you should have everything you need.</p><p>This assumes the stylesheet you wish to use is at <code>~/Documents/markdown.css</code> - adjust the path if necessary. You may also need to amend the path to your Markdown install if the location differs. You can put what you like in the stylesheet, but my advice is to keep it as simple as you can - it’s your CV, not a web page. Here’s what I use:</p><pre><code class="lang-css">body {
+    font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;
+    width: 80%;
+    margin: auto;
+    background: #ffffff;
+    padding: 10px;
 }
 
-<span class="hljs-selector-tag">h2</span> {
-    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">30px</span>;
-    <span class="hljs-attribute">color</span>: <span class="hljs-number">#757575</span>;
-    <span class="hljs-attribute">text-align</span>: center;
-    <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">15px</span>;
+h2 {
+    font-size: 30px;
+    color: #757575;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-<span class="hljs-selector-tag">h1</span> {
-    <span class="hljs-attribute">font-size</span>: <span class="hljs-number">55px</span>;
-    <span class="hljs-attribute">color</span>: <span class="hljs-number">#757575</span>;
-    <span class="hljs-attribute">text-align</span>: center;
-    <span class="hljs-attribute">margin-bottom</span>: <span class="hljs-number">15px</span>;
+h1 {
+    font-size: 55px;
+    color: #757575;
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-<span class="hljs-selector-tag">hr</span> {
-    <span class="hljs-attribute">color</span>: <span class="hljs-number">#000000</span>;
+hr {
+    color: #000000;
 }
 
-<span class="hljs-selector-tag">ul</span> <span class="hljs-selector-tag">li</span> {
-    <span class="hljs-attribute">list-style-type</span>: disc;
+ul li {
+    list-style-type: disc;
 }
 
-<span class="hljs-selector-tag">blockquote</span> {
-    <span class="hljs-attribute">text-align</span>: center;
+blockquote {
+    text-align: center;
 }
 
-<span class="hljs-selector-tag">a</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:visited</span>, <span class="hljs-selector-tag">a</span><span class="hljs-selector-pseudo">:hover</span> {
-    <span class="hljs-attribute">text-decoration</span>: none;
-    <span class="hljs-attribute">color</span>: <span class="hljs-number">#000000</span>;
+a, a:visited, a:hover {
+    text-decoration: none;
+    color: #000000;
 }
 
-<span class="hljs-selector-tag">code</span> {
-    <span class="hljs-attribute">white-space</span>: pre-wrap;
-    <span class="hljs-attribute">word-wrap</span>: break-word;
+code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
-</code></pre><p>Next, we write our CV in Markdown. Here’s a sample one based on mine:</p><pre><code class="hljs lang-markdown"><span class="hljs-section">James Smith
-============</span>
+</code></pre><p>Next, we write our CV in Markdown. Here’s a sample one based on mine:</p><pre><code class="lang-markdown">James Smith
+============
 
-<span class="hljs-section">About me
---------</span>
+About me
+--------
 
-I'm a full-stack web developer. I have built a wide variety of web applications (including single-page web apps), content based sites and REST APIs.
+I&#39;m a full-stack web developer. I have built a wide variety of web applications (including single-page web apps), content based sites and REST APIs.
 
 ---
 
-<span class="hljs-section">Skills
-----------</span>
-<span class="hljs-bullet">* </span>HTML5
-<span class="hljs-bullet">* </span>CSS, Sass and Compass
-<span class="hljs-bullet">* </span>Javascript, including Angular.js
-<span class="hljs-bullet">* </span>PHP, including Laravel and Lumen
+Skills
+----------
+* HTML5
+* CSS, Sass and Compass
+* Javascript, including Angular.js
+* PHP, including Laravel and Lumen
 
 ---
 
-<span class="hljs-section">Employment
-----------</span>
+Employment
+----------
 
-<span class="hljs-strong">**Agency ltd**</span>
+**Agency ltd**
 June 2014 - present
 
 I worked for a busy digital agency, building custom web apps using Laravel and Angular.js
 
 ---
 
-<span class="hljs-section">Education
-----------</span>
+Education
+----------
 
-<span class="hljs-bullet">* </span><span class="hljs-strong">**2009-2014 My Secondary School, London**</span> - 7 GCSEs:
+* **2009-2014 My Secondary School, London** - 7 GCSEs:
 
 ---
 
-<span class="hljs-section">Hobbies and Interests
----------------------</span>
+Hobbies and Interests
+---------------------
 
 Real ale, learning more about webdev, reading, socialising.
 
 ---
 
-<span class="hljs-section">Contact
--------</span>
+Contact
+-------
 
-<span class="hljs-quote">&gt; **Mobile:** 01234 567890</span>
+&gt; **Mobile:** 01234 567890
 
-<span class="hljs-quote">&gt; **[Email](mailto:user@example.com)** - **[Website](http://www.example.com)** - **[GitHub](https://github.com/username)**</span>
-</code></pre><p>Now, if you save this file as something like <code>cv.md</code> and then open it up in Emacs, you should be able to preview it in your browser with <code>C-c C-c p</code>. Nice, huh? To export it to HTML, run <code>C-c C-c v</code> instead.</p><p>What if you want to view it in other formats? Say a potential employer is asking for your CV in Microsoft DocX format (ugh…)? Just run this command in the shell:</p><pre><code class="hljs lang-bash">$ pandoc -s -S cv.md -o cv.docx
-</code></pre><p>Or how about PDF?</p><pre><code class="hljs lang-bash">$ pandoc -s -S cv.md -o cv.pdf
+&gt; **[Email](mailto:user@example.com)** - **[Website](http://www.example.com)** - **[GitHub](https://github.com/username)**
+</code></pre><p>Now, if you save this file as something like <code>cv.md</code> and then open it up in Emacs, you should be able to preview it in your browser with <code>C-c C-c p</code>. Nice, huh? To export it to HTML, run <code>C-c C-c v</code> instead.</p><p>What if you want to view it in other formats? Say a potential employer is asking for your CV in Microsoft DocX format (ugh…)? Just run this command in the shell:</p><pre><code class="lang-bash">$ pandoc -s -S cv.md -o cv.docx
+</code></pre><p>Or how about PDF?</p><pre><code class="lang-bash">$ pandoc -s -S cv.md -o cv.pdf
 </code></pre><p>Using this method it’s straightforward to maintain a single master copy of your CV which you can then convert to other formats on demand.</p><h2 id="keeping-your-cv-backed-up">Keeping your CV backed up</h2><p>If you want to keep your CV safe, there’s a couple of ways to do it. One is to keep it in a Git or Mercurial repository, and another is to use Dropbox to keep it in sync. I tend to use the latter approach, although I’m considering switching to the former. If you wanted to generate the various versions automatically, you could set up a hook to generate the various versions using Pandoc during the commit process.</p><p>I used to hate updating my CV, but that was largely because I left it too long, and often had nothing much to put on it. Nowadays I’m often learning something new so I quite often have reason to update it to reflect that, and adopting this workflow has made things a lot easier.</p><section><ul class="categories"><li><a href="/blog/categories/markdown/">markdown</a></li><li><a href="/blog/categories/emacs/">emacs</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/08/29/maintaining-your-cv-with-markdown-and-emacs/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/09/05/deploying-new-versions-of-a-laravel-app-with-fabric/amp/">Deploying New Versions of a Laravel App With Fabric</a> <a class="postlink" href="/blog/2016/08/15/creating-a-personal-dashboard-with-react-and-webpack/amp/">Creating a Personal Dashboard With React and Webpack</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

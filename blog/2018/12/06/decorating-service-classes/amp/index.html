@@ -183,164 +183,164 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">6th December 2018 6:34 pm</p><h1>Decorating Service Classes</h1><p>I’ve written before about using decorators to extend the functionality of existing classes, in the context of the repository pattern when working with Eloquent. However, the same practice is applicable in many other contexts.</p><p>Recently, I was asked to add RSS feeds to the home page of the legacy project that is my main focus these days. The resulting service class looked something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">6th December 2018 6:34 pm</p><h1>Decorating Service Classes</h1><p>I’ve written before about using decorators to extend the functionality of existing classes, in the context of the repository pattern when working with Eloquent. However, the same practice is applicable in many other contexts.</p><p>Recently, I was asked to add RSS feeds to the home page of the legacy project that is my main focus these days. The resulting service class looked something like this:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+namespace App\Services;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Rss</span>\<span class="hljs-title">Feed</span>\<span class="hljs-title">Reader</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
+use Rss\Feed\Reader;
+use App\Contracts\Services\FeedFetcher;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RssFetcher</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> Reader::import($url);
+class RssFetcher implements FeedFetcher
+{
+    public function fetch($url)
+    {
+        return Reader::import($url);
     }
 }
-</code></pre><p>In accordance with the principle of loose coupling, I also created an interface for it:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>In accordance with the principle of loose coupling, I also created an interface for it:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>;
+namespace App\Contracts\Services;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">FeedFetcher</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span></span>;
+interface FeedFetcher
+{
+    public function fetch($url);
 }
-</code></pre><p>I was recently able to add dependency injection to the project using PHP-DI, so now I can inject an instance of the feed fetcher into the controller by typehinting the interface and having it resolve to the <code>RssFetcher</code> class.</p><p>However, there was an issue. I didn’t want the application to make multiple HTTP requests to fetch those feeds every time the page loads. At the same time, it was also a bit much to have a scheduled task running to fetch those feeds and store them in the database, since many times that would be unnecessary. The obvious solution was to cache the feed content for a specified length of time, in this case five minutes.</p><p>I <em>could</em> have integrated the caching into the service class itself, but that wasn’t the best practice, because it would be tied to that implementation. If in future we needed to switch to a different feed handler, we’d have to re-implement the caching functionality. So I decided it made sense to decorate the service class.</p><p>The decorator class implemented the same interface as the feed fetcher, and accepted another instance of that interface in the constructor, along with a PSR6-compliant caching library. It looked something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>I was recently able to add dependency injection to the project using PHP-DI, so now I can inject an instance of the feed fetcher into the controller by typehinting the interface and having it resolve to the <code>RssFetcher</code> class.</p><p>However, there was an issue. I didn’t want the application to make multiple HTTP requests to fetch those feeds every time the page loads. At the same time, it was also a bit much to have a scheduled task running to fetch those feeds and store them in the database, since many times that would be unnecessary. The obvious solution was to cache the feed content for a specified length of time, in this case five minutes.</p><p>I <em>could</em> have integrated the caching into the service class itself, but that wasn’t the best practice, because it would be tied to that implementation. If in future we needed to switch to a different feed handler, we’d have to re-implement the caching functionality. So I decided it made sense to decorate the service class.</p><p>The decorator class implemented the same interface as the feed fetcher, and accepted another instance of that interface in the constructor, along with a PSR6-compliant caching library. It looked something like this:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+namespace App\Services;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+use App\Contracts\Services\FeedFetcher;
+use Psr\Cache\CacheItemPoolInterface;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FetcherCachingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $fetcher;
+class FetcherCachingDecorator implements FeedFetcher
+{
+    protected $fetcher;
 
-    <span class="hljs-keyword">protected</span> $cache;
+    protected $cache;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(FeedFetcher $fetcher, CacheItemPoolInterface $cache)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;fetcher = $fetcher;
-        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
+    public function __construct(FeedFetcher $fetcher, CacheItemPoolInterface $cache)
+    {
+        $this-&gt;fetcher = $fetcher;
+        $this-&gt;cache = $cache;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
-    </span>{
-        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'feed_'</span>.$url);
-        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
-            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;fetcher-&gt;fetch($url));
-            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+    public function fetch($url)
+    {
+        $item = $this-&gt;cache-&gt;getItem(&#39;feed_&#39;.$url);
+        if (!$item-&gt;isHit()) {
+            $item-&gt;set($this-&gt;fetcher-&gt;fetch($url));
+            $this-&gt;cache-&gt;save($item);
         }
-        <span class="hljs-keyword">return</span> $item-&gt;get();
+        return $item-&gt;get();
     }
 }
-</code></pre><p>Now, when you instantiate the feed fetcher, you wrap it in the decorator as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Now, when you instantiate the feed fetcher, you wrap it in the decorator as follows:</p><pre><code class="lang-php">&lt;?php
 
-$fetcher = <span class="hljs-keyword">new</span> FetcherCachingDecorator(
-        <span class="hljs-keyword">new</span> App\Services\RssFetcher,
+$fetcher = new FetcherCachingDecorator(
+        new App\Services\RssFetcher,
         $cache
 );
-</code></pre><p>As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don’t have to touch the caching layer at all. As long as we’re using dependency injection to resolve this interface, we’re only looking at a little more code to instantiate it.</p><p>In addition, this same approach can be applied for other purposes, and you can wrap the service class as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>As you can see, this solves our problem quite nicely. By wrapping our feed fetcher in this decorator, we keep the caching layer completely separate from any one implementation of the fetcher, so in the event we need to swap the current one out for another implementation, we don’t have to touch the caching layer at all. As long as we’re using dependency injection to resolve this interface, we’re only looking at a little more code to instantiate it.</p><p>In addition, this same approach can be applied for other purposes, and you can wrap the service class as many times as necessary. For instance, if we wanted to log all the responses we got, we could write a logging decorator something like this:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>;
+namespace App\Services;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Services</span>\<span class="hljs-title">FeedFetcher</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+use App\Contracts\Services\FeedFetcher;
+use Psr\Log\LoggerInterface;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FeedLoggingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FeedFetcher</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $fetcher;
+class FeedLoggingDecorator implements FeedFetcher
+{
+    protected $fetcher;
 
-    <span class="hljs-keyword">protected</span> $logger;
+    protected $logger;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(FeedFetcher $fetcher, LoggerInterface $logger)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;fetcher = $fetcher;
-        <span class="hljs-keyword">$this</span>-&gt;logger = $logger;
+    public function __construct(FeedFetcher $fetcher, LoggerInterface $logger)
+    {
+        $this-&gt;fetcher = $fetcher;
+        $this-&gt;logger = $logger;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">($url)</span>
-    </span>{
-        $response = <span class="hljs-keyword">$this</span>-&gt;fetcher-&gt;fetch($url);
-        <span class="hljs-keyword">$this</span>-&gt;logger-&gt;info($response);
-        <span class="hljs-keyword">return</span> $response;
+    public function fetch($url)
+    {
+        $response = $this-&gt;fetcher-&gt;fetch($url);
+        $this-&gt;logger-&gt;info($response);
+        return $response;
     }
 }
-</code></pre><p>The same idea can be applied to an API client. For instance, say we have the following interface for an API client:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>The same idea can be applied to an API client. For instance, say we have the following interface for an API client:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Contracts</span>;
+namespace Foo\Bar\Contracts;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Objects</span>\<span class="hljs-title">Item</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Objects</span>\<span class="hljs-title">ItemCollection</span>;
+use Foo\Bar\Objects\Item;
+use Foo\Bar\Objects\ItemCollection;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Client</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getAll</span><span class="hljs-params">()</span>: <span class="hljs-title">ItemCollection</span></span>;
+interface Client
+{
+    public function getAll(): ItemCollection;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">find</span><span class="hljs-params">(int $id)</span>: <span class="hljs-title">Item</span></span>;
+    public function find(int $id): Item;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span>: <span class="hljs-title">Item</span></span>;
+    public function create(array $data): Item;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(int $id, array $data)</span>: <span class="hljs-title">Item</span></span>;
+    public function update(int $id, array $data): Item;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">delete</span><span class="hljs-params">(int $id)</span></span>;
+    public function delete(int $id);
 }
-</code></pre><p>Now, of course any good API client should respect HTTP headers and use those to do some caching itself, but depending on the use case, you may also want to cache these requests yourself. For instance, if the only changes to the entities stored by the third party API will be ones you’ve made, or they don’t need to be 100% up to date, you may be better off caching those responses before they reach the actual API client. Under those circumstances, you might write a decorator like this to do the caching:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Now, of course any good API client should respect HTTP headers and use those to do some caching itself, but depending on the use case, you may also want to cache these requests yourself. For instance, if the only changes to the entities stored by the third party API will be ones you’ve made, or they don’t need to be 100% up to date, you may be better off caching those responses before they reach the actual API client. Under those circumstances, you might write a decorator like this to do the caching:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Services</span>;
+namespace Foo\Bar\Services;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Foo</span>\<span class="hljs-title">Bar</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Client</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">CacheItemPoolInterface</span>;
+use Foo\Bar\Contracts\Client;
+use Psr\Cache\CacheItemPoolInterface;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CachingDecorator</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Client</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $client;
+class CachingDecorator implements Client
+{
+    protected $client;
 
-    <span class="hljs-keyword">protected</span> $cache;
+    protected $cache;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Client $client, CacheItemPoolInterface $cache)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;client = $client;
-        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
+    public function __construct(Client $client, CacheItemPoolInterface $cache)
+    {
+        $this-&gt;client = $client;
+        $this-&gt;cache = $cache;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getAll</span><span class="hljs-params">()</span>: <span class="hljs-title">ItemCollection</span>
-    </span>{
-        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'item_all'</span>);
-        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
-            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;client-&gt;getAll());
-            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+    public function getAll(): ItemCollection
+    {
+        $item = $this-&gt;cache-&gt;getItem(&#39;item_all&#39;);
+        if (!$item-&gt;isHit()) {
+            $item-&gt;set($this-&gt;client-&gt;getAll());
+            $this-&gt;cache-&gt;save($item);
         }
-        <span class="hljs-keyword">return</span> $item-&gt;get();
+        return $item-&gt;get();
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">find</span><span class="hljs-params">(int $id)</span>: <span class="hljs-title">Item</span>
-    </span>{
-        $item = <span class="hljs-keyword">$this</span>-&gt;cache-&gt;getItem(<span class="hljs-string">'item_'</span>.$id);
-        <span class="hljs-keyword">if</span> (!$item-&gt;isHit()) {
-            $item-&gt;set(<span class="hljs-keyword">$this</span>-&gt;client-&gt;find($id));
-            <span class="hljs-keyword">$this</span>-&gt;cache-&gt;save($item);
+    public function find(int $id): Item
+    {
+        $item = $this-&gt;cache-&gt;getItem(&#39;item_&#39;.$id);
+        if (!$item-&gt;isHit()) {
+            $item-&gt;set($this-&gt;client-&gt;find($id));
+            $this-&gt;cache-&gt;save($item);
         }
-        <span class="hljs-keyword">return</span> $item-&gt;get();
+        return $item-&gt;get();
 
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span>: <span class="hljs-title">Item</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;create($data);
+    public function create(array $data): Item
+    {
+        $this-&gt;cache-&gt;clear();
+        return $this-&gt;client-&gt;create($data);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(int $id, array $data)</span>: <span class="hljs-title">Item</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;update($id, $data);
+    public function update(int $id, array $data): Item
+    {
+        $this-&gt;cache-&gt;clear();
+        return $this-&gt;client-&gt;update($id, $data);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">delete</span><span class="hljs-params">(int $id)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;clear();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;client-&gt;delete($id);
+    public function delete(int $id)
+    {
+        $this-&gt;cache-&gt;clear();
+        return $this-&gt;client-&gt;delete($id);
     }
 }
 </code></pre><p>Any methods that change the state of the data on the remote API will clear the cache, while any that fetch data will first check the cache, only explicitly fetching data from the API when the cache is empty, and caching it again. I won’t go into how you might write a logging decorator for this, but it should be straightforward to figure out for yourself.</p><p>The decorator pattern is a very powerful way of adding functionality to a class without tying it to a specific implementation. If you’re familiar with how middleware works, decorators work in a very similar fashion in that you can wrap your service in as many layers as you wish in order to accomplish specific tasks, and they adhere to the single responsibility principle by allowing you to use different decorators for different tasks.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/12/06/decorating-service-classes/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/amp/">Simplify Your Tests With Anonymous Classes</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

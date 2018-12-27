@@ -4,7 +4,7 @@
         <title>legacy | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/legacy/</link>
         <description>legacy | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -29,10 +29,13 @@
 <p>There was some extremely complex code for creating and updating various objects that was jammed into the controllers, and involved a lot of duplicate code. I’ve used dedicated persister classes in the past with great effect, so I pulled that code out into persisters to centralise the logic about the creation of different objects. It’s still a lot more convoluted than I’d like, but at least now it’s out of the controllers and can be tested to some extent.</p>
 <h1 id="creating-repositories">Creating repositories</h1>
 <p>One of the most problematic parts of the code base is the models. Whoever was responsible for them couldn’t seem to decide whether they represented a single domain object, or a container for methods for getting those objects, so both responsibilities were mixed up in the same class. This means you had to instantiate an object, then use it to call one of the methods to get another instance of that object, as in this example:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$media = <span class="hljs-keyword">new</span> Application_Model_Media;</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$media = $media-&gt;find(<span class="hljs-number">1</span>);</td></table></code></pre>
+<pre><code class="lang-php">$media = new Application_Model_Media;
+$media = $media-&gt;find(1);
+</code></pre>
 <p>I’ve therefore resolved to pull those methods out into separate repository classes, leaving the models as pure domain objects. Unfortunately, the lack of dependency injection makes it problematic to instantiate the repositories. For that reason, right now the repositories only implement static methods - it’s not ideal, but it’s better than what we have now.</p>
 <p>I started out by creating interfaces for the methods I wanted to migrate, and had the models implement them. Then, I moved those methods from the model to the repository classes and amended all references to them, before removing the interfaces from the models. Now, a typical find request looks like this:</p>
-<pre><code class="hljs lang-php singleline">$media = App\Repository\Media::find(<span class="hljs-number">1</span>);</code></pre>
+<pre><code class="lang-php">$media = App\Repository\Media::find(1);
+</code></pre>
 <p>It’s not done yet, but over half of them have been migrated.</p>
 <p>Once that’s done, I’ll then be in a position to look at refactoring the logic in the models to make them easier to work with - right now each model has dedicated setters and getters (as well as some horrific logic to populate them), and I’m considering amending them to allow access to the properties via the <code>__get()</code> and <code>__set()</code> magic methods. Another option is to consider migrating the database layer to Doctrine, since that way we can reuse the getters and setters, but I haven’t yet made a firm decision about that.</p>
 <h1 id="adding-tests">Adding tests</h1>

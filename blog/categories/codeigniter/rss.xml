@@ -4,7 +4,7 @@
         <title>codeigniter | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/codeigniter/</link>
         <description>codeigniter | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -16,12 +16,41 @@
             <description><![CDATA[<p>I haven’t started a new CodeIgniter project since 2014, and don’t intend to, but on occasion I’ve been asked to do maintenance work on legacy CodeIgniter projects. This week I was asked to help out with a situation where a CodeIgniter site was being migrated to HTTPS and there were issues resulting from the migration.</p>
 <p>Back in 2012, when working on my first solo project, I’d built a website using CodeIgniter that used HTTPS, but also needed to support an affiliate marketing system that did not support it, so certain pages had to force HTTP, and others had to force HTTPS, so I’d used the hook system to create hooks to enforce this. This kind of requirement is unlikely to reoccur now because HTTPS is becoming more prevalent, but sometimes it may be easier to enforce HTTPS at application level than in the web server configuration or using htaccess. It’s relatively straightforward to do that in CodeIgniter.</p>
 <p>The first step is to create the hook. Save this as <code>application/hooks/ssl.php</code>:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">force_ssl</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    $CI =&amp; get_instance();</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    $CI-&gt;config-&gt;config[<span class="hljs-string">'base_url'</span>] = str_replace(<span class="hljs-string">'http://'</span>, <span class="hljs-string">'https://'</span>, $CI-&gt;config-&gt;config[<span class="hljs-string">'base_url'</span>]);</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-keyword">if</span> ($_SERVER[<span class="hljs-string">'SERVER_PORT'</span>] != <span class="hljs-number">443</span>) redirect($CI-&gt;uri-&gt;uri_string());</td><tr><td class="linenos" data-pseudo-content="7"></td><td>}</td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-meta">?&gt;</span></td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+function force_ssl()
+{
+    $CI =&amp; get_instance();
+    $CI-&gt;config-&gt;config[&#39;base_url&#39;] = str_replace(&#39;http://&#39;, &#39;https://&#39;, $CI-&gt;config-&gt;config[&#39;base_url&#39;]);
+    if ($_SERVER[&#39;SERVER_PORT&#39;] != 443) redirect($CI-&gt;uri-&gt;uri_string());
+}
+?&gt;
+</code></pre>
 <p>Next, we register the hook. Update <code>application/configs/hooks.php</code> as follows:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span>  <span class="hljs-keyword">if</span> ( ! defined(<span class="hljs-string">'BASEPATH'</span>)) <span class="hljs-keyword">exit</span>(<span class="hljs-string">'No direct script access allowed'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-comment">/*</td><tr><td class="linenos" data-pseudo-content="3"></td><td>| -------------------------------------------------------------------------</td><tr><td class="linenos" data-pseudo-content="4"></td><td>| Hooks</td><tr><td class="linenos" data-pseudo-content="5"></td><td>| -------------------------------------------------------------------------</td><tr><td class="linenos" data-pseudo-content="6"></td><td>| This file lets you define "hooks" to extend CI without hacking the core</td><tr><td class="linenos" data-pseudo-content="7"></td><td>| files.  Please see the user guide for info:</td><tr><td class="linenos" data-pseudo-content="8"></td><td>|</td><tr><td class="linenos" data-pseudo-content="9"></td><td>|    http://codeigniter.com/user_guide/general/hooks.html</td><tr><td class="linenos" data-pseudo-content="10"></td><td>|</td><tr><td class="linenos" data-pseudo-content="11"></td><td>*/</span></td><tr><td class="linenos" data-pseudo-content="12"></td><td></td><tr><td class="linenos" data-pseudo-content="13"></td><td>$hook[<span class="hljs-string">'post_controller_constructor'</span>][] = <span class="hljs-keyword">array</span>(</td><tr><td class="linenos" data-pseudo-content="14"></td><td>                                <span class="hljs-string">'function'</span> =&gt; <span class="hljs-string">'force_ssl'</span>,</td><tr><td class="linenos" data-pseudo-content="15"></td><td>                                <span class="hljs-string">'filename'</span> =&gt; <span class="hljs-string">'ssl.php'</span>,</td><tr><td class="linenos" data-pseudo-content="16"></td><td>                                <span class="hljs-string">'filepath'</span> =&gt; <span class="hljs-string">'hooks'</span></td><tr><td class="linenos" data-pseudo-content="17"></td><td>                                );</td><tr><td class="linenos" data-pseudo-content="18"></td><td></td><tr><td class="linenos" data-pseudo-content="19"></td><td><span class="hljs-comment">/* End of file hooks.php */</span></td><tr><td class="linenos" data-pseudo-content="20"></td><td><span class="hljs-comment">/* Location: ./application/config/hooks.php */</span></td></table></code></pre>
+<pre><code class="lang-php">&lt;?php  if ( ! defined(&#39;BASEPATH&#39;)) exit(&#39;No direct script access allowed&#39;);
+/*
+| -------------------------------------------------------------------------
+| Hooks
+| -------------------------------------------------------------------------
+| This file lets you define &quot;hooks&quot; to extend CI without hacking the core
+| files.  Please see the user guide for info:
+|
+|    http://codeigniter.com/user_guide/general/hooks.html
+|
+*/
+
+$hook[&#39;post_controller_constructor&#39;][] = array(
+                                &#39;function&#39; =&gt; &#39;force_ssl&#39;,
+                                &#39;filename&#39; =&gt; &#39;ssl.php&#39;,
+                                &#39;filepath&#39; =&gt; &#39;hooks&#39;
+                                );
+
+/* End of file hooks.php */
+/* Location: ./application/config/hooks.php */
+</code></pre>
 <p>This tells CodeIgniter that it should looks in the <code>application/hooks</code> directory for a file called <code>ssl.php</code>, and return the function <code>force_ssl</code>.</p>
 <p>Finally, we enable hooks. Update <code>application/config/config.php</code>:</p>
-<pre><code class="hljs lang-php singleline">$config[<span class="hljs-string">'enable_hooks'</span>] = <span class="hljs-keyword">TRUE</span>;</code></pre>
+<pre><code class="lang-php">$config[&#39;enable_hooks&#39;] = TRUE;
+</code></pre>
 <p>If you only want to force SSL in production, not development, you may want to amend the <code>ssl.php</code> file to only perform the redirect in non-development environments, perhaps by using an environment variable via DotEnv.</p>
 ]]></description>
         </item>

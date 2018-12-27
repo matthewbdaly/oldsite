@@ -183,138 +183,138 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">11th September 2016 7:33 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 1</h1><p>A lot of my work over the last few years has been on Phonegap apps. Phonegap isn’t terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you’ve used client-side Javascript frameworks before it can be a struggle.</p><p>In this series of tutorials I’ll show you how I might build a Phonegap app. The work involved will include:</p><ul><li>Building a REST API using Laravel to expose the data</li><li>Building an admin interface to manage the data</li><li>Building a Phonegap app using Angular.js</li><li>Testing and deploying it</li></ul><p>In the process we’ll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p><h2 id="the-brief">The brief</h2><p>Let’s say our new client is an animal shelter. The brief for the app is as follows:</p><blockquote><p>My New Animal Friend will be an app for finding a new pet. Once a user signs in, they’ll be able to choose what type of pet they’re looking for, then look through a list of pets available to adopt. They can reject them by swiping left or save them by swiping right. They can see more about the ones they swipe right on, and arrange to meet them, from within the app. Users can also message the staff to ask questions about a pet.</p></blockquote><p>Nice idea, but there’s a lot of work involved! Our very first task is to build the REST API, since everything else relies on that. Before starting, make sure you have the following installed:</p><ul><li>PHP (I’m using PHP 7, but 5.6 should be fine)</li><li>Composer</li><li>Git</li><li>A compatible relational database (I use PostgreSQL)</li><li>Redis</li><li>Your usual text editor</li><li>Node.js</li></ul><p>As long as you have this, you should be ready to go. Using <a href="https://laravel.com/docs/5.3/homestead">Homestead</a> is the simplest way to get started if you don’t have all this stuff already.</p><h2 id="starting-the-api">Starting the API</h2><p>To start building our REST API, run the following command from the shell:</p><pre><code class="hljs lang-bash">$ composer create-project --prefer-dist laravel/laravel mynewanimalfriend-backend
-</code></pre><p>We also have some other dependencies we need to install, so switch into the new directory and run the following command:</p><pre><code class="hljs lang-bash">$ composer require barryvdh/laravel-cors tymon/jwt-auth predis/predis
-</code></pre><p>Next, we need to add the new packages to the Laravel config. Open up <code>config/app.php</code> and add the following to the <code>providers</code> array:</p><pre><code class="hljs lang-php">   Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,                                                                                                                                              
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">11th September 2016 7:33 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 1</h1><p>A lot of my work over the last few years has been on Phonegap apps. Phonegap isn’t terribly hard to use, but the difference in context between that and a more conventional web app means that you have to move a lot of functionality to the client side, and unless you’ve used client-side Javascript frameworks before it can be a struggle.</p><p>In this series of tutorials I’ll show you how I might build a Phonegap app. The work involved will include:</p><ul><li>Building a REST API using Laravel to expose the data</li><li>Building an admin interface to manage the data</li><li>Building a Phonegap app using Angular.js</li><li>Testing and deploying it</li></ul><p>In the process we’ll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p><h2 id="the-brief">The brief</h2><p>Let’s say our new client is an animal shelter. The brief for the app is as follows:</p><blockquote><p>My New Animal Friend will be an app for finding a new pet. Once a user signs in, they’ll be able to choose what type of pet they’re looking for, then look through a list of pets available to adopt. They can reject them by swiping left or save them by swiping right. They can see more about the ones they swipe right on, and arrange to meet them, from within the app. Users can also message the staff to ask questions about a pet.</p></blockquote><p>Nice idea, but there’s a lot of work involved! Our very first task is to build the REST API, since everything else relies on that. Before starting, make sure you have the following installed:</p><ul><li>PHP (I’m using PHP 7, but 5.6 should be fine)</li><li>Composer</li><li>Git</li><li>A compatible relational database (I use PostgreSQL)</li><li>Redis</li><li>Your usual text editor</li><li>Node.js</li></ul><p>As long as you have this, you should be ready to go. Using <a href="https://laravel.com/docs/5.3/homestead">Homestead</a> is the simplest way to get started if you don’t have all this stuff already.</p><h2 id="starting-the-api">Starting the API</h2><p>To start building our REST API, run the following command from the shell:</p><pre><code class="lang-bash">$ composer create-project --prefer-dist laravel/laravel mynewanimalfriend-backend
+</code></pre><p>We also have some other dependencies we need to install, so switch into the new directory and run the following command:</p><pre><code class="lang-bash">$ composer require barryvdh/laravel-cors tymon/jwt-auth predis/predis
+</code></pre><p>Next, we need to add the new packages to the Laravel config. Open up <code>config/app.php</code> and add the following to the <code>providers</code> array:</p><pre><code class="lang-php">   Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,                                                                                                                                              
    Barryvdh\Cors\ServiceProvider::class,   
-</code></pre><p>And the following to the <code>aliases</code> array:</p><pre><code class="hljs lang-php">   <span class="hljs-string">'JWTAuth'</span> =&gt; Tymon\JWTAuth\Facades\JWTAuth::class,
-</code></pre><p>We also need to ensure that the CORS middleware is applied to all API routes. Open up <code>app/Http/Kernel.php</code> and under the <code>api</code> array in <code>protected $middlewareGroups</code> paste the following:</p><pre><code class="hljs lang-php">   \Barryvdh\Cors\HandleCors::class,
-</code></pre><p>Now that the packages are included, we can publish the files for them:</p><pre><code class="hljs lang-bash">$ php artisan vendor:publish
-</code></pre><p>Next, we need to set a key for our API authentication:</p><pre><code class="hljs lang-bash">$ php artisan jwt:generate
-</code></pre><p>And set a custom namespace:</p><pre><code class="hljs lang-bash">$ php artisan app:name AnimalFriend
-</code></pre><p>You’ll also want to set up the <code>.env</code> file with the configuration settings for your application. There’s one at <code>.env.example</code> by default that you can copy and customise. Then run the following command to generate the application key:</p><pre><code class="hljs lang-bash">$ php artisan key:generate
-</code></pre><p>I had to change the namespace for the user model in <code>config/jwt.php</code> as well:</p><pre><code class="hljs lang-php">    <span class="hljs-string">'user'</span> =&gt; <span class="hljs-string">'AnimalFriend\User'</span>,
-</code></pre><p>I also tend to amend the settings in <code>phpunit.xml</code> as follows so that it uses an in-memory SQLite database for tests:</p><pre><code class="hljs lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"APP_ENV"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"testing"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"SESSION_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"array"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"QUEUE_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sync"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"CACHE_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"redis"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_CONNECTION"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sqlite"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_DATABASE"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">":memory:"</span>/&gt;</span>
-</code></pre><p>Also, delete <code>tests/ExampleTest.php</code> and amend <code>tests/TestCase.php</code> as follows in order to use database migrations in tests:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And the following to the <code>aliases</code> array:</p><pre><code class="lang-php">   &#39;JWTAuth&#39; =&gt; Tymon\JWTAuth\Facades\JWTAuth::class,
+</code></pre><p>We also need to ensure that the CORS middleware is applied to all API routes. Open up <code>app/Http/Kernel.php</code> and under the <code>api</code> array in <code>protected $middlewareGroups</code> paste the following:</p><pre><code class="lang-php">   \Barryvdh\Cors\HandleCors::class,
+</code></pre><p>Now that the packages are included, we can publish the files for them:</p><pre><code class="lang-bash">$ php artisan vendor:publish
+</code></pre><p>Next, we need to set a key for our API authentication:</p><pre><code class="lang-bash">$ php artisan jwt:generate
+</code></pre><p>And set a custom namespace:</p><pre><code class="lang-bash">$ php artisan app:name AnimalFriend
+</code></pre><p>You’ll also want to set up the <code>.env</code> file with the configuration settings for your application. There’s one at <code>.env.example</code> by default that you can copy and customise. Then run the following command to generate the application key:</p><pre><code class="lang-bash">$ php artisan key:generate
+</code></pre><p>I had to change the namespace for the user model in <code>config/jwt.php</code> as well:</p><pre><code class="lang-php">    &#39;user&#39; =&gt; &#39;AnimalFriend\User&#39;,
+</code></pre><p>I also tend to amend the settings in <code>phpunit.xml</code> as follows so that it uses an in-memory SQLite database for tests:</p><pre><code class="lang-xml">        &lt;env name=&quot;APP_ENV&quot; value=&quot;testing&quot;/&gt;
+        &lt;env name=&quot;SESSION_DRIVER&quot; value=&quot;array&quot;/&gt;
+        &lt;env name=&quot;QUEUE_DRIVER&quot; value=&quot;sync&quot;/&gt;
+        &lt;env name=&quot;CACHE_DRIVER&quot; value=&quot;redis&quot;/&gt;
+        &lt;env name=&quot;DB_CONNECTION&quot; value=&quot;sqlite&quot;/&gt;
+        &lt;env name=&quot;DB_DATABASE&quot; value=&quot;:memory:&quot;/&gt;
+</code></pre><p>Also, delete <code>tests/ExampleTest.php</code> and amend <code>tests/TestCase.php</code> as follows in order to use database migrations in tests:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-<span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestCase</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
+{
+    use DatabaseMigrations;
 
-    <span class="hljs-comment">/**
+    /**
      * The base URL to use while testing the application.
      *
-     * <span class="hljs-doctag">@var</span> string
-     */</span>
-    <span class="hljs-keyword">protected</span> $baseUrl = <span class="hljs-string">'http://localhost'</span>;
+     * @var string
+     */
+    protected $baseUrl = &#39;http://localhost&#39;;
 
-    <span class="hljs-comment">/**
+    /**
      * Creates the application.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Foundation\Application
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createApplication</span><span class="hljs-params">()</span>
-    </span>{
-        $app = <span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../bootstrap/app.php'</span>;
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
+    {
+        $app = require __DIR__.&#39;/../bootstrap/app.php&#39;;
 
         $app-&gt;make(Illuminate\Contracts\Console\Kernel::class)-&gt;bootstrap();
 
-        <span class="hljs-keyword">return</span> $app;
+        return $app;
     }
 }
-</code></pre><p>With that in place, we can start work on our API proper.</p><h2 id="authenticating-our-api">Authenticating our API</h2><p>We’re going to start out with a very limited subset of our API. First, we’ll implement the authentication for our app, then we’ll add the facility to view a list of pets or an individual pet. Other functionality will come later. This will be sufficient to get the app working.</p><p>First, we need to create our user model. As we’ll be practicing TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>With that in place, we can start work on our API proper.</p><h2 id="authenticating-our-api">Authenticating our API</h2><p>We’re going to start out with a very limited subset of our API. First, we’ll implement the authentication for our app, then we’ll add the facility to view a list of pets or an individual pet. Other functionality will come later. This will be sufficient to get the app working.</p><p>First, we need to create our user model. As we’ll be practicing TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">User</span>;
+use AnimalFriend\User;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserModelTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-comment">/**
+class UserModelTest extends TestCase
+{
+    /**
      * Test creating a user
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCreatingAUser</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a User</span>
+     * @return void
+     */
+    public function testCreatingAUser()
+    {
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Verify it works</span>
-        $saved = User::where(<span class="hljs-string">'email'</span>, <span class="hljs-string">'bob@example.com'</span>)-&gt;first();
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;id, <span class="hljs-number">1</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;name, <span class="hljs-string">'bobsmith'</span>);
+        // Verify it works
+        $saved = User::where(&#39;email&#39;, &#39;bob@example.com&#39;)-&gt;first();
+        $this-&gt;assertEquals($saved-&gt;id, 1);
+        $this-&gt;assertEquals($saved-&gt;name, &#39;bobsmith&#39;);
     }
 }
-</code></pre><p>If we run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>If we run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 .                                                                   1 / 1 (100%)
 
 Time: 169 ms, Memory: 12.00MB
 
-OK (1 <span class="hljs-built_in">test</span>, 3 assertions)
-</code></pre><p>We already have a perfectly good <code>User</code> model and the appropriate migrations, so our test already passes.</p><p>Next, we need to implement the authentication system. Save this as <code>tests/AuthTest.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+OK (1 test, 3 assertions)
+</code></pre><p>We already have a perfectly good <code>User</code> model and the appropriate migrations, so our test already passes.</p><p>Next, we need to implement the authentication system. Save this as <code>tests/AuthTest.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+class AuthTest extends TestCase
+{
+    use DatabaseMigrations;
 
-    <span class="hljs-comment">/**
+    /**
      * Test the auth
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testAuth</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a User</span>
+     * @return void
+     */
+    public function testAuth()
+    {
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
-            <span class="hljs-string">'password'</span> =&gt; bcrypt(<span class="hljs-string">'password'</span>)
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
+            &#39;password&#39; =&gt; bcrypt(&#39;password&#39;)
         ]);
 
-        <span class="hljs-comment">// Create request</span>
-        $data = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'email'</span> =&gt; $user-&gt;email,
-            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>,
+        // Create request
+        $data = array(
+            &#39;email&#39; =&gt; $user-&gt;email,
+            &#39;password&#39; =&gt; &#39;password&#39;,
         );
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'api/authenticate'</span>, $data);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">200</span>);
+        $response = $this-&gt;call(&#39;POST&#39;, &#39;api/authenticate&#39;, $data);
+        $this-&gt;assertResponseStatus(200);
         $content = json_decode($response-&gt;getContent());
-        <span class="hljs-keyword">$this</span>-&gt;assertTrue(array_key_exists(<span class="hljs-string">'token'</span>, $content));
+        $this-&gt;assertTrue(array_key_exists(&#39;token&#39;, $content));
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test the auth when user does not exist
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testAuthFailure</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create data for request</span>
-        $data = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'user@example.com'</span>,
-            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>,
+     * @return void
+     */
+    public function testAuthFailure()
+    {
+        // Create data for request
+        $data = array(
+            &#39;email&#39; =&gt; &#39;user@example.com&#39;,
+            &#39;password&#39; =&gt; &#39;password&#39;,
         );
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'api/authenticate'</span>, $data);
+        $response = $this-&gt;call(&#39;POST&#39;, &#39;api/authenticate&#39;, $data);
 
-        <span class="hljs-comment">// Check the status code</span>
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">401</span>);
+        // Check the status code
+        $this-&gt;assertResponseStatus(401);
     }
 }
-</code></pre><p>The first test creates a user and sends an authentication request, then confirms that it returns the JSON Web Token. The second checks that a user that doesn’t exist cannot log in.</p><p>Let’s run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>The first test creates a user and sends an authentication request, then confirms that it returns the JSON Web Token. The second checks that a user that doesn’t exist cannot log in.</p><p>Let’s run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 FF.                                                                 3 / 3 (100%)
@@ -339,66 +339,66 @@ Failed asserting that 404 matches expected 401.
 
 FAILURES!
 Tests: 3, Assertions: 5, Failures: 2.
-</code></pre><p>With a failing test in place, we can implement login. First let’s create our controller at <code>app/Http/Controllers/AuthenticateController.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>With a failing test in place, we can implement login. First let’s create our controller at <code>app/Http/Controllers/AuthenticateController.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace AnimalFriend\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>\<span class="hljs-title">Controller</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">JWTAuth</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Tymon</span>\<span class="hljs-title">JWTAuth</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">JWTException</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">User</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
+use AnimalFriend\Http\Requests;
+use AnimalFriend\Http\Controllers\Controller;
+use JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use AnimalFriend\User;
+use Hash;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthenticateController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">private</span> $user;
+class AuthenticateController extends Controller
+{
+    private $user;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $user)</span> </span>{
-        <span class="hljs-keyword">$this</span>-&gt;user = $user;
+    public function __construct(User $user) {
+        $this-&gt;user = $user;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">authenticate</span><span class="hljs-params">(Request $request)</span>
-    </span>{
-        <span class="hljs-comment">// Get credentials</span>
-        $credentials = $request-&gt;only(<span class="hljs-string">'email'</span>, <span class="hljs-string">'password'</span>);
+    public function authenticate(Request $request)
+    {
+        // Get credentials
+        $credentials = $request-&gt;only(&#39;email&#39;, &#39;password&#39;);
 
-        <span class="hljs-comment">// Get user</span>
-        $user = <span class="hljs-keyword">$this</span>-&gt;user-&gt;where(<span class="hljs-string">'email'</span>, $credentials[<span class="hljs-string">'email'</span>])-&gt;first();
+        // Get user
+        $user = $this-&gt;user-&gt;where(&#39;email&#39;, $credentials[&#39;email&#39;])-&gt;first();
 
-        <span class="hljs-keyword">try</span> {
-            <span class="hljs-comment">// attempt to verify the credentials and create a token for the user</span>
-            <span class="hljs-keyword">if</span> (! $token = JWTAuth::attempt($credentials)) {
-                <span class="hljs-keyword">return</span> response()-&gt;json([<span class="hljs-string">'error'</span> =&gt; <span class="hljs-string">'invalid_credentials'</span>], <span class="hljs-number">401</span>);
+        try {
+            // attempt to verify the credentials and create a token for the user
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()-&gt;json([&#39;error&#39; =&gt; &#39;invalid_credentials&#39;], 401);
             }
-        } <span class="hljs-keyword">catch</span> (JWTException $e) {
-            <span class="hljs-comment">// something went wrong whilst attempting to encode the token</span>
-            <span class="hljs-keyword">return</span> response()-&gt;json([<span class="hljs-string">'error'</span> =&gt; <span class="hljs-string">'could_not_create_token'</span>], <span class="hljs-number">500</span>);
+        } catch (JWTException $e) {
+            // something went wrong whilst attempting to encode the token
+            return response()-&gt;json([&#39;error&#39; =&gt; &#39;could_not_create_token&#39;], 500);
         }
 
-        <span class="hljs-comment">// all good so return the token</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json(compact(<span class="hljs-string">'token'</span>));
+        // all good so return the token
+        return response()-&gt;json(compact(&#39;token&#39;));
     }
 }
-</code></pre><p>And we need to set up the route in <code>routes/api.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And we need to set up the route in <code>routes/api.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-comment">/*
+/*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| is assigned the &quot;api&quot; middleware group. Enjoy building your API!
 |
-*/</span>
+*/
 
-Route::post(<span class="hljs-string">'authenticate'</span>, <span class="hljs-string">'AuthenticateController@authenticate'</span>);
-</code></pre><p>Note that because it’s an API route, it’s automatically prefixed with <code>api/</code> without us having to do anything.</p><p>Now if we run our tests, they should pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+Route::post(&#39;authenticate&#39;, &#39;AuthenticateController@authenticate&#39;);
+</code></pre><p>Note that because it’s an API route, it’s automatically prefixed with <code>api/</code> without us having to do anything.</p><p>Now if we run our tests, they should pass:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ...                                                                 3 / 3 (100%)
@@ -406,78 +406,78 @@ PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 Time: 402 ms, Memory: 14.00MB
 
 OK (3 tests, 6 assertions)
-</code></pre><p>Now we can obtain a JSON Web Token to authenticate users with. To start with we’ll only support existing users, but later we’ll add a method to sign up. However, we need at least one user to test with, so we’ll create a seeder for that at <code>database/seeds/UserTableSeeder.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Now we can obtain a JSON Web Token to authenticate users with. To start with we’ll only support existing users, but later we’ll add a method to sign up. However, we need at least one user to test with, so we’ll create a seeder for that at <code>database/seeds/UserTableSeeder.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Seeder</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Carbon</span>\<span class="hljs-title">Carbon</span>;
+use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserTableSeeder</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Seeder</span>
-</span>{
-    <span class="hljs-comment">/**
+class UserTableSeeder extends Seeder
+{
+    /**
      * Run the database seeds.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Add user</span>
-        DB::table(<span class="hljs-string">'users'</span>)-&gt;insert([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
-            <span class="hljs-string">'created_at'</span> =&gt; Carbon::now(),
-            <span class="hljs-string">'updated_at'</span> =&gt; Carbon::now(),
-            <span class="hljs-string">'password'</span> =&gt; Hash::make(<span class="hljs-string">"password"</span>)
+     * @return void
+     */
+    public function run()
+    {
+        // Add user
+        DB::table(&#39;users&#39;)-&gt;insert([
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
+            &#39;created_at&#39; =&gt; Carbon::now(),
+            &#39;updated_at&#39; =&gt; Carbon::now(),
+            &#39;password&#39; =&gt; Hash::make(&quot;password&quot;)
         ]);
     }
 }
-</code></pre><p>You can run <code>php artisan make:seeder UserTableSeeder</code> to generate the file, or just paste it in. You also need to amend <code>database/seeds/DatabaseSeeder.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>You can run <code>php artisan make:seeder UserTableSeeder</code> to generate the file, or just paste it in. You also need to amend <code>database/seeds/DatabaseSeeder.php</code> as follows:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Seeder</span>;
+use Illuminate\Database\Seeder;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DatabaseSeeder</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Seeder</span>
-</span>{
-    <span class="hljs-comment">/**
+class DatabaseSeeder extends Seeder
+{
+    /**
      * Run the database seeds.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;call(UserTableSeeder::class);
+     * @return void
+     */
+    public function run()
+    {
+        $this-&gt;call(UserTableSeeder::class);
     }
 }
-</code></pre><p>This ensures the seeder will actually be called. Then, run the following commands:</p><pre><code class="hljs lang-bash">$ php artisan migrate
+</code></pre><p>This ensures the seeder will actually be called. Then, run the following commands:</p><pre><code class="lang-bash">$ php artisan migrate
 $ php artisan db:seed
-</code></pre><p>That sets up our user in the database.</p><h2 id="adding-the-pets-endpoint">Adding the Pets endpoint</h2><p>Our next step is to add the pets model and endpoint. Our <code>Pet</code> model should have the following fields:</p><ul><li>ID</li><li>Timestamps (<code>created_at</code> and <code>updated_at</code>)</li><li>Name</li><li>Path to photo</li><li>Availability</li><li>Type (eg cat, dog)</li></ul><p>Let’s create a test for that model:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>That sets up our user in the database.</p><h2 id="adding-the-pets-endpoint">Adding the Pets endpoint</h2><p>Our next step is to add the pets model and endpoint. Our <code>Pet</code> model should have the following fields:</p><ul><li>ID</li><li>Timestamps (<code>created_at</code> and <code>updated_at</code>)</li><li>Name</li><li>Path to photo</li><li>Availability</li><li>Type (eg cat, dog)</li></ul><p>Let’s create a test for that model:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Pet</span>;
+use AnimalFriend\Pet;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetModelTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-comment">/**
+class PetModelTest extends TestCase
+{
+    /**
      * Test creating a pet
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCreatingAPet</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testCreatingAPet()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Verify it works</span>
-        $saved = Pet::where(<span class="hljs-string">'name'</span>, <span class="hljs-string">'Freddie'</span>)-&gt;first();
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;id, <span class="hljs-number">1</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;name, <span class="hljs-string">'Freddie'</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;type, <span class="hljs-string">'Cat'</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;available, <span class="hljs-number">1</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;picture, <span class="hljs-string">'1.jpg'</span>);
+        // Verify it works
+        $saved = Pet::where(&#39;name&#39;, &#39;Freddie&#39;)-&gt;first();
+        $this-&gt;assertEquals($saved-&gt;id, 1);
+        $this-&gt;assertEquals($saved-&gt;name, &#39;Freddie&#39;);
+        $this-&gt;assertEquals($saved-&gt;type, &#39;Cat&#39;);
+        $this-&gt;assertEquals($saved-&gt;available, 1);
+        $this-&gt;assertEquals($saved-&gt;picture, &#39;1.jpg&#39;);
     }
 }
-</code></pre><p>Save this as <code>tests/PetModelTest.php</code>. Then run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>Save this as <code>tests/PetModelTest.php</code>. Then run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ..E.                                                                4 / 4 (100%)
@@ -498,53 +498,53 @@ InvalidArgumentException: Unable to locate factory with name [default] [AnimalFr
 
 ERRORS!
 Tests: 4, Assertions: 6, Errors: 1.
-</code></pre><p>First we need to create a factory for creating a pet in <code>database/factories/ModelFactory.php</code>:</p><pre><code class="hljs lang-php">$factory-&gt;define(AnimalFriend\Pet::class, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Faker\Generator $faker)</span> </span>{
-    <span class="hljs-keyword">return</span> [
-        <span class="hljs-string">'name'</span> =&gt; $faker-&gt;firstNameMale,
-        <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
-        <span class="hljs-string">'available'</span> =&gt; <span class="hljs-number">1</span>,
-        <span class="hljs-string">'picture'</span> =&gt; <span class="hljs-string">'1.jpg'</span>
+</code></pre><p>First we need to create a factory for creating a pet in <code>database/factories/ModelFactory.php</code>:</p><pre><code class="lang-php">$factory-&gt;define(AnimalFriend\Pet::class, function (Faker\Generator $faker) {
+    return [
+        &#39;name&#39; =&gt; $faker-&gt;firstNameMale,
+        &#39;type&#39; =&gt; &#39;Cat&#39;,
+        &#39;available&#39; =&gt; 1,
+        &#39;picture&#39; =&gt; &#39;1.jpg&#39;
     ];
 });
-</code></pre><p>Then, we create the model:</p><pre><code class="hljs lang-bash">$ php artisan make:model Pet
-</code></pre><p>Next, we create a migration for the <code>Pet</code> model:</p><pre><code class="hljs lang-bash">$ php artisan make:migration create_pets_table
+</code></pre><p>Then, we create the model:</p><pre><code class="lang-bash">$ php artisan make:model Pet
+</code></pre><p>Next, we create a migration for the <code>Pet</code> model:</p><pre><code class="lang-bash">$ php artisan make:migration create_pets_table
 Created Migration: 2016_09_11_145010_create_pets_table
-</code></pre><p>And paste in the following code:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And paste in the following code:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreatePetsTable</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span>
-</span>{
-    <span class="hljs-comment">/**
+class CreatePetsTable extends Migration
+{
+    /**
      * Run the migrations.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span>
-    </span>{
-        Schema::create(<span class="hljs-string">'pets'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{
-            $table-&gt;increments(<span class="hljs-string">'id'</span>);
-            $table-&gt;string(<span class="hljs-string">'name'</span>);
-            $table-&gt;string(<span class="hljs-string">'type'</span>);
-            $table-&gt;string(<span class="hljs-string">'available'</span>);
-            $table-&gt;string(<span class="hljs-string">'picture'</span>)-&gt;nullable();
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create(&#39;pets&#39;, function (Blueprint $table) {
+            $table-&gt;increments(&#39;id&#39;);
+            $table-&gt;string(&#39;name&#39;);
+            $table-&gt;string(&#39;type&#39;);
+            $table-&gt;string(&#39;available&#39;);
+            $table-&gt;string(&#39;picture&#39;)-&gt;nullable();
             $table-&gt;timestamps();
         });
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Reverse the migrations.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span>
-    </span>{
-        Schema::drop(<span class="hljs-string">'pets'</span>);
+     * @return void
+     */
+    public function down()
+    {
+        Schema::drop(&#39;pets&#39;);
     }
 }
-</code></pre><p>Time to run the tests again:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>Time to run the tests again:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ....                                                                4 / 4 (100%)
@@ -552,77 +552,77 @@ PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 Time: 412 ms, Memory: 16.00MB
 
 OK (4 tests, 12 assertions)
-</code></pre><p>With that done, we can start work on implementing the endpoint. We need to check that unauthorised users cannot retrieve the data, and that authorised users can. First, let’s create <code>tests/PetControllerTest.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>With that done, we can start work on implementing the endpoint. We need to check that unauthorised users cannot retrieve the data, and that authorised users can. First, let’s create <code>tests/PetControllerTest.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+class PetControllerTest extends TestCase
+{
+    use DatabaseMigrations;
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pets when unauthorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetsWhenUnauthorised</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPetsWhenUnauthorised()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets'</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">400</span>);
+        // Create request
+        $response = $this-&gt;call(&#39;GET&#39;, &#39;/api/pets&#39;);
+        $this-&gt;assertResponseStatus(400);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pets when authorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPets</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPets()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create a User</span>
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets'</span>, [], $headers)
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets&#39;, [], $headers)
             -&gt;seeJsonStructure([
-                <span class="hljs-string">'*'</span> =&gt; [
-                    <span class="hljs-string">'id'</span>,
-                    <span class="hljs-string">'name'</span>,
-                    <span class="hljs-string">'type'</span>,
-                    <span class="hljs-string">'available'</span>,
-                    <span class="hljs-string">'picture'</span>,
-                    <span class="hljs-string">'created_at'</span>,
-                    <span class="hljs-string">'updated_at'</span>
+                &#39;*&#39; =&gt; [
+                    &#39;id&#39;,
+                    &#39;name&#39;,
+                    &#39;type&#39;,
+                    &#39;available&#39;,
+                    &#39;picture&#39;,
+                    &#39;created_at&#39;,
+                    &#39;updated_at&#39;
                 ]
             ]);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">200</span>);
+        $this-&gt;assertResponseStatus(200);
     }
 }
-</code></pre><p>First, we create a pet, make an HTTP request to <code>/api/pets</code>, and check we are not authorised. Next, we do the same, but also create a user and a JSON Web Token, and pass the token through in the request. Then we verify the response data and that it was successful.</p><p>Let’s run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>First, we create a pet, make an HTTP request to <code>/api/pets</code>, and check we are not authorised. Next, we do the same, but also create a user and a JSON Web Token, and pass the token through in the request. Then we verify the response data and that it was successful.</p><p>Let’s run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ..FF..                                                              6 / 6 (100%)
@@ -639,50 +639,50 @@ Failed asserting that 404 matches expected 400.
 /home/matthew/Projects/mynewanimalfriend-backend/tests/PetControllerTest.php:25
 
 2) PetControllerTest::testFetchingPets
-Failed asserting that null is of <span class="hljs-built_in">type</span> <span class="hljs-string">"array"</span>.
+Failed asserting that null is of type &quot;array&quot;.
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:295
 /home/matthew/Projects/mynewanimalfriend-backend/tests/PetControllerTest.php:67
 
 FAILURES!
 Tests: 6, Assertions: 17, Failures: 2.
-</code></pre><p>That looks correct, so we can start building our endpoint. We can generate a boilerplate for it as follows:</p><pre><code class="hljs lang-bash">$ $ php artisan make:controller PetController --resource
-</code></pre><p>Note the <code>--resource</code> flag - this tells Laravel to set it up to be a RESTful controller with certain predefined functions. Next, let’s amend the new file at <code>app\Http\Controllers/PetController.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>That looks correct, so we can start building our endpoint. We can generate a boilerplate for it as follows:</p><pre><code class="lang-bash">$ $ php artisan make:controller PetController --resource
+</code></pre><p>Note the <code>--resource</code> flag - this tells Laravel to set it up to be a RESTful controller with certain predefined functions. Next, let’s amend the new file at <code>app\Http\Controllers/PetController.php</code> as follows:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace AnimalFriend\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Pet</span>;
+use AnimalFriend\Http\Requests;
+use AnimalFriend\Pet;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">private</span> $pet;
+class PetController extends Controller
+{
+    private $pet;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Pet $pet)</span> </span>{
-        <span class="hljs-keyword">$this</span>-&gt;pet = $pet;
+    public function __construct(Pet $pet) {
+        $this-&gt;pet = $pet;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display a listing of the resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Get all pets</span>
-        $pets = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;get();
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // Get all pets
+        $pets = $this-&gt;pet-&gt;get();
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($pets, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($pets, 200);
     }
 }
-</code></pre><p>This implements an index route that shows all pets. Next, we hook up the route in <code>routes/api.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-comment">// Auth routes</span>
-Route::group([<span class="hljs-string">'middleware'</span> =&gt; [<span class="hljs-string">'jwt.auth'</span>]], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-    Route::resource(<span class="hljs-string">'pets'</span>, <span class="hljs-string">'PetController'</span>);
+</code></pre><p>This implements an index route that shows all pets. Next, we hook up the route in <code>routes/api.php</code>:</p><pre><code class="lang-php">// Auth routes
+Route::group([&#39;middleware&#39; =&gt; [&#39;jwt.auth&#39;]], function () {
+    Route::resource(&#39;pets&#39;, &#39;PetController&#39;);
 });
-</code></pre><p>Note that we wrap this resource in the <code>jwt.auth</code> middleware to prevent access by unauthorised users. Implementing this as middleware makes it very easy to reuse. Also note that we can specify it as a resource, meaning we don’t have to explicitly hook up each route to a controller method.</p><p>Let’s run the tests again:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>Note that we wrap this resource in the <code>jwt.auth</code> middleware to prevent access by unauthorised users. Implementing this as middleware makes it very easy to reuse. Also note that we can specify it as a resource, meaning we don’t have to explicitly hook up each route to a controller method.</p><p>Let’s run the tests again:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ..EE..                                                              6 / 6 (100%)
@@ -714,9 +714,9 @@ ReflectionException: Class jwt.auth does not exist
 
 ERRORS!
 Tests: 6, Assertions: 15, Errors: 2.
-</code></pre><p>Looks like JWT isn’t configured correctly. We can fix that in <code>app/Http/Kernel.php</code> by adding it to <code>$routeMiddleware</code>:</p><pre><code class="hljs lang-php">        <span class="hljs-string">'jwt.auth'</span> =&gt; <span class="hljs-string">'Tymon\JWTAuth\Middleware\GetUserFromToken'</span>,
-        <span class="hljs-string">'jwt.refresh'</span> =&gt; <span class="hljs-string">'Tymon\JWTAuth\Middleware\RefreshToken'</span>,
-</code></pre><p>And run the tests again:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>Looks like JWT isn’t configured correctly. We can fix that in <code>app/Http/Kernel.php</code> by adding it to <code>$routeMiddleware</code>:</p><pre><code class="lang-php">        &#39;jwt.auth&#39; =&gt; &#39;Tymon\JWTAuth\Middleware\GetUserFromToken&#39;,
+        &#39;jwt.refresh&#39; =&gt; &#39;Tymon\JWTAuth\Middleware\RefreshToken&#39;,
+</code></pre><p>And run the tests again:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ......                                                              6 / 6 (100%)
@@ -724,91 +724,91 @@ PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 Time: 514 ms, Memory: 16.00MB
 
 OK (6 tests, 25 assertions)
-</code></pre><p>Our final task for today on the API is building a route for fetching a single pet. Our tests need to handle three situations:</p><ul><li>An unauthorised request</li><li>A request for a pet that does not exist</li><li>A request for a pet that does exist</li></ul><p>Add these methods to <code>tests/PetControllerTest.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-comment">/**
+</code></pre><p>Our final task for today on the API is building a route for fetching a single pet. Our tests need to handle three situations:</p><ul><li>An unauthorised request</li><li>A request for a pet that does not exist</li><li>A request for a pet that does exist</li></ul><p>Add these methods to <code>tests/PetControllerTest.php</code>:</p><pre><code class="lang-php">    /**
      * Test fetching pet when unauthorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetWhenUnauthorised</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPetWhenUnauthorised()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Send request</span>
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/'</span>.$pet-&gt;id);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">400</span>);
+        // Send request
+        $response = $this-&gt;call(&#39;GET&#39;, &#39;/api/pets/&#39;.$pet-&gt;id);
+        $this-&gt;assertResponseStatus(400);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pet which does not exist
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetDoesNotExist</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a User</span>
+     * @return void
+     */
+    public function testFetchingPetDoesNotExist()
+    {
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/1'</span>, [], $headers);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">404</span>);
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets/1&#39;, [], $headers);
+        $this-&gt;assertResponseStatus(404);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pet when authorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPet</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPet()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create a User</span>
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/'</span>.$pet-&gt;id, [], $headers)
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets/&#39;.$pet-&gt;id, [], $headers)
             -&gt;seeJsonStructure([
-                <span class="hljs-string">'id'</span>,
-                <span class="hljs-string">'name'</span>,
-                <span class="hljs-string">'type'</span>,
-                <span class="hljs-string">'available'</span>,
-                <span class="hljs-string">'picture'</span>,
-                <span class="hljs-string">'created_at'</span>,
-                <span class="hljs-string">'updated_at'</span>
+                &#39;id&#39;,
+                &#39;name&#39;,
+                &#39;type&#39;,
+                &#39;available&#39;,
+                &#39;picture&#39;,
+                &#39;created_at&#39;,
+                &#39;updated_at&#39;
             ]);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">200</span>);
+        $this-&gt;assertResponseStatus(200);
     }
-</code></pre><p>Let’s check our tests fail:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>Let’s check our tests fail:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 .....FE..                                                           9 / 9 (100%)
@@ -818,7 +818,7 @@ Time: 974 ms, Memory: 16.00MB
 There was 1 error:
 
 1) PetControllerTest::testFetchingPet
-PHPUnit_Framework_Exception: Argument <span class="hljs-comment">#2 (No Value) of PHPUnit_Framework_Assert::assertArrayHasKey() must be a array or ArrayAccess</span>
+PHPUnit_Framework_Exception: Argument #2 (No Value) of PHPUnit_Framework_Assert::assertArrayHasKey() must be a array or ArrayAccess
 
 /home/matthew/Projects/mynewanimalfriend-backend/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php:304
 /home/matthew/Projects/mynewanimalfriend-backend/tests/PetControllerTest.php:145
@@ -836,21 +836,21 @@ Failed asserting that 400 matches expected 404.
 
 ERRORS!
 Tests: 9, Assertions: 31, Errors: 1, Failures: 1.
-</code></pre><p>Now, we already have the <code>show()</code> method hooked up by default, so we just have to implement it in <code>app/Http/Controllers/PetController.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-comment">/**
+</code></pre><p>Now, we already have the <code>show()</code> method hooked up by default, so we just have to implement it in <code>app/Http/Controllers/PetController.php</code>:</p><pre><code class="lang-php">    /**
      * Display the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">// Get pet</span>
-        $pet = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;findOrFail($id);
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        // Get pet
+        $pet = $this-&gt;pet-&gt;findOrFail($id);
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($pet, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($pet, 200);
     }
-</code></pre><p>And let’s run our tests again:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>And let’s run our tests again:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 .........                                                           9 / 9 (100%)

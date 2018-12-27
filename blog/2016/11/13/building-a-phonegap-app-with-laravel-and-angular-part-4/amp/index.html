@@ -183,49 +183,49 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">13th November 2016 4:15 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 4</h1><p>In this instalment we’ll return to the back end. What we’ve done so far is typical of the kind of proof of concept we might do for a client early on, before going back and implementing the full set of features later on. Now we’ll go back and start to improve on that rather quick-and-dirty API by making sure we follow a few best practices.</p><p>For those of you who want to follow the Laravel Phonegap tutorials, I’ve created a dedicated category <a href="/blog/categories/laravel-phonegap-tutorial/">here</a> for those tutorials. This category include RSS and Atom feeds, so if you only want to read those posts, you can do so. I’ve also done the same for the <a href="/blog/categories/django-blog-tutorial/">Django tutorials</a>.</p><h2 id="the-repository-pattern">The Repository pattern</h2><p>One of the issues we currently have with our API is that we’re passing our Eloquent models into our controllers. This may not seem like a huge issue, but it means that our controllers are tightly coupled to the Eloquent ORM, so if we wanted to switch to another ORM, or to a completely different database such as MongoDB, we’d have to amend our controllers. That’s not good.</p><p>However, using the <a href="http://designpatternsphp.readthedocs.io/en/latest/More/Repository/README.html">Repository pattern</a> we can first of all define an interface for our repository, and then create a repository class that implements that interface. That way we can interact with the repository class in our controllers, rather than using Eloquent models directly. Then, if we want to switch databases, we merely amend the repository class to change the implementation of those methods, without having to touch our controllers. Also, it makes it much easier to test our controllers in isolation, because we can easily mock our repository class using Mockery and hard-code the response, so our tests won’t touch the database and will therefore run more quickly. We won’t touch on that this time, but it’s a very significant advantage.</p><p>If you haven’t used interfaces before in PHP, they aren’t that hard. They merely specify what methods an object implementing that method must have and what arguments they must accept, but do not specify the details of the implementation. This makes it easy to determine if a class implements an interface correctly, because it will throw an exception if it doesn’t.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">13th November 2016 4:15 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 4</h1><p>In this instalment we’ll return to the back end. What we’ve done so far is typical of the kind of proof of concept we might do for a client early on, before going back and implementing the full set of features later on. Now we’ll go back and start to improve on that rather quick-and-dirty API by making sure we follow a few best practices.</p><p>For those of you who want to follow the Laravel Phonegap tutorials, I’ve created a dedicated category <a href="/blog/categories/laravel-phonegap-tutorial/">here</a> for those tutorials. This category include RSS and Atom feeds, so if you only want to read those posts, you can do so. I’ve also done the same for the <a href="/blog/categories/django-blog-tutorial/">Django tutorials</a>.</p><h2 id="the-repository-pattern">The Repository pattern</h2><p>One of the issues we currently have with our API is that we’re passing our Eloquent models into our controllers. This may not seem like a huge issue, but it means that our controllers are tightly coupled to the Eloquent ORM, so if we wanted to switch to another ORM, or to a completely different database such as MongoDB, we’d have to amend our controllers. That’s not good.</p><p>However, using the <a href="http://designpatternsphp.readthedocs.io/en/latest/More/Repository/README.html">Repository pattern</a> we can first of all define an interface for our repository, and then create a repository class that implements that interface. That way we can interact with the repository class in our controllers, rather than using Eloquent models directly. Then, if we want to switch databases, we merely amend the repository class to change the implementation of those methods, without having to touch our controllers. Also, it makes it much easier to test our controllers in isolation, because we can easily mock our repository class using Mockery and hard-code the response, so our tests won’t touch the database and will therefore run more quickly. We won’t touch on that this time, but it’s a very significant advantage.</p><p>If you haven’t used interfaces before in PHP, they aren’t that hard. They merely specify what methods an object implementing that method must have and what arguments they must accept, but do not specify the details of the implementation. This makes it easy to determine if a class implements an interface correctly, because it will throw an exception if it doesn’t.</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>;
+namespace AnimalFriend\Repositories\Interfaces;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">PetRepositoryInterface</span> </span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span></span>;
+interface PetRepositoryInterface {
+    public function all();
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span></span>;
+    public function findOrFail($id);
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span></span>;
+    public function create($input);
 }
-</code></pre><p>That’s all there is to it. We define it using the <code>interface</code> keyword and we specify the methods it must implement. Save this file at <code>app/Repositories/Interfaces/PetRepositoryInterface.php</code>.</p><p>Next, we implement the repository class:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>That’s all there is to it. We define it using the <code>interface</code> keyword and we specify the methods it must implement. Save this file at <code>app/Repositories/Interfaces/PetRepositoryInterface.php</code>.</p><p>Next, we implement the repository class:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>;
+namespace AnimalFriend\Repositories;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Pet</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">PetRepositoryInterface</span>;
+use AnimalFriend\Pet;
+use AnimalFriend\Repositories\Interfaces\PetRepositoryInterface;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EloquentPetRepository</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">PetRepositoryInterface</span> </span>{
+class EloquentPetRepository implements PetRepositoryInterface {
 
-    <span class="hljs-keyword">private</span> $pet;
+    private $pet;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Pet $pet)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;pet = $pet;
+    public function __construct(Pet $pet)
+    {
+        $this-&gt;pet = $pet;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;pet-&gt;all();
+    public function all()
+    {
+        return $this-&gt;pet-&gt;all();
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;pet-&gt;findOrFail($id);
+    public function findOrFail($id)
+    {
+        return $this-&gt;pet-&gt;findOrFail($id);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;pet-&gt;create($input);
+    public function create($input)
+    {
+        return $this-&gt;pet-&gt;create($input);
     }
 }
-</code></pre><p>Save this to <code>app/Repositories/EloquentPetRepository.php</code>. Note how the methods closely mirror the underlying Eloquent methods, but they don’t need to - you could change the underlying implementation of each method, but the repository would still work in exactly the same way.</p><p>To make this work, we need to make a few changes elsewhere. In <code>composer.json</code>, we need to add the new <code>Repositories</code> folder to our classmap:</p><pre><code class="hljs lang-json">    &quot;autoload&quot;: {
+</code></pre><p>Save this to <code>app/Repositories/EloquentPetRepository.php</code>. Note how the methods closely mirror the underlying Eloquent methods, but they don’t need to - you could change the underlying implementation of each method, but the repository would still work in exactly the same way.</p><p>To make this work, we need to make a few changes elsewhere. In <code>composer.json</code>, we need to add the new <code>Repositories</code> folder to our classmap:</p><pre><code class="lang-json">    &quot;autoload&quot;: {
         &quot;classmap&quot;: [
             &quot;database&quot;,
             &quot;app/Repositories&quot;
@@ -234,343 +234,343 @@
             &quot;AnimalFriend\\&quot;: &quot;app/&quot;
         }
     },
-</code></pre><p>And in <code>app/Providers/AppServiceProvider.php</code>, we need to bind our new files:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And in <code>app/Providers/AppServiceProvider.php</code>, we need to bind our new files:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Providers</span>;
+namespace AnimalFriend\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class AppServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function boot()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;app-&gt;bind(
-            <span class="hljs-string">'AnimalFriend\Repositories\Interfaces\PetRepositoryInterface'</span>,
-            <span class="hljs-string">'AnimalFriend\Repositories\EloquentPetRepository'</span>
+     * @return void
+     */
+    public function register()
+    {
+        $this-&gt;app-&gt;bind(
+            &#39;AnimalFriend\Repositories\Interfaces\PetRepositoryInterface&#39;,
+            &#39;AnimalFriend\Repositories\EloquentPetRepository&#39;
         );
     }
 }
-</code></pre><p>With that done, we can now update <code>app/Http/Controllers/PetController.php</code> to use the repository:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>With that done, we can now update <code>app/Http/Controllers/PetController.php</code> to use the repository:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace AnimalFriend\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">PetRepositoryInterface</span> <span class="hljs-title">as</span> <span class="hljs-title">Pet</span>;
+use AnimalFriend\Http\Requests;
+use AnimalFriend\Repositories\Interfaces\PetRepositoryInterface as Pet;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">private</span> $pet;
+class PetController extends Controller
+{
+    private $pet;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Pet $pet)</span> </span>{
-        <span class="hljs-keyword">$this</span>-&gt;pet = $pet;
+    public function __construct(Pet $pet) {
+        $this-&gt;pet = $pet;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display a listing of the resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Get all pets</span>
-        $pets = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;all();
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // Get all pets
+        $pets = $this-&gt;pet-&gt;all();
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($pets, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($pets, 200);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for creating a new resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Store a newly created resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">// Get pet</span>
-        $pet = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;findOrFail($id);
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        // Get pet
+        $pet = $this-&gt;pet-&gt;findOrFail($id);
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($pet, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($pet, 200);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for editing the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Update the specified resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(Request $request, $id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Remove the specified resource from storage.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
     }
 }
-</code></pre><p>Our repository is now injected automatically into the controller. To make this work we need to run the following command:</p><pre><code class="hljs lang-bash">$ composer dump-autoload
-</code></pre><p>Running our tests should confirm that everything is still working:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
+</code></pre><p>Our repository is now injected automatically into the controller. To make this work we need to run the following command:</p><pre><code class="lang-bash">$ composer dump-autoload
+</code></pre><p>Running our tests should confirm that everything is still working:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 ............                                                      12 / 12 (100%)
 
 Time: 897 ms, Memory: 18.00MB
 
 OK (12 tests, 46 assertions)
-</code></pre><p>Let’s do the same for the User model. First we implement our interface in <code>app/Repositories/Interfaces/UserRepositoryInterface.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Let’s do the same for the User model. First we implement our interface in <code>app/Repositories/Interfaces/UserRepositoryInterface.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>;
+namespace AnimalFriend\Repositories\Interfaces;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserRepositoryInterface</span> </span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span></span>;
+interface UserRepositoryInterface {
+    public function all();
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span></span>;
+    public function findOrFail($id);
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span></span>;
+    public function create($input);
 }
-</code></pre><p>Next we create our repository at <code>app/Repositories/EloquentUserRepository.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Next we create our repository at <code>app/Repositories/EloquentUserRepository.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>;
+namespace AnimalFriend\Repositories;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">User</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">UserRepositoryInterface</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">JWTAuth</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
+use AnimalFriend\User;
+use AnimalFriend\Repositories\Interfaces\UserRepositoryInterface;
+use JWTAuth;
+use Hash;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EloquentUserRepository</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserRepositoryInterface</span> </span>{
+class EloquentUserRepository implements UserRepositoryInterface {
 
-    <span class="hljs-keyword">private</span> $user;
+    private $user;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $user)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;user = $user;
+    public function __construct(User $user)
+    {
+        $this-&gt;user = $user;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;user-&gt;all();
+    public function all()
+    {
+        return $this-&gt;user-&gt;all();
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;user-&gt;findOrFail($id);
+    public function findOrFail($id)
+    {
+        return $this-&gt;user-&gt;findOrFail($id);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span>
-    </span>{
-        $user = <span class="hljs-keyword">new</span> <span class="hljs-keyword">$this</span>-&gt;user;
-        $user-&gt;email = $input[<span class="hljs-string">'email'</span>];
-        $user-&gt;name = $input[<span class="hljs-string">'name'</span>];
-        $user-&gt;password = Hash::make($input[<span class="hljs-string">'password'</span>]);
+    public function create($input)
+    {
+        $user = new $this-&gt;user;
+        $user-&gt;email = $input[&#39;email&#39;];
+        $user-&gt;name = $input[&#39;name&#39;];
+        $user-&gt;password = Hash::make($input[&#39;password&#39;]);
         $user-&gt;save();
 
-        <span class="hljs-comment">// Create token</span>
-        <span class="hljs-keyword">return</span> JWTAuth::fromUser($user);
+        // Create token
+        return JWTAuth::fromUser($user);
     }
 }
-</code></pre><p>Note how we’ve moved much of the logic for creating a user into the <code>create()</code> method, and we return the token, not the user model. This makes sense as right now we only ever want to get a token back when we create a user. Later that may change, but there’s nothing stopping us adding a new method to implement that behaviour alongside this.</p><p>Then we update <code>app/Http/Controllers/UserController.php</code> to use our repository:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Note how we’ve moved much of the logic for creating a user into the <code>create()</code> method, and we return the token, not the user model. This makes sense as right now we only ever want to get a token back when we create a user. Later that may change, but there’s nothing stopping us adding a new method to implement that behaviour alongside this.</p><p>Then we update <code>app/Http/Controllers/UserController.php</code> to use our repository:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace AnimalFriend\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">UserRepositoryInterface</span> <span class="hljs-title">as</span> <span class="hljs-title">User</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">JWTAuth</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
+use AnimalFriend\Http\Requests;
+use AnimalFriend\Repositories\Interfaces\UserRepositoryInterface as User;
+use JWTAuth;
+use Hash;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">private</span> $user;
+class UserController extends Controller
+{
+    private $user;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $user)</span> </span>{
-        <span class="hljs-keyword">$this</span>-&gt;user = $user;
+    public function __construct(User $user) {
+        $this-&gt;user = $user;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display a listing of the resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for creating a new resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Store a newly created resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request)</span>
-    </span>{
-        <span class="hljs-comment">// Validate request</span>
-        $valid = <span class="hljs-keyword">$this</span>-&gt;validate($request, [
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'required|email|unique:users,email'</span>,
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'required|string'</span>,
-            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'required|confirmed'</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // Validate request
+        $valid = $this-&gt;validate($request, [
+            &#39;email&#39; =&gt; &#39;required|email|unique:users,email&#39;,
+            &#39;name&#39; =&gt; &#39;required|string&#39;,
+            &#39;password&#39; =&gt; &#39;required|confirmed&#39;
         ]);
 
-        <span class="hljs-comment">// Create token</span>
-        $token = <span class="hljs-keyword">$this</span>-&gt;user-&gt;create($request-&gt;only(
-            <span class="hljs-string">'email'</span>,
-            <span class="hljs-string">'name'</span>,
-            <span class="hljs-string">'password'</span>
+        // Create token
+        $token = $this-&gt;user-&gt;create($request-&gt;only(
+            &#39;email&#39;,
+            &#39;name&#39;,
+            &#39;password&#39;
         ));
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json([<span class="hljs-string">'token'</span> =&gt; $token], <span class="hljs-number">201</span>);
+        // Send response
+        return response()-&gt;json([&#39;token&#39; =&gt; $token], 201);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for editing the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Update the specified resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(Request $request, $id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Remove the specified resource from storage.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
     }
 }
-</code></pre><p>And add a new binding in <code>app/Providers/AppServiceProvider.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And add a new binding in <code>app/Providers/AppServiceProvider.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Providers</span>;
+namespace AnimalFriend\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class AppServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function boot()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;app-&gt;bind(
-            <span class="hljs-string">'AnimalFriend\Repositories\Interfaces\PetRepositoryInterface'</span>,
-            <span class="hljs-string">'AnimalFriend\Repositories\EloquentPetRepository'</span>
+     * @return void
+     */
+    public function register()
+    {
+        $this-&gt;app-&gt;bind(
+            &#39;AnimalFriend\Repositories\Interfaces\PetRepositoryInterface&#39;,
+            &#39;AnimalFriend\Repositories\EloquentPetRepository&#39;
         );
-        <span class="hljs-keyword">$this</span>-&gt;app-&gt;bind(
-            <span class="hljs-string">'AnimalFriend\Repositories\Interfaces\UserRepositoryInterface'</span>,
-            <span class="hljs-string">'AnimalFriend\Repositories\EloquentUserRepository'</span>
+        $this-&gt;app-&gt;bind(
+            &#39;AnimalFriend\Repositories\Interfaces\UserRepositoryInterface&#39;,
+            &#39;AnimalFriend\Repositories\EloquentUserRepository&#39;
         );
     }
 }
-</code></pre><p>Note that we bind the two sets separately - this allows Laravel to figure out which one maps to which.</p><p>Let’s run our tests to make sure nothing is broken:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>Note that we bind the two sets separately - this allows Laravel to figure out which one maps to which.</p><p>Let’s run our tests to make sure nothing is broken:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ............                                                      12 / 12 (100%)
@@ -578,8 +578,8 @@ PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 Time: 956 ms, Memory: 18.00MB
 
 OK (12 tests, 46 assertions)
-</code></pre><p>Now that we’ve got our repositories in place, we’re no longer tightly coupled to Eloquent, and have a more flexible implementation which is easier to test.</p><h2 id="separating-our-models-from-our-json-with-fractal">Separating our models from our JSON with Fractal</h2><p>Another problem with our API is that our representation of our data is tightly coupled to our underlying implementation of our models. We therefore can’t change our models without potentially changing the data returned by the API. We need to separate our representation of our data from our actual model so that we can more easily specify the exact data we want to return, regardless of the underlying database structure.</p><p>Enter <a href="http://fractal.thephpleague.com/">Fractal</a>. From the website:</p><blockquote><p>Fractal provides a presentation and transformation layer for complex data output, the like found in RESTful APIs, and works really well with JSON. Think of this as a view layer for your JSON/YAML/etc.</p></blockquote><p>In other words, Fractal lets you specify the format your data will take in one place so that it’s easier to return that data in a desired format. We’ll use Fractal to specify how we want our API responses to be formatted.</p><p>Install Fractal with the following command:</p><pre><code class="hljs lang-php">$ composer <span class="hljs-keyword">require</span> league/fractal
-</code></pre><p>Then amend the classmap in <code>composer.json</code>:</p><pre><code class="hljs lang-json">    &quot;autoload&quot;: {
+</code></pre><p>Now that we’ve got our repositories in place, we’re no longer tightly coupled to Eloquent, and have a more flexible implementation which is easier to test.</p><h2 id="separating-our-models-from-our-json-with-fractal">Separating our models from our JSON with Fractal</h2><p>Another problem with our API is that our representation of our data is tightly coupled to our underlying implementation of our models. We therefore can’t change our models without potentially changing the data returned by the API. We need to separate our representation of our data from our actual model so that we can more easily specify the exact data we want to return, regardless of the underlying database structure.</p><p>Enter <a href="http://fractal.thephpleague.com/">Fractal</a>. From the website:</p><blockquote><p>Fractal provides a presentation and transformation layer for complex data output, the like found in RESTful APIs, and works really well with JSON. Think of this as a view layer for your JSON/YAML/etc.</p></blockquote><p>In other words, Fractal lets you specify the format your data will take in one place so that it’s easier to return that data in a desired format. We’ll use Fractal to specify how we want our API responses to be formatted.</p><p>Install Fractal with the following command:</p><pre><code class="lang-php">$ composer require league/fractal
+</code></pre><p>Then amend the classmap in <code>composer.json</code>:</p><pre><code class="lang-json">    &quot;autoload&quot;: {
         &quot;classmap&quot;: [
             &quot;database&quot;,
             &quot;app/Repositories&quot;,
@@ -589,296 +589,296 @@ OK (12 tests, 46 assertions)
             &quot;AnimalFriend\\&quot;: &quot;app/&quot;
         }
     },
-</code></pre><p>Then create the folder <code>app/Transformers</code> and run <code>composer dump-autoload</code>. We’re now ready to write our first transformer. Save this as <code>app/Transformers/PetTransformer.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Then create the folder <code>app/Transformers</code> and run <code>composer dump-autoload</code>. We’re now ready to write our first transformer. Save this as <code>app/Transformers/PetTransformer.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Transformers</span>;
+namespace AnimalFriend\Transformers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Pet</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Fractal</span>;
+use AnimalFriend\Pet;
+use League\Fractal;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetTransformer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Fractal</span>\<span class="hljs-title">TransformerAbstract</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(Pet $pet)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> [
-            <span class="hljs-string">'id'</span>            =&gt; (int) $pet-&gt;id,
-            <span class="hljs-string">'name'</span>          =&gt; (string) $pet-&gt;name,
-            <span class="hljs-string">'type'</span>          =&gt; (string) $pet-&gt;type,
-            <span class="hljs-string">'available'</span>     =&gt; (bool) $pet-&gt;available,
-            <span class="hljs-string">'picture'</span>       =&gt; (string) $pet-&gt;picture
+class PetTransformer extends Fractal\TransformerAbstract
+{
+    public function transform(Pet $pet)
+    {
+        return [
+            &#39;id&#39;            =&gt; (int) $pet-&gt;id,
+            &#39;name&#39;          =&gt; (string) $pet-&gt;name,
+            &#39;type&#39;          =&gt; (string) $pet-&gt;type,
+            &#39;available&#39;     =&gt; (bool) $pet-&gt;available,
+            &#39;picture&#39;       =&gt; (string) $pet-&gt;picture
         ];
     }
 }
-</code></pre><p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represemt relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p><p>Now let’s amend <code>PetController.php</code> to use this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represemt relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p><p>Now let’s amend <code>PetController.php</code> to use this:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace AnimalFriend\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">PetRepositoryInterface</span> <span class="hljs-title">as</span> <span class="hljs-title">Pet</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Transformers</span>\<span class="hljs-title">PetTransformer</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Fractal</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">League</span>\<span class="hljs-title">Fractal</span>\<span class="hljs-title">Manager</span>;
+use AnimalFriend\Http\Requests;
+use AnimalFriend\Repositories\Interfaces\PetRepositoryInterface as Pet;
+use AnimalFriend\Transformers\PetTransformer;
+use League\Fractal;
+use League\Fractal\Manager;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">private</span> $pet, $fractal;
+class PetController extends Controller
+{
+    private $pet, $fractal;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Pet $pet, Manager $fractal)</span> </span>{
-        <span class="hljs-keyword">$this</span>-&gt;pet = $pet;
-        <span class="hljs-keyword">$this</span>-&gt;fractal = $fractal;
+    public function __construct(Pet $pet, Manager $fractal) {
+        $this-&gt;pet = $pet;
+        $this-&gt;fractal = $fractal;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display a listing of the resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Get all pets</span>
-        $pets = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;all();
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // Get all pets
+        $pets = $this-&gt;pet-&gt;all();
 
-        <span class="hljs-comment">// Format it</span>
-        $resource = <span class="hljs-keyword">new</span> Fractal\Resource\Collection($pets, <span class="hljs-keyword">new</span> PetTransformer);
-        $data = <span class="hljs-keyword">$this</span>-&gt;fractal-&gt;createData($resource)-&gt;toArray();
+        // Format it
+        $resource = new Fractal\Resource\Collection($pets, new PetTransformer);
+        $data = $this-&gt;fractal-&gt;createData($resource)-&gt;toArray();
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($data, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($data, 200);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for creating a new resource.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Store a newly created resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Display the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">// Get pet</span>
-        $pet = <span class="hljs-keyword">$this</span>-&gt;pet-&gt;findOrFail($id);
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        // Get pet
+        $pet = $this-&gt;pet-&gt;findOrFail($id);
 
-        <span class="hljs-comment">// Format it</span>
-        $resource = <span class="hljs-keyword">new</span> Fractal\Resource\Item($pet, <span class="hljs-keyword">new</span> PetTransformer);
-        $data = <span class="hljs-keyword">$this</span>-&gt;fractal-&gt;createData($resource)-&gt;toArray();
+        // Format it
+        $resource = new Fractal\Resource\Item($pet, new PetTransformer);
+        $data = $this-&gt;fractal-&gt;createData($resource)-&gt;toArray();
 
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> response()-&gt;json($data, <span class="hljs-number">200</span>);
+        // Send response
+        return response()-&gt;json($data, 200);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Show the form for editing the specified resource.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Update the specified resource in storage.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(Request $request, $id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Remove the specified resource from storage.
      *
-     * <span class="hljs-doctag">@param</span>  int  $id
-     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
     }
 }
-</code></pre><p>Note that by default, Fractal places our data inside a dedicated <code>data</code> namespace. This is good because it leaves a place for us to put metadata such as pagination links, but it does mean our controller test has been broken. Let’s fix it:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Note that by default, Fractal places our data inside a dedicated <code>data</code> namespace. This is good because it leaves a place for us to put metadata such as pagination links, but it does mean our controller test has been broken. Let’s fix it:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">DatabaseMigrations</span>;
+class PetControllerTest extends TestCase
+{
+    use DatabaseMigrations;
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pets when unauthorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetsWhenUnauthorised</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPetsWhenUnauthorised()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets'</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">400</span>);
+        // Create request
+        $response = $this-&gt;call(&#39;GET&#39;, &#39;/api/pets&#39;);
+        $this-&gt;assertResponseStatus(400);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pets when authorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPets</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPets()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create a User</span>
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets'</span>, [], $headers)
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets&#39;, [], $headers)
             -&gt;seeJsonStructure([
-                <span class="hljs-string">'data'</span> =&gt; [
-                    <span class="hljs-string">'*'</span> =&gt; [
-                        <span class="hljs-string">'id'</span>,
-                        <span class="hljs-string">'name'</span>,
-                        <span class="hljs-string">'type'</span>,
-                        <span class="hljs-string">'available'</span>,
-                        <span class="hljs-string">'picture'</span>
+                &#39;data&#39; =&gt; [
+                    &#39;*&#39; =&gt; [
+                        &#39;id&#39;,
+                        &#39;name&#39;,
+                        &#39;type&#39;,
+                        &#39;available&#39;,
+                        &#39;picture&#39;
                     ]
                 ]
             ]);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">200</span>);
+        $this-&gt;assertResponseStatus(200);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pet when unauthorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetWhenUnauthorised</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPetWhenUnauthorised()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Send request</span>
-        $response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/'</span>.$pet-&gt;id);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">400</span>);
+        // Send request
+        $response = $this-&gt;call(&#39;GET&#39;, &#39;/api/pets/&#39;.$pet-&gt;id);
+        $this-&gt;assertResponseStatus(400);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pet which does not exist
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPetDoesNotExist</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a User</span>
+     * @return void
+     */
+    public function testFetchingPetDoesNotExist()
+    {
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/1'</span>, [], $headers);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">404</span>);
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets/1&#39;, [], $headers);
+        $this-&gt;assertResponseStatus(404);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching pet when authorised
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingPet</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create a Pet</span>
+     * @return void
+     */
+    public function testFetchingPet()
+    {
+        // Create a Pet
         $pet = factory(AnimalFriend\Pet::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
-            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            &#39;name&#39; =&gt; &#39;Freddie&#39;,
+            &#39;type&#39; =&gt; &#39;Cat&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'pets'</span>, [<span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>]);
+        $this-&gt;seeInDatabase(&#39;pets&#39;, [&#39;type&#39; =&gt; &#39;Cat&#39;]);
 
-        <span class="hljs-comment">// Create a User</span>
+        // Create a User
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'bobsmith'</span>,
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            &#39;name&#39; =&gt; &#39;bobsmith&#39;,
+            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
+        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
 
-        <span class="hljs-comment">// Create request</span>
+        // Create request
         $token = JWTAuth::fromUser($user);
-        $headers = <span class="hljs-keyword">array</span>(
-            <span class="hljs-string">'Authorization'</span> =&gt; <span class="hljs-string">'Bearer '</span>.$token
+        $headers = array(
+            &#39;Authorization&#39; =&gt; &#39;Bearer &#39;.$token
         );
 
-        <span class="hljs-comment">// Send it</span>
-        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'/api/pets/'</span>.$pet-&gt;id, [], $headers)
+        // Send it
+        $this-&gt;json(&#39;GET&#39;, &#39;/api/pets/&#39;.$pet-&gt;id, [], $headers)
             -&gt;seeJsonStructure([
-                <span class="hljs-string">'data'</span> =&gt; [
-                    <span class="hljs-string">'id'</span>,
-                    <span class="hljs-string">'name'</span>,
-                    <span class="hljs-string">'type'</span>,
-                    <span class="hljs-string">'available'</span>,
-                    <span class="hljs-string">'picture'</span>
+                &#39;data&#39; =&gt; [
+                    &#39;id&#39;,
+                    &#39;name&#39;,
+                    &#39;type&#39;,
+                    &#39;available&#39;,
+                    &#39;picture&#39;
                 ]
             ]);
-        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">200</span>);
+        $this-&gt;assertResponseStatus(200);
     }
 }
-</code></pre><p>We’re also going to amend our test settings to use the array backend for the cache, as this does not require any external dependencies, but still allows us to tag our cache keys (I’ll cover that in a future instalment). Change the cache settings in <code>phpunit.xml</code> as follows:</p><pre><code class="hljs lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"CACHE_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"array"</span>/&gt;</span>
-</code></pre><p>Let’s run our tests to make sure everything’s fine:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit 
+</code></pre><p>We’re also going to amend our test settings to use the array backend for the cache, as this does not require any external dependencies, but still allows us to tag our cache keys (I’ll cover that in a future instalment). Change the cache settings in <code>phpunit.xml</code> as follows:</p><pre><code class="lang-xml">        &lt;env name=&quot;CACHE_DRIVER&quot; value=&quot;array&quot;/&gt;
+</code></pre><p>Let’s run our tests to make sure everything’s fine:</p><pre><code class="lang-bash">$ vendor/bin/phpunit 
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ............                                                      12 / 12 (100%)

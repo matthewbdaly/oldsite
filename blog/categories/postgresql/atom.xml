@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>postgresql | Matthew Daly&apos;s Blog</title>
-    <updated>2018-12-07T12:13:50Z</updated>
+    <updated>2018-12-27T16:01:38Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -21,10 +21,54 @@
         <summary type="html"><![CDATA[<p>Today I’ve been working on a generic, reusable Laravel admin interface, loosely inspired by the Django admin, that dynamically picks up the field types and generates an appropriate input field accordingly.</p>
 <p>One problem I’ve run into is that getting a representation of a database table’s fields relies on <code>doctrine/dbal</code>, and its support for the more unusual PostgreSQL field types is spotty at best. I’ve been testing it out on a Laravel-based blogging engine, which has full-text search using the <code>TSVECTOR</code> field type, which isn’t supported, and it threw a nasty <code>Unknown database type tsvector requested</code> error.</p>
 <p>Fortunately, it’s possible to register custom field type mappings easily enough. In this case we can safely treat a <code>TSVECTOR</code> field as a string` type anyway, so we can map it to the string type. We can do so in the boot method of a service provider:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     * Bootstrap any application services.</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        <span class="hljs-comment">// Register the TSVECTOR column</span></td><tr><td class="linenos" data-pseudo-content="17"></td><td>        $conn = <span class="hljs-keyword">$this</span>-&gt;app-&gt;make(<span class="hljs-string">'Illuminate\Database\ConnectionInterface'</span>);</td><tr><td class="linenos" data-pseudo-content="18"></td><td>        $conn-&gt;getDoctrineSchemaManager()</td><tr><td class="linenos" data-pseudo-content="19"></td><td>            -&gt;getDatabasePlatform()</td><tr><td class="linenos" data-pseudo-content="20"></td><td>            -&gt;registerDoctrineTypeMapping(<span class="hljs-string">'tsvector'</span>, <span class="hljs-string">'string'</span>);</td><tr><td class="linenos" data-pseudo-content="21"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="22"></td><td></td><tr><td class="linenos" data-pseudo-content="23"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="24"></td><td>     * Register any application services.</td><tr><td class="linenos" data-pseudo-content="25"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="26"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="27"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="28"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="29"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="30"></td><td>       <span class="hljs-comment">//</span></td><tr><td class="linenos" data-pseudo-content="31"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="32"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        // Register the TSVECTOR column
+        $conn = $this-&gt;app-&gt;make(&#39;Illuminate\Database\ConnectionInterface&#39;);
+        $conn-&gt;getDoctrineSchemaManager()
+            -&gt;getDatabasePlatform()
+            -&gt;registerDoctrineTypeMapping(&#39;tsvector&#39;, &#39;string&#39;);
+    }
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+       //
+    }
+}
+</code></pre>
 <p>We register a Doctrine type mapping that maps the <code>tsvector</code> type to a string. Now Doctrine will just treat it as a string.</p>
 <p>We can then retrieve the field types as follows:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>        $table = <span class="hljs-keyword">$this</span>-&gt;model-&gt;getTable();</td><tr><td class="linenos" data-pseudo-content="2"></td><td>        $fields = array_values(Schema::getColumnListing($table));</td><tr><td class="linenos" data-pseudo-content="3"></td><td>        $fielddata = [];</td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-keyword">foreach</span> ($fields <span class="hljs-keyword">as</span> $field){</td><tr><td class="linenos" data-pseudo-content="5"></td><td>            <span class="hljs-keyword">if</span> ($field != <span class="hljs-string">'id'</span> &amp;&amp; $field != <span class="hljs-string">'created_at'</span> &amp;&amp; $field != <span class="hljs-string">'updated_at'</span> &amp;&amp; $field != <span class="hljs-string">'deleted_at'</span>) {</td><tr><td class="linenos" data-pseudo-content="6"></td><td>                <span class="hljs-keyword">try</span> {</td><tr><td class="linenos" data-pseudo-content="7"></td><td>                    $fielddata[$field] = Schema::getColumnType($table, $field);</td><tr><td class="linenos" data-pseudo-content="8"></td><td>                } <span class="hljs-keyword">catch</span> (\<span class="hljs-keyword">Exception</span> $e) {</td><tr><td class="linenos" data-pseudo-content="9"></td><td>                    $fielddata[$field] = <span class="hljs-string">'unknown'</span>;</td><tr><td class="linenos" data-pseudo-content="10"></td><td>                }</td><tr><td class="linenos" data-pseudo-content="11"></td><td>            }</td><tr><td class="linenos" data-pseudo-content="12"></td><td>        }</td></table></code></pre>
+<pre><code class="lang-php">        $table = $this-&gt;model-&gt;getTable();
+        $fields = array_values(Schema::getColumnListing($table));
+        $fielddata = [];
+        foreach ($fields as $field){
+            if ($field != &#39;id&#39; &amp;&amp; $field != &#39;created_at&#39; &amp;&amp; $field != &#39;updated_at&#39; &amp;&amp; $field != &#39;deleted_at&#39;) {
+                try {
+                    $fielddata[$field] = Schema::getColumnType($table, $field);
+                } catch (\Exception $e) {
+                    $fielddata[$field] = &#39;unknown&#39;;
+                }
+            }
+        }
+</code></pre>
 <p>Note that we specifically don’t want to retrieve the ID or timestamps, so we exclude them - the user should never really have the need to update them manually. We fetch the table from the model and then call <code>Schema::getColumnListing()</code> to retrieve a list of fields for that table. Finally we call <code>Schema::getColumnType()</code> to actually get the type of each column.</p>
 <p>Now, I suspect the performance of this admin interface is going to be inferior to a more specific one because it has to retrieve the fields all the time, but that’s not the point here - with a non-user facing admin interface, performance isn’t quite as much of an issue. For the same reason the admin doesn’t do any caching at all. It’s still useful under certain circumstances to be able to reverse-engineer the table structure and render an appropriate form dynamically.</p>
 ]]></summary>
@@ -37,9 +81,24 @@
         <updated>2017-12-29T18:01:04Z</updated>
         <summary type="html"><![CDATA[<p>For many applications, using UUID’s as the primary keys on a database table can make a lot of sense. For mobile or offline apps, in particular, they mean you can create new objects locally and assign them a primary key without having to worry about it colliding with another object that was created in the meantime once it gets synchronised to the server. Also, they are less informative to nefarious users - an autoincrementing value in a URL tells a user that that value is the primary key, and means the app may potentially allow gathering of information via user enumeration (eg calling <code>/api/v1/users/1</code>, <code>/api/v1/users/2</code> etc).</p>
 <p>It’s fairly straightforward to use UUID’s as primary keys on your models when using PostgreSQL. First, you need to set up your migrations to use the <code>uuid-ossp</code> extension and set up the <code>id</code> field as both a UUID and the primary key. You also need to set a default value manually so that if it’s left empty it will generate a UUID for it.</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Schema::create(<span class="hljs-string">'items'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    $table-&gt;uuid(<span class="hljs-string">'id'</span>)-&gt;primary();</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    $table-&gt;text(<span class="hljs-string">'text'</span>)-&gt;nullable();</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    $table-&gt;timestamps();</td><tr><td class="linenos" data-pseudo-content="6"></td><td>});</td><tr><td class="linenos" data-pseudo-content="7"></td><td>DB::statement(<span class="hljs-string">'ALTER TABLE items ALTER COLUMN id SET DEFAULT uuid_generate_v4();'</span>);</td></table></code></pre>
+<pre><code class="lang-php">DB::statement(&#39;CREATE EXTENSION IF NOT EXISTS &quot;uuid-ossp&quot;;&#39;);
+Schema::create(&#39;items&#39;, function (Blueprint $table) {
+    $table-&gt;uuid(&#39;id&#39;)-&gt;primary();
+    $table-&gt;text(&#39;text&#39;)-&gt;nullable();
+    $table-&gt;timestamps();
+});
+DB::statement(&#39;ALTER TABLE items ALTER COLUMN id SET DEFAULT uuid_generate_v4();&#39;);
+</code></pre>
 <p>Then, in the model definition, you need to tell Laravel to cast the <code>id</code> field to a string, and explicitly set the primary key to <code>id</code>:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Item</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-keyword">protected</span> $casts = [</td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-string">'id'</span> =&gt; <span class="hljs-string">'string'</span>,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    ];</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td>    <span class="hljs-keyword">protected</span> $primaryKey = <span class="hljs-string">"id"</span>;</td><tr><td class="linenos" data-pseudo-content="8"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">class Item extends Model
+{
+    protected $casts = [
+        &#39;id&#39; =&gt; &#39;string&#39;,
+    ];
+
+    protected $primaryKey = &quot;id&quot;;
+}
+</code></pre>
 <p>Once this is done, the model should generate the primary keys for you as usual, except as UUID’s. If your application needs to accept UUID primary keys that were created offline, such as in a mobile app, you will probably want to add the <code>id</code> field to the <code>$fillable</code> array on the model to allow this.</p>
 ]]></summary>
     </entry>
@@ -51,7 +110,50 @@
         <updated>2017-12-02T23:30:44Z</updated>
         <summary type="html"><![CDATA[<p>I’ve touched on <a href="/blog/2017/10/03/simple-fuzzy-search-with-laravel-and-postgresql/">using PostgreSQL to implement fuzzy search with Laravel before</a>, but another type of search that PostgreSQL can handle fairly easily is full-text search. Here I’ll show you how to use it in a Laravel application.</p>
 <p>An obvious use case for this kind of search is a personal blogging engine. It’s unlikely something like this is going to have enough content for it to be worth using a heavier solution like Elasticsearch, but a <code>LIKE</code> or <code>ILIKE</code> statement doesn’t really cut it either, so Postgres’s full text search is a good fit. Below you’ll see a Laravel migration for the blog posts table:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreatePostsTable</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     * Run the migrations.</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        Schema::create(<span class="hljs-string">'posts'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{</td><tr><td class="linenos" data-pseudo-content="17"></td><td>            $table-&gt;increments(<span class="hljs-string">'id'</span>);</td><tr><td class="linenos" data-pseudo-content="18"></td><td>            $table-&gt;string(<span class="hljs-string">'title'</span>);</td><tr><td class="linenos" data-pseudo-content="19"></td><td>            $table-&gt;datetime(<span class="hljs-string">'pub_date'</span>);</td><tr><td class="linenos" data-pseudo-content="20"></td><td>            $table-&gt;text(<span class="hljs-string">'text'</span>);</td><tr><td class="linenos" data-pseudo-content="21"></td><td>            $table-&gt;string(<span class="hljs-string">'slug'</span>);</td><tr><td class="linenos" data-pseudo-content="22"></td><td>            $table-&gt;integer(<span class="hljs-string">'author_id'</span>);</td><tr><td class="linenos" data-pseudo-content="23"></td><td>            $table-&gt;timestamps();</td><tr><td class="linenos" data-pseudo-content="24"></td><td>        });</td><tr><td class="linenos" data-pseudo-content="25"></td><td>        DB::statement(<span class="hljs-string">"ALTER TABLE posts ADD COLUMN searchtext TSVECTOR"</span>);</td><tr><td class="linenos" data-pseudo-content="26"></td><td>        DB::statement(<span class="hljs-string">"UPDATE posts SET searchtext = to_tsvector('english', title || '' || text)"</span>);</td><tr><td class="linenos" data-pseudo-content="27"></td><td>        DB::statement(<span class="hljs-string">"CREATE INDEX searchtext_gin ON posts USING GIN(searchtext)"</span>);</td><tr><td class="linenos" data-pseudo-content="28"></td><td>        DB::statement(<span class="hljs-string">"CREATE TRIGGER ts_searchtext BEFORE INSERT OR UPDATE ON posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger('searchtext', 'pg_catalog.english', 'title', 'text')"</span>);</td><tr><td class="linenos" data-pseudo-content="29"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="30"></td><td></td><tr><td class="linenos" data-pseudo-content="31"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="32"></td><td>     * Reverse the migrations.</td><tr><td class="linenos" data-pseudo-content="33"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="34"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="35"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="36"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="37"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="38"></td><td>        DB::statement(<span class="hljs-string">"DROP TRIGGER IF EXISTS tsvector_update_trigger ON posts"</span>);</td><tr><td class="linenos" data-pseudo-content="39"></td><td>        DB::statement(<span class="hljs-string">"DROP INDEX IF EXISTS searchtext_gin"</span>);</td><tr><td class="linenos" data-pseudo-content="40"></td><td>        DB::statement(<span class="hljs-string">"ALTER TABLE posts DROP COLUMN searchtext"</span>);</td><tr><td class="linenos" data-pseudo-content="41"></td><td>        Schema::dropIfExists(<span class="hljs-string">'posts'</span>);</td><tr><td class="linenos" data-pseudo-content="42"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="43"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreatePostsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create(&#39;posts&#39;, function (Blueprint $table) {
+            $table-&gt;increments(&#39;id&#39;);
+            $table-&gt;string(&#39;title&#39;);
+            $table-&gt;datetime(&#39;pub_date&#39;);
+            $table-&gt;text(&#39;text&#39;);
+            $table-&gt;string(&#39;slug&#39;);
+            $table-&gt;integer(&#39;author_id&#39;);
+            $table-&gt;timestamps();
+        });
+        DB::statement(&quot;ALTER TABLE posts ADD COLUMN searchtext TSVECTOR&quot;);
+        DB::statement(&quot;UPDATE posts SET searchtext = to_tsvector(&#39;english&#39;, title || &#39;&#39; || text)&quot;);
+        DB::statement(&quot;CREATE INDEX searchtext_gin ON posts USING GIN(searchtext)&quot;);
+        DB::statement(&quot;CREATE TRIGGER ts_searchtext BEFORE INSERT OR UPDATE ON posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(&#39;searchtext&#39;, &#39;pg_catalog.english&#39;, &#39;title&#39;, &#39;text&#39;)&quot;);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        DB::statement(&quot;DROP TRIGGER IF EXISTS tsvector_update_trigger ON posts&quot;);
+        DB::statement(&quot;DROP INDEX IF EXISTS searchtext_gin&quot;);
+        DB::statement(&quot;ALTER TABLE posts DROP COLUMN searchtext&quot;);
+        Schema::dropIfExists(&#39;posts&#39;);
+    }
+}
+</code></pre>
 <p>Note that after we create the basic layout of our <code>posts</code> table, we then have to drop down to raw DB statements to achieve the next steps:</p>
 <ul>
 <li>We add a column called <code>searchtext</code> with a type of <code>TSVECTOR</code> (unfortunately Laravel doesn’t have a convenient method to create this column type, so we need to do it with a raw statement). This column will hold our searchable document.</li>
@@ -60,21 +162,57 @@
 <li>Finally we create a trigger which, when the table is amended, regenerates the search text.</li>
 </ul>
 <p>With that done, we can now look at actually performing a full-text search. To facilitate easy re-use, we’ll create a local scope on our <code>Post</code> model. If you haven’t used scopes in Laravel before, they essentially allow you to break queries into reusable chunks. In this case, we expect our scope to receive two arguments, the query instance (which is passed through automatically), and the search text:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-keyword">protected</span> $fillable = [</td><tr><td class="linenos" data-pseudo-content="10"></td><td>        <span class="hljs-string">'title'</span>,</td><tr><td class="linenos" data-pseudo-content="11"></td><td>        <span class="hljs-string">'pub_date'</span>,</td><tr><td class="linenos" data-pseudo-content="12"></td><td>        <span class="hljs-string">'text'</span>,</td><tr><td class="linenos" data-pseudo-content="13"></td><td>        <span class="hljs-string">'slug'</span>,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        <span class="hljs-string">'author_id'</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    ];</td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scopeSearch</span><span class="hljs-params">($query, $search)</span></td><tr><td class="linenos" data-pseudo-content="18"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="19"></td><td>        <span class="hljs-keyword">if</span> (!$search) {</td><tr><td class="linenos" data-pseudo-content="20"></td><td>            <span class="hljs-keyword">return</span> $query;</td><tr><td class="linenos" data-pseudo-content="21"></td><td>        }</td><tr><td class="linenos" data-pseudo-content="22"></td><td>        <span class="hljs-keyword">return</span> $query-&gt;whereRaw(<span class="hljs-string">'searchtext @@ to_tsquery(\'english\', ?)'</span>, [$search])</td><tr><td class="linenos" data-pseudo-content="23"></td><td>            -&gt;orderByRaw(<span class="hljs-string">'ts_rank(searchtext, to_tsquery(\'english\', ?)) DESC'</span>, [$search]);</td><tr><td class="linenos" data-pseudo-content="24"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="25"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    protected $fillable = [
+        &#39;title&#39;,
+        &#39;pub_date&#39;,
+        &#39;text&#39;,
+        &#39;slug&#39;,
+        &#39;author_id&#39;
+    ];
+
+    public function scopeSearch($query, $search)
+    {
+        if (!$search) {
+            return $query;
+        }
+        return $query-&gt;whereRaw(&#39;searchtext @@ to_tsquery(\&#39;english\&#39;, ?)&#39;, [$search])
+            -&gt;orderByRaw(&#39;ts_rank(searchtext, to_tsquery(\&#39;english\&#39;, ?)) DESC&#39;, [$search]);
+    }
+}
+</code></pre>
 <p>If <code>$search</code> is empty, we just return the query object as is. Otherwise, we first of all construct a <code>WHERE</code> clause that matches our search text against the <code>searchtext</code> column. Note the syntax used here:</p>
-<pre><code class="hljs lang-sql singleline">searchtext @@ to_tsquery('english', 'foo')</code></pre>
+<pre><code class="lang-sql">searchtext @@ to_tsquery(&#39;english&#39;, &#39;foo&#39;)
+</code></pre>
 <p>We use the <code>to_tsquery()</code> method to match our text against our search document. As before, note that we specify the language.</p>
 <p>Finally, we specify an order - we want the highest ranked matches to appear first, and this section of the query does that:</p>
-<pre><code class="hljs lang-sql singleline">ts_rank(searchtext, to_tsquery('english', 'foo')) DESC</code></pre>
+<pre><code class="lang-sql">ts_rank(searchtext, to_tsquery(&#39;english&#39;, &#39;foo&#39;)) DESC
+</code></pre>
 <p>Here we use <code>ts_rank()</code> to ensure we get our results in the appropriate order. Note that for both queries, we passed the arguments through as parameterized queries, rather than constructing a raw string - we have to watch out for SQL injection when we’re writing raw queries, but we can use PDO’s parameterized queries from Eloquent in a raw statement, which makes things a bit easier.</p>
 <p>Now we can call our new search scope as follows:</p>
-<pre><code class="hljs lang-php singleline">$posts = Post::search($search)-&gt;get();</code></pre>
+<pre><code class="lang-php">$posts = Post::search($search)-&gt;get();
+</code></pre>
 <p>Because the scope receives and returns a query builder instance, you can continue to add the rest of your query, or paginate it, as necessary:</p>
-<pre><code class="hljs lang-php singleline">$posts = Post::search($search)-&gt;where(<span class="hljs-string">'draft'</span>, <span class="hljs-keyword">false</span>)-&gt;simplePaginate(<span class="hljs-number">5</span>);</code></pre>
+<pre><code class="lang-php">$posts = Post::search($search)-&gt;where(&#39;draft&#39;, false)-&gt;simplePaginate(5);
+</code></pre>
 <p>If you’re working in a language that makes heavy use of accents, such as French, you might also want to install the <code>unaccent</code> extension (you can do this in the migration with <code>CREATE EXTENSION unaccent</code>). Then, any time we call <code>to_tsvector()</code>, you should pass any strings through the <code>unaccent()</code> method to strip out the accents.</p>
 <h2 id="do-we-need-the-migrations-">Do we need the migrations?</h2>
 <p>Technically, we could do without the additional changes to the database structure - we could create a document on the fly inside a subquery and use that to query against, which would look something like this in SQL:</p>
-<pre><code class="hljs lang-sql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">SELECT</span> *</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">FROM</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>  (<span class="hljs-keyword">SELECT</span> *,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>          to_tsvector(<span class="hljs-string">'english'</span>, posts.title) || to_tsvector(<span class="hljs-string">'english'</span>, posts.text) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">document</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>   <span class="hljs-keyword">FROM</span> <span class="hljs-string">"posts"</span>) <span class="hljs-keyword">search</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-keyword">WHERE</span> search.document @@ to_tsquery(<span class="hljs-string">'Redis'</span>)</td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> ts_rank(search.document, to_tsquery(<span class="hljs-string">'english'</span>, <span class="hljs-string">'Redis'</span>)) <span class="hljs-keyword">DESC</span>;</td></table></code></pre>
+<pre><code class="lang-sql">SELECT *
+FROM
+  (SELECT *,
+          to_tsvector(&#39;english&#39;, posts.title) || to_tsvector(&#39;english&#39;, posts.text) AS document
+   FROM &quot;posts&quot;) search
+WHERE search.document @@ to_tsquery(&#39;Redis&#39;)
+ORDER BY ts_rank(search.document, to_tsquery(&#39;english&#39;, &#39;Redis&#39;)) DESC;
+</code></pre>
 <p>However, the performance is likely to be significantly worse using this approach as it has to recreate the document, and doesn’t have an existing index to query against. It’s also a pig to write something like this with an ORM.</p>
 <p>I’m currently working on a more generic solution for implementing full text search with Postgres and Laravel, however so far it looks like that solution will not only be considerably more complex than this (consistently producing a suitable query for unknown data is rather fiddly), but you can’t create a column for the vector ahead of time, meaning the query will be slower. This approach, while it requires more work than simply installing a package, is not terribly hard to implement on a per-model basis and is easy to customise for your use case.</p>
 ]]></summary>
@@ -87,22 +225,117 @@
         <updated>2017-10-03T22:56:11Z</updated>
         <summary type="html"><![CDATA[<p>When implementing fuzzy search, many developers reach straight for specialised tools like Elasticsearch. However, for simple implementations, this is often overkill. PostgreSQL, my relational database of choice, can natively handle fuzzy search quite easily if you know how. Here’s how you might use this with Laravel.</p>
 <p>Suppose we have the following migration to create a <code>locations</code> table, storing towns, cities and villages:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateLocations</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="9"></td><td>     * Run the migrations.</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="15"></td><td>        <span class="hljs-comment">// Create locations table</span></td><tr><td class="linenos" data-pseudo-content="16"></td><td>        Schema::create(<span class="hljs-string">'locations'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{</td><tr><td class="linenos" data-pseudo-content="17"></td><td>            $table-&gt;increments(<span class="hljs-string">'id'</span>)-&gt;unsigned();</td><tr><td class="linenos" data-pseudo-content="18"></td><td>            $table-&gt;string(<span class="hljs-string">'name'</span>);</td><tr><td class="linenos" data-pseudo-content="19"></td><td>            $table-&gt;timestamps();</td><tr><td class="linenos" data-pseudo-content="20"></td><td>        });</td><tr><td class="linenos" data-pseudo-content="21"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="22"></td><td></td><tr><td class="linenos" data-pseudo-content="23"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="24"></td><td>     * Reverse the migrations.</td><tr><td class="linenos" data-pseudo-content="25"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="26"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="27"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="28"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="29"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="30"></td><td>        <span class="hljs-comment">// Drop locations table</span></td><tr><td class="linenos" data-pseudo-content="31"></td><td>        Schema::drop(<span class="hljs-string">'locations'</span>);</td><tr><td class="linenos" data-pseudo-content="32"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="33"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateLocations extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        // Create locations table
+        Schema::create(&#39;locations&#39;, function (Blueprint $table) {
+            $table-&gt;increments(&#39;id&#39;)-&gt;unsigned();
+            $table-&gt;string(&#39;name&#39;);
+            $table-&gt;timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        // Drop locations table
+        Schema::drop(&#39;locations&#39;);
+    }
+}
+</code></pre>
 <p>The key to this implementation of fuzzy search is <em>trigrams</em>. A trigram is a group of three consecutive characters taken from a string. Using the <code>pg_trgm</code> module, which comes with PostgreSQL, we can break a string into as many trigrams as possible, and then return the strings with the most matching trigrams.</p>
 <p>We can ensure that <code>pg_trgm</code> is set up on the database by creating a migration:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddTrgmExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     * Run the migrations.</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS pg_trgm'</span>);</td><tr><td class="linenos" data-pseudo-content="17"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="18"></td><td></td><tr><td class="linenos" data-pseudo-content="19"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="20"></td><td>     * Reverse the migrations.</td><tr><td class="linenos" data-pseudo-content="21"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="22"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="23"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="24"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="25"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="26"></td><td>        DB::statement(<span class="hljs-string">'DROP EXTENSION IF EXISTS pg_trgm'</span>);</td><tr><td class="linenos" data-pseudo-content="27"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="28"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddTrgmExtension extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        DB::statement(&#39;CREATE EXTENSION IF NOT EXISTS pg_trgm&#39;);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        DB::statement(&#39;DROP EXTENSION IF EXISTS pg_trgm&#39;);
+    }
+}
+</code></pre>
 <p>Make sure you run the migration as well. Once that is done, we can make a raw fuzzy query against the <code>name</code> field as follows:</p>
-<pre><code class="hljs lang-sql singleline"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> locations <span class="hljs-keyword">WHERE</span> <span class="hljs-string">'burgh'</span> % <span class="hljs-keyword">name</span>;</code></pre>
+<pre><code class="lang-sql">SELECT * FROM locations WHERE &#39;burgh&#39; % name;
+</code></pre>
 <p>Translating that to work with the Eloquent ORM, we can perform fuzzy queries against the <code>name</code> field as follows:</p>
-<pre><code class="hljs lang-php singleline">$location = Location::whereRaw(<span class="hljs-string">"'burgh' % name"</span>)-&gt;get();</code></pre>
+<pre><code class="lang-php">$location = Location::whereRaw(&quot;&#39;burgh&#39; % name&quot;)-&gt;get();
+</code></pre>
 <p>This query might match both <code>Aldeburgh</code> and <code>Edinburgh</code>. It’s also able to handle slight misspellings, as in this example:</p>
-<pre><code class="hljs lang-php singleline">$location = Location::whereRaw(<span class="hljs-string">"'hendrad' % name"</span>)-&gt;get();</code></pre>
+<pre><code class="lang-php">$location = Location::whereRaw(&quot;&#39;hendrad&#39; % name&quot;)-&gt;get();
+</code></pre>
 <p>This query will match <code>East Hendred</code> or <code>West Hendred</code> successfully. As you can see, we can match strings at any point in the name string, and handle slight mis-spellings without any problems.</p>
 <p>In practice, rather than using <code>whereRaw()</code> every time, you’ll probably want to create a local scope that accepts the name you want to match against. You’ll also want to use query parameters to prevent SQL injection:</p>
-<pre><code class="hljs lang-php singleline">$location = Location::whereRaw(<span class="hljs-string">"? % name"</span>, [$name])-&gt;get();</code></pre>
+<pre><code class="lang-php">$location = Location::whereRaw(&quot;? % name&quot;, [$name])-&gt;get();
+</code></pre>
 <h2 id="improving-performance-with-an-index">Improving performance with an index</h2>
 <p>The performance of these queries isn’t that great out of the box. We can improve them by creating an index:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddTrgmExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="10"></td><td>     * Run the migrations.</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS pg_trgm'</span>);</td><tr><td class="linenos" data-pseudo-content="17"></td><td>        DB::statement(<span class="hljs-string">'CREATE INDEX locations_name_trigram ON locations USING gist(name gist_trgm_ops);'</span>);</td><tr><td class="linenos" data-pseudo-content="18"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="19"></td><td></td><tr><td class="linenos" data-pseudo-content="20"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="21"></td><td>     * Reverse the migrations.</td><tr><td class="linenos" data-pseudo-content="22"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="23"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="24"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="25"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="26"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="27"></td><td>        DB::statement(<span class="hljs-string">'DROP INDEX IF EXISTS locations_name_trigram'</span>);</td><tr><td class="linenos" data-pseudo-content="28"></td><td>        DB::statement(<span class="hljs-string">'DROP EXTENSION IF EXISTS pg_trgm'</span>);</td><tr><td class="linenos" data-pseudo-content="29"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="30"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddTrgmExtension extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        DB::statement(&#39;CREATE EXTENSION IF NOT EXISTS pg_trgm&#39;);
+        DB::statement(&#39;CREATE INDEX locations_name_trigram ON locations USING gist(name gist_trgm_ops);&#39;);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        DB::statement(&#39;DROP INDEX IF EXISTS locations_name_trigram&#39;);
+        DB::statement(&#39;DROP EXTENSION IF EXISTS pg_trgm&#39;);
+    }
+}
+</code></pre>
 <p>Adding an index should produce a noticeable improvement in the response time.</p>
 <h2 id="final-thoughts">Final thoughts</h2>
 <p>PostgreSQL’s <code>pg_trgm</code> module is a fairly straightforward way of implementing fuzzy search. It’s not much more involved than a <code>LIKE</code> or <code>ILIKE</code> clause in your query, and for many use cases, it’s more than sufficient. If you don’t have a huge number of records, it’s probably a more appropriate choice than something like Elasticsearch, and has the advantage of a simpler stack. However, if you have a larger dataset, you may be better off with a dedicated search solution. As always, if you’re unsure it’s a good idea to try both and see what works best for that particular use case.</p>
@@ -118,60 +351,195 @@
 <p>By far the biggest deal out of all of these was the new <code>HStoreField</code> type. PostgreSQL added a JSON data type a little while back, and <code>HStoreField</code> allows you to use that field type. This is a really big deal because it allows you to store arbitrary data as JSON and query it. Previously, you could of course just store data as JSON in a text field, but that lacked the same ability to query it. This gives you many of the advantages of a NoSQL document database such as MongoDB in a relational database. For instance, you can store different products with different data about them, and crucially, query them by that data. Previously, the only way to add arbitrary product data and be able to query it was to have it in a separate table, and it was often cumbersome to join them when fetching multiple products.</p>
 <p>Let’s see a working example. We might be building an online store where products can have all kinds of arbitrary data stored about them. One product might be a plastic box, and you’d need to list the capacity as an additional attribute. Another product might be a pair of shoes, which have no capacity, but do have a size. It might be difficult to model this otherwise, but <code>HStoreField</code> is perfect for this kind of data.</p>
 <p>First, let’s set up our database. I’ll assume you already have PostgreSQL up and running via your package manager. First, we need to create our database:</p>
-<pre><code class="hljs lang-bash singleline">$ createdb djangostore</code></pre>
+<pre><code class="lang-bash">$ createdb djangostore
+</code></pre>
 <p>Next, we need to create a new user for this database with superuser access:</p>
-<pre><code class="hljs lang-bash singleline">$ createuser store -s -P</code></pre>
+<pre><code class="lang-bash">$ createuser store -s -P
+</code></pre>
 <p>You’ll be prompted for a password - I’m assuming this will just be <code>password</code> here. Next, we need to connect to PostgreSQL using the <code>psql</code> utility:</p>
-<pre><code class="hljs lang-bash singleline">$ psql djangostore -U store -W</code></pre>
+<pre><code class="lang-bash">$ psql djangostore -U store -W
+</code></pre>
 <p>You’ll be prompted for your new password. Next, run the following command:</p>
-<pre><code class="hljs lang-psql"><table><tr><td class="linenos" data-pseudo-content="1"></td><td># <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">EXTENSION</span> hstore;</td><tr><td class="linenos" data-pseudo-content="2"></td><td># <span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">PRIVILEGES</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DATABASE</span> djangostore <span class="hljs-keyword">TO</span> store;</td><tr><td class="linenos" data-pseudo-content="3"></td><td># \q</td></table></code></pre>
+<pre><code class="lang-psql"># CREATE EXTENSION hstore;
+# GRANT ALL PRIVILEGES ON DATABASE djangostore TO store;
+# \q
+</code></pre>
 <p>The first command installs the HStore extension. Next we make sure our new user has the privileges required on the new database:</p>
 <p>We’ve now created our database and a user to interact with it. Next, we’ll set up our Django install:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ <span class="hljs-built_in">cd</span> Projects</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ mkdir djangostore</td><tr><td class="linenos" data-pseudo-content="3"></td><td>$ <span class="hljs-built_in">cd</span> djangostore</td><tr><td class="linenos" data-pseudo-content="4"></td><td>$ pyvenv venv</td><tr><td class="linenos" data-pseudo-content="5"></td><td>$ <span class="hljs-built_in">source</span> venv/bin/activate</td><tr><td class="linenos" data-pseudo-content="6"></td><td>$ pip install Django psycopg2 ipdb</td><tr><td class="linenos" data-pseudo-content="7"></td><td>$ django-admin.py startproject djangostore</td><tr><td class="linenos" data-pseudo-content="8"></td><td>$ python manage.py startapp store</td></table></code></pre>
+<pre><code class="lang-bash">$ cd Projects
+$ mkdir djangostore
+$ cd djangostore
+$ pyvenv venv
+$ source venv/bin/activate
+$ pip install Django psycopg2 ipdb
+$ django-admin.py startproject djangostore
+$ python manage.py startapp store
+</code></pre>
 <p>I’m assuming here that you’re using Python 3.4. On Ubuntu, getting it working is <a href="https://gist.github.com/denilsonsa/21e50a357f2d4920091e">a bit more involved</a>.</p>
 <p>Next, open up <code>djangostore/settings.py</code> and amend <code>INSTALLED_APPS</code> to include the new app and the PostgreSQL-specific functionality:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>INSTALLED_APPS = (</td><tr><td class="linenos" data-pseudo-content="2"></td><td>    <span class="hljs-string">'django.contrib.admin'</span>,</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-string">'django.contrib.auth'</span>,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-string">'django.contrib.contenttypes'</span>,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    <span class="hljs-string">'django.contrib.sessions'</span>,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-string">'django.contrib.messages'</span>,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    <span class="hljs-string">'django.contrib.staticfiles'</span>,</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-string">'django.contrib.postgres'</span>,</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-string">'store'</span>,</td><tr><td class="linenos" data-pseudo-content="10"></td><td>)</td></table></code></pre>
+<pre><code class="lang-python">INSTALLED_APPS = (
+    &#39;django.contrib.admin&#39;,
+    &#39;django.contrib.auth&#39;,
+    &#39;django.contrib.contenttypes&#39;,
+    &#39;django.contrib.sessions&#39;,
+    &#39;django.contrib.messages&#39;,
+    &#39;django.contrib.staticfiles&#39;,
+    &#39;django.contrib.postgres&#39;,
+    &#39;store&#39;,
+)
+</code></pre>
 <p>You’ll also need to configure the database settings:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>DATABASES = {</td><tr><td class="linenos" data-pseudo-content="2"></td><td>    <span class="hljs-string">'default'</span>: {</td><tr><td class="linenos" data-pseudo-content="3"></td><td>        <span class="hljs-string">'ENGINE'</span>: <span class="hljs-string">'django.db.backends.postgresql_psycopg2'</span>,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-string">'NAME'</span>: <span class="hljs-string">'djangostore'</span>,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>        <span class="hljs-string">'USER'</span>: <span class="hljs-string">'store'</span>,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>        <span class="hljs-string">'PASSWORD'</span>: <span class="hljs-string">'password'</span>,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>        <span class="hljs-string">'HOST'</span>: <span class="hljs-string">'localhost'</span>,</td><tr><td class="linenos" data-pseudo-content="8"></td><td>        <span class="hljs-string">'PORT'</span>: <span class="hljs-string">''</span>,</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="10"></td><td>}</td></table></code></pre>
+<pre><code class="lang-python">DATABASES = {
+    &#39;default&#39;: {
+        &#39;ENGINE&#39;: &#39;django.db.backends.postgresql_psycopg2&#39;,
+        &#39;NAME&#39;: &#39;djangostore&#39;,
+        &#39;USER&#39;: &#39;store&#39;,
+        &#39;PASSWORD&#39;: &#39;password&#39;,
+        &#39;HOST&#39;: &#39;localhost&#39;,
+        &#39;PORT&#39;: &#39;&#39;,
+    }
+}
+</code></pre>
 <p>We need to create an empty migration to use <code>HStoreField</code>:</p>
-<pre><code class="hljs lang-bash singleline">$ python manage.py makemigrations --empty store</code></pre>
+<pre><code class="lang-bash">$ python manage.py makemigrations --empty store
+</code></pre>
 <p>This command should create the file <code>store/migrations/0001_initial.py</code>. Open this up and edit it to look like this:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-comment"># -*- coding: utf-8 -*-</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> __future__ <span class="hljs-keyword">import</span> unicode_literals</td><tr><td class="linenos" data-pseudo-content="3"></td><td></td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models, migrations</td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">from</span> django.contrib.postgres.operations <span class="hljs-keyword">import</span> HStoreExtension</td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Migration</span><span class="hljs-params">(migrations.Migration)</span>:</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td></td><tr><td class="linenos" data-pseudo-content="10"></td><td>    dependencies = [</td><tr><td class="linenos" data-pseudo-content="11"></td><td>    ]</td><tr><td class="linenos" data-pseudo-content="12"></td><td></td><tr><td class="linenos" data-pseudo-content="13"></td><td>    operations = [</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        HStoreExtension(),</td><tr><td class="linenos" data-pseudo-content="15"></td><td>    ]</td></table></code></pre>
+<pre><code class="lang-python"># -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.contrib.postgres.operations import HStoreExtension
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+    ]
+
+    operations = [
+        HStoreExtension(),
+    ]
+</code></pre>
 <p>This will make sure the HStore extension is installed. Next, let’s run these migrations:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ python manage.py migrate</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Operations to perform:</td><tr><td class="linenos" data-pseudo-content="3"></td><td>  Synchronize unmigrated apps: messages, staticfiles, postgres</td><tr><td class="linenos" data-pseudo-content="4"></td><td>  Apply all migrations: sessions, store, admin, auth, contenttypes</td><tr><td class="linenos" data-pseudo-content="5"></td><td>Synchronizing apps without migrations:</td><tr><td class="linenos" data-pseudo-content="6"></td><td>  Creating tables...</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    Running deferred SQL...</td><tr><td class="linenos" data-pseudo-content="8"></td><td>  Installing custom SQL...</td><tr><td class="linenos" data-pseudo-content="9"></td><td>Running migrations:</td><tr><td class="linenos" data-pseudo-content="10"></td><td>  Rendering model states... DONE</td><tr><td class="linenos" data-pseudo-content="11"></td><td>  Applying contenttypes.0001_initial... OK</td><tr><td class="linenos" data-pseudo-content="12"></td><td>  Applying auth.0001_initial... OK</td><tr><td class="linenos" data-pseudo-content="13"></td><td>  Applying admin.0001_initial... OK</td><tr><td class="linenos" data-pseudo-content="14"></td><td>  Applying contenttypes.0002_remove_content_type_name... OK</td><tr><td class="linenos" data-pseudo-content="15"></td><td>  Applying auth.0002_alter_permission_name_max_length... OK</td><tr><td class="linenos" data-pseudo-content="16"></td><td>  Applying auth.0003_alter_user_email_max_length... OK</td><tr><td class="linenos" data-pseudo-content="17"></td><td>  Applying auth.0004_alter_user_username_opts... OK</td><tr><td class="linenos" data-pseudo-content="18"></td><td>  Applying auth.0005_alter_user_last_login_null... OK</td><tr><td class="linenos" data-pseudo-content="19"></td><td>  Applying auth.0006_require_contenttypes_0002... OK</td><tr><td class="linenos" data-pseudo-content="20"></td><td>  Applying sessions.0001_initial... OK</td><tr><td class="linenos" data-pseudo-content="21"></td><td>  Applying store.0001_initial... OK</td></table></code></pre>
+<pre><code class="lang-bash">$ python manage.py migrate
+Operations to perform:
+  Synchronize unmigrated apps: messages, staticfiles, postgres
+  Apply all migrations: sessions, store, admin, auth, contenttypes
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+  Installing custom SQL...
+Running migrations:
+  Rendering model states... DONE
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying sessions.0001_initial... OK
+  Applying store.0001_initial... OK
+</code></pre>
 <p>Now, we’re ready to start creating our <code>Product</code> model. Open up <code>store/models.py</code> and amend it as follows:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">from</span> django.contrib.postgres.fields <span class="hljs-keyword">import</span> HStoreField</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models</td><tr><td class="linenos" data-pseudo-content="3"></td><td></td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-comment"># Create your models here.</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span><span class="hljs-params">(models.Model)</span>:</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>    created_at = models.DateTimeField(auto_now_add=<span class="hljs-keyword">True</span>)</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    updated_at = models.DateTimeField(auto_now=<span class="hljs-keyword">True</span>)</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    name = models.CharField(max_length=<span class="hljs-number">200</span>)</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    description = models.TextField()</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    price = models.FloatField()</td><tr><td class="linenos" data-pseudo-content="11"></td><td>    attributes = HStoreField()</td><tr><td class="linenos" data-pseudo-content="12"></td><td></td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__str__</span><span class="hljs-params">(self)</span>:</span></td><tr><td class="linenos" data-pseudo-content="14"></td><td>        <span class="hljs-keyword">return</span> self.name</td></table></code></pre>
+<pre><code class="lang-python">from django.contrib.postgres.fields import HStoreField
+from django.db import models
+
+# Create your models here.
+class Product(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    price = models.FloatField()
+    attributes = HStoreField()
+
+    def __str__(self):
+        return self.name
+</code></pre>
 <p>Note that <code>HStoreField</code> is not part of the standard group of model fields, and needs to be imported from the Postgres-specific fields module. Next, let’s create and run our migrations:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ python manage.py makemigrations</td><tr><td class="linenos" data-pseudo-content="2"></td><td>$ python manage.py migrate</td></table></code></pre>
+<pre><code class="lang-bash">$ python manage.py makemigrations
+$ python manage.py migrate
+</code></pre>
 <p>We should now have a <code>Product</code> model where the <code>attributes</code> field can be any arbitrary data we want. Note that we installed <code>ipdb</code> earlier - if you’re not familiar with it, this is an improved Python debugger, and also pulls in <code>ipython</code>, an improved Python shell, which Django will use if available.</p>
 <p>Open up the Django shell:</p>
-<pre><code class="hljs lang-bash singleline">$ python manage.py shell</code></pre>
+<pre><code class="lang-bash">$ python manage.py shell
+</code></pre>
 <p>Then, import the <code>Product</code> model:</p>
-<pre><code class="hljs lang-python singleline"><span class="hljs-keyword">from</span> store.models <span class="hljs-keyword">import</span> Product</code></pre>
+<pre><code class="lang-python">from store.models import Product
+</code></pre>
 <p>Let’s create our first product - a plastic storage box:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>box = Product()</td><tr><td class="linenos" data-pseudo-content="2"></td><td>box.name = <span class="hljs-string">'Box'</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>box.description = <span class="hljs-string">'A big box'</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>box.price = <span class="hljs-number">5.99</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>box.attributes = { <span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">"colour"</span>: <span class="hljs-string">"blue"</span>}</td><tr><td class="linenos" data-pseudo-content="6"></td><td>box.save()</td></table></code></pre>
+<pre><code class="lang-python">box = Product()
+box.name = &#39;Box&#39;
+box.description = &#39;A big box&#39;
+box.price = 5.99
+box.attributes = { &#39;capacity&#39;: &#39;1L&#39;, &quot;colour&quot;: &quot;blue&quot;}
+box.save()
+</code></pre>
 <p>If we take a look, we can see that the attributes can be returned as a Python dictionary:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">12</span>]: Product.objects.all()[<span class="hljs-number">0</span>].attributes</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">12</span>]: {<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>}</td></table></code></pre>
+<pre><code class="lang-python">In [12]: Product.objects.all()[0].attributes
+Out[12]: {&#39;capacity&#39;: &#39;1L&#39;, &#39;colour&#39;: &#39;blue&#39;}
+</code></pre>
 <p>We can easily retrieve single values:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">15</span>]: Product.objects.all()[<span class="hljs-number">0</span>].attributes[<span class="hljs-string">'capacity'</span>]</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">15</span>]: <span class="hljs-string">'1L'</span></td></table></code></pre>
+<pre><code class="lang-python">In [15]: Product.objects.all()[0].attributes[&#39;capacity&#39;]
+Out[15]: &#39;1L&#39;
+</code></pre>
 <p>Let’s add a second product - a mop:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>mop = Product()</td><tr><td class="linenos" data-pseudo-content="2"></td><td>mop.name = <span class="hljs-string">'Mop'</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>mop.description = <span class="hljs-string">'A mop'</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>mop.price = <span class="hljs-number">12.99</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>mop.attributes = { <span class="hljs-string">'colour'</span>: <span class="hljs-string">"red"</span> }</td><tr><td class="linenos" data-pseudo-content="6"></td><td>mop.save()</td></table></code></pre>
+<pre><code class="lang-python">mop = Product()
+mop.name = &#39;Mop&#39;
+mop.description = &#39;A mop&#39;
+mop.price = 12.99
+mop.attributes = { &#39;colour&#39;: &quot;red&quot; }
+mop.save()
+</code></pre>
 <p>Now, we can filter out only the red items easily:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">2</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'colour'</span>: <span class="hljs-string">'red'</span>})</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">2</span>]: [&lt;Product: Mop&gt;]</td></table></code></pre>
+<pre><code class="lang-python">In [2]: Product.objects.filter(attributes__contains={&#39;colour&#39;: &#39;red&#39;})
+Out[2]: [&lt;Product: Mop&gt;]
+</code></pre>
 <p>Here we search for items where the <code>colour</code> attribute is set to <code>red</code>, and we only get back the mop. Let’s do the same for blue items:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">3</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>})</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">3</span>]: [&lt;Product: Box&gt;]</td></table></code></pre>
+<pre><code class="lang-python">In [3]: Product.objects.filter(attributes__contains={&#39;colour&#39;: &#39;blue&#39;})
+Out[3]: [&lt;Product: Box&gt;]
+</code></pre>
 <p>Here it returns the box. Let’s now search for an item with a capacity of 1L:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">4</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>})</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">4</span>]: [&lt;Product: Box&gt;]</td></table></code></pre>
+<pre><code class="lang-python">In [4]: Product.objects.filter(attributes__contains={&#39;capacity&#39;: &#39;1L&#39;})
+Out[4]: [&lt;Product: Box&gt;]
+</code></pre>
 <p>Only the box has the capacity attribute at all, and it’s the only one returned. Let’s see what happens when we search for an item with a capacity of 2L, which we know is not present:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">5</span>]: Product.objects.filter(attributes__contains={<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'2L'</span>})</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">5</span>]: []</td></table></code></pre>
+<pre><code class="lang-python">In [5]: Product.objects.filter(attributes__contains={&#39;capacity&#39;: &#39;2L&#39;})
+Out[5]: []
+</code></pre>
 <p>No items returned, as expected. Let’s look for any item with the <code>capacity</code> attribute:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">6</span>]: Product.objects.filter(attributes__has_key=<span class="hljs-string">'capacity'</span>)</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">6</span>]: [&lt;Product: Box&gt;]</td></table></code></pre>
+<pre><code class="lang-python">In [6]: Product.objects.filter(attributes__has_key=&#39;capacity&#39;)
+Out[6]: [&lt;Product: Box&gt;]
+</code></pre>
 <p>Again, it only returns the box, as that’s the only one where that key exists. Note that all of this is tightly integrated with the existing API for the Django ORM. Let’s add a third product, a food hamper:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">3</span>]: hamper = Product()</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td>In [<span class="hljs-number">4</span>]: hamper.name = <span class="hljs-string">'Hamper'</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>In [<span class="hljs-number">5</span>]: hamper.description = <span class="hljs-string">'A food hamper'</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td>In [<span class="hljs-number">6</span>]: hamper.price = <span class="hljs-number">19.99</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td></td><tr><td class="linenos" data-pseudo-content="9"></td><td>In [<span class="hljs-number">7</span>]: hamper.attributes = {</td><tr><td class="linenos" data-pseudo-content="10"></td><td>   ...: <span class="hljs-string">'contents'</span>: <span class="hljs-string">'ham, cheese, coffee'</span>,</td><tr><td class="linenos" data-pseudo-content="11"></td><td>   ...: <span class="hljs-string">'size'</span>: <span class="hljs-string">'90cmx60cm'</span></td><tr><td class="linenos" data-pseudo-content="12"></td><td>   ...: }</td><tr><td class="linenos" data-pseudo-content="13"></td><td></td><tr><td class="linenos" data-pseudo-content="14"></td><td>In [<span class="hljs-number">8</span>]: hamper.save()</td></table></code></pre>
+<pre><code class="lang-python">In [3]: hamper = Product()
+
+In [4]: hamper.name = &#39;Hamper&#39;
+
+In [5]: hamper.description = &#39;A food hamper&#39;
+
+In [6]: hamper.price = 19.99
+
+In [7]: hamper.attributes = {
+   ...: &#39;contents&#39;: &#39;ham, cheese, coffee&#39;,
+   ...: &#39;size&#39;: &#39;90cmx60cm&#39;
+   ...: }
+
+In [8]: hamper.save()
+</code></pre>
 <p>Next, let’s return only those items that have a <code>contents</code> attribute that contains <code>cheese</code>:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">9</span>]: Product.objects.filter(attributes__contents__contains=<span class="hljs-string">'cheese'</span>)</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">9</span>]: [&lt;Product: Hamper&gt;]</td></table></code></pre>
+<pre><code class="lang-python">In [9]: Product.objects.filter(attributes__contents__contains=&#39;cheese&#39;)
+Out[9]: [&lt;Product: Hamper&gt;]
+</code></pre>
 <p>As you can see, the <code>HStoreField</code> type allows for quite complex queries, while allowing you to set arbitrary values for an individual item. This overcomes one of the biggest issues with relational databases - the inability to set arbitrary data. Previously, you might have to work around it in some fashion, such as creating a table containing attributes for individual items which had to be joined on the product table. This is very cumbersome and difficult to use, especially when you wanted to work with more than one product. With this approach, it’s easy to filter products by multiple values in the HStore field, and you get back all of the attributes at once, as in this example:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>In [<span class="hljs-number">13</span>]: Product.objects.filter(attributes__capacity=<span class="hljs-string">'1L'</span>, attributes__colour=<span class="hljs-string">'blue'</span>)</td><tr><td class="linenos" data-pseudo-content="2"></td><td>Out[<span class="hljs-number">13</span>]: [&lt;Product: Box&gt;]</td><tr><td class="linenos" data-pseudo-content="3"></td><td>In [<span class="hljs-number">14</span>]: Product.objects.filter(attributes__capacity=<span class="hljs-string">'1L'</span>, attributes__colour=<span class="hljs-string">'blue'</span>)[<span class="hljs-number">0</span>].attributes</td><tr><td class="linenos" data-pseudo-content="4"></td><td>Out[<span class="hljs-number">14</span>]: {<span class="hljs-string">'capacity'</span>: <span class="hljs-string">'1L'</span>, <span class="hljs-string">'colour'</span>: <span class="hljs-string">'blue'</span>}</td></table></code></pre>
+<pre><code class="lang-python">In [13]: Product.objects.filter(attributes__capacity=&#39;1L&#39;, attributes__colour=&#39;blue&#39;)
+Out[13]: [&lt;Product: Box&gt;]
+In [14]: Product.objects.filter(attributes__capacity=&#39;1L&#39;, attributes__colour=&#39;blue&#39;)[0].attributes
+Out[14]: {&#39;capacity&#39;: &#39;1L&#39;, &#39;colour&#39;: &#39;blue&#39;}
+</code></pre>
 <p>Similar functionality is coming in a future version of MySQL, so it wouldn’t be entirely surprising to see <code>HStoreField</code> become more generally available in Django in the near future. For now, this functionality is extremely useful and makes for a good reason to ditch MySQL in favour of PostgreSQL for your future Django apps.</p>
 ]]></summary>
     </entry>

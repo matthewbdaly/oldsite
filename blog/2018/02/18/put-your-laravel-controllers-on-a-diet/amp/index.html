@@ -183,217 +183,217 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th February 2018 6:10 pm</p><h1>Put Your Laravel Controllers on a Diet</h1><p>MVC frameworks are a tremendously useful tool for modern web development. They offer easy ways to carry out common tasks, and enforce a certain amount of structure on a project.</p><p>However, that doesn’t mean using them makes you immune to bad practices, and it’s quite easy to wind up falling into certain anti-patterns. Probably the most common is the Fat Controller.</p><h2 id="what-is-a-fat-controller-">What is a fat controller?</h2><p>When I first started out doing professional web development, CodeIgniter 2 was the first MVC framework I used. While I hadn’t used it before, I was familiar with the general concept of MVC. However, I didn’t appreciate that when referring to the model layer as a place for business logic, that wasn’t necessarily the same thing as the database models.</p><p>As such, my controllers became a dumping ground for anything that didn’t fit into the models. If it didn’t interact with the database, I put it in the controller. They quickly became bloated, with many methods running to hundreds of lines of code. The code base became hard to understand, and when I was under the gun on projects I found myself copying and pasting functionality between controllers, making the situation even worse. Not having an experienced senior developer on hand to offer criticism and advice, it was a long time before I realised that this was a problem or how to avoid it.</p><h2 id="why-are-fat-controllers-bad-">Why are fat controllers bad?</h2><p>Controllers are meant to be simple glue code that receives requests and returns responses. Anything else should be handed off to the model layer. As noted above, however, that’s not the same as putting it in the models. Your model layer can consist of many different classes, not just your Eloquent models, and you should not fall into the trap of thinking your application should consist of little more than models, views and controllers.</p><p>Placing business logic in controllers can be bad for many reasons:</p><ul><li>Code in controllers can be difficult to write automated tests for</li><li>Any logic in a controller method may need to be repeated elsewhere if the same functionality is needed for a different route, unless it’s in a private or protected method that is called from elsewhere, in which case it’s very hard to test in isolation</li><li>Placing it in the controller makes it difficult to pull out and re-use on a different project</li><li>Making your controller methods too large makes them complex and hard to follow</li></ul><p>As a general rule of thumb, I find that 10 lines of code for any one method for a controller is where it starts getting a bit much. That said, it’s not a hard and fast rule, and for very small projects it may not be worthwhile. But if a project is large and needs to be maintained for any reasonable period of time, you should take the trouble to ensure your controllers are as skinny as is practical.</p><p>Nowadays Laravel is my go-to framework and I’ve put together a number of strategies for avoiding the fat controller anti-pattern. Here’s some examples of how I would move various parts of the application out of my controllers.</p><h2 id="validation">Validation</h2><p>Laravel has a nice, easy way of getting validation out of the controllers. Just create a custom <a href="https://laravel.com/docs/5.6/validation#form-request-validation">form request</a> for your input data, as in this example:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th February 2018 6:10 pm</p><h1>Put Your Laravel Controllers on a Diet</h1><p>MVC frameworks are a tremendously useful tool for modern web development. They offer easy ways to carry out common tasks, and enforce a certain amount of structure on a project.</p><p>However, that doesn’t mean using them makes you immune to bad practices, and it’s quite easy to wind up falling into certain anti-patterns. Probably the most common is the Fat Controller.</p><h2 id="what-is-a-fat-controller-">What is a fat controller?</h2><p>When I first started out doing professional web development, CodeIgniter 2 was the first MVC framework I used. While I hadn’t used it before, I was familiar with the general concept of MVC. However, I didn’t appreciate that when referring to the model layer as a place for business logic, that wasn’t necessarily the same thing as the database models.</p><p>As such, my controllers became a dumping ground for anything that didn’t fit into the models. If it didn’t interact with the database, I put it in the controller. They quickly became bloated, with many methods running to hundreds of lines of code. The code base became hard to understand, and when I was under the gun on projects I found myself copying and pasting functionality between controllers, making the situation even worse. Not having an experienced senior developer on hand to offer criticism and advice, it was a long time before I realised that this was a problem or how to avoid it.</p><h2 id="why-are-fat-controllers-bad-">Why are fat controllers bad?</h2><p>Controllers are meant to be simple glue code that receives requests and returns responses. Anything else should be handed off to the model layer. As noted above, however, that’s not the same as putting it in the models. Your model layer can consist of many different classes, not just your Eloquent models, and you should not fall into the trap of thinking your application should consist of little more than models, views and controllers.</p><p>Placing business logic in controllers can be bad for many reasons:</p><ul><li>Code in controllers can be difficult to write automated tests for</li><li>Any logic in a controller method may need to be repeated elsewhere if the same functionality is needed for a different route, unless it’s in a private or protected method that is called from elsewhere, in which case it’s very hard to test in isolation</li><li>Placing it in the controller makes it difficult to pull out and re-use on a different project</li><li>Making your controller methods too large makes them complex and hard to follow</li></ul><p>As a general rule of thumb, I find that 10 lines of code for any one method for a controller is where it starts getting a bit much. That said, it’s not a hard and fast rule, and for very small projects it may not be worthwhile. But if a project is large and needs to be maintained for any reasonable period of time, you should take the trouble to ensure your controllers are as skinny as is practical.</p><p>Nowadays Laravel is my go-to framework and I’ve put together a number of strategies for avoiding the fat controller anti-pattern. Here’s some examples of how I would move various parts of the application out of my controllers.</p><h2 id="validation">Validation</h2><p>Laravel has a nice, easy way of getting validation out of the controllers. Just create a custom <a href="https://laravel.com/docs/5.6/validation#form-request-validation">form request</a> for your input data, as in this example:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
+namespace App\Http\Requests;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">FormRequest</span>;
+use Illuminate\Foundation\Http\FormRequest;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateRequest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">FormRequest</span>
-</span>{
-    <span class="hljs-comment">/**
+class CreateRequest extends FormRequest
+{
+    /**
      * Determine if the user is authorized to make this request.
      *
-     * <span class="hljs-doctag">@return</span> bool
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">authorize</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Get the validation rules that apply to the request.
      *
-     * <span class="hljs-doctag">@return</span> array
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rules</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> [
-            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'required|email'</span>
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            &#39;email&#39; =&gt; &#39;required|email&#39;
         ];
     }
 }
-</code></pre><p>Then type-hint the form request in the controller method, instead of <code>Illuminate\Http\Request</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Then type-hint the form request in the controller method, instead of <code>Illuminate\Http\Request</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace App\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>\<span class="hljs-title">CreateRequest</span>;
+use App\Http\Requests\CreateRequest;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HomeController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(CreateRequest $request)</span>
-    </span>{
-        <span class="hljs-comment">// Process request here..</span>
+class HomeController extends Controller
+{
+    public function store(CreateRequest $request)
+    {
+        // Process request here..
     }
 }
-</code></pre><h2 id="database-access-and-caching">Database access and caching</h2><p>For non-trivial applications I normally use <a href="/blog/2017/03/01/decorating-laravel-repositories/">decorated repositories</a> to handle caching and database access in one place. That way my caching and database layers are abstracted out into separate classes, and caching is nearly always handled seamlessly without having to do much work.</p><h2 id="complex-object-creation-logic">Complex object creation logic</h2><p>If I have a form or API endpoint that needs to:</p><ul><li>Create more than one object</li><li>Transform the incoming data in some way</li><li>Or is non-trivial in any other way</li></ul><p>I will typically pull it out into a separate persister class. First, you should create an interface for this persister class:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><h2 id="database-access-and-caching">Database access and caching</h2><p>For non-trivial applications I normally use <a href="/blog/2017/03/01/decorating-laravel-repositories/">decorated repositories</a> to handle caching and database access in one place. That way my caching and database layers are abstracted out into separate classes, and caching is nearly always handled seamlessly without having to do much work.</p><h2 id="complex-object-creation-logic">Complex object creation logic</h2><p>If I have a form or API endpoint that needs to:</p><ul><li>Create more than one object</li><li>Transform the incoming data in some way</li><li>Or is non-trivial in any other way</li></ul><p>I will typically pull it out into a separate persister class. First, you should create an interface for this persister class:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Persisters</span>;
+namespace App\Contracts\Persisters;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;
+use Illuminate\Database\Eloquent\Model;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Foo</span>
-</span>{
-    <span class="hljs-comment">/**
+interface Foo
+{
+    /**
      * Create a new Model
      *
-     * <span class="hljs-doctag">@param</span> array $data
-     * <span class="hljs-doctag">@return</span> Model
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span></span>;
+     * @param array $data
+     * @return Model
+     */
+    public function create(array $data);
 
-    <span class="hljs-comment">/**
+    /**
      * Update the given Model
      *
-     * <span class="hljs-doctag">@param</span> array $data
-     * <span class="hljs-doctag">@param</span> Model $model
-     * <span class="hljs-doctag">@return</span> Model
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(array $data, Model $model)</span></span>;
+     * @param array $data
+     * @param Model $model
+     * @return Model
+     */
+    public function update(array $data, Model $model);
 }
-</code></pre><p>Then create the persister class itself:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Then create the persister class itself:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Persisters</span>;
+namespace App\Persisters;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Foo</span> <span class="hljs-title">as</span> <span class="hljs-title">Repository</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Persisters</span>\<span class="hljs-title">Foo</span> <span class="hljs-title">as</span> <span class="hljs-title">FooContract</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">DatabaseManager</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Carbon</span>\<span class="hljs-title">Carbon</span>;
+use Illuminate\Database\Eloquent\Model;
+use App\Contracts\Repositories\Foo as Repository;
+use App\Contracts\Persisters\Foo as FooContract;
+use Illuminate\Database\DatabaseManager;
+use Carbon\Carbon;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FooContract</span>
-</span>{
-    <span class="hljs-keyword">protected</span> $repository;
+class Foo implements FooContract
+{
+    protected $repository;
 
-    <span class="hljs-keyword">protected</span> $db;
+    protected $db;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(DatabaseManager $db, Repository $repository)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;db = $db;
-        <span class="hljs-keyword">$this</span>-&gt;repository = $repository;
+    public function __construct(DatabaseManager $db, Repository $repository)
+    {
+        $this-&gt;db = $db;
+        $this-&gt;repository = $repository;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Create a new Model
      *
-     * <span class="hljs-doctag">@param</span> array $data
-     * <span class="hljs-doctag">@return</span> Model
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(array $data)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;db-&gt;beginTransaction();
-        $model = <span class="hljs-keyword">$this</span>-&gt;repository-&gt;create([
-             <span class="hljs-string">'date'</span> =&gt; Carbon::parse($data[<span class="hljs-string">'date'</span>])-&gt;toDayDateTimeString(),
+     * @param array $data
+     * @return Model
+     */
+    public function create(array $data)
+    {
+        $this-&gt;db-&gt;beginTransaction();
+        $model = $this-&gt;repository-&gt;create([
+             &#39;date&#39; =&gt; Carbon::parse($data[&#39;date&#39;])-&gt;toDayDateTimeString(),
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;db-&gt;commit();
-        <span class="hljs-keyword">return</span> $model;
+        $this-&gt;db-&gt;commit();
+        return $model;
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Update the given Model
      *
-     * <span class="hljs-doctag">@param</span> array $data
-     * <span class="hljs-doctag">@param</span> Model $model
-     * <span class="hljs-doctag">@return</span> Model
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(array $data, Model $model)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;db-&gt;beginTransaction();
-        $updatedmodel = <span class="hljs-keyword">$this</span>-&gt;repository-&gt;update([
-             <span class="hljs-string">'date'</span> =&gt; Carbon::parse($data[<span class="hljs-string">'date'</span>])-&gt;toDayDateTimeString(),
+     * @param array $data
+     * @param Model $model
+     * @return Model
+     */
+    public function update(array $data, Model $model)
+    {
+        $this-&gt;db-&gt;beginTransaction();
+        $updatedmodel = $this-&gt;repository-&gt;update([
+             &#39;date&#39; =&gt; Carbon::parse($data[&#39;date&#39;])-&gt;toDayDateTimeString(),
              $model
         ]);
-        <span class="hljs-keyword">$this</span>-&gt;db-&gt;commit();
-        <span class="hljs-keyword">return</span> $updatedmodel;
+        $this-&gt;db-&gt;commit();
+        return $updatedmodel;
     }
 }
-</code></pre><p>Then you can set up the persister in a service provider so that type-hinting the interface returns the persister:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Then you can set up the persister in a service provider so that type-hinting the interface returns the persister:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
+namespace App\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class AppServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function boot()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-       <span class="hljs-keyword">$this</span>-&gt;app-&gt;bind(
-            <span class="hljs-string">'App\Contracts\Persisters\Foo'</span>,
-            <span class="hljs-string">'App\Persisters\Foo'</span>,
+     * @return void
+     */
+    public function register()
+    {
+       $this-&gt;app-&gt;bind(
+            &#39;App\Contracts\Persisters\Foo&#39;,
+            &#39;App\Persisters\Foo&#39;,
        });
     }
 }
-</code></pre><p>This approach means that complex logic, such as creating multiple related objects, can be handled in a consistent way, even if it needs to be called from multiple places.</p><h2 id="triggering-actions-as-a-result-of-something">Triggering actions as a result of something</h2><p><a href="https://laravel.com/docs/5.6/events">Events</a> are tailor-made for this use case, and Laravel documents them very well, so I won’t repeat it here. Suffice to say, if something needs to happen, but the response sent by the application doesn’t necessarily depend on it returning something immediately, then it’s probably worth considering making it an event. If it’s going to be called from multiple places, it’s even more worthwhile.</p><p>For instance, if you have a contact form, it’s worth taking the time to create an event for when a new contact is received, and handle proessing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you’re sending an acknowledgement email for a new user registration, you don’t need to wait for that email to be sent before you return the response, so queueing it can improve response times.</p><h2 id="interacting-with-third-party-services">Interacting with third-party services</h2><p>If you have some code that needs to interact with a third-party service or API, it can get quite complex, especially if you need to process the content in some way. It therefore makes sense to pull that functionality out into a separate class.</p><p>For instance, say you have some code in your controller that uses an HTTP client to fetch some data from a third-party API and display it in the view:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(Request $request)</span>
-</span>{
-   $data = <span class="hljs-keyword">$this</span>-&gt;client-&gt;get(<span class="hljs-string">'http://api.com/api/items'</span>);
+</code></pre><p>This approach means that complex logic, such as creating multiple related objects, can be handled in a consistent way, even if it needs to be called from multiple places.</p><h2 id="triggering-actions-as-a-result-of-something">Triggering actions as a result of something</h2><p><a href="https://laravel.com/docs/5.6/events">Events</a> are tailor-made for this use case, and Laravel documents them very well, so I won’t repeat it here. Suffice to say, if something needs to happen, but the response sent by the application doesn’t necessarily depend on it returning something immediately, then it’s probably worth considering making it an event. If it’s going to be called from multiple places, it’s even more worthwhile.</p><p>For instance, if you have a contact form, it’s worth taking the time to create an event for when a new contact is received, and handle proessing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you’re sending an acknowledgement email for a new user registration, you don’t need to wait for that email to be sent before you return the response, so queueing it can improve response times.</p><h2 id="interacting-with-third-party-services">Interacting with third-party services</h2><p>If you have some code that needs to interact with a third-party service or API, it can get quite complex, especially if you need to process the content in some way. It therefore makes sense to pull that functionality out into a separate class.</p><p>For instance, say you have some code in your controller that uses an HTTP client to fetch some data from a third-party API and display it in the view:</p><pre><code class="lang-php">public function index(Request $request)
+{
+   $data = $this-&gt;client-&gt;get(&#39;http://api.com/api/items&#39;);
    $items = [];
-   <span class="hljs-keyword">foreach</span> ($data <span class="hljs-keyword">as</span> $k =&gt; $v) {
+   foreach ($data as $k =&gt; $v) {
          $item = [
-           <span class="hljs-string">'name'</span> =&gt; $v[<span class="hljs-string">'name'</span>],
-              <span class="hljs-string">'description'</span> =&gt; $v[<span class="hljs-string">'data'</span>][<span class="hljs-string">'description'</span>],
-              <span class="hljs-string">'tags'</span> =&gt; $v[<span class="hljs-string">'data'</span>][<span class="hljs-string">'metadata'</span>][<span class="hljs-string">'tags'</span>]
+           &#39;name&#39; =&gt; $v[&#39;name&#39;],
+              &#39;description&#39; =&gt; $v[&#39;data&#39;][&#39;description&#39;],
+              &#39;tags&#39; =&gt; $v[&#39;data&#39;][&#39;metadata&#39;][&#39;tags&#39;]
          ];
          $items[] = $item;
    }
-   <span class="hljs-keyword">return</span> view(<span class="hljs-string">'template'</span>, [
-       <span class="hljs-string">'items'</span> =&gt; $items
+   return view(&#39;template&#39;, [
+       &#39;items&#39; =&gt; $items
    ]);
 }
-</code></pre><p>This is a very small example (and a lot simpler than most real-world instances of this issue), but it illustrates the principle. Not only does this code bloat the controller, it might also be used elsewhere in the application, and we don’t want to copy and paste it elsewhere - therefore it makes sense to extract it to a service class.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>This is a very small example (and a lot simpler than most real-world instances of this issue), but it illustrates the principle. Not only does this code bloat the controller, it might also be used elsewhere in the application, and we don’t want to copy and paste it elsewhere - therefore it makes sense to extract it to a service class.</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Services</span>
+namespace App\Services
 
-<span class="hljs-title">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">ClientInterface</span> <span class="hljs-title">as</span> <span class="hljs-title">GuzzleClient</span>;
+use GuzzleHttp\ClientInterface as GuzzleClient;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Api</span>
-</span>{
-   <span class="hljs-keyword">protected</span> $client;
+class Api
+{
+   protected $client;
 
-   <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(GuzzleClient $client)</span>
-   </span>{
-      <span class="hljs-keyword">$this</span>-&gt;client = $client;
+   public function __construct(GuzzleClient $client)
+   {
+      $this-&gt;client = $client;
    }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetch</span><span class="hljs-params">()</span>
-    </span>{
-      $data = <span class="hljs-keyword">$this</span>-&gt;client-&gt;get(<span class="hljs-string">'http://api.com/api/items'</span>);
+    public function fetch()
+    {
+      $data = $this-&gt;client-&gt;get(&#39;http://api.com/api/items&#39;);
       $items = [];
-      <span class="hljs-keyword">foreach</span> ($data <span class="hljs-keyword">as</span> $k =&gt; $v) {
+      foreach ($data as $k =&gt; $v) {
          $item = [
-            <span class="hljs-string">'name'</span> =&gt; $v[<span class="hljs-string">'name'</span>],
-            <span class="hljs-string">'description'</span> =&gt; $v[<span class="hljs-string">'data'</span>][<span class="hljs-string">'description'</span>],
-            <span class="hljs-string">'tags'</span> =&gt; $v[<span class="hljs-string">'data'</span>][<span class="hljs-string">'metadata'</span>][<span class="hljs-string">'tags'</span>]
+            &#39;name&#39; =&gt; $v[&#39;name&#39;],
+            &#39;description&#39; =&gt; $v[&#39;data&#39;][&#39;description&#39;],
+            &#39;tags&#39; =&gt; $v[&#39;data&#39;][&#39;metadata&#39;][&#39;tags&#39;]
          ];
          $items[] = $item;
       }
-      <span class="hljs-keyword">return</span> $items;
+      return $items;
     }
 }
-</code></pre><p>Our controller can then type-hint the service and refactor that functionality out of the method:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(App\Services\Api $api)</span>
-</span>{
-    <span class="hljs-keyword">$this</span>-&gt;api = $api;
+</code></pre><p>Our controller can then type-hint the service and refactor that functionality out of the method:</p><pre><code class="lang-php">public function __construct(App\Services\Api $api)
+{
+    $this-&gt;api = $api;
 }
 
-<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">(Request $request)</span>
-</span>{
-   $items = <span class="hljs-keyword">$this</span>-&gt;api-&gt;fetch();
-   <span class="hljs-keyword">return</span> view(<span class="hljs-string">'template'</span>, [
-       <span class="hljs-string">'items'</span> =&gt; $items
+public function index(Request $request)
+{
+   $items = $this-&gt;api-&gt;fetch();
+   return view(&#39;template&#39;, [
+       &#39;items&#39; =&gt; $items
    ]);
 }
 </code></pre><h2 id="including-common-variables-in-the-view">Including common variables in the view</h2><p>If data is needed in more than one view (eg show the user’s name on every page when logged in), consider using <a href="https://laravel.com/docs/5.6/views#view-composers">view composers</a> to retrieve this data rather than fetching them in the controller. That way you’re not having to repeat that logic in more than one place.</p><h2 id="formatting-content-for-display">Formatting content for display</h2><p>Logically this belongs in the view layer, so you should <a href="/blog/2018/01/09/creating-laravel-helpers/">write a helper</a> to handle things like formatting dates. For more complex stuff, such as formatting HTML, you should be doing this in Blade (or another templating system, if you’re using one) - for instance, when generating an HTML table, you should consider <a href="https://laravel.com/docs/5.6/blade#rendering-views-for-collections">using a view partial</a> to loop through them. For particularly tricky functionality, you have the option of <a href="https://laravel.com/docs/5.6/blade#extending-blade">writing a custom Blade directive</a>.</p><p>The same applies for rendering other content - for rendering JSON you should consider using <a href="https://laravel.com/docs/5.6/eloquent-resources">API resources</a> or <a href="https://fractal.thephpleague.com/">Fractal</a> to get any non-trivial logic for your API responses out of the controller. Blade templates can also work for non-HTML content such as XML.</p><h2 id="anything-else-">Anything else…</h2><p>These examples are largely to get you started, and there will be occasions where something doesn’t fall into any of the above categories. However, the same principle applies. Your controllers should stick to just receiving requests and sending responses, and anything else should normally be deferred to other classes.</p><p>Fat controllers make developer’s lives very difficult, and if you want your code base to be easily maintainable, you should be willing to refactor them ruthlessly. Any functionality you can pull out of the controller becomes easier to reuse and test, and as long as you name your classes and methods sensibly, they’re easier to understand.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/02/18/put-your-laravel-controllers-on-a-diet/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/02/25/unit-testing-your-laravel-controllers/amp/">Unit Testing Your Laravel Controllers</a> <a class="postlink" href="/blog/2018/02/04/using-lando-as-an-alternative-to-vagrant/amp/">Using Lando As An Alternative to Vagrant</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

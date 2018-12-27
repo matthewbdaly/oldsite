@@ -4,7 +4,7 @@
         <title>celery | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/celery/</link>
         <description>celery | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -15,9 +15,19 @@
             <pubDate>Wed, 17 Jun 2015 19:34:08 GMT</pubDate>
             <description><![CDATA[<p>I ran into a small issue today. I’m working on a Django app which uses Celery to handle certain tasks that don’t need to return a response within the context of the HTTP request. I also wanted to use <code>django_behave</code> for running BDD tests. The trouble is that both <code>django_behave</code> and Celery provide their own custom test runners that extend the default Django test runner, and so it looked like I might have to choose between the two.</p>
 <p>However, it turned out that the Celery one was actually very simple, with only a handful of changes needing to be made to the default test runner to make it work with Celery. I was therefore able to create my own custom test runner that inherited from <code>DjangoBehaveTestSuiteRunner</code> and applied the changes necessary to get Celery working with it. Here is the test runner I wrote, which was saved as <code>myproject/runner.py</code>:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">from</span> django.conf <span class="hljs-keyword">import</span> settings</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> djcelery.contrib.test_runner <span class="hljs-keyword">import</span> _set_eager</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">from</span> django_behave.runner <span class="hljs-keyword">import</span> DjangoBehaveTestSuiteRunner</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CeleryAndBehaveRunner</span><span class="hljs-params">(DjangoBehaveTestSuiteRunner)</span>:</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">setup_test_environment</span><span class="hljs-params">(self, **kwargs)</span>:</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>        _set_eager()</td><tr><td class="linenos" data-pseudo-content="8"></td><td>        settings.BROKER_BACKEND = <span class="hljs-string">'memory'</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td>        super(CeleryAndBehaveRunner, self).setup_test_environment(**kwargs)</td></table></code></pre>
+<pre><code class="lang-python">from django.conf import settings
+from djcelery.contrib.test_runner import _set_eager
+from django_behave.runner import DjangoBehaveTestSuiteRunner
+
+class CeleryAndBehaveRunner(DjangoBehaveTestSuiteRunner):
+    def setup_test_environment(self, **kwargs):
+        _set_eager()
+        settings.BROKER_BACKEND = &#39;memory&#39;
+        super(CeleryAndBehaveRunner, self).setup_test_environment(**kwargs)
+</code></pre>
 <p>To use it, you need to set the test runner in <code>settings.py</code></p>
-<pre><code class="hljs lang-python singleline">TEST_RUNNER = <span class="hljs-string">'myproject.runner.CeleryAndBehaveRunner'</span></code></pre>
+<pre><code class="lang-python">TEST_RUNNER = &#39;myproject.runner.CeleryAndBehaveRunner&#39;
+</code></pre>
 <p>Once that was done, my tests worked flawlessly with Celery, and the Behave tests ran as expected.</p>
 ]]></description>
         </item>

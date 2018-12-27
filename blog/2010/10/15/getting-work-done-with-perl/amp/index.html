@@ -183,59 +183,59 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">15th October 2010 8:39 pm</p><h1>Getting Work Done With Perl</h1><p>After my initial struggles with Perl, I now think I’m really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.</p><p>As one of the exercises for my studies I had to open a database connection to a Microsoft Access database, but I wanted to do the exercise in Ubuntu (I’ve always preferred using Unix-like operating systems for programming, and thanks to apt-get it’s a lot less grief installing additional libraries and modules as you need them) and couldn’t get Perl to connect to the database properly, so I resolved to export it to either MySQL or SQLite.</p><p>I was able to export it to MySQL in the end using mdbtools, but I wasn’t entirely happy with the end result. I resorted to re-exporting the data as a CSV file, then resolved to write a small Perl script to read the file, parse it using a regular expression to obtain the necessary information, then insert it into a new SQLite database.</p><p>Here’s what I came up with:</p><pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">15th October 2010 8:39 pm</p><h1>Getting Work Done With Perl</h1><p>After my initial struggles with Perl, I now think I’m really starting to get to grips with the language. I generally find it a pain when you have to learn by building small but basically useless scripts - I always do best when building something useful.</p><p>As one of the exercises for my studies I had to open a database connection to a Microsoft Access database, but I wanted to do the exercise in Ubuntu (I’ve always preferred using Unix-like operating systems for programming, and thanks to apt-get it’s a lot less grief installing additional libraries and modules as you need them) and couldn’t get Perl to connect to the database properly, so I resolved to export it to either MySQL or SQLite.</p><p>I was able to export it to MySQL in the end using mdbtools, but I wasn’t entirely happy with the end result. I resorted to re-exporting the data as a CSV file, then resolved to write a small Perl script to read the file, parse it using a regular expression to obtain the necessary information, then insert it into a new SQLite database.</p><p>Here’s what I came up with:</p><pre><code class="lang-perl">#!/usr/bin/perl -w
 
-<span class="hljs-keyword">use</span> strict;
-<span class="hljs-keyword">use</span> DBI;
+use strict;
+use DBI;
 
-<span class="hljs-keyword">my</span> $db = <span class="hljs-string">"dbi:SQLite:backend.db"</span>;
+my $db = &quot;dbi:SQLite:backend.db&quot;;
 
-<span class="hljs-keyword">if</span> (!(-e <span class="hljs-string">"backend.db"</span>))
+if (!(-e &quot;backend.db&quot;))
 {
-   <span class="hljs-keyword">print</span> <span class="hljs-string">"Database does not exist. Creating it..."</span>;
+   print &quot;Database does not exist. Creating it...&quot;;
 
-   <span class="hljs-comment"># Create the database</span>
-   <span class="hljs-keyword">my</span> $dbh = DBI-&gt;<span class="hljs-keyword">connect</span>($db) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! $DBI::errstr"</span>;
-   <span class="hljs-keyword">my</span> $createdb = $dbh-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"CREATE TABLE CARS( ID INTEGER PRIMARY KEY, YEAR INTEGER, MAKE VARCHAR(30), MODEL VARCHAR(30), COLOR VARCHAR(30), PRICE INTEGER);"</span>);
+   # Create the database
+   my $dbh = DBI-&gt;connect($db) or die &quot;Error in connecting to database! $DBI::errstr&quot;;
+   my $createdb = $dbh-&gt;do(&quot;CREATE TABLE CARS( ID INTEGER PRIMARY KEY, YEAR INTEGER, MAKE VARCHAR(30), MODEL VARCHAR(30), COLOR VARCHAR(30), PRICE INTEGER);&quot;);
    $dbh-&gt;disconnect();
 }
 
-<span class="hljs-keyword">open</span>(READFILE, <span class="hljs-string">"cartable.csv"</span>);
+open(READFILE, &quot;cartable.csv&quot;);
 
-<span class="hljs-keyword">while</span>()
+while()
 {
-   <span class="hljs-keyword">unless</span>($_ =~ <span class="hljs-regexp">m/id,/</span>)
+   unless($_ =~ m/id,/)
    {
-      <span class="hljs-regexp">m/\d+\,(\d{4})\,\"(\w+)\"\,\"(\w+)\"\,\"(\w+)\"\,\"(\d+)\"/</span>;
-      <span class="hljs-keyword">my</span> $year = $1;
-      <span class="hljs-keyword">my</span> $make = $2;
-      <span class="hljs-keyword">my</span> $model = $3;
-      <span class="hljs-keyword">my</span> $color = $4;
-      <span class="hljs-keyword">my</span> $price = $5;
+      m/\d+\,(\d{4})\,\&quot;(\w+)\&quot;\,\&quot;(\w+)\&quot;\,\&quot;(\w+)\&quot;\,\&quot;(\d+)\&quot;/;
+      my $year = $1;
+      my $make = $2;
+      my $model = $3;
+      my $color = $4;
+      my $price = $5;
 
-      <span class="hljs-keyword">my</span> $dbh2 = DBI-&gt;<span class="hljs-keyword">connect</span>($db) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Error in connecting to database! $DBI::errstr"</span>;
-      <span class="hljs-keyword">my</span> $insertdb = $dbh2-&gt;<span class="hljs-keyword">do</span>(<span class="hljs-string">"INSERT INTO CARS (YEAR, MAKE, MODEL, COLOR, PRICE) VALUES (\"$year\", \"$make\", \"$model\", \"$color\", \"$price\");"</span>);
+      my $dbh2 = DBI-&gt;connect($db) or die &quot;Error in connecting to database! $DBI::errstr&quot;;
+      my $insertdb = $dbh2-&gt;do(&quot;INSERT INTO CARS (YEAR, MAKE, MODEL, COLOR, PRICE) VALUES (\&quot;$year\&quot;, \&quot;$make\&quot;, \&quot;$model\&quot;, \&quot;$color\&quot;, \&quot;$price\&quot;);&quot;);
       $dbh2-&gt;disconnect;
    }
 }
-<span class="hljs-keyword">close</span>(READFILE);
+close(READFILE);
 
-<span class="hljs-keyword">print</span> <span class="hljs-string">"Write completed!\n"</span>;
-<span class="hljs-keyword">print</span> <span class="hljs-string">"To demonstrate it works, we'll run a SELECT query against the database...\n"</span>;
+print &quot;Write completed!\n&quot;;
+print &quot;To demonstrate it works, we&#39;ll run a SELECT query against the database...\n&quot;;
 
-<span class="hljs-comment"># Read the database</span>
-<span class="hljs-keyword">my</span> $readdb = DBI-&gt;<span class="hljs-keyword">connect</span>($db);
-<span class="hljs-keyword">my</span> $dbselect = $readdb-&gt;prepare(<span class="hljs-string">"SELECT * FROM CARS;"</span>);
+# Read the database
+my $readdb = DBI-&gt;connect($db);
+my $dbselect = $readdb-&gt;prepare(&quot;SELECT * FROM CARS;&quot;);
 $dbselect-&gt;execute;
 
-<span class="hljs-comment"># Print the results</span>
-<span class="hljs-keyword">print</span> <span class="hljs-string">"ID\tYear\tMake\tModel\tColor\tPrice\n"</span>;
-<span class="hljs-keyword">while</span>(<span class="hljs-keyword">my</span> @row = $dbselect-&gt;fetchrow_array)
+# Print the results
+print &quot;ID\tYear\tMake\tModel\tColor\tPrice\n&quot;;
+while(my @row = $dbselect-&gt;fetchrow_array)
 {
-   <span class="hljs-keyword">print</span> <span class="hljs-string">"$row[0]\t$row[1]\t$row[2]\t$row[3]\t$row[4]\t$row[5]\n"</span>;
+   print &quot;$row[0]\t$row[1]\t$row[2]\t$row[3]\t$row[4]\t$row[5]\n&quot;;
 }
 
-<span class="hljs-comment"># Close the connection</span>
+# Close the connection
 $readdb-&gt;disconnect;
 </code></pre><p>Apologies for the fact that the indentation doesn’t seem to have copied across from Vim very well (can anyone recommend a good WordPress plugin for displaying code, none of the ones I’ve tried seem to be any good?). It works well, and it’s also helped me grasp Perl’s database API better.</p><p>I think I’ve got a better idea now of what Python and Perl are best at and when to use each. Perl is a great language, but the fact that a lot of it is implicit makes it a little harder to pick up at first than Python - for instance, the default variable, which is quite a good idea, but takes a little getting used to. Its regex support is great, and I like the database API, but I would find it a lot harder to do any object-oriented programming in Perl than in Python (which I guess is why <a href="http://www.iinteractive.com/moose/">Moose</a> exists). I’ve found Perl very useful for quick and dirty scripts and as a glue language, but for longer scripts Python seems the better choice.</p><section><ul class="categories"><li><a href="/blog/categories/perl/">perl</a></li><li><a href="/blog/categories/python/">python</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2010/10/15/getting-work-done-with-perl/">View the article with comments</a></section><section><a class="postlink" href="/blog/2010/10/16/another-perl-snippet/amp/">Another Perl Snippet...</a> <a class="postlink" href="/blog/2010/08/22/what-makes-a-good-programming-textbook/amp/">What Makes a Good Programming Textbook?</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {

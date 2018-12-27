@@ -4,7 +4,7 @@
         <title>artisan | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/artisan/</link>
         <description>artisan | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:50 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -15,10 +15,77 @@
             <pubDate>Mon, 08 Jan 2018 12:52:39 GMT</pubDate>
             <description><![CDATA[<p>When working with any Laravel application that implements authentication, you’ll need to set up a user account to be able to work with it. One way of doing that is to add a user in a seeder, but that’s only really suitable if every user is going to use the same details.</p>
 <p>Instead, you may want to create an Artisan command to set up the user account. Here’s an example of a command that does that:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Commands</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUser</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     * The name and signature of the console command.</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     * <span class="hljs-doctag">@var</span> string</td><tr><td class="linenos" data-pseudo-content="14"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    <span class="hljs-keyword">protected</span> $signature = <span class="hljs-string">'create:user'</span>;</td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="18"></td><td>     * The console command description.</td><tr><td class="linenos" data-pseudo-content="19"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="20"></td><td>     * <span class="hljs-doctag">@var</span> string</td><tr><td class="linenos" data-pseudo-content="21"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="22"></td><td>    <span class="hljs-keyword">protected</span> $description = <span class="hljs-string">'Creates a single user'</span>;</td><tr><td class="linenos" data-pseudo-content="23"></td><td></td><tr><td class="linenos" data-pseudo-content="24"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="25"></td><td>     * Create a new command instance.</td><tr><td class="linenos" data-pseudo-content="26"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="27"></td><td>     * <span class="hljs-doctag">@return</span> void</td><tr><td class="linenos" data-pseudo-content="28"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="29"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="30"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="31"></td><td>        <span class="hljs-keyword">parent</span>::__construct();</td><tr><td class="linenos" data-pseudo-content="32"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="33"></td><td></td><tr><td class="linenos" data-pseudo-content="34"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="35"></td><td>     * Execute the console command.</td><tr><td class="linenos" data-pseudo-content="36"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="37"></td><td>     * <span class="hljs-doctag">@return</span> mixed</td><tr><td class="linenos" data-pseudo-content="38"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="39"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="40"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="41"></td><td>        <span class="hljs-comment">// Get user model from config</span></td><tr><td class="linenos" data-pseudo-content="42"></td><td>        $model = config(<span class="hljs-string">'auth.providers.users.model'</span>);</td><tr><td class="linenos" data-pseudo-content="43"></td><td></td><tr><td class="linenos" data-pseudo-content="44"></td><td>        <span class="hljs-comment">// Let user know what this will do</span></td><tr><td class="linenos" data-pseudo-content="45"></td><td>        <span class="hljs-keyword">$this</span>-&gt;info(<span class="hljs-string">'I\'ll ask you for the details I need to set up the user'</span>);</td><tr><td class="linenos" data-pseudo-content="46"></td><td></td><tr><td class="linenos" data-pseudo-content="47"></td><td>        <span class="hljs-comment">// Get username</span></td><tr><td class="linenos" data-pseudo-content="48"></td><td>        $name = <span class="hljs-keyword">$this</span>-&gt;ask(<span class="hljs-string">'Please provide the username'</span>);</td><tr><td class="linenos" data-pseudo-content="49"></td><td></td><tr><td class="linenos" data-pseudo-content="50"></td><td>        <span class="hljs-comment">// Get email</span></td><tr><td class="linenos" data-pseudo-content="51"></td><td>        $email = <span class="hljs-keyword">$this</span>-&gt;ask(<span class="hljs-string">'Please provide the email address'</span>);</td><tr><td class="linenos" data-pseudo-content="52"></td><td></td><tr><td class="linenos" data-pseudo-content="53"></td><td>        <span class="hljs-comment">// Get password</span></td><tr><td class="linenos" data-pseudo-content="54"></td><td>        $password = <span class="hljs-keyword">$this</span>-&gt;secret(<span class="hljs-string">'Please provide the password'</span>);</td><tr><td class="linenos" data-pseudo-content="55"></td><td></td><tr><td class="linenos" data-pseudo-content="56"></td><td>        <span class="hljs-comment">// Create model</span></td><tr><td class="linenos" data-pseudo-content="57"></td><td>        $user = <span class="hljs-keyword">new</span> $model;</td><tr><td class="linenos" data-pseudo-content="58"></td><td>        $user-&gt;name = $name;</td><tr><td class="linenos" data-pseudo-content="59"></td><td>        $user-&gt;email = $email;</td><tr><td class="linenos" data-pseudo-content="60"></td><td>        $user-&gt;password = Hash::make($password);</td><tr><td class="linenos" data-pseudo-content="61"></td><td>        $user-&gt;save();</td><tr><td class="linenos" data-pseudo-content="62"></td><td>        <span class="hljs-keyword">$this</span>-&gt;info(<span class="hljs-string">'User saved'</span>);</td><tr><td class="linenos" data-pseudo-content="63"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="64"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Hash;
+
+class CreateUser extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = &#39;create:user&#39;;
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = &#39;Creates a single user&#39;;
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        // Get user model from config
+        $model = config(&#39;auth.providers.users.model&#39;);
+
+        // Let user know what this will do
+        $this-&gt;info(&#39;I\&#39;ll ask you for the details I need to set up the user&#39;);
+
+        // Get username
+        $name = $this-&gt;ask(&#39;Please provide the username&#39;);
+
+        // Get email
+        $email = $this-&gt;ask(&#39;Please provide the email address&#39;);
+
+        // Get password
+        $password = $this-&gt;secret(&#39;Please provide the password&#39;);
+
+        // Create model
+        $user = new $model;
+        $user-&gt;name = $name;
+        $user-&gt;email = $email;
+        $user-&gt;password = Hash::make($password);
+        $user-&gt;save();
+        $this-&gt;info(&#39;User saved&#39;);
+    }
+}
+</code></pre>
 <p>We fetch the user model from the config, before asking the user for the data we need. Then we insert it into the database and confirm it to the user.</p>
 <p>Then we just need to register the command in <code>App\Console\Kernel.php</code>:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>    <span class="hljs-keyword">protected</span> $commands = [</td><tr><td class="linenos" data-pseudo-content="2"></td><td>        \App\Console\Commands\CreateUser::class,</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    ];</td></table></code></pre>
+<pre><code class="lang-php">    protected $commands = [
+        \App\Console\Commands\CreateUser::class,
+    ];
+</code></pre>
 <p>And we can run our command with <code>php artisan create:user</code>.</p>
 ]]></description>
         </item>
@@ -29,7 +96,8 @@
             <pubDate>Tue, 02 Jan 2018 12:12:15 GMT</pubDate>
             <description><![CDATA[<p>The second package I’ve been working on recently is <a href="https://github.com/matthewbdaly/laravel-package-boilerplate">Laravel Package Boilerplate</a>. It’s a basic starter boilerplate for building your own Laravel packages.</p>
 <p>It’s not meant to be installed as a project dependency. Instead, run the following command to create a new project boilerplate with it:</p>
-<pre><code class="hljs lang-bash singleline">composer create-project --prefer-dist matthewbdaly/laravel-package-boilerplate &lt;YOUR_NEW_PACKAGE_DIRECTORY&gt;</code></pre>
+<pre><code class="lang-bash">composer create-project --prefer-dist matthewbdaly/laravel-package-boilerplate &lt;YOUR_NEW_PACKAGE_DIRECTORY&gt;
+</code></pre>
 <p>This will create a new folder that includes a <code>src</code> folder containing a service provider, and a <code>tests</code> folder containing a preconfigured base test case, as well as a simple test case for tests that don’t need the full application instantiated, in order to help keep your test suite as fast as possible.</p>
 <p>In addition, it includes configuration files for:</p>
 <ul>
@@ -39,7 +107,8 @@
 </ul>
 <p>That way you can start your project off the right way with very little effort.</p>
 <p>I’ve also added my Artisan Standalone project as a dependency - that way you can access any Artisan commands you need to generate files you need as follows:</p>
-<pre><code class="hljs lang-bash singleline">$ vendor/bin/artisan</code></pre>
+<pre><code class="lang-bash">$ vendor/bin/artisan
+</code></pre>
 <p>Hopefully this package should make it a lot easier to create new Laravel packages in future.</p>
 ]]></description>
         </item>
@@ -51,9 +120,11 @@
             <description><![CDATA[<p>Recently I’ve been building and publishing a significant number of Laravel packages, and I thought I’d share details of some of them over the next few days.</p>
 <p><a href="https://github/com/matthewbdaly/artisan-standalone">Artisan Standalone</a> is a package that, when installed in a standalone Laravel package (eg, not in an actual Laravel install, but in a package that you’re building that is intended for use with Laravel), allows you to use Artisan. It’s intended largely to make it quicker and easier to build functionality as separate packages by giving you access to the same generator commands as you have when working with a Laravel application. It came about largely from a need to scratch my own itch, as when building packages I was having to either run Artisan commands in a Laravel app and move them over, or copy them from existing files, which was obviously a pain in the proverbial.</p>
 <p>You can install it with the following command:</p>
-<pre><code class="hljs lang-bash singleline">$ composer require --dev matthewbdaly/artisan-standalone</code></pre>
+<pre><code class="lang-bash">$ composer require --dev matthewbdaly/artisan-standalone
+</code></pre>
 <p>Once it’s installed, you can access Artisan as follows:</p>
-<pre><code class="hljs lang-bash singleline">$ vendor/bin/artisan</code></pre>
+<pre><code class="lang-bash">$ vendor/bin/artisan
+</code></pre>
 <p>Note that it doesn’t explicitly include Laravel as a dependency - you’ll need to add that in the parent package to pull in the libraries it needs (which you should be doing anyway). It’s possible that there are some commands that won’t work in this context, but they’re almost certainly ones you won’t need here, such as the <code>migrate</code> command. As far as I can tell the generator commands, which are the only ones we’re really interested in here, all work OK.</p>
 ]]></description>
         </item>
@@ -64,15 +135,111 @@
             <pubDate>Mon, 01 Jan 2018 16:06:21 GMT</pubDate>
             <description><![CDATA[<p>While the documentation for creating Artisan tasks is generally pretty good, it doesn’t really touch on creating tasks that generate new files. The only way to figure it out was to go digging through the source code. In this case, I was building an Artisan command to create Fractal transformers as part of a package I’m working on.</p>
 <p>There’s a specialised class for generating files at <code>Illuminate\Console\GeneratorCommand</code>, which your command class should extend instead of <code>Illuminate\Console\Command</code>. In addition to the usual properties such as the signature and description, you also need to specify <code>$type</code> to give the type of class being generated. Also, note that the constructor is different, so if you use <code>php artisan make:console</code> to create the boilerplate for this command, you’ll need to delete the constructor.</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Commands</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">GeneratorCommand</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TransformerMakeCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">GeneratorCommand</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="11"></td><td>     * The name and signature of the console command.</td><tr><td class="linenos" data-pseudo-content="12"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="13"></td><td>     * <span class="hljs-doctag">@var</span> string</td><tr><td class="linenos" data-pseudo-content="14"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>    <span class="hljs-keyword">protected</span> $signature = <span class="hljs-string">'make:transformer {name : The required name of the transformer class}'</span>;</td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="18"></td><td>     * The console command description.</td><tr><td class="linenos" data-pseudo-content="19"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="20"></td><td>     * <span class="hljs-doctag">@var</span> string</td><tr><td class="linenos" data-pseudo-content="21"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="22"></td><td>    <span class="hljs-keyword">protected</span> $description = <span class="hljs-string">'Create a Fractal transformer'</span>;</td><tr><td class="linenos" data-pseudo-content="23"></td><td></td><tr><td class="linenos" data-pseudo-content="24"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="25"></td><td>     * The type of class being generated.</td><tr><td class="linenos" data-pseudo-content="26"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="27"></td><td>     * <span class="hljs-doctag">@var</span> string</td><tr><td class="linenos" data-pseudo-content="28"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="29"></td><td>    <span class="hljs-keyword">protected</span> $type = <span class="hljs-string">'Fractal transformer'</span>;</td><tr><td class="linenos" data-pseudo-content="30"></td><td></td><tr><td class="linenos" data-pseudo-content="31"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="32"></td><td>     * Get the stub file for the generator.</td><tr><td class="linenos" data-pseudo-content="33"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="34"></td><td>     * <span class="hljs-doctag">@return</span> string</td><tr><td class="linenos" data-pseudo-content="35"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="36"></td><td>    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStub</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="37"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="38"></td><td>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/stubs/transformer.stub'</span>;</td><tr><td class="linenos" data-pseudo-content="39"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="40"></td><td></td><tr><td class="linenos" data-pseudo-content="41"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="42"></td><td>     * Get the console command arguments.</td><tr><td class="linenos" data-pseudo-content="43"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="44"></td><td>     * <span class="hljs-doctag">@return</span> array</td><tr><td class="linenos" data-pseudo-content="45"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="46"></td><td>    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArguments</span><span class="hljs-params">()</span></td><tr><td class="linenos" data-pseudo-content="47"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="48"></td><td>        <span class="hljs-keyword">return</span> [</td><tr><td class="linenos" data-pseudo-content="49"></td><td>            [<span class="hljs-string">'name'</span>, InputArgument::REQUIRED, <span class="hljs-string">'The name of the command.'</span>],</td><tr><td class="linenos" data-pseudo-content="50"></td><td>        ];</td><tr><td class="linenos" data-pseudo-content="51"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="52"></td><td></td><tr><td class="linenos" data-pseudo-content="53"></td><td>    <span class="hljs-comment">/**</td><tr><td class="linenos" data-pseudo-content="54"></td><td>     * Get the default namespace for the class.</td><tr><td class="linenos" data-pseudo-content="55"></td><td>     *</td><tr><td class="linenos" data-pseudo-content="56"></td><td>     * <span class="hljs-doctag">@param</span>  string  $rootNamespace</td><tr><td class="linenos" data-pseudo-content="57"></td><td>     * <span class="hljs-doctag">@return</span> string</td><tr><td class="linenos" data-pseudo-content="58"></td><td>     */</span></td><tr><td class="linenos" data-pseudo-content="59"></td><td>    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefaultNamespace</span><span class="hljs-params">($rootNamespace)</span></td><tr><td class="linenos" data-pseudo-content="60"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="61"></td><td>        <span class="hljs-keyword">return</span> $rootNamespace.<span class="hljs-string">'\Transformers'</span>;</td><tr><td class="linenos" data-pseudo-content="62"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="63"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace Matthewbdaly\MyPackage\Console\Commands;
+
+use Illuminate\Console\GeneratorCommand;
+use Symfony\Component\Console\Input\InputArgument;
+
+class TransformerMakeCommand extends GeneratorCommand
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = &#39;make:transformer {name : The required name of the transformer class}&#39;;
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = &#39;Create a Fractal transformer&#39;;
+
+    /**
+     * The type of class being generated.
+     *
+     * @var string
+     */
+    protected $type = &#39;Fractal transformer&#39;;
+
+    /**
+     * Get the stub file for the generator.
+     *
+     * @return string
+     */
+    protected function getStub()
+    {
+        return __DIR__.&#39;/stubs/transformer.stub&#39;;
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return [
+            [&#39;name&#39;, InputArgument::REQUIRED, &#39;The name of the command.&#39;],
+        ];
+    }
+
+    /**
+     * Get the default namespace for the class.
+     *
+     * @param  string  $rootNamespace
+     * @return string
+     */
+    protected function getDefaultNamespace($rootNamespace)
+    {
+        return $rootNamespace.&#39;\Transformers&#39;;
+    }
+}
+</code></pre>
 <p>Note the <code>getDefaultNamespace()</code> method. If your class will live directly under the <code>app</code> folder this is not necessary. Otherwise, it needs to return the root namespace, with the folder structure you want after it. Here my class will live under <code>app\Transformers</code>, so I’ve set it to reflect that.</p>
 <p>Also, note the <code>getStub()</code> method. This tells Artisan that it should use the specified stub file as the basis for our class. Below you’ll find the stub file I used for my transformer:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">DummyNamespace</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Transformers</span>\<span class="hljs-title">BaseTransformer</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DummyClass</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseTransformer</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(Model $model)</span></td><tr><td class="linenos" data-pseudo-content="11"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="12"></td><td>        <span class="hljs-keyword">return</span> [</td><tr><td class="linenos" data-pseudo-content="13"></td><td>            <span class="hljs-string">'id'</span>            =&gt; (int) $model-&gt;id,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        ];</td><tr><td class="linenos" data-pseudo-content="15"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="16"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace DummyNamespace;
+
+use Matthewbdaly\MyPackage\Transformers\BaseTransformer;
+use Illuminate\Database\Eloquent\Model;
+
+class DummyClass extends BaseTransformer
+{
+    public function transform(Model $model)
+    {
+        return [
+            &#39;id&#39;            =&gt; (int) $model-&gt;id,
+        ];
+    }
+}
+</code></pre>
 <p>Note that the <code>DummyNamespace</code> and <code>DummyClass</code> fields will be overwritten with the correct values.</p>
 <p>Once this Artisan command is registered in the usual way, you can then run it as follows:</p>
-<pre><code class="hljs lang-bash singleline">$ php artisan make:transformer Example</code></pre>
+<pre><code class="lang-bash">$ php artisan make:transformer Example
+</code></pre>
 <p>And it will generate a boilerplate class something like this:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-meta">&lt;?php</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Transformers</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Transformers</span>\<span class="hljs-title">BaseTransformer</span>;</td><tr><td class="linenos" data-pseudo-content="6"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Example</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseTransformer</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td></span>{</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(Model $model)</span></td><tr><td class="linenos" data-pseudo-content="11"></td><td>    </span>{</td><tr><td class="linenos" data-pseudo-content="12"></td><td>        <span class="hljs-keyword">return</span> [</td><tr><td class="linenos" data-pseudo-content="13"></td><td>            <span class="hljs-string">'id'</span>            =&gt; (int) $model-&gt;id,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        ];</td><tr><td class="linenos" data-pseudo-content="15"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="16"></td><td>}</td></table></code></pre>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Transformers;
+
+use Matthewbdaly\MyPackage\Transformers\BaseTransformer;
+use Illuminate\Database\Eloquent\Model;
+
+class Example extends BaseTransformer
+{
+    public function transform(Model $model)
+    {
+        return [
+            &#39;id&#39;            =&gt; (int) $model-&gt;id,
+        ];
+    }
+}
+</code></pre>
 <p>You can then replace the model with your own one as necessary, and add any further content to this class.</p>
 ]]></description>
         </item>

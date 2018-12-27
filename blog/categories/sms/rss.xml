@@ -4,7 +4,7 @@
         <title>sms | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/sms/</link>
         <description>sms | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -26,7 +26,23 @@
 <li>RequestBin</li>
 </ul>
 <p>Here’s an example of how you might use it with the ClockworkSMS driver:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Client</span> <span class="hljs-title">as</span> <span class="hljs-title">GuzzleClient</span>;</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">GuzzleHttp</span>\<span class="hljs-title">Psr7</span>\<span class="hljs-title">Response</span>;</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">SMS</span>\<span class="hljs-title">Drivers</span>\<span class="hljs-title">Clockwork</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">SMS</span>\<span class="hljs-title">Client</span>;</td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td>$guzzle = <span class="hljs-keyword">new</span> GuzzleClient;</td><tr><td class="linenos" data-pseudo-content="7"></td><td>$resp = <span class="hljs-keyword">new</span> Response;</td><tr><td class="linenos" data-pseudo-content="8"></td><td>$driver = <span class="hljs-keyword">new</span> Clockwork($guzzle, $resp, [</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    <span class="hljs-string">'api_key'</span> =&gt; <span class="hljs-string">'MY_CLOCKWORK_API_KEY'</span>,</td><tr><td class="linenos" data-pseudo-content="10"></td><td>]);</td><tr><td class="linenos" data-pseudo-content="11"></td><td>$client = <span class="hljs-keyword">new</span> Client($driver);</td><tr><td class="linenos" data-pseudo-content="12"></td><td>$msg = [</td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-string">'to'</span>      =&gt; <span class="hljs-string">'+44 01234 567890'</span>,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>    <span class="hljs-string">'content'</span> =&gt; <span class="hljs-string">'Just testing'</span>,</td><tr><td class="linenos" data-pseudo-content="15"></td><td>];</td><tr><td class="linenos" data-pseudo-content="16"></td><td>$client-&gt;send($msg);</td></table></code></pre>
+<pre><code class="lang-php">use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Response;
+use Matthewbdaly\SMS\Drivers\Clockwork;
+use Matthewbdaly\SMS\Client;
+
+$guzzle = new GuzzleClient;
+$resp = new Response;
+$driver = new Clockwork($guzzle, $resp, [
+    &#39;api_key&#39; =&gt; &#39;MY_CLOCKWORK_API_KEY&#39;,
+]);
+$client = new Client($driver);
+$msg = [
+    &#39;to&#39;      =&gt; &#39;+44 01234 567890&#39;,
+    &#39;content&#39; =&gt; &#39;Just testing&#39;,
+];
+$client-&gt;send($msg);
+</code></pre>
 <p>If you want to roll your own driver for it, it should be easy - just create a class that implements the <code>Matthewbdaly\SMS\Contracts\Driver</code> interface. Most of the existing drivers work using Guzzle to send HTTP requests to an API, but you don’t necessarily have to do that - for instance, you could create a driver for a mail-to-SMS gateway by using Swiftmailer or the PHP mail class. If you create a driver for it, please feel free to submit a pull request so I can add it to the repository.</p>
 <p>For Laravel or Lumen users, there’s <a href="https://github.com/matthewbdaly/laravel-sms">an integration package</a> that should make it easier to use. For users of other frameworks, it should still be fairly straightforward to integrate.</p>
 ]]></description>

@@ -183,45 +183,45 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th April 2016 8:55 pm</p><h1>Writing Faster Laravel Tests</h1><p>Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practicing TDD a lot easier.</p><p>Out of the box running Laravel tests can be quite slow, which is a big issue - if your test suite takes several minutes to run, that’s a huge disruption. Also, Laravel doesn’t create a dedicated test database - instead it runs the tests against the same database you’re using normally, which is almost always not what you want. I’ll show you how to set up a dedicated test database, and how to use an in-memory SQLite database for faster tests. This results in cleaner and easier-to-maintain tests, since you can be sure the test database is restored to a clean state at the end of every test.</p><h2 id="setup">Setup</h2><p>Our first step is to make sure that when a new test begins, the following should happen:</p><ul><li>We should create a new transaction</li><li>We should empty and migrate our database</li></ul><p>Then, at the end of each test:</p><ul><li>We should roll back our transaction to restore the database to its prior state</li></ul><p>To do so, we can create custom <code>setUp()</code> and <code>tearDown()</code> methods for our base <code>TestCase</code> class. Save this in <code>tests/TestCase.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th April 2016 8:55 pm</p><h1>Writing Faster Laravel Tests</h1><p>Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practicing TDD a lot easier.</p><p>Out of the box running Laravel tests can be quite slow, which is a big issue - if your test suite takes several minutes to run, that’s a huge disruption. Also, Laravel doesn’t create a dedicated test database - instead it runs the tests against the same database you’re using normally, which is almost always not what you want. I’ll show you how to set up a dedicated test database, and how to use an in-memory SQLite database for faster tests. This results in cleaner and easier-to-maintain tests, since you can be sure the test database is restored to a clean state at the end of every test.</p><h2 id="setup">Setup</h2><p>Our first step is to make sure that when a new test begins, the following should happen:</p><ul><li>We should create a new transaction</li><li>We should empty and migrate our database</li></ul><p>Then, at the end of each test:</p><ul><li>We should roll back our transaction to restore the database to its prior state</li></ul><p>To do so, we can create custom <code>setUp()</code> and <code>tearDown()</code> methods for our base <code>TestCase</code> class. Save this in <code>tests/TestCase.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestCase</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-comment">/**
+class TestCase extends Illuminate\Foundation\Testing\TestCase
+{
+    /**
      * The base URL to use while testing the application.
      *
-     * <span class="hljs-doctag">@var</span> string
-     */</span>
-    <span class="hljs-keyword">protected</span> $baseUrl = <span class="hljs-string">'http://localhost'</span>;
-    <span class="hljs-comment">/**
+     * @var string
+     */
+    protected $baseUrl = &#39;http://localhost&#39;;
+    /**
      * Creates the application.
      *
-     * <span class="hljs-doctag">@return</span> \Illuminate\Foundation\Application
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createApplication</span><span class="hljs-params">()</span>
-    </span>{
-        $app = <span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/../bootstrap/app.php'</span>;
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
+    {
+        $app = require __DIR__.&#39;/../bootstrap/app.php&#39;;
         $app-&gt;make(Illuminate\Contracts\Console\Kernel::class)-&gt;bootstrap();
-        <span class="hljs-keyword">return</span> $app;
+        return $app;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setUp</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">parent</span>::setUp();
+    public function setUp()
+    {
+        parent::setUp();
         DB::beginTransaction();
-        Artisan::call(<span class="hljs-string">'migrate:refresh'</span>);
+        Artisan::call(&#39;migrate:refresh&#39;);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tearDown</span><span class="hljs-params">()</span>
-    </span>{
+    public function tearDown()
+    {
         DB::rollBack();
-        <span class="hljs-keyword">parent</span>::tearDown();
+        parent::tearDown();
     }
 }
-</code></pre><p>That takes care of building up and tearing down our database for each test.</p><p>EDIT: Turns out there’s actually a much easier way of doing this already included in Laravel. Just import and add either <code>use DatabaseMigrations;</code> or <code>use DatabaseTransactions;</code> to the <code>TestCase</code> class. The first will roll back the database and migrate it again after each test, while the second wraps each test in a transaction.</p><h2 id="using-an-in-memory-sqlite-database-for-testing-purposes">Using an in-memory SQLite database for testing purposes</h2><p>It’s not always practical to do this, especially if you rely on database features in PostgreSQL that aren’t available in SQLite, but if it is, it’s probably worth using an in-memory SQLite database for your tests. If you want to do so, here’s some example settings you might want to use in <code>phpunit.xml</code>:</p><pre><code class="hljs lang-xml">        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"APP_ENV"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"testing"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"CACHE_DRIVER"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"array"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_CONNECTION"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"sqlite"</span>/&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">env</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"DB_DATABASE"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">":memory:"</span>/&gt;</span>
+</code></pre><p>That takes care of building up and tearing down our database for each test.</p><p>EDIT: Turns out there’s actually a much easier way of doing this already included in Laravel. Just import and add either <code>use DatabaseMigrations;</code> or <code>use DatabaseTransactions;</code> to the <code>TestCase</code> class. The first will roll back the database and migrate it again after each test, while the second wraps each test in a transaction.</p><h2 id="using-an-in-memory-sqlite-database-for-testing-purposes">Using an in-memory SQLite database for testing purposes</h2><p>It’s not always practical to do this, especially if you rely on database features in PostgreSQL that aren’t available in SQLite, but if it is, it’s probably worth using an in-memory SQLite database for your tests. If you want to do so, here’s some example settings you might want to use in <code>phpunit.xml</code>:</p><pre><code class="lang-xml">        &lt;env name=&quot;APP_ENV&quot; value=&quot;testing&quot;/&gt;
+        &lt;env name=&quot;CACHE_DRIVER&quot; value=&quot;array&quot;/&gt;
+        &lt;env name=&quot;DB_CONNECTION&quot; value=&quot;sqlite&quot;/&gt;
+        &lt;env name=&quot;DB_DATABASE&quot; value=&quot;:memory:&quot;/&gt;
 </code></pre><p>This can result in a very significant speed boost.</p><p>I would still recommend that you test against your production database, but this can be easily handed off to a continuous integration server such as Jenkins, since that way it won’t disrupt your workflow.</p><p>During TDD, you’ll typically run your tests several times for any change you make, so if they’re too slow it can have a disastrous effect on your productivity. But with a few simple changes like this, you can ensure your tests run as quickly as possible. This approach should also be viable for Lumen apps.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/05/14/broadcasting-events-with-laravel-and-socket-dot-io/amp/">Broadcasting Events With Laravel and Socket.io</a> <a class="postlink" href="/blog/2016/03/26/building-a-location-aware-web-app-with-geodjango/amp/">Building a Location Aware Web App With Geodjango</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

@@ -183,21 +183,21 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th July 2015 1:01 pm</p><h1>Handling Images As Base64 Strings With Django REST Framework</h1><p>I’m currently working on a Phonegap app that involves taking pictures and uploading them via a REST API. I’ve done this before, and I found at that time that the best way to do so was to fetch the image as a base-64 encoded string and push that up, rather than the image file itself. However, the last time I did so, I was using Tastypie to build the API, and I’ve since switched over to Django REST Framework as my API toolkit of choice.</p><p>It didn’t take long to find <a href="https://gist.github.com/yprez/7704036">this gist</a> giving details of how to do so, but it didn’t work as is, partly because I was using Python 3, and partly because the <code>from_native</code> method has gone as at Django REST Framework 3.0. It was, however, straightforward to adapt it to work. Here’s my solution:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> base64, uuid
-<span class="hljs-keyword">from</span> django.core.files.base <span class="hljs-keyword">import</span> ContentFile
-<span class="hljs-keyword">from</span> rest_framework <span class="hljs-keyword">import</span> serializers
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">4th July 2015 1:01 pm</p><h1>Handling Images As Base64 Strings With Django REST Framework</h1><p>I’m currently working on a Phonegap app that involves taking pictures and uploading them via a REST API. I’ve done this before, and I found at that time that the best way to do so was to fetch the image as a base-64 encoded string and push that up, rather than the image file itself. However, the last time I did so, I was using Tastypie to build the API, and I’ve since switched over to Django REST Framework as my API toolkit of choice.</p><p>It didn’t take long to find <a href="https://gist.github.com/yprez/7704036">this gist</a> giving details of how to do so, but it didn’t work as is, partly because I was using Python 3, and partly because the <code>from_native</code> method has gone as at Django REST Framework 3.0. It was, however, straightforward to adapt it to work. Here’s my solution:</p><pre><code class="lang-python">import base64, uuid
+from django.core.files.base import ContentFile
+from rest_framework import serializers
 
 
-<span class="hljs-comment"># Custom image field - handles base 64 encoded images</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Base64ImageField</span><span class="hljs-params">(serializers.ImageField)</span>:</span>
-    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">to_internal_value</span><span class="hljs-params">(self, data)</span>:</span>
-        <span class="hljs-keyword">if</span> isinstance(data, str) <span class="hljs-keyword">and</span> data.startswith(<span class="hljs-string">'data:image'</span>):
-            <span class="hljs-comment"># base64 encoded image - decode</span>
-            format, imgstr = data.split(<span class="hljs-string">';base64,'</span>) <span class="hljs-comment"># format ~= data:image/X,</span>
-            ext = format.split(<span class="hljs-string">'/'</span>)[<span class="hljs-number">-1</span>] <span class="hljs-comment"># guess file extension</span>
+# Custom image field - handles base 64 encoded images
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith(&#39;data:image&#39;):
+            # base64 encoded image - decode
+            format, imgstr = data.split(&#39;;base64,&#39;) # format ~= data:image/X,
+            ext = format.split(&#39;/&#39;)[-1] # guess file extension
             id = uuid.uuid4()
-            data = ContentFile(base64.b64decode(imgstr), name = id.urn[<span class="hljs-number">9</span>:] + <span class="hljs-string">'.'</span> + ext)
-        <span class="hljs-keyword">return</span> super(Base64ImageField, self).to_internal_value(data)
+            data = ContentFile(base64.b64decode(imgstr), name = id.urn[9:] + &#39;.&#39; + ext)
+        return super(Base64ImageField, self).to_internal_value(data)
 </code></pre><p>This solution will handle both base 64 encoded strings and image files. Then, just use this field as normal.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/djangorestframework/">djangorestframework</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2015/07/04/handling-images-as-base64-strings-with-django-rest-framework/">View the article with comments</a></section><section><a class="postlink" href="/blog/2015/07/21/new-laptop/amp/">New Laptop</a> <a class="postlink" href="/blog/2015/06/17/getting-django-behave-and-celery-to-work-together/amp/">Getting Django-behave and Celery to Work Together</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

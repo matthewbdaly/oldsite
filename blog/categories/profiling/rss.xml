@@ -4,7 +4,7 @@
         <title>profiling | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/profiling/</link>
         <description>profiling | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -17,11 +17,16 @@
 <p>Recently I was introduced to <a href="https://github.com/itsgoingd/clockwork">Clockwork</a>, which is a server-side extension for profiling PHP applications. It’s made it a whole lot easier to track down issues like excessive numbers of queries when building an API, and as a result I’ve been able to dramatically improve the performance of an API I’ve been working on. Here I’ll show you how you can use it on a project.</p>
 <h2 id="installing-clockwork">Installing Clockwork</h2>
 <p>Clockwork is available via Composer:</p>
-<pre><code class="hljs lang-bash singleline">$ composer require itsgoingd/clockwork</code></pre>
+<pre><code class="lang-bash">$ composer require itsgoingd/clockwork
+</code></pre>
 <p>You also need to register the service provider in <code>config/app.php</code>:</p>
-<pre><code class="hljs lang-php singleline">   Clockwork\Support\Laravel\ClockworkServiceProvider::class,</code></pre>
+<pre><code class="lang-php">   Clockwork\Support\Laravel\ClockworkServiceProvider::class,
+</code></pre>
 <p>And register the middleware globally in <code>app/Http/Kernel.php</code>:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">protected</span> $middleware = [</td><tr><td class="linenos" data-pseudo-content="2"></td><td>      \Clockwork\Support\Laravel\ClockworkMiddleware::class,</td><tr><td class="linenos" data-pseudo-content="3"></td><td>]</td></table></code></pre>
+<pre><code class="lang-php">protected $middleware = [
+      \Clockwork\Support\Laravel\ClockworkMiddleware::class,
+]
+</code></pre>
 <p>Note that it only works when <code>APP_DEBUG</code> is set to true in your <code>.env</code> file. This means that you can keep it in your application without worrying about exposing too much data in production, as long as debug mode is not active on your production server (which it shouldn’t be anyway).</p>
 <p>You will also need to install the <a href="https://chrome.google.com/webstore/detail/clockwork/dmggabnehkmmfmdffgajcflpdjlnoemp?hl=en">Chrome extension</a> in order to actually work with the returned data. Clockwork works by adding its own route to your Laravel application, and this extension makes sure that it makes the appropriate request on loading a page, and then displays the data in the dev tools.</p>
 <p>Once it’s all installed and your application is running, open the dev tools and you should see the new <strong>Clockwork</strong> tab in there. On the left of this tab is a list of requests - if you make a request, you’ll see it added to the list. When you click on each request, you’ll see the following tabs, where applicable:</p>
@@ -32,11 +37,15 @@
 <p><img src="/static/images/clockwork2.png" alt="Timeline tab"></p>
 <p>This shows how long the response takes to respond, which can be helpful in identifying slower requests.</p>
 <p>In addition, you can create your own events using the <code>clock()</code> helper, which will appear in the timeline, as in this example:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>clock()-&gt;startEvent(<span class="hljs-string">'email_sent'</span>, <span class="hljs-string">'Email sent.'</span>);</td><tr><td class="linenos" data-pseudo-content="2"></td><td>clock()-&gt;endEvent(<span class="hljs-string">'email_sent'</span>);</td></table></code></pre>
+<pre><code class="lang-php">clock()-&gt;startEvent(&#39;email_sent&#39;, &#39;Email sent.&#39;);
+clock()-&gt;endEvent(&#39;email_sent&#39;);
+</code></pre>
 <h2 id="log">Log</h2>
 <p><img src="/static/images/clockwork8.png" alt="Log tab"></p>
 <p>The log tab is only displayed if you use the <code>clock()</code> helper to log data. You can log text or JSON objects as appropriate:</p>
-<pre><code class="hljs lang-php"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>clock(<span class="hljs-string">'Message text.'</span>); <span class="hljs-comment">// 'Message text.' appears in Clockwork log tab</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>clock([<span class="hljs-string">'hello'</span> =&gt; <span class="hljs-string">'world'</span>]); <span class="hljs-comment">// logs json representation of the array</span></td></table></code></pre>
+<pre><code class="lang-php">clock(&#39;Message text.&#39;); // &#39;Message text.&#39; appears in Clockwork log tab
+clock([&#39;hello&#39; =&gt; &#39;world&#39;]); // logs json representation of the array
+</code></pre>
 <p>This is arguably more convenient than using the <code>Log</code> facade to write to the application log, since it’s kept in the browser and you can easily see what request caused what message to be logged.</p>
 <h2 id="database">Database</h2>
 <p><img src="/static/images/clockwork3.png" alt="Database tab"></p>

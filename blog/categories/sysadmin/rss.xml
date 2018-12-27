@@ -4,7 +4,7 @@
         <title>sysadmin | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/sysadmin/</link>
         <description>sysadmin | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -34,44 +34,149 @@
 <p>Ansible is very easy to use, but you do still need to know what is actually going on to get the best out of it. It’s intended as a convenient abstraction on top of the underlying commands, not a replacement, and you should know how to do what you want to do manually before you write an Ansible playbook to do it.</p>
 <h2 id="setting-up">Setting up</h2>
 <p>You need to have Python 2 available. Ansible doesn’t yet support Python 3 (Grr…) so if you’re using an operating system that has switched to Python 3, such as Arch Linux, you’ll need to have Python 2 installed as well. Assuming you have <code>pip</code> installed, then run this command to install it:</p>
-<pre><code class="hljs lang-bash singleline">$ sudo pip install ansible</code></pre>
+<pre><code class="lang-bash">$ sudo pip install ansible
+</code></pre>
 <p>Or for users on systems with Python 3 as the main Python:</p>
-<pre><code class="hljs lang-bash singleline">$ sudo pip2 install ansible</code></pre>
+<pre><code class="lang-bash">$ sudo pip2 install ansible
+</code></pre>
 <p>For Windows users, you’ll want to drop <code>sudo</code>. On Unix-like OS’s that don’t have <code>sudo</code> installed, drop it and run the command as root.</p>
 <h2 id="our-first-ansible-command">Our first Ansible command</h2>
 <p>We’ll demonstrate Ansible in action with a Vagrant VM. Drop the following <code>Vagrantfile</code> into your working directory:</p>
-<pre><code class="hljs lang-ruby"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-comment"># -*- mode: ruby -*-</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-comment"># vi: set ft=ruby :</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>VAGRANTFILE_API_VERSION = <span class="hljs-string">"2"</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>Vagrant.configure(VAGRANTFILE_API_VERSION) <span class="hljs-keyword">do</span> <span class="hljs-params">|config|</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td>  config.vm.box = <span class="hljs-string">"debian/jessie64"</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>  config.vm.network <span class="hljs-string">"forwarded_port"</span>, <span class="hljs-symbol">guest:</span> <span class="hljs-number">80</span>, <span class="hljs-symbol">host:</span> <span class="hljs-number">8080</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td><span class="hljs-keyword">end</span></td></table></code></pre>
+<pre><code class="lang-ruby"># -*- mode: ruby -*-
+# vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = &quot;2&quot;
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = &quot;debian/jessie64&quot;
+  config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 8080
+end
+</code></pre>
 <p>Then fire up the VM:</p>
-<pre><code class="hljs lang-bash singleline">$ vagrant up</code></pre>
+<pre><code class="lang-bash">$ vagrant up
+</code></pre>
 <p>This VM will be our test bed for running Ansible. If you prefer, you can use a remote server instead.</p>
 <p>Next, we’ll configure Ansible. Save this as <code>ansible.cfg</code>:</p>
-<pre><code class="hljs lang-conf"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-section">[defaults]</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-attr">hostfile</span> = inventory</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-attr">remote_user</span> = vagrant</td><tr><td class="linenos" data-pseudo-content="4"></td><td><span class="hljs-attr">private_key_file</span> = .vagrant/machines/default/virtualbox/private_key</td></table></code></pre>
+<pre><code class="lang-conf">[defaults]
+hostfile = inventory
+remote_user = vagrant
+private_key_file = .vagrant/machines/default/virtualbox/private_key
+</code></pre>
 <p>In this case the remote user is <code>vagrant</code> because we’re using Vagrant, but to manage remote machines you would need to change this to the name of the account that you use on the server. The value of <code>private_key_file</code> will also normally be something like <code>/home/matthew/.ssh/id_rsa.pub</code>, but here we’re using the Vagrant-specific key.</p>
 <p>Note the <code>hostfile</code> entry - this points to the list of hosts you want to manage with Ansible. Let’s create this next. Save the following as <code>inventory</code>:</p>
-<pre><code class="hljs lang-conf singleline">testserver ansible_ssh_host=<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> ansible_ssh_port=<span class="hljs-number">2222</span></code></pre>
+<pre><code class="lang-conf">testserver ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222
+</code></pre>
 <p>Note that we explicitly need to set the port here because we’re using Vagrant. Normally it will default to port 22. A typical entry for a remote server might look like this:</p>
-<pre><code class="hljs lang-conf singleline">example.com ansible_ssh_host=<span class="hljs-number">192.168</span><span class="hljs-number">.56</span><span class="hljs-number">.101</span></code></pre>
+<pre><code class="lang-conf">example.com ansible_ssh_host=192.168.56.101
+</code></pre>
 <p>Note also that we can refer to hosts by the name we give it, which can be as meaningful (or not) as you want.</p>
 <p>Let’s run our first command:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible all -m ping</td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS =&gt; {</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-string">"changed"</span>: <span class="hljs-literal">false</span>,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-string">"ping"</span>: <span class="hljs-string">"pong"</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>}</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible all -m ping
+testserver | SUCCESS =&gt; {
+    &quot;changed&quot;: false,
+    &quot;ping&quot;: &quot;pong&quot;
+}
+</code></pre>
 <p>We called Ansible with the hosts set to <code>all</code>, therefore every host in the inventory was contacted. We used the <code>-m</code> flag to say we were calling a module, and then specified the <code>ping</code> module. Ansible therefore pinged each server in turn.</p>
 <p>We can call ad-hoc commands using the <code>-a</code> flag, as in this example:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible all -a <span class="hljs-string">"uptime"</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS | rc=0 &gt;&gt;</td><tr><td class="linenos" data-pseudo-content="3"></td><td> 17:26:57 up 19 min,  1 user,  load average: 0.00, 0.04, 0.13</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible all -a &quot;uptime&quot;
+testserver | SUCCESS | rc=0 &gt;&gt;
+ 17:26:57 up 19 min,  1 user,  load average: 0.00, 0.04, 0.13
+</code></pre>
 <p>This command gets the uptime for the server. If you only want to run the command on a single server, you can specify it by name:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible testserver -a <span class="hljs-string">"uptime"</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS | rc=0 &gt;&gt;</td><tr><td class="linenos" data-pseudo-content="3"></td><td> 17:28:21 up 20 min,  1 user,  load average: 0.02, 0.04, 0.13</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible testserver -a &quot;uptime&quot;
+testserver | SUCCESS | rc=0 &gt;&gt;
+ 17:28:21 up 20 min,  1 user,  load average: 0.02, 0.04, 0.13
+</code></pre>
 <p>Here we specified the server as <code>testserver</code>. What about if you want to specify more than one server, but not all of them? You can create groups of servers in <code>inventory</code>, as in this example:</p>
-<pre><code class="hljs lang-conf"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>[webservers]</td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver ansible_ssh_host=<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span> ansible_ssh_port=<span class="hljs-number">2222</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>example.com ansible_ssh_host=<span class="hljs-number">192.168</span><span class="hljs-number">.56</span><span class="hljs-number">.101</span></td></table></code></pre>
+<pre><code class="lang-conf">[webservers]
+testserver ansible_ssh_host=127.0.0.1 ansible_ssh_port=2222
+example.com ansible_ssh_host=192.168.56.101
+</code></pre>
 <p>You could then call the following to run the <code>uptime</code> command on all the servers in the <code>webservers</code> group:</p>
-<pre><code class="hljs lang-perl singleline">$ ansible webservers -a <span class="hljs-string">'uptime'</span></code></pre>
+<pre><code class="lang-perl">$ ansible webservers -a &#39;uptime&#39;
+</code></pre>
 <p>If you want to run the command as a different user, you can do so:</p>
-<pre><code class="hljs lang-perl singleline">$ ansible webservers -a <span class="hljs-string">'uptime'</span> -u bob</code></pre>
+<pre><code class="lang-perl">$ ansible webservers -a &#39;uptime&#39; -u bob
+</code></pre>
 <p>Note that for running <code>uptime</code> we haven’t specified the <code>-m</code> flag. This is because the <code>command</code> module is the default, but it’s very basic and doesn’t support shell variables. For more complex interactions you might need to use the <code>shell</code> module, as in this example:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible testserver -m shell -a <span class="hljs-string">'echo $PATH'</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS | rc=0 &gt;&gt;</td><tr><td class="linenos" data-pseudo-content="3"></td><td>/usr/<span class="hljs-built_in">local</span>/bin:/usr/bin:/bin:/usr/games</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible testserver -m shell -a &#39;echo $PATH&#39;
+testserver | SUCCESS | rc=0 &gt;&gt;
+/usr/local/bin:/usr/bin:/bin:/usr/games
+</code></pre>
 <p>For installing a package on Debian or Ubuntu, you might use the <code>apt</code> module:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible testserver -m apt -a <span class="hljs-string">"name=git state=present"</span> --become</td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS =&gt; {</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-string">"cache_update_time"</span>: 0,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-string">"cache_updated"</span>: <span class="hljs-literal">false</span>,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    <span class="hljs-string">"changed"</span>: <span class="hljs-literal">true</span>,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-string">"stderr"</span>: <span class="hljs-string">""</span>,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    <span class="hljs-string">"stdout"</span>: <span class="hljs-string">"Reading package lists...\nBuilding dependency tree...\nReading state information...\nThe following extra packages will be installed:\n  git-man liberror-perl\nSuggested packages:\n  git-daemon-run git-daemon-sysvinit git-doc git-el git-email git-gui gitk\n  gitweb git-arch git-cvs git-mediawiki git-svn\nThe following NEW packages will be installed:\n  git git-man liberror-perl\n0 upgraded, 3 newly installed, 0 to remove and 83 not upgraded.\nNeed to get 4552 kB of archives.\nAfter this operation, 23.5 MB of additional disk space will be used.\nGet:1 http://httpredir.debian.org/debian/ jessie/main liberror-perl all 0.17-1.1 [22.4 kB]\nGet:2 http://httpredir.debian.org/debian/ jessie/main git-man all 1:2.1.4-2.1+deb8u2 [1267 kB]\nGet:3 http://httpredir.debian.org/debian/ jessie/main git amd64 1:2.1.4-2.1+deb8u2 [3262 kB]\nFetched 4552 kB in 1s (3004 kB/s)\nSelecting previously unselected package liberror-perl.\r\n(Reading database ... \r(Reading database ... 5%\r(Reading database ... 10%\r(Reading database ... 15%\r(Reading database ... 20%\r(Reading database ... 25%\r(Reading database ... 30%\r(Reading database ... 35%\r(Reading database ... 40%\r(Reading database ... 45%\r(Reading database ... 50%\r(Reading database ... 55%\r(Reading database ... 60%\r(Reading database ... 65%\r(Reading database ... 70%\r(Reading database ... 75%\r(Reading database ... 80%\r(Reading database ... 85%\r(Reading database ... 90%\r(Reading database ... 95%\r(Reading database ... 100%\r(Reading database ... 32784 files and directories currently installed.)\r\nPreparing to unpack .../liberror-perl_0.17-1.1_all.deb ...\r\nUnpacking liberror-perl (0.17-1.1) ...\r\nSelecting previously unselected package git-man.\r\nPreparing to unpack .../git-man_1%3a2.1.4-2.1+deb8u2_all.deb ...\r\nUnpacking git-man (1:2.1.4-2.1+deb8u2) ...\r\nSelecting previously unselected package git.\r\nPreparing to unpack .../git_1%3a2.1.4-2.1+deb8u2_amd64.deb ...\r\nUnpacking git (1:2.1.4-2.1+deb8u2) ...\r\nProcessing triggers for man-db (2.7.0.2-5) ...\r\nSetting up liberror-perl (0.17-1.1) ...\r\nSetting up git-man (1:2.1.4-2.1+deb8u2) ...\r\nSetting up git (1:2.1.4-2.1+deb8u2) ...\r\n"</span>,</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-string">"stdout_lines"</span>: [</td><tr><td class="linenos" data-pseudo-content="9"></td><td>        <span class="hljs-string">"Reading package lists..."</span>,</td><tr><td class="linenos" data-pseudo-content="10"></td><td>        <span class="hljs-string">"Building dependency tree..."</span>,</td><tr><td class="linenos" data-pseudo-content="11"></td><td>        <span class="hljs-string">"Reading state information..."</span>,</td><tr><td class="linenos" data-pseudo-content="12"></td><td>        <span class="hljs-string">"The following extra packages will be installed:"</span>,</td><tr><td class="linenos" data-pseudo-content="13"></td><td>        <span class="hljs-string">"  git-man liberror-perl"</span>,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        <span class="hljs-string">"Suggested packages:"</span>,</td><tr><td class="linenos" data-pseudo-content="15"></td><td>        <span class="hljs-string">"  git-daemon-run git-daemon-sysvinit git-doc git-el git-email git-gui gitk"</span>,</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        <span class="hljs-string">"  gitweb git-arch git-cvs git-mediawiki git-svn"</span>,</td><tr><td class="linenos" data-pseudo-content="17"></td><td>        <span class="hljs-string">"The following NEW packages will be installed:"</span>,</td><tr><td class="linenos" data-pseudo-content="18"></td><td>        <span class="hljs-string">"  git git-man liberror-perl"</span>,</td><tr><td class="linenos" data-pseudo-content="19"></td><td>        <span class="hljs-string">"0 upgraded, 3 newly installed, 0 to remove and 83 not upgraded."</span>,</td><tr><td class="linenos" data-pseudo-content="20"></td><td>        <span class="hljs-string">"Need to get 4552 kB of archives."</span>,</td><tr><td class="linenos" data-pseudo-content="21"></td><td>        <span class="hljs-string">"After this operation, 23.5 MB of additional disk space will be used."</span>,</td><tr><td class="linenos" data-pseudo-content="22"></td><td>        <span class="hljs-string">"Get:1 http://httpredir.debian.org/debian/ jessie/main liberror-perl all 0.17-1.1 [22.4 kB]"</span>,</td><tr><td class="linenos" data-pseudo-content="23"></td><td>        <span class="hljs-string">"Get:2 http://httpredir.debian.org/debian/ jessie/main git-man all 1:2.1.4-2.1+deb8u2 [1267 kB]"</span>,</td><tr><td class="linenos" data-pseudo-content="24"></td><td>        <span class="hljs-string">"Get:3 http://httpredir.debian.org/debian/ jessie/main git amd64 1:2.1.4-2.1+deb8u2 [3262 kB]"</span>,</td><tr><td class="linenos" data-pseudo-content="25"></td><td>        <span class="hljs-string">"Fetched 4552 kB in 1s (3004 kB/s)"</span>,</td><tr><td class="linenos" data-pseudo-content="26"></td><td>        <span class="hljs-string">"Selecting previously unselected package liberror-perl."</span>,</td><tr><td class="linenos" data-pseudo-content="27"></td><td>        <span class="hljs-string">"(Reading database ... "</span>,</td><tr><td class="linenos" data-pseudo-content="28"></td><td>        <span class="hljs-string">"(Reading database ... 5%"</span>,</td><tr><td class="linenos" data-pseudo-content="29"></td><td>        <span class="hljs-string">"(Reading database ... 10%"</span>,</td><tr><td class="linenos" data-pseudo-content="30"></td><td>        <span class="hljs-string">"(Reading database ... 15%"</span>,</td><tr><td class="linenos" data-pseudo-content="31"></td><td>        <span class="hljs-string">"(Reading database ... 20%"</span>,</td><tr><td class="linenos" data-pseudo-content="32"></td><td>        <span class="hljs-string">"(Reading database ... 25%"</span>,</td><tr><td class="linenos" data-pseudo-content="33"></td><td>        <span class="hljs-string">"(Reading database ... 30%"</span>,</td><tr><td class="linenos" data-pseudo-content="34"></td><td>        <span class="hljs-string">"(Reading database ... 35%"</span>,</td><tr><td class="linenos" data-pseudo-content="35"></td><td>        <span class="hljs-string">"(Reading database ... 40%"</span>,</td><tr><td class="linenos" data-pseudo-content="36"></td><td>        <span class="hljs-string">"(Reading database ... 45%"</span>,</td><tr><td class="linenos" data-pseudo-content="37"></td><td>        <span class="hljs-string">"(Reading database ... 50%"</span>,</td><tr><td class="linenos" data-pseudo-content="38"></td><td>        <span class="hljs-string">"(Reading database ... 55%"</span>,</td><tr><td class="linenos" data-pseudo-content="39"></td><td>        <span class="hljs-string">"(Reading database ... 60%"</span>,</td><tr><td class="linenos" data-pseudo-content="40"></td><td>        <span class="hljs-string">"(Reading database ... 65%"</span>,</td><tr><td class="linenos" data-pseudo-content="41"></td><td>        <span class="hljs-string">"(Reading database ... 70%"</span>,</td><tr><td class="linenos" data-pseudo-content="42"></td><td>        <span class="hljs-string">"(Reading database ... 75%"</span>,</td><tr><td class="linenos" data-pseudo-content="43"></td><td>        <span class="hljs-string">"(Reading database ... 80%"</span>,</td><tr><td class="linenos" data-pseudo-content="44"></td><td>        <span class="hljs-string">"(Reading database ... 85%"</span>,</td><tr><td class="linenos" data-pseudo-content="45"></td><td>        <span class="hljs-string">"(Reading database ... 90%"</span>,</td><tr><td class="linenos" data-pseudo-content="46"></td><td>        <span class="hljs-string">"(Reading database ... 95%"</span>,</td><tr><td class="linenos" data-pseudo-content="47"></td><td>        <span class="hljs-string">"(Reading database ... 100%"</span>,</td><tr><td class="linenos" data-pseudo-content="48"></td><td>        <span class="hljs-string">"(Reading database ... 32784 files and directories currently installed.)"</span>,</td><tr><td class="linenos" data-pseudo-content="49"></td><td>        <span class="hljs-string">"Preparing to unpack .../liberror-perl_0.17-1.1_all.deb ..."</span>,</td><tr><td class="linenos" data-pseudo-content="50"></td><td>        <span class="hljs-string">"Unpacking liberror-perl (0.17-1.1) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="51"></td><td>        <span class="hljs-string">"Selecting previously unselected package git-man."</span>,</td><tr><td class="linenos" data-pseudo-content="52"></td><td>        <span class="hljs-string">"Preparing to unpack .../git-man_1%3a2.1.4-2.1+deb8u2_all.deb ..."</span>,</td><tr><td class="linenos" data-pseudo-content="53"></td><td>        <span class="hljs-string">"Unpacking git-man (1:2.1.4-2.1+deb8u2) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="54"></td><td>        <span class="hljs-string">"Selecting previously unselected package git."</span>,</td><tr><td class="linenos" data-pseudo-content="55"></td><td>        <span class="hljs-string">"Preparing to unpack .../git_1%3a2.1.4-2.1+deb8u2_amd64.deb ..."</span>,</td><tr><td class="linenos" data-pseudo-content="56"></td><td>        <span class="hljs-string">"Unpacking git (1:2.1.4-2.1+deb8u2) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="57"></td><td>        <span class="hljs-string">"Processing triggers for man-db (2.7.0.2-5) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="58"></td><td>        <span class="hljs-string">"Setting up liberror-perl (0.17-1.1) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="59"></td><td>        <span class="hljs-string">"Setting up git-man (1:2.1.4-2.1+deb8u2) ..."</span>,</td><tr><td class="linenos" data-pseudo-content="60"></td><td>        <span class="hljs-string">"Setting up git (1:2.1.4-2.1+deb8u2) ..."</span></td><tr><td class="linenos" data-pseudo-content="61"></td><td>    ]</td><tr><td class="linenos" data-pseudo-content="62"></td><td>}</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible testserver -m apt -a &quot;name=git state=present&quot; --become
+testserver | SUCCESS =&gt; {
+    &quot;cache_update_time&quot;: 0,
+    &quot;cache_updated&quot;: false,
+    &quot;changed&quot;: true,
+    &quot;stderr&quot;: &quot;&quot;,
+    &quot;stdout&quot;: &quot;Reading package lists...\nBuilding dependency tree...\nReading state information...\nThe following extra packages will be installed:\n  git-man liberror-perl\nSuggested packages:\n  git-daemon-run git-daemon-sysvinit git-doc git-el git-email git-gui gitk\n  gitweb git-arch git-cvs git-mediawiki git-svn\nThe following NEW packages will be installed:\n  git git-man liberror-perl\n0 upgraded, 3 newly installed, 0 to remove and 83 not upgraded.\nNeed to get 4552 kB of archives.\nAfter this operation, 23.5 MB of additional disk space will be used.\nGet:1 http://httpredir.debian.org/debian/ jessie/main liberror-perl all 0.17-1.1 [22.4 kB]\nGet:2 http://httpredir.debian.org/debian/ jessie/main git-man all 1:2.1.4-2.1+deb8u2 [1267 kB]\nGet:3 http://httpredir.debian.org/debian/ jessie/main git amd64 1:2.1.4-2.1+deb8u2 [3262 kB]\nFetched 4552 kB in 1s (3004 kB/s)\nSelecting previously unselected package liberror-perl.\r\n(Reading database ... \r(Reading database ... 5%\r(Reading database ... 10%\r(Reading database ... 15%\r(Reading database ... 20%\r(Reading database ... 25%\r(Reading database ... 30%\r(Reading database ... 35%\r(Reading database ... 40%\r(Reading database ... 45%\r(Reading database ... 50%\r(Reading database ... 55%\r(Reading database ... 60%\r(Reading database ... 65%\r(Reading database ... 70%\r(Reading database ... 75%\r(Reading database ... 80%\r(Reading database ... 85%\r(Reading database ... 90%\r(Reading database ... 95%\r(Reading database ... 100%\r(Reading database ... 32784 files and directories currently installed.)\r\nPreparing to unpack .../liberror-perl_0.17-1.1_all.deb ...\r\nUnpacking liberror-perl (0.17-1.1) ...\r\nSelecting previously unselected package git-man.\r\nPreparing to unpack .../git-man_1%3a2.1.4-2.1+deb8u2_all.deb ...\r\nUnpacking git-man (1:2.1.4-2.1+deb8u2) ...\r\nSelecting previously unselected package git.\r\nPreparing to unpack .../git_1%3a2.1.4-2.1+deb8u2_amd64.deb ...\r\nUnpacking git (1:2.1.4-2.1+deb8u2) ...\r\nProcessing triggers for man-db (2.7.0.2-5) ...\r\nSetting up liberror-perl (0.17-1.1) ...\r\nSetting up git-man (1:2.1.4-2.1+deb8u2) ...\r\nSetting up git (1:2.1.4-2.1+deb8u2) ...\r\n&quot;,
+    &quot;stdout_lines&quot;: [
+        &quot;Reading package lists...&quot;,
+        &quot;Building dependency tree...&quot;,
+        &quot;Reading state information...&quot;,
+        &quot;The following extra packages will be installed:&quot;,
+        &quot;  git-man liberror-perl&quot;,
+        &quot;Suggested packages:&quot;,
+        &quot;  git-daemon-run git-daemon-sysvinit git-doc git-el git-email git-gui gitk&quot;,
+        &quot;  gitweb git-arch git-cvs git-mediawiki git-svn&quot;,
+        &quot;The following NEW packages will be installed:&quot;,
+        &quot;  git git-man liberror-perl&quot;,
+        &quot;0 upgraded, 3 newly installed, 0 to remove and 83 not upgraded.&quot;,
+        &quot;Need to get 4552 kB of archives.&quot;,
+        &quot;After this operation, 23.5 MB of additional disk space will be used.&quot;,
+        &quot;Get:1 http://httpredir.debian.org/debian/ jessie/main liberror-perl all 0.17-1.1 [22.4 kB]&quot;,
+        &quot;Get:2 http://httpredir.debian.org/debian/ jessie/main git-man all 1:2.1.4-2.1+deb8u2 [1267 kB]&quot;,
+        &quot;Get:3 http://httpredir.debian.org/debian/ jessie/main git amd64 1:2.1.4-2.1+deb8u2 [3262 kB]&quot;,
+        &quot;Fetched 4552 kB in 1s (3004 kB/s)&quot;,
+        &quot;Selecting previously unselected package liberror-perl.&quot;,
+        &quot;(Reading database ... &quot;,
+        &quot;(Reading database ... 5%&quot;,
+        &quot;(Reading database ... 10%&quot;,
+        &quot;(Reading database ... 15%&quot;,
+        &quot;(Reading database ... 20%&quot;,
+        &quot;(Reading database ... 25%&quot;,
+        &quot;(Reading database ... 30%&quot;,
+        &quot;(Reading database ... 35%&quot;,
+        &quot;(Reading database ... 40%&quot;,
+        &quot;(Reading database ... 45%&quot;,
+        &quot;(Reading database ... 50%&quot;,
+        &quot;(Reading database ... 55%&quot;,
+        &quot;(Reading database ... 60%&quot;,
+        &quot;(Reading database ... 65%&quot;,
+        &quot;(Reading database ... 70%&quot;,
+        &quot;(Reading database ... 75%&quot;,
+        &quot;(Reading database ... 80%&quot;,
+        &quot;(Reading database ... 85%&quot;,
+        &quot;(Reading database ... 90%&quot;,
+        &quot;(Reading database ... 95%&quot;,
+        &quot;(Reading database ... 100%&quot;,
+        &quot;(Reading database ... 32784 files and directories currently installed.)&quot;,
+        &quot;Preparing to unpack .../liberror-perl_0.17-1.1_all.deb ...&quot;,
+        &quot;Unpacking liberror-perl (0.17-1.1) ...&quot;,
+        &quot;Selecting previously unselected package git-man.&quot;,
+        &quot;Preparing to unpack .../git-man_1%3a2.1.4-2.1+deb8u2_all.deb ...&quot;,
+        &quot;Unpacking git-man (1:2.1.4-2.1+deb8u2) ...&quot;,
+        &quot;Selecting previously unselected package git.&quot;,
+        &quot;Preparing to unpack .../git_1%3a2.1.4-2.1+deb8u2_amd64.deb ...&quot;,
+        &quot;Unpacking git (1:2.1.4-2.1+deb8u2) ...&quot;,
+        &quot;Processing triggers for man-db (2.7.0.2-5) ...&quot;,
+        &quot;Setting up liberror-perl (0.17-1.1) ...&quot;,
+        &quot;Setting up git-man (1:2.1.4-2.1+deb8u2) ...&quot;,
+        &quot;Setting up git (1:2.1.4-2.1+deb8u2) ...&quot;
+    ]
+}
+</code></pre>
 <p>Here we specify that a particular package should be <code>state=present</code> or <code>state=absent</code>. Also, note the <code>--become</code> flag, which allows us to become root. If you’re using an RPM-based Linux distro, you can use the <code>yum</code> module in the same way.</p>
 <p>Finally, let’s use the <code>git</code> module to check out a project on the server:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible testserver -m git -a <span class="hljs-string">"repo=https://github.com/matthewbdaly/django_tutorial_blog_ng.git dest=/home/vagrant/example version=HEAD"</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>testserver | SUCCESS =&gt; {</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-string">"after"</span>: <span class="hljs-string">"3542098e3b01103db4d9cfc724ba3c71c45cb314"</span>,</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-string">"before"</span>: null,</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    <span class="hljs-string">"changed"</span>: <span class="hljs-literal">true</span>,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-string">"warnings"</span>: []</td><tr><td class="linenos" data-pseudo-content="7"></td><td>}</td></table></code></pre>
+<pre><code class="lang-bash">$ ansible testserver -m git -a &quot;repo=https://github.com/matthewbdaly/django_tutorial_blog_ng.git dest=/home/vagrant/example version=HEAD&quot;
+testserver | SUCCESS =&gt; {
+    &quot;after&quot;: &quot;3542098e3b01103db4d9cfc724ba3c71c45cb314&quot;,
+    &quot;before&quot;: null,
+    &quot;changed&quot;: true,
+    &quot;warnings&quot;: []
+}
+</code></pre>
 <p>Here we check out a Git repository. We specify the repo, destination and version.</p>
 <p>You can call any installed Ansible module in an ad-hoc fashion in the same way. Refer to the documentation for a list of modules.</p>
 <h2 id="playbooks">Playbooks</h2>
@@ -82,7 +187,34 @@
 </ul>
 <p>This is sufficiently complex to demonstrate some more of the functionality of Ansible, while also demonstrating playbooks in action.</p>
 <p>Create a new folder called <code>playbooks</code>, and inside it save the following as <code>sitecopy.yml</code>:</p>
-<pre><code class="hljs lang-yml"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>---</td><tr><td class="linenos" data-pseudo-content="2"></td><td>- name: Copy personal website</td><tr><td class="linenos" data-pseudo-content="3"></td><td>  hosts: testserver</td><tr><td class="linenos" data-pseudo-content="4"></td><td>  become: <span class="hljs-literal">True</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>  tasks:</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    - name: Install Nginx</td><tr><td class="linenos" data-pseudo-content="7"></td><td>      apt: <span class="hljs-attribute">name</span>=nginx <span class="hljs-attribute">update_cache</span>=<span class="hljs-literal">yes</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>    - name: Copy<span class="hljs-built_in"> config</td><tr><td class="linenos" data-pseudo-content="9"></td><td></span>      copy: &gt;</td><tr><td class="linenos" data-pseudo-content="10"></td><td>        <span class="hljs-attribute">src</span>=files/nginx.conf</td><tr><td class="linenos" data-pseudo-content="11"></td><td>        <span class="hljs-attribute">dest</span>=/etc/nginx/sites-available/default</td><tr><td class="linenos" data-pseudo-content="12"></td><td>    - name: Activate<span class="hljs-built_in"> config</td><tr><td class="linenos" data-pseudo-content="13"></td><td></span>      file: &gt;</td><tr><td class="linenos" data-pseudo-content="14"></td><td>        <span class="hljs-attribute">dest</span>=/etc/nginx/sites-enabled/default</td><tr><td class="linenos" data-pseudo-content="15"></td><td>        <span class="hljs-attribute">src</span>=/etc/nginx/sites-available/default</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        <span class="hljs-attribute">state</span>=link</td><tr><td class="linenos" data-pseudo-content="17"></td><td>    - name: Delete /var/www directory</td><tr><td class="linenos" data-pseudo-content="18"></td><td>      file: &gt;</td><tr><td class="linenos" data-pseudo-content="19"></td><td>        <span class="hljs-attribute">path</span>=/var/www</td><tr><td class="linenos" data-pseudo-content="20"></td><td>        <span class="hljs-attribute">state</span>=absent</td><tr><td class="linenos" data-pseudo-content="21"></td><td>    - name: Clone repository</td><tr><td class="linenos" data-pseudo-content="22"></td><td>      git: &gt;</td><tr><td class="linenos" data-pseudo-content="23"></td><td>        <span class="hljs-attribute">repo</span>=https://github.com/matthewbdaly/matthewbdaly.github.io.git</td><tr><td class="linenos" data-pseudo-content="24"></td><td>        <span class="hljs-attribute">dest</span>=/var/www</td><tr><td class="linenos" data-pseudo-content="25"></td><td>        <span class="hljs-attribute">version</span>=HEAD</td><tr><td class="linenos" data-pseudo-content="26"></td><td>    - name: Restart Nginx</td><tr><td class="linenos" data-pseudo-content="27"></td><td>      service: <span class="hljs-attribute">name</span>=nginx <span class="hljs-attribute">state</span>=restarted</td></table></code></pre>
+<pre><code class="lang-yml">---
+- name: Copy personal website
+  hosts: testserver
+  become: True
+  tasks:
+    - name: Install Nginx
+      apt: name=nginx update_cache=yes
+    - name: Copy config
+      copy: &gt;
+        src=files/nginx.conf
+        dest=/etc/nginx/sites-available/default
+    - name: Activate config
+      file: &gt;
+        dest=/etc/nginx/sites-enabled/default
+        src=/etc/nginx/sites-available/default
+        state=link
+    - name: Delete /var/www directory
+      file: &gt;
+        path=/var/www
+        state=absent
+    - name: Clone repository
+      git: &gt;
+        repo=https://github.com/matthewbdaly/matthewbdaly.github.io.git
+        dest=/var/www
+        version=HEAD
+    - name: Restart Nginx
+      service: name=nginx state=restarted
+</code></pre>
 <p>Note the <code>name</code> fields - these are comments that will show up in the output when each step is run. First we use the <code>apt</code> module to install Nginx, then we copy over the config file and activate it, then we empty the existing <code>/var/www</code> and clone the repository, and finally we restart Nginx.</p>
 <p>Also, note the following fields:</p>
 <ul>
@@ -90,14 +222,63 @@
 <li><code>become</code> specifies that the commands are run using <code>sudo</code></li>
 </ul>
 <p>We also need to create the config for Nginx. Create the <code>files</code> directory under <code>playbooks</code> and save this file as <code>playbooks/files/nginx.conf</code>:</p>
-<pre><code class="hljs lang-nginx"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-section">server</span> {</td><tr><td class="linenos" data-pseudo-content="2"></td><td>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default_server;</td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-attribute">listen</span> [::]:<span class="hljs-number">80</span> default_server ipv6only=<span class="hljs-literal">on</span>;</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>    <span class="hljs-attribute">root</span> /var/www;</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    <span class="hljs-attribute">index</span> index.html index.htm;</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-attribute">server_name</span> localhost;</td><tr><td class="linenos" data-pseudo-content="9"></td><td></td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-attribute">location</span> / {</td><tr><td class="linenos" data-pseudo-content="11"></td><td>        <span class="hljs-attribute">try_files</span> <span class="hljs-variable">$uri</span> <span class="hljs-variable">$uri</span>/ =<span class="hljs-number">404</span>;</td><tr><td class="linenos" data-pseudo-content="12"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="13"></td><td>}</td></table></code></pre>
+<pre><code class="lang-nginx">server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /var/www;
+    index index.html index.htm;
+
+    server_name localhost;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+</code></pre>
 <p>Obviously if your Nginx config will be different, feel free to amend it as necessary. Finally, we run the playbook using the <code>ansible-playbook</code> command:</p>
-<pre><code class="hljs lang-bash"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>$ ansible-playbook playbooks/sitecopy.yml</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td>PLAY [Copy personal website] ***************************************************</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>TASK [setup] *******************************************************************</td><tr><td class="linenos" data-pseudo-content="6"></td><td>ok: [testserver]</td><tr><td class="linenos" data-pseudo-content="7"></td><td></td><tr><td class="linenos" data-pseudo-content="8"></td><td>TASK [Install Nginx] ***********************************************************</td><tr><td class="linenos" data-pseudo-content="9"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="10"></td><td></td><tr><td class="linenos" data-pseudo-content="11"></td><td>TASK [Copy config] *************************************************************</td><tr><td class="linenos" data-pseudo-content="12"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="13"></td><td></td><tr><td class="linenos" data-pseudo-content="14"></td><td>TASK [Activate config] *********************************************************</td><tr><td class="linenos" data-pseudo-content="15"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="16"></td><td></td><tr><td class="linenos" data-pseudo-content="17"></td><td>TASK [Delete /var/www directory] ***********************************************</td><tr><td class="linenos" data-pseudo-content="18"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="19"></td><td></td><tr><td class="linenos" data-pseudo-content="20"></td><td>TASK [Clone repository] ********************************************************</td><tr><td class="linenos" data-pseudo-content="21"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="22"></td><td></td><tr><td class="linenos" data-pseudo-content="23"></td><td>TASK [Restart Nginx] ***********************************************************</td><tr><td class="linenos" data-pseudo-content="24"></td><td>changed: [testserver]</td><tr><td class="linenos" data-pseudo-content="25"></td><td></td><tr><td class="linenos" data-pseudo-content="26"></td><td>PLAY RECAP *********************************************************************</td><tr><td class="linenos" data-pseudo-content="27"></td><td>testserver                 : ok=7    changed=6    unreachable=0    failed=0</td><tr><td class="linenos" data-pseudo-content="28"></td><td></td></table></code></pre>
+<pre><code class="lang-bash">$ ansible-playbook playbooks/sitecopy.yml
+
+PLAY [Copy personal website] ***************************************************
+
+TASK [setup] *******************************************************************
+ok: [testserver]
+
+TASK [Install Nginx] ***********************************************************
+changed: [testserver]
+
+TASK [Copy config] *************************************************************
+changed: [testserver]
+
+TASK [Activate config] *********************************************************
+changed: [testserver]
+
+TASK [Delete /var/www directory] ***********************************************
+changed: [testserver]
+
+TASK [Clone repository] ********************************************************
+changed: [testserver]
+
+TASK [Restart Nginx] ***********************************************************
+changed: [testserver]
+
+PLAY RECAP *********************************************************************
+testserver                 : ok=7    changed=6    unreachable=0    failed=0
+
+</code></pre>
 <p>If we had a playbook that we wanted to run on only a subset of the hosts it applied to, we could use the <code>-l</code> flag, as in this example:</p>
-<pre><code class="hljs lang-bash singleline">$ ansible-playbook playbooks/sitecopy.yml -l testserver</code></pre>
+<pre><code class="lang-bash">$ ansible-playbook playbooks/sitecopy.yml -l testserver
+</code></pre>
 <p>Using these same basic concepts, you can invoke many different Ansible modules to achieve many different tasks. You can spin up new servers on supported cloud hosting companies, you can set up a known good fail2ban config, you can configure your firewall, and many more tasks. As your playbooks get bigger, it’s worth moving sections into separate roles that get invoked within multiple playbooks, in order to reduce repetition.</p>
 <p>Finally, I mentioned earlier that you can use Ansible to update all of your servers regularly. Here’s the playbook I use for that:</p>
-<pre><code class="hljs lang-yml"><table><tr><td class="linenos" data-pseudo-content="1"></td><td>---</td><tr><td class="linenos" data-pseudo-content="2"></td><td>- name: Update<span class="hljs-built_in"> system</td><tr><td class="linenos" data-pseudo-content="3"></td><td></span>  hosts: all</td><tr><td class="linenos" data-pseudo-content="4"></td><td>  become: <span class="hljs-literal">True</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>  tasks:</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    - name: update<span class="hljs-built_in"> system</td><tr><td class="linenos" data-pseudo-content="7"></td><td></span>      apt: <span class="hljs-attribute">upgrade</span>=full <span class="hljs-attribute">update_cache</span>=<span class="hljs-literal">yes</span></td></table></code></pre>
+<pre><code class="lang-yml">---
+- name: Update system
+  hosts: all
+  become: True
+  tasks:
+    - name: update system
+      apt: upgrade=full update_cache=yes
+</code></pre>
 <p>This connects to all hosts using the <code>all</code> shortcut we saw earlier, and upgrades all existing packages. Using this method is a lot easier than connecting to each one in turn via SSH and updating it manually.</p>
 <h2 id="summary">Summary</h2>
 <p>Ansible is an extremely useful tool for managing servers, but to get the most out of it you have to put in a fair bit of work reading the <a href="https://docs.ansible.com/">documentation</a> and writing your own playbooks for your own use cases. It’s simple to get started with, and if you’re willing to put in the time writing your own playbooks then in the long run you’ll save yourself a lot of time and grief by making it easy to set up new servers and administer existing ones. Hopefully this has given you a taster of what you can do with Ansible - from here on the documentation is worth a look as it lists all of the modules that ship with Ansible. If there’s a particular task you dread, such as setting up a mail server, then Ansible is a very good way to automate that away so it’s easier next time.</p>

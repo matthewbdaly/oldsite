@@ -183,211 +183,211 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">1st March 2017 11:16 pm</p><h1>Decorating Laravel Repositories</h1><p><a href="/blog/2016/11/13/building-a-phonegap-app-with-laravel-and-angular-part-4/">As mentioned previously</a>, when building any nontrivial Laravel application, it’s prudent to decouple our controllers from the Eloquent ORM (or any other ORM or data source we may be using) by creating an interface, and then writing a repository that implements that interface. We can then resolve the interface to our repository, and use the repository to interact with our data source. Should we need to switch to a different implementation, we then need only create the new repository and amend how Laravel resolves that interface.</p><p>The same principle applies when it comes to caching. Database queries are typically a major bottleneck in a web application, and so it’s prudent to implement some form of caching for your queries. However, it’s a bad idea to do so in your controllers, because just as with Eloquent models, you’re tying yourself to one particular implementation and won’t be able to switch without rewriting a good chunk of your controllers, as well as possibly having to maintain large amounts of duplicate code for when a query is made in several places.</p><p>Alternatively, you could implement caching within the methods of your repository, which might make sense for smaller projects. However, it means that your repository is now dependent on both the ORM and cache you chose. If you decide you want to change your ORM but retain the same caching system, or vice versa, you’re stuck with writing a new repository to handle both, duplicating work you’ve already done.</p><p>Fortunately, there’s a more elegant solution. Using the <a href="http://designpatternsphp.readthedocs.io/en/latest/Structural/Decorator/README.html">decorator pattern</a>, we can create a second repository that implements the same interface and “wraps” the original repository. Each of its methods will call its counterpart in the original, and if appropriate cache the response. That way, our caching is implemented separately from our database interactions, and we can easily create a repository for a new data source without affecting the caching in the slightest.</p><p>Say we have the following interface for our <code>User</code> model:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">1st March 2017 11:16 pm</p><h1>Decorating Laravel Repositories</h1><p><a href="/blog/2016/11/13/building-a-phonegap-app-with-laravel-and-angular-part-4/">As mentioned previously</a>, when building any nontrivial Laravel application, it’s prudent to decouple our controllers from the Eloquent ORM (or any other ORM or data source we may be using) by creating an interface, and then writing a repository that implements that interface. We can then resolve the interface to our repository, and use the repository to interact with our data source. Should we need to switch to a different implementation, we then need only create the new repository and amend how Laravel resolves that interface.</p><p>The same principle applies when it comes to caching. Database queries are typically a major bottleneck in a web application, and so it’s prudent to implement some form of caching for your queries. However, it’s a bad idea to do so in your controllers, because just as with Eloquent models, you’re tying yourself to one particular implementation and won’t be able to switch without rewriting a good chunk of your controllers, as well as possibly having to maintain large amounts of duplicate code for when a query is made in several places.</p><p>Alternatively, you could implement caching within the methods of your repository, which might make sense for smaller projects. However, it means that your repository is now dependent on both the ORM and cache you chose. If you decide you want to change your ORM but retain the same caching system, or vice versa, you’re stuck with writing a new repository to handle both, duplicating work you’ve already done.</p><p>Fortunately, there’s a more elegant solution. Using the <a href="http://designpatternsphp.readthedocs.io/en/latest/Structural/Decorator/README.html">decorator pattern</a>, we can create a second repository that implements the same interface and “wraps” the original repository. Each of its methods will call its counterpart in the original, and if appropriate cache the response. That way, our caching is implemented separately from our database interactions, and we can easily create a repository for a new data source without affecting the caching in the slightest.</p><p>Say we have the following interface for our <code>User</code> model:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>;
+namespace App\Repositories\Interfaces;
 
-<span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">UserRepositoryInterface</span> </span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span></span>;
+interface UserRepositoryInterface {
+    public function all();
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span></span>;
+    public function findOrFail($id);
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span></span>;
+    public function create($input);
 }
-</code></pre><p>And the following repository implements that interface:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>And the following repository implements that interface:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>;
+namespace App\Repositories;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">User</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">UserRepositoryInterface</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
+use App\User;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use Hash;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EloquentUserRepository</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserRepositoryInterface</span> </span>{
+class EloquentUserRepository implements UserRepositoryInterface {
 
-    <span class="hljs-keyword">private</span> $model;
+    private $model;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $model)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;model = $model;
+    public function __construct(User $model)
+    {
+        $this-&gt;model = $model;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;model-&gt;all();
+    public function all()
+    {
+        return $this-&gt;model-&gt;all();
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;model-&gt;findOrFail($id);
+    public function findOrFail($id)
+    {
+        return $this-&gt;model-&gt;findOrFail($id);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span>
-    </span>{
-        $user = <span class="hljs-keyword">new</span> <span class="hljs-keyword">$this</span>-&gt;model;
-        $user-&gt;email = $input[<span class="hljs-string">'email'</span>];
-        $user-&gt;name = $input[<span class="hljs-string">'name'</span>];
-        $user-&gt;password = Hash::make($input[<span class="hljs-string">'password'</span>]);
+    public function create($input)
+    {
+        $user = new $this-&gt;model;
+        $user-&gt;email = $input[&#39;email&#39;];
+        $user-&gt;name = $input[&#39;name&#39;];
+        $user-&gt;password = Hash::make($input[&#39;password&#39;]);
         $user-&gt;save();
-        <span class="hljs-keyword">return</span> $user;
+        return $user;
     }
 }
-</code></pre><p>We might implement the following repository class to handle caching:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>We might implement the following repository class to handle caching:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Decorators</span>;
+namespace App\Repositories\Decorators;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Interfaces</span>\<span class="hljs-title">UserRepositoryInterface</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Repository</span> <span class="hljs-title">as</span> <span class="hljs-title">Cache</span>;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use Illuminate\Contracts\Cache\Repository as Cache;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CachingUserRepository</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserRepositoryInterface</span> </span>{
+class CachingUserRepository implements UserRepositoryInterface {
 
-    <span class="hljs-keyword">protected</span> $repository;
+    protected $repository;
 
-    <span class="hljs-keyword">protected</span> $cache;
+    protected $cache;
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(UserRepositoryInterface $repository, Cache $cache)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;repository = $repository;
-        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
+    public function __construct(UserRepositoryInterface $repository, Cache $cache)
+    {
+        $this-&gt;repository = $repository;
+        $this-&gt;cache = $cache;
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">all</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(<span class="hljs-string">'users'</span>)-&gt;remember(<span class="hljs-string">'all'</span>, <span class="hljs-number">60</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;repository-&gt;all();
+    public function all()
+    {
+        return $this-&gt;cache-&gt;tags(&#39;users&#39;)-&gt;remember(&#39;all&#39;, 60, function () {
+            return $this-&gt;repository-&gt;all();
         });
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">findOrFail</span><span class="hljs-params">($id)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(<span class="hljs-string">'users'</span>)-&gt;remember($id, <span class="hljs-number">60</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">($id)</span> </span>{
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;repository-&gt;findOrFail($id);
+    public function findOrFail($id)
+    {
+        return $this-&gt;cache-&gt;tags(&#39;users&#39;)-&gt;remember($id, 60, function () use ($id) {
+            return $this-&gt;repository-&gt;findOrFail($id);
         });
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">($input)</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(<span class="hljs-string">'users'</span>)-&gt;flush();
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;repository-&gt;create($input);
+    public function create($input)
+    {
+        $this-&gt;cache-&gt;tags(&#39;users&#39;)-&gt;flush();
+        return $this-&gt;repository-&gt;create($input);
     }
 }
-</code></pre><p>Note how each method doesn’t actually do any querying. Instead, the constructor accepts an implementation of the same interface and the cache, and we defer all interactions with the database to that implementation. Each call that queries the database is wrapped in a callback so that it’s stored in Laravel’s cache when it’s returned, without touching the original implementation. When a user is created, the users tag is flushed from the cache so that stale results don’t get served.</p><p>To actually use this implementation, we need to update our service provider so that it resolves the interface to an implementation of our decorator:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Note how each method doesn’t actually do any querying. Instead, the constructor accepts an implementation of the same interface and the cache, and we defer all interactions with the database to that implementation. Each call that queries the database is wrapped in a callback so that it’s stored in Laravel’s cache when it’s returned, without touching the original implementation. When a user is created, the users tag is flushed from the cache so that stale results don’t get served.</p><p>To actually use this implementation, we need to update our service provider so that it resolves the interface to an implementation of our decorator:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
+namespace App\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class AppServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function boot()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register any application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">$this</span>-&gt;app-&gt;singleton(<span class="hljs-string">'App\Repositories\Interfaces\UserRepositoryInterface'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            $baseRepo = <span class="hljs-keyword">new</span> \App\Repositories\EloquentUserRepository(<span class="hljs-keyword">new</span> \App\User);
-            $cachingRepo = <span class="hljs-keyword">new</span> \App\Repositories\Decorators\CachingUserRepository($baseRepo, <span class="hljs-keyword">$this</span>-&gt;app[<span class="hljs-string">'cache.store'</span>]);
-            <span class="hljs-keyword">return</span> $cachingRepo;
+     * @return void
+     */
+    public function register()
+    {
+        $this-&gt;app-&gt;singleton(&#39;App\Repositories\Interfaces\UserRepositoryInterface&#39;, function () {
+            $baseRepo = new \App\Repositories\EloquentUserRepository(new \App\User);
+            $cachingRepo = new \App\Repositories\Decorators\CachingUserRepository($baseRepo, $this-&gt;app[&#39;cache.store&#39;]);
+            return $cachingRepo;
         });
     }
 }
-</code></pre><p>We instantiate the base repository, passing it the appropriate model. Then we instantiate the decorator, passing it the base repository and the cache, and return it. Now our controllers will start using the new decorator.</p><h2 id="testing-the-decorator">Testing the decorator</h2><p>Now that we have a working decorator, how do we test it? Just as with the decorator itself, we want our tests to be completely decoupled from any particular implementation of the dependencies. If in future we’re asked to migrate the database to MongoDB, say, we’ll have plenty of work writing our new database repositories, so we don’t want to have to rewrite the tests for our decorator as well. Fortunately, using Mockery we can just mock the interface for the repository, and pass that mock into the constructor of the decorator in our test. That way we can have the mock return a known response and not involve either the database repository or the underlying models in any way.</p><p>We will also want to mock the cache itself, as this is a unit test and so as far as possible it should not be testing anything outside of the repository class. Here’s an example of how we might test the above decorator.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>We instantiate the base repository, passing it the appropriate model. Then we instantiate the decorator, passing it the base repository and the cache, and return it. Now our controllers will start using the new decorator.</p><h2 id="testing-the-decorator">Testing the decorator</h2><p>Now that we have a working decorator, how do we test it? Just as with the decorator itself, we want our tests to be completely decoupled from any particular implementation of the dependencies. If in future we’re asked to migrate the database to MongoDB, say, we’ll have plenty of work writing our new database repositories, so we don’t want to have to rewrite the tests for our decorator as well. Fortunately, using Mockery we can just mock the interface for the repository, and pass that mock into the constructor of the decorator in our test. That way we can have the mock return a known response and not involve either the database repository or the underlying models in any way.</p><p>We will also want to mock the cache itself, as this is a unit test and so as far as possible it should not be testing anything outside of the repository class. Here’s an example of how we might test the above decorator.</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Decorators</span>;
+namespace Tests\Repositories\Decorators;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">TestCase</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>\<span class="hljs-title">Decorators</span>\<span class="hljs-title">CachingUserRepository</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Mockery</span> <span class="hljs-title">as</span> <span class="hljs-title">m</span>;
+use Tests\TestCase;
+use App\Repositories\Decorators\CachingUserRepository;
+use Mockery as m;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-comment">/**
+class UserTest extends TestCase
+{
+    /**
      * Test fetching all items
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFetchingAll</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create mock of decorated repository</span>
-        $repo = m::mock(<span class="hljs-string">'App\Repositories\Interfaces\UserRepositoryInterface'</span>);
-        $repo-&gt;shouldReceive(<span class="hljs-string">'all'</span>)-&gt;andReturn([]);
+     * @return void
+     */
+    public function testFetchingAll()
+    {
+        // Create mock of decorated repository
+        $repo = m::mock(&#39;App\Repositories\Interfaces\UserRepositoryInterface&#39;);
+        $repo-&gt;shouldReceive(&#39;all&#39;)-&gt;andReturn([]);
 
-        <span class="hljs-comment">// Create mock of cache</span>
-        $cache = m::mock(<span class="hljs-string">'Illuminate\Contracts\Cache\Repository'</span>);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'tags'</span>)-&gt;with(<span class="hljs-string">'users'</span>)-&gt;andReturn($cache);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'remember'</span>)-&gt;andReturn([]);
+        // Create mock of cache
+        $cache = m::mock(&#39;Illuminate\Contracts\Cache\Repository&#39;);
+        $cache-&gt;shouldReceive(&#39;tags&#39;)-&gt;with(&#39;users&#39;)-&gt;andReturn($cache);
+        $cache-&gt;shouldReceive(&#39;remember&#39;)-&gt;andReturn([]);
 
-        <span class="hljs-comment">// Instantiate the repository</span>
-        $repository = <span class="hljs-keyword">new</span> CachingUserRepository($repo, $cache);
+        // Instantiate the repository
+        $repository = new CachingUserRepository($repo, $cache);
 
-        <span class="hljs-comment">// Get all</span>
+        // Get all
         $items = $repository-&gt;all();
-        <span class="hljs-keyword">$this</span>-&gt;assertCount(<span class="hljs-number">0</span>, $items);
+        $this-&gt;assertCount(0, $items);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test fetching a single item
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testFindOrFail</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create mock of decorated repository</span>
-        $repo = m::mock(<span class="hljs-string">'App\Repositories\Interfaces\UserRepositoryInterface'</span>);
-        $repo-&gt;shouldReceive(<span class="hljs-string">'findOrFail'</span>)-&gt;with(<span class="hljs-number">1</span>)-&gt;andReturn(<span class="hljs-keyword">null</span>);
+     * @return void
+     */
+    public function testFindOrFail()
+    {
+        // Create mock of decorated repository
+        $repo = m::mock(&#39;App\Repositories\Interfaces\UserRepositoryInterface&#39;);
+        $repo-&gt;shouldReceive(&#39;findOrFail&#39;)-&gt;with(1)-&gt;andReturn(null);
 
-        <span class="hljs-comment">// Create mock of cache</span>
-        $cache = m::mock(<span class="hljs-string">'Illuminate\Contracts\Cache\Repository'</span>);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'tags'</span>)-&gt;with(<span class="hljs-string">'users'</span>)-&gt;andReturn($cache);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'remember'</span>)-&gt;andReturn(<span class="hljs-keyword">null</span>);
+        // Create mock of cache
+        $cache = m::mock(&#39;Illuminate\Contracts\Cache\Repository&#39;);
+        $cache-&gt;shouldReceive(&#39;tags&#39;)-&gt;with(&#39;users&#39;)-&gt;andReturn($cache);
+        $cache-&gt;shouldReceive(&#39;remember&#39;)-&gt;andReturn(null);
 
-        <span class="hljs-comment">// Instantiate the repository</span>
-        $repository = <span class="hljs-keyword">new</span> CachingUserRepository($repo, $cache);
+        // Instantiate the repository
+        $repository = new CachingUserRepository($repo, $cache);
 
-        <span class="hljs-comment">// Get all</span>
-        $item = $repository-&gt;findOrFail(<span class="hljs-number">1</span>);
-        <span class="hljs-keyword">$this</span>-&gt;assertNull($item);
+        // Get all
+        $item = $repository-&gt;findOrFail(1);
+        $this-&gt;assertNull($item);
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test creating a single item
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testCreate</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create mock of decorated repository</span>
-        $repo = m::mock(<span class="hljs-string">'App\Repositories\Interfaces\UserRepositoryInterface'</span>);
-        $repo-&gt;shouldReceive(<span class="hljs-string">'create'</span>)-&gt;with([<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>])-&gt;andReturn(<span class="hljs-keyword">true</span>);
+     * @return void
+     */
+    public function testCreate()
+    {
+        // Create mock of decorated repository
+        $repo = m::mock(&#39;App\Repositories\Interfaces\UserRepositoryInterface&#39;);
+        $repo-&gt;shouldReceive(&#39;create&#39;)-&gt;with([&#39;email&#39; =&gt; &#39;bob@example.com&#39;])-&gt;andReturn(true);
 
-        <span class="hljs-comment">// Create mock of cache</span>
-        $cache = m::mock(<span class="hljs-string">'Illuminate\Contracts\Cache\Repository'</span>);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'tags'</span>)-&gt;with(<span class="hljs-string">'usersUser'</span>)-&gt;andReturn($cache);
-        $cache-&gt;shouldReceive(<span class="hljs-string">'flush'</span>)-&gt;andReturn(<span class="hljs-keyword">true</span>);
+        // Create mock of cache
+        $cache = m::mock(&#39;Illuminate\Contracts\Cache\Repository&#39;);
+        $cache-&gt;shouldReceive(&#39;tags&#39;)-&gt;with(&#39;usersUser&#39;)-&gt;andReturn($cache);
+        $cache-&gt;shouldReceive(&#39;flush&#39;)-&gt;andReturn(true);
 
-        <span class="hljs-comment">// Instantiate the repository</span>
-        $repository = <span class="hljs-keyword">new</span> CachingUserRepository($repo, $cache);
+        // Instantiate the repository
+        $repository = new CachingUserRepository($repo, $cache);
 
-        <span class="hljs-comment">// Get all</span>
-        $item = $repository-&gt;create([<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
-        <span class="hljs-keyword">$this</span>-&gt;assertTrue($item);
+        // Get all
+        $item = $repository-&gt;create([&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
+        $this-&gt;assertTrue($item);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tearDown</span><span class="hljs-params">()</span>
-    </span>{
+    public function tearDown()
+    {
         m::close();
-        <span class="hljs-keyword">parent</span>::tearDown();
+        parent::tearDown();
     }
 }
 </code></pre><p>As you can see, all we care about is that the underlying repository interface receives the correct method calls and arguments, nothing more. That way our test is fast and repository-agnositc.</p><h2 id="other-applications">Other applications</h2><p>Here I’ve used this technique to cache the queries, but that’s not the only use case for decorating a repository. For instance, you could decorate a repository to fire events when certain methods are called, and write different decorators when reusing these repositories for different applications. You could create one to log interactions with the repository, or you could use an external library to cache your queries, all without touching your existing repository. Should we need to switch back to our base repository, it’s just a matter of amending the service provider accordingly as both the decorator and the repository implement the same interface.</p><p>Creating decorators does mean you have to implement all of the interface’s methods again, but if you have a base repository that your other ones inherit from, you can easily create a base decorator in a similar fashion that wraps methods common to all the repositories, and then just implement the additional methods for each decorator as required. Also, each method is likely to be fairly limited in scope so it’s not generally too onerous.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/03/01/decorating-laravel-repositories/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/03/15/enforcing-a-coding-standard-with-php-codesniffer/amp/">Enforcing a Coding Standard With PHP Codesniffer</a> <a class="postlink" href="/blog/2017/02/19/my-first-laravel-package/amp/">My First Laravel Package</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

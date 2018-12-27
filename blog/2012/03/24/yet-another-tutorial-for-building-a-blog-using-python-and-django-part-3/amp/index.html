@@ -183,177 +183,177 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">24th March 2012 6:23 pm</p><h1>Yet Another Tutorial for Building a Blog Using Python and Django - Part 3</h1><p>Welcome back! In this installment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.</p><p>First of all, our URL structure. The existing structure works fine, but it would be better if we included a representation of the date of publication. If you’re familiar with WordPress, you’ll know it offers several different URL forms, one of which is the post name alone as we’re using here, and another of which is the year, month and name. We’ll use the latter of these URL schemes with our blogging engine.</p><p>This seems like a good opportunity to introduce the interactive Python shell that comes with Django. Make sure you have a few dummy posts set up, then in the project directory (DjangoBlog/, not the top-level one but the one inside that), enter the following command:</p><pre><code class="hljs lang-bash">python manage.py shell
-</code></pre><p>This will start up an interactive Python shell which you can use to interact with your Post objects. Now, the first step is to import your Post model:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
-</code></pre><p>We now have access to our Post objects – let’s take a look at them:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>Post.objects.all()
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">24th March 2012 6:23 pm</p><h1>Yet Another Tutorial for Building a Blog Using Python and Django - Part 3</h1><p>Welcome back! In this installment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.</p><p>First of all, our URL structure. The existing structure works fine, but it would be better if we included a representation of the date of publication. If you’re familiar with WordPress, you’ll know it offers several different URL forms, one of which is the post name alone as we’re using here, and another of which is the year, month and name. We’ll use the latter of these URL schemes with our blogging engine.</p><p>This seems like a good opportunity to introduce the interactive Python shell that comes with Django. Make sure you have a few dummy posts set up, then in the project directory (DjangoBlog/, not the top-level one but the one inside that), enter the following command:</p><pre><code class="lang-bash">python manage.py shell
+</code></pre><p>This will start up an interactive Python shell which you can use to interact with your Post objects. Now, the first step is to import your Post model:</p><pre><code class="lang-python">&gt;&gt;&gt; from blogengine.models import Post
+</code></pre><p>We now have access to our Post objects – let’s take a look at them:</p><pre><code class="lang-python">&gt;&gt;&gt; Post.objects.all()
 [&lt;Post: My first blog post&gt;, &lt;Post: My second blog post&gt;, &lt;Post: My third post&gt;, &lt;Post: My fourth post&gt;, &lt;Post: My fifth post&gt;, &lt;Post: My sixth post&gt;]
-</code></pre><p>You may have completely different post objects, or a different number of them, but that’s fine. Remember we set <code>__unicode__(self)</code> to return self.title? Here we see that each blog post is represented by its title. Now let’s get one of our Post objects:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>p = Post.objects.get(pk=<span class="hljs-number">1</span>)
-<span class="hljs-meta">&gt;&gt;&gt; </span>p
+</code></pre><p>You may have completely different post objects, or a different number of them, but that’s fine. Remember we set <code>__unicode__(self)</code> to return self.title? Here we see that each blog post is represented by its title. Now let’s get one of our Post objects:</p><pre><code class="lang-python">&gt;&gt;&gt; p = Post.objects.get(pk=1)
+&gt;&gt;&gt; p
 &lt;Post: My first blog post&gt;
-</code></pre><p>In the first line above, we get the Post object with the primary key of 1, and store a reference to it as p. We then demonstrate that it is, indeed, one of our blog posts by outputting its title.</p><p>If you’re not familiar with relational database theory, a primary key is a value in a database table that refers uniquely to one entry in the table, so that if you refer to an entry by its primary key, you can be sure you’re getting the correct value. By default, Django models generate a field called id in addition to the ones you define, which is set as the primary key, and this is set to auto-increment, so for instance, every time you add an additional blog post, it gets the next number as its id. Here, we just want to get access to a single blog post object, so we just enter 1 as the primary key in order to get the earliest blog post.</p><p>Next, we get the publication date:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>p.pub_date
-datetime.datetime(<span class="hljs-number">2012</span>, <span class="hljs-number">3</span>, <span class="hljs-number">19</span>, <span class="hljs-number">12</span>, <span class="hljs-number">11</span>, <span class="hljs-number">10</span>)
-</code></pre><p>This returns a datetime.datetime object. If you look at the documentation for Python’s datetime module, you’ll notice that it has attributes called day, month and year. Here’s how we can use these to get the information we want:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>p.pub_date.month
-<span class="hljs-number">3</span>
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.pub_date.day
-<span class="hljs-number">19</span>
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.pub_date.month
-<span class="hljs-number">3</span>
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.pub_date.year
-<span class="hljs-number">2012</span>
-</code></pre><p>It’s that simple – we just refer to the attribute we want to retrieve. So, it should now be pretty easy to understand how we can get the date for each blog post.</p><p>Exit your Python shell with <kbd>Ctrl-D</kbd> and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_absolute_url</span><span class="hljs-params">(self)</span>:</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-string">"/%s/%s/%s/"</span> % (self.pub_date.year, self.pub_date.month, self.slug)
-</code></pre><p>Now, you haven’t seen get_absolute_url before. Every time you create a model in Django, you should really create a get_absolute_url method for it. In essence, it defines a single, canonical URL for that object, whether it’s a blog post, a user, or what have you. By creating one method that defines the structure for the URL for this type of object and referring to it elsewhere, we only need to change it in one place if we want to make any changes to how we determine the URL for that type of object.</p><p>What we do here is we define the URL as being /year/month/slug/. If you want, you can quite easily make it include the day as well like this:</p><pre><code class="hljs lang-python">    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_absolute_url</span><span class="hljs-params">(self)</span>:</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-string">"/%s/%s/%s/%s/"</span> % (self.pub_date.year, self.pub_date.month, self.pub_date.day, self.slug)
-</code></pre><p>With our model updated, let’s change our URLconf accordingly. Return to the inner DjangoBlog/ directory and open up urls.py, then amend the lines for the blog posts as follows:</p><pre><code class="hljs lang-python">    <span class="hljs-comment"># Blog posts</span>
-    url(<span class="hljs-string">r'^\d{4}/\d{1,2}/(?P&lt;postSlug&gt;[-a-zA-Z0-9]+)/?$'</span>, <span class="hljs-string">'blogengine.views.getPost'</span>),
-</code></pre><p>What we’ve changed here is that we’ve told urls.py to expect blog posts that look like 4 digits, then a forward slash, then one or two digits, then another forward slash, then a slug that can include hyphens, upper or lower case letters, and numbers.</p><p>With that done, we just need to update our template. Edit templates/posts.html to look like this:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">for</span></span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span></span><span class="hljs-template-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span></span><span class="hljs-template-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
-        </span><span class="hljs-template-variable">{{ post.text }}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endfor</span></span> %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_previous %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_next %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
-</code></pre><p>Literally all we do is replace post.slug with post.get_absolute_url and remove the leading forward slash. If you then run python manage.py syncdb, restart the development server and go clicking around your posts, you should be able to see that our new URL system is now up and running.</p><p>With that done, the next step is to add support for multiple authors. Now, you might think that we’re going to have to create a new model for users, but that’s not so – Django ships with a number of useful models already, and we’re going to use one of them here.</p><p>Now, first of all, we need to amend our Post model to include the author’s details. Edit your blogengine/models.py to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.db <span class="hljs-keyword">import</span> models
-<span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
+</code></pre><p>In the first line above, we get the Post object with the primary key of 1, and store a reference to it as p. We then demonstrate that it is, indeed, one of our blog posts by outputting its title.</p><p>If you’re not familiar with relational database theory, a primary key is a value in a database table that refers uniquely to one entry in the table, so that if you refer to an entry by its primary key, you can be sure you’re getting the correct value. By default, Django models generate a field called id in addition to the ones you define, which is set as the primary key, and this is set to auto-increment, so for instance, every time you add an additional blog post, it gets the next number as its id. Here, we just want to get access to a single blog post object, so we just enter 1 as the primary key in order to get the earliest blog post.</p><p>Next, we get the publication date:</p><pre><code class="lang-python">&gt;&gt;&gt; p.pub_date
+datetime.datetime(2012, 3, 19, 12, 11, 10)
+</code></pre><p>This returns a datetime.datetime object. If you look at the documentation for Python’s datetime module, you’ll notice that it has attributes called day, month and year. Here’s how we can use these to get the information we want:</p><pre><code class="lang-python">&gt;&gt;&gt; p.pub_date.month
+3
+&gt;&gt;&gt; p.pub_date.day
+19
+&gt;&gt;&gt; p.pub_date.month
+3
+&gt;&gt;&gt; p.pub_date.year
+2012
+</code></pre><p>It’s that simple – we just refer to the attribute we want to retrieve. So, it should now be pretty easy to understand how we can get the date for each blog post.</p><p>Exit your Python shell with <kbd>Ctrl-D</kbd> and head back into the blogengine/ folder. Then open models.py in your text editor and add the following method to the bottom of your Post class:</p><pre><code class="lang-python">    def get_absolute_url(self):
+        return &quot;/%s/%s/%s/&quot; % (self.pub_date.year, self.pub_date.month, self.slug)
+</code></pre><p>Now, you haven’t seen get_absolute_url before. Every time you create a model in Django, you should really create a get_absolute_url method for it. In essence, it defines a single, canonical URL for that object, whether it’s a blog post, a user, or what have you. By creating one method that defines the structure for the URL for this type of object and referring to it elsewhere, we only need to change it in one place if we want to make any changes to how we determine the URL for that type of object.</p><p>What we do here is we define the URL as being /year/month/slug/. If you want, you can quite easily make it include the day as well like this:</p><pre><code class="lang-python">    def get_absolute_url(self):
+        return &quot;/%s/%s/%s/%s/&quot; % (self.pub_date.year, self.pub_date.month, self.pub_date.day, self.slug)
+</code></pre><p>With our model updated, let’s change our URLconf accordingly. Return to the inner DjangoBlog/ directory and open up urls.py, then amend the lines for the blog posts as follows:</p><pre><code class="lang-python">    # Blog posts
+    url(r&#39;^\d{4}/\d{1,2}/(?P&lt;postSlug&gt;[-a-zA-Z0-9]+)/?$&#39;, &#39;blogengine.views.getPost&#39;),
+</code></pre><p>What we’ve changed here is that we’ve told urls.py to expect blog posts that look like 4 digits, then a forward slash, then one or two digits, then another forward slash, then a slug that can include hyphens, upper or lower case letters, and numbers.</p><p>With that done, we just need to update our template. Edit templates/posts.html to look like this:</p><pre><code class="lang-django">&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;My Django Blog&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        {% for post in posts %}
+        &lt;h1&gt;&lt;a href=&quot;{{ post.get_absolute_url }}&quot;&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
+        &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
+        {{ post.text }}
+        {% endfor %}
+        &lt;br /&gt;
+        {% if page.has_previous %}
+        &lt;a href=&quot;/{{ page.previous_page_number }}/&quot;&gt;Previous Page&lt;/a&gt;
+        {% endif %}
+        {% if page.has_next %}
+        &lt;a href=&quot;/{{ page.next_page_number }}/&quot;&gt;Next Page&lt;/a&gt;
+        {% endif %}
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>Literally all we do is replace post.slug with post.get_absolute_url and remove the leading forward slash. If you then run python manage.py syncdb, restart the development server and go clicking around your posts, you should be able to see that our new URL system is now up and running.</p><p>With that done, the next step is to add support for multiple authors. Now, you might think that we’re going to have to create a new model for users, but that’s not so – Django ships with a number of useful models already, and we’re going to use one of them here.</p><p>Now, first of all, we need to amend our Post model to include the author’s details. Edit your blogengine/models.py to look like this:</p><pre><code class="lang-python">from django.db import models
+from django.contrib.auth.models import User
 
-<span class="hljs-comment"># Create your models here.</span>
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
-    title = models.CharField(max_length=<span class="hljs-number">200</span>)
+# Create your models here.
+class Post(models.Model):
+    title = models.CharField(max_length=200)
     pub_date = models.DateTimeField()
     text = models.TextField()
-    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
+    slug = models.SlugField(max_length=40, unique=True)
     author = models.ForeignKey(User)
 
-    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__unicode__</span><span class="hljs-params">(self)</span>:</span>
-        <span class="hljs-keyword">return</span> self.title
+    def __unicode__(self):
+        return self.title
 
-    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_absolute_url</span><span class="hljs-params">(self)</span>:</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-string">"%s/%s/%s/"</span> % (self.pub_date.year, self.pub_date.month, self.slug)
-</code></pre><p>There are two significant changes here. First, we import User from django.contrib.auth.models. User is a model provided by the auth model, and we’re going to use it here to represent the author of a given post. Then in the class definition of Post, we add a new field called author.</p><p>Note here that author is a foreign key field, and is passed a User object. Again for those unfamiliar with relational databases, a foreign key is a field in a database table that is also a primary key in another database table. Here we’re declaring that the author is one of the entries in the User table.</p><p>As well as this, we need to make some changes to the admin interface. By default, when we make a field in a model a foreign key, the admin interface will show a dropdown list of all of the instances of that object (so here, it would be a list of all the users on the system). But we don’t want that. We want the author to automatically be set as the current user, and for there to be no way to override this.</p><p>Open up admin.py and change it to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">import</span> models
-<span class="hljs-keyword">from</span> django.contrib <span class="hljs-keyword">import</span> admin
-<span class="hljs-keyword">from</span> django.contrib.auth.models <span class="hljs-keyword">import</span> User
+    def get_absolute_url(self):
+        return &quot;%s/%s/%s/&quot; % (self.pub_date.year, self.pub_date.month, self.slug)
+</code></pre><p>There are two significant changes here. First, we import User from django.contrib.auth.models. User is a model provided by the auth model, and we’re going to use it here to represent the author of a given post. Then in the class definition of Post, we add a new field called author.</p><p>Note here that author is a foreign key field, and is passed a User object. Again for those unfamiliar with relational databases, a foreign key is a field in a database table that is also a primary key in another database table. Here we’re declaring that the author is one of the entries in the User table.</p><p>As well as this, we need to make some changes to the admin interface. By default, when we make a field in a model a foreign key, the admin interface will show a dropdown list of all of the instances of that object (so here, it would be a list of all the users on the system). But we don’t want that. We want the author to automatically be set as the current user, and for there to be no way to override this.</p><p>Open up admin.py and change it to look like this:</p><pre><code class="lang-python">import models
+from django.contrib import admin
+from django.contrib.auth.models import User
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostAdmin</span><span class="hljs-params">(admin.ModelAdmin)</span>:</span>
-    prepopulated_fields = {<span class="hljs-string">"slug"</span>: (<span class="hljs-string">"title"</span>,)}
-    exclude = (<span class="hljs-string">'author'</span>,)
+class PostAdmin(admin.ModelAdmin):
+    prepopulated_fields = {&quot;slug&quot;: (&quot;title&quot;,)}
+    exclude = (&#39;author&#39;,)
 
-    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">save_model</span><span class="hljs-params">(self, request, obj, form, change)</span>:</span>
+    def save_model(self, request, obj, form, change):
         obj.author = request.user
         obj.save()
 
 admin.site.register(models.Post, PostAdmin)
-</code></pre><p>The changes made here are simple. We import the User model, and in the PostAdmin class definition we exclude the author field – this means that we don’t show this field at all.</p><p>Note the addition of the save_model method. In Django it’s easy to create a new object using your models:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
-<span class="hljs-meta">&gt;&gt;&gt; </span>p = Post()
-<span class="hljs-meta">&gt;&gt;&gt; </span>p
+</code></pre><p>The changes made here are simple. We import the User model, and in the PostAdmin class definition we exclude the author field – this means that we don’t show this field at all.</p><p>Note the addition of the save_model method. In Django it’s easy to create a new object using your models:</p><pre><code class="lang-python">&gt;&gt;&gt; from blogengine.models import Post
+&gt;&gt;&gt; p = Post()
+&gt;&gt;&gt; p
 &lt;Post: &gt;
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.title=<span class="hljs-string">"My new blog post"</span>
-<span class="hljs-meta">&gt;&gt;&gt; </span>p
+&gt;&gt;&gt; p.title=&quot;My new blog post&quot;
+&gt;&gt;&gt; p
 &lt;Post: My new blog post&gt;
-</code></pre><p>However, the new object won’t actually be stored in the database properly until you call the save() method. Here, you would need to enter p.save() (Note this won’t actually work unless you enter all the fields manually). What we’re doing in admin.py is overriding the default save() method to set the author to the name of the user who wrote the post.</p><p>Now run python manage.py syncdb again. Note that as you’ve changed the Post model, your existing posts will be lacking the required author field, and so you may need to add these again manually – this will be a numeric ID mapping to a user id. If you only have one user set up, you should just be able to set this to 1 by using an UPDATE SQL query.</p><p>If you now make sure the development server is running and log into the administrative interface, the first page you see should have a section marked “Auth”, with two items underneath named Groups and Users.</p><p>Now, cast your mind back to when you activated the admin interface and synced the database. If you recall, at this time you were asked to create a superuser account in order to log into the admin interface. This was actually provided by the django.contrib.auth application, one of the applications that are shipped with Django and are active by default. This contains the User and Group models.</p><p>If you’re familiar with Linux or Unix, the Auth application will feel very familiar. The account you created at the start was a superuser account, much like the root account on a Unix system, with unlimited privileges. Other users can be created, and given permissions on an individual basis. You can also create groups and add users to those groups, and then set the privileges for those groups en masse. For instance, in a large collaborative blog with many authors, you may have one group for people who contribute articles who can create new posts, editors who can edit existing posts and so on. Similarly, if you had a working comments system, you could easily set up a moderators group who can delete comments, and add people to that group.</p><p>Let’s create another user account so we have more than one. From the main admin page, click on the link for Add next to Users. You’ll be taken to a screen that prompts you for a username and password for the new user. Fill these in (there are two password fields for confirmation purposes) as you wish – here I’m setting the new user as bob. On the next screen you can add some additional details for the new user account, such as first name, last name and email address – do this so you have some information to work with.</p><p>Lower down you’ll see a dialogue for entering the permissions. You can make the new user a superuser so that they have permission to do anything, you can say whether or not they are staff (they need to be staff to use the admin interface, so check that), and whether they are active (making it easy to deactivate a user account without the need to delete it). Below you’ll see another dialogue showing the available permissions and allowing you to allocate them to that user. Further down, you’ll see a dialogue for changing the start date and last login date for the user, and finally a dialogue for adding new groups and adding the user to existing groups.</p><p>Save the user details once you’re done, then go into your superuser account and add a first and last name so we have some data to work with for that as well. Note that just as with a root account on a Unix box, it’s not a great idea to use a superuser account for everyday work (you should create an account that has the minimum privileges you need and use that), but we’ll stick with it for now just for learning purposes – don’t forget if you should roll out a public facing Django-powered site in future, though!</p><p>With that done, we now have some data to work with to identify the author of a given post. Let’s fire up the interactive shell again with python manage.py shell:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post
-<span class="hljs-meta">&gt;&gt;&gt; </span>Post.objects.all()
+</code></pre><p>However, the new object won’t actually be stored in the database properly until you call the save() method. Here, you would need to enter p.save() (Note this won’t actually work unless you enter all the fields manually). What we’re doing in admin.py is overriding the default save() method to set the author to the name of the user who wrote the post.</p><p>Now run python manage.py syncdb again. Note that as you’ve changed the Post model, your existing posts will be lacking the required author field, and so you may need to add these again manually – this will be a numeric ID mapping to a user id. If you only have one user set up, you should just be able to set this to 1 by using an UPDATE SQL query.</p><p>If you now make sure the development server is running and log into the administrative interface, the first page you see should have a section marked “Auth”, with two items underneath named Groups and Users.</p><p>Now, cast your mind back to when you activated the admin interface and synced the database. If you recall, at this time you were asked to create a superuser account in order to log into the admin interface. This was actually provided by the django.contrib.auth application, one of the applications that are shipped with Django and are active by default. This contains the User and Group models.</p><p>If you’re familiar with Linux or Unix, the Auth application will feel very familiar. The account you created at the start was a superuser account, much like the root account on a Unix system, with unlimited privileges. Other users can be created, and given permissions on an individual basis. You can also create groups and add users to those groups, and then set the privileges for those groups en masse. For instance, in a large collaborative blog with many authors, you may have one group for people who contribute articles who can create new posts, editors who can edit existing posts and so on. Similarly, if you had a working comments system, you could easily set up a moderators group who can delete comments, and add people to that group.</p><p>Let’s create another user account so we have more than one. From the main admin page, click on the link for Add next to Users. You’ll be taken to a screen that prompts you for a username and password for the new user. Fill these in (there are two password fields for confirmation purposes) as you wish – here I’m setting the new user as bob. On the next screen you can add some additional details for the new user account, such as first name, last name and email address – do this so you have some information to work with.</p><p>Lower down you’ll see a dialogue for entering the permissions. You can make the new user a superuser so that they have permission to do anything, you can say whether or not they are staff (they need to be staff to use the admin interface, so check that), and whether they are active (making it easy to deactivate a user account without the need to delete it). Below you’ll see another dialogue showing the available permissions and allowing you to allocate them to that user. Further down, you’ll see a dialogue for changing the start date and last login date for the user, and finally a dialogue for adding new groups and adding the user to existing groups.</p><p>Save the user details once you’re done, then go into your superuser account and add a first and last name so we have some data to work with for that as well. Note that just as with a root account on a Unix box, it’s not a great idea to use a superuser account for everyday work (you should create an account that has the minimum privileges you need and use that), but we’ll stick with it for now just for learning purposes – don’t forget if you should roll out a public facing Django-powered site in future, though!</p><p>With that done, we now have some data to work with to identify the author of a given post. Let’s fire up the interactive shell again with python manage.py shell:</p><pre><code class="lang-python">&gt;&gt;&gt; from blogengine.models import Post
+&gt;&gt;&gt; Post.objects.all()
 [&lt;Post: My first post&gt;]
-<span class="hljs-meta">&gt;&gt;&gt; </span>p = Post.objects.get()
-<span class="hljs-meta">&gt;&gt;&gt; </span>p
+&gt;&gt;&gt; p = Post.objects.get()
+&gt;&gt;&gt; p
 &lt;Post: My first post&gt;
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.author
+&gt;&gt;&gt; p.author
 &lt;User: root&gt;
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.author.first_name
-<span class="hljs-string">u'Matthew'</span>
-<span class="hljs-meta">&gt;&gt;&gt; </span>p.author.last_name
-<span class="hljs-string">u'Daly</span>
-</code></pre><p>Here, we can see that it’s easy to get the author’s details from the post. We define p as a reference to the single Post object,then we get the author, which in this case is called root. As I’ve defined a first and last name, we can get those too with p.author.first_name and p.author.last_name, which are strings containing the first and last name respectively. Note the ‘u’ before the string – this just indicates that the string is Unicode.</p><p>So from here, it’s pretty easy to display the author’s name in each post. Go into templates/posts.html and add the following line where you want your author details to appear:</p><pre><code class="hljs lang-django"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>By </span><span class="hljs-template-variable">{{ post.author.first_name }}</span><span class="xml"> </span><span class="hljs-template-variable">{{ post.author.last_name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span></span>
-</code></pre><p>Now, as long as you’ve added a first name and last name to that author’s details, if you visit <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see the appropriate details.</p><p>Our next step is to add the facility to create flat pages, somewhat like the Pages functionality in WordPress. Again, Django comes with an application that will handle this, called flatpages, but it’s not enabled by default. Go into DjangoBlog/settings.py and at the bottom of INSTALLED_APPS, add the following:</p><pre><code class="hljs lang-python">    <span class="hljs-string">'django.contrib.flatpages'</span>,
-</code></pre><p>Then run python manage.py syncdb again to add the appropriate tables to your database. Now, we need to add a flat page. Go back to the main page of the admin interface, and you should see that you now have the facility to add flat pages. Click on the Add link for flat pages, and give your page a URL, a title, and some text (here I’m giving it a URL of /about/ and a title of About), add it to a site at the bottom (this will say example.com, but don’t worry about that, it’s to do with the Sites application, which we’re not looking at right now) then save it. You should now have a FlatPage object available.</p><p>Let’s take a look at the tables created for flatpages using the sqlall command:</p><pre><code class="hljs lang-bash">python manage.py sqlall flatpages
-</code></pre><pre><code class="hljs lang-sql"><span class="hljs-keyword">BEGIN</span>;
-<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">"django_flatpage_sites"</span> (
-    <span class="hljs-string">"id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
-    <span class="hljs-string">"flatpage_id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"site_id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> <span class="hljs-keyword">REFERENCES</span> <span class="hljs-string">"django_site"</span> (<span class="hljs-string">"id"</span>),
-    <span class="hljs-keyword">UNIQUE</span> (<span class="hljs-string">"flatpage_id"</span>, <span class="hljs-string">"site_id"</span>)
+&gt;&gt;&gt; p.author.first_name
+u&#39;Matthew&#39;
+&gt;&gt;&gt; p.author.last_name
+u&#39;Daly
+</code></pre><p>Here, we can see that it’s easy to get the author’s details from the post. We define p as a reference to the single Post object,then we get the author, which in this case is called root. As I’ve defined a first and last name, we can get those too with p.author.first_name and p.author.last_name, which are strings containing the first and last name respectively. Note the ‘u’ before the string – this just indicates that the string is Unicode.</p><p>So from here, it’s pretty easy to display the author’s name in each post. Go into templates/posts.html and add the following line where you want your author details to appear:</p><pre><code class="lang-django">        &lt;h3&gt;By {{ post.author.first_name }} {{ post.author.last_name }}&lt;/h3&gt;
+</code></pre><p>Now, as long as you’ve added a first name and last name to that author’s details, if you visit <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>, you should see the appropriate details.</p><p>Our next step is to add the facility to create flat pages, somewhat like the Pages functionality in WordPress. Again, Django comes with an application that will handle this, called flatpages, but it’s not enabled by default. Go into DjangoBlog/settings.py and at the bottom of INSTALLED_APPS, add the following:</p><pre><code class="lang-python">    &#39;django.contrib.flatpages&#39;,
+</code></pre><p>Then run python manage.py syncdb again to add the appropriate tables to your database. Now, we need to add a flat page. Go back to the main page of the admin interface, and you should see that you now have the facility to add flat pages. Click on the Add link for flat pages, and give your page a URL, a title, and some text (here I’m giving it a URL of /about/ and a title of About), add it to a site at the bottom (this will say example.com, but don’t worry about that, it’s to do with the Sites application, which we’re not looking at right now) then save it. You should now have a FlatPage object available.</p><p>Let’s take a look at the tables created for flatpages using the sqlall command:</p><pre><code class="lang-bash">python manage.py sqlall flatpages
+</code></pre><pre><code class="lang-sql">BEGIN;
+CREATE TABLE &quot;django_flatpage_sites&quot; (
+    &quot;id&quot; integer NOT NULL PRIMARY KEY,
+    &quot;flatpage_id&quot; integer NOT NULL,
+    &quot;site_id&quot; integer NOT NULL REFERENCES &quot;django_site&quot; (&quot;id&quot;),
+    UNIQUE (&quot;flatpage_id&quot;, &quot;site_id&quot;)
 )
 ;
-<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-string">"django_flatpage"</span> (
-    <span class="hljs-string">"id"</span> <span class="hljs-built_in">integer</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span> PRIMARY <span class="hljs-keyword">KEY</span>,
-    <span class="hljs-string">"url"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"title"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">200</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"content"</span> <span class="hljs-built_in">text</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"enable_comments"</span> <span class="hljs-built_in">bool</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"template_name"</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">70</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
-    <span class="hljs-string">"registration_required"</span> <span class="hljs-built_in">bool</span> <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>
+CREATE TABLE &quot;django_flatpage&quot; (
+    &quot;id&quot; integer NOT NULL PRIMARY KEY,
+    &quot;url&quot; varchar(100) NOT NULL,
+    &quot;title&quot; varchar(200) NOT NULL,
+    &quot;content&quot; text NOT NULL,
+    &quot;enable_comments&quot; bool NOT NULL,
+    &quot;template_name&quot; varchar(70) NOT NULL,
+    &quot;registration_required&quot; bool NOT NULL
 )
 ;
-<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">INDEX</span> <span class="hljs-string">"django_flatpage_a4b49ab"</span> <span class="hljs-keyword">ON</span> <span class="hljs-string">"django_flatpage"</span> (<span class="hljs-string">"url"</span>);
-<span class="hljs-keyword">COMMIT</span>;
-</code></pre><p>So we can see that django_flatpage, which contains the details about the actual flat pages, has the fields id, url, title, content, enable_comments, template_name, and registration_required. Some of these options are under the advanced options in the flat page interface, so you may have missed them. Now fire up python manage.py shell again:</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> django.contrib.flatpages.models <span class="hljs-keyword">import</span> FlatPage
-<span class="hljs-meta">&gt;&gt;&gt; </span>f = FlatPage.objects.get()
-<span class="hljs-meta">&gt;&gt;&gt; </span>f
+CREATE INDEX &quot;django_flatpage_a4b49ab&quot; ON &quot;django_flatpage&quot; (&quot;url&quot;);
+COMMIT;
+</code></pre><p>So we can see that django_flatpage, which contains the details about the actual flat pages, has the fields id, url, title, content, enable_comments, template_name, and registration_required. Some of these options are under the advanced options in the flat page interface, so you may have missed them. Now fire up python manage.py shell again:</p><pre><code class="lang-python">&gt;&gt;&gt; from django.contrib.flatpages.models import FlatPage
+&gt;&gt;&gt; f = FlatPage.objects.get()
+&gt;&gt;&gt; f
 &lt;FlatPage: /about/ -- About&gt;
-</code></pre><p>Here we have one FlatPage object only (note that get() should only be used if you will only get one result back), which is represented by a string that includes the URL and title.</p><pre><code class="hljs lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>f.content
-<span class="hljs-string">u'This is my about page.'</span>
-</code></pre><p>We can easily access any of the fields in the flat page. Now, we need to define some URLs for our flat pages. Exit the Python shell and open urls.py, then insert the following rule underneath the one for blog posts:</p><pre><code class="hljs lang-python">    <span class="hljs-comment"># Flat pages</span>
-    url(<span class="hljs-string">r''</span>, include(<span class="hljs-string">'django.contrib.flatpages.urls'</span>)),
-</code></pre><p>Note that this must be the last rule in your urls.py, because it will match anything. Now, you can try and load /about/, or whatever page you’ve created, but you’ll get an error stating that the template does not exist, so we need to create that. Go into your template directory, and create a directory inside that called flatpages. Then create a new file in there called default.html, and add the following code to it:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-        </span><span class="hljs-template-variable">{{ flatpage.content }}</span><span class="xml">
-    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
-</code></pre><p>Now, make sure you have the development server running and try to load <a href="http://127.0.0.1:8000/about/">http://127.0.0.1:8000/about/</a>, or whatever your flat page URL is, and you should see your flat page’s title and content.</p><p>One final task for this lesson – we’re going to refactor our templates a little so that as little code as possible is duplicated and if we want to change anything we need to only do so in one place. Go to your template directory and edit posts.html to look like this:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'header.html' %}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">for</span></span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span></span><span class="hljs-template-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span></span><span class="hljs-template-variable">{{ post.pub_date }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
-        </span><span class="hljs-template-variable">{{ post.text }}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>By </span><span class="hljs-template-variable">{{ post.author.first_name }}</span><span class="xml"> </span><span class="hljs-template-variable">{{ post.author.last_name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endfor</span></span> %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_previous %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_next %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'footer.html' %}</span><span class="xml"></span>
-</code></pre><p>Here we’re taking the header and footer of the page out and replacing them with code that includes another file there instead. Next, we need to create those files in the same directory. Here’s header.html:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>My Django Blog<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span></span>
-</code></pre><p>And here’s footer.html:</p><pre><code class="hljs lang-django"><span class="xml">    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
-</code></pre><p>None of this is terribly complex – we’re just moving the code into another file so that other templates can use the same files. Now save a copy of posts.html as single.html – we’re going to create a template for a single blog post. Edit the original posts.html to look like this:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'header.html' %}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">for</span></span> post <span class="hljs-keyword">in</span> posts %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ post.get_absolute_url }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span></span><span class="hljs-template-variable">{{ post.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-        </span><span class="hljs-template-variable">{{ post.text }}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endfor</span></span> %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">br</span> /&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_previous %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.previous_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Previous Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">if</span></span> page.has_next %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
-        </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
-</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'footer.html' %}</span><span class="xml"></span>
-</code></pre><p>We’re just removing the date and author details from the template that shows multiple posts. Our existing single.html file can remain as it is for now, since that still has all the additional information we want to include in an individual post.</p><p>While we’re here, let’s update our flat pages to use the same header and footer. Go into the flatpages directory and change default.html to look like this:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'header.html' %}</span><span class="xml">
-        <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span></span><span class="hljs-template-variable">{{ flatpage.title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
-        </span><span class="hljs-template-variable">{{ flatpage.content }}</span><span class="xml">
-</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">include</span></span> 'footer.html' %}</span><span class="xml"> </span>
-</code></pre><p>Note that the path to the template files is not relative to flatpages/default.html, but relative to the root of the template directory.</p><p>The last thing to do is to amend the view for our blog to use the correct templates. Go into blogengine/views.py and change the getPost (NOT getPosts) function to pass the single.html template to render_to_response, instead of the posts.html template:</p><pre><code class="hljs lang-python">    <span class="hljs-comment"># Display specified post</span>
-    <span class="hljs-keyword">return</span> render_to_response(<span class="hljs-string">'single.html'</span>, { <span class="hljs-string">'posts'</span>:post})
+</code></pre><p>Here we have one FlatPage object only (note that get() should only be used if you will only get one result back), which is represented by a string that includes the URL and title.</p><pre><code class="lang-python">&gt;&gt;&gt; f.content
+u&#39;This is my about page.&#39;
+</code></pre><p>We can easily access any of the fields in the flat page. Now, we need to define some URLs for our flat pages. Exit the Python shell and open urls.py, then insert the following rule underneath the one for blog posts:</p><pre><code class="lang-python">    # Flat pages
+    url(r&#39;&#39;, include(&#39;django.contrib.flatpages.urls&#39;)),
+</code></pre><p>Note that this must be the last rule in your urls.py, because it will match anything. Now, you can try and load /about/, or whatever page you’ve created, but you’ll get an error stating that the template does not exist, so we need to create that. Go into your template directory, and create a directory inside that called flatpages. Then create a new file in there called default.html, and add the following code to it:</p><pre><code class="lang-django">&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;My Django Blog&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;{{ flatpage.title }}&lt;/h1&gt;
+        {{ flatpage.content }}
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>Now, make sure you have the development server running and try to load <a href="http://127.0.0.1:8000/about/">http://127.0.0.1:8000/about/</a>, or whatever your flat page URL is, and you should see your flat page’s title and content.</p><p>One final task for this lesson – we’re going to refactor our templates a little so that as little code as possible is duplicated and if we want to change anything we need to only do so in one place. Go to your template directory and edit posts.html to look like this:</p><pre><code class="lang-django">{% include &#39;header.html&#39; %}
+        {% for post in posts %}
+        &lt;h1&gt;&lt;a href=&quot;{{ post.get_absolute_url }}&quot;&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
+        &lt;h3&gt;{{ post.pub_date }}&lt;/h3&gt;
+        {{ post.text }}
+        &lt;h3&gt;By {{ post.author.first_name }} {{ post.author.last_name }}&lt;/h3&gt;
+        {% endfor %}
+        &lt;br /&gt;
+        {% if page.has_previous %}
+        &lt;a href=&quot;/{{ page.previous_page_number }}/&quot;&gt;Previous Page&lt;/a&gt;
+        {% endif %}
+        {% if page.has_next %}
+        &lt;a href=&quot;/{{ page.next_page_number }}/&quot;&gt;Next Page&lt;/a&gt;
+        {% endif %}
+{% include &#39;footer.html&#39; %}
+</code></pre><p>Here we’re taking the header and footer of the page out and replacing them with code that includes another file there instead. Next, we need to create those files in the same directory. Here’s header.html:</p><pre><code class="lang-django">&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;My Django Blog&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+</code></pre><p>And here’s footer.html:</p><pre><code class="lang-django">    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>None of this is terribly complex – we’re just moving the code into another file so that other templates can use the same files. Now save a copy of posts.html as single.html – we’re going to create a template for a single blog post. Edit the original posts.html to look like this:</p><pre><code class="lang-django">{% include &#39;header.html&#39; %}
+        {% for post in posts %}
+        &lt;h1&gt;&lt;a href=&quot;{{ post.get_absolute_url }}&quot;&gt;{{ post.title }}&lt;/a&gt;&lt;/h1&gt;
+        {{ post.text }}
+        {% endfor %}
+        &lt;br /&gt;
+        {% if page.has_previous %}
+        &lt;a href=&quot;/{{ page.previous_page_number }}/&quot;&gt;Previous Page&lt;/a&gt;
+        {% endif %}
+        {% if page.has_next %}
+        &lt;a href=&quot;/{{ page.next_page_number }}/&quot;&gt;Next Page&lt;/a&gt;
+        {% endif %}
+{% include &#39;footer.html&#39; %}
+</code></pre><p>We’re just removing the date and author details from the template that shows multiple posts. Our existing single.html file can remain as it is for now, since that still has all the additional information we want to include in an individual post.</p><p>While we’re here, let’s update our flat pages to use the same header and footer. Go into the flatpages directory and change default.html to look like this:</p><pre><code class="lang-django">{% include &#39;header.html&#39; %}
+        &lt;h1&gt;{{ flatpage.title }}&lt;/h1&gt;
+        {{ flatpage.content }}
+{% include &#39;footer.html&#39; %} 
+</code></pre><p>Note that the path to the template files is not relative to flatpages/default.html, but relative to the root of the template directory.</p><p>The last thing to do is to amend the view for our blog to use the correct templates. Go into blogengine/views.py and change the getPost (NOT getPosts) function to pass the single.html template to render_to_response, instead of the posts.html template:</p><pre><code class="lang-python">    # Display specified post
+    return render_to_response(&#39;single.html&#39;, { &#39;posts&#39;:post})
 </code></pre><p>You should now notice that the single posts and multiple posts are using different templates.</p><p>Hope you’ve enjoyed this lesson, and I’ll do another one as soon as I can. The code is available on GitHub if you prefer to get it that way.</p><section><ul class="categories"><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/webdevelopment/">webdevelopment</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2012/03/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-3/">View the article with comments</a></section><section><a class="postlink" href="/blog/2012/03/29/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-4/amp/">Yet Another Tutorial for Building a Blog Using Python and Django - Part 4</a> <a class="postlink" href="/blog/2012/03/19/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-2/amp/">Yet Another Tutorial for Building a Blog Using Python and Django – Part 2</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

@@ -183,70 +183,70 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th October 2010 8:49 pm</p><h1>Deleting Unwanted Vim Swap Files Using Perl</h1><p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I’d written between several computers, and it would be a good idea to clear them up. I didn’t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p><p>I came up with the following:</p><pre><code class="hljs lang-perl"><span class="hljs-comment">#!/usr/bin/perl -w</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th October 2010 8:49 pm</p><h1>Deleting Unwanted Vim Swap Files Using Perl</h1><p>Yesterday I realised that I had somehow managed to scatter Vim swap files all across the Dropbox folder I use to share Perl and Python scripts I’d written between several computers, and it would be a good idea to clear them up. I didn’t like the idea of using grep to search for them and manually deleting them, so I decided this was the ideal opportunity to write a Perl script to do it for me!</p><p>I came up with the following:</p><pre><code class="lang-perl">#!/usr/bin/perl -w
 
-<span class="hljs-keyword">use</span> strict;
-<span class="hljs-keyword">use</span> Cwd;
+use strict;
+use Cwd;
 
-<span class="hljs-function"><span class="hljs-keyword">sub</span> <span class="hljs-title">searchDir</span>
-</span>{
-    <span class="hljs-comment"># Subroutine to scan a directory looking for Vim swap files</span>
-    <span class="hljs-comment"># Get directory to read and current directory</span>
-    <span class="hljs-keyword">my</span> $readdir = <span class="hljs-keyword">shift</span>;
-    <span class="hljs-keyword">my</span> $startdir = cwd();
+sub searchDir
+{
+    # Subroutine to scan a directory looking for Vim swap files
+    # Get directory to read and current directory
+    my $readdir = shift;
+    my $startdir = cwd();
 
-    <span class="hljs-comment"># Change directory to the target one</span>
-    <span class="hljs-keyword">chdir</span>($readdir) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open $readdir! $!\n"</span>;
-    <span class="hljs-keyword">print</span> <span class="hljs-string">"Scanning contents of directory $startdir\n"</span>;
+    # Change directory to the target one
+    chdir($readdir) or die &quot;Unable to open $readdir! $!\n&quot;;
+    print &quot;Scanning contents of directory $startdir\n&quot;;
 
-    <span class="hljs-comment"># Open the directory and grab the names of all the files and folders in it</span>
-    <span class="hljs-keyword">opendir</span>(DIR, <span class="hljs-string">"."</span>) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to open current directory! $!\n"</span>;
-    <span class="hljs-keyword">my</span> @entries = <span class="hljs-keyword">readdir</span>(DIR) <span class="hljs-keyword">or</span> <span class="hljs-keyword">die</span> <span class="hljs-string">"Unable to read directory! $!\n"</span>;
+    # Open the directory and grab the names of all the files and folders in it
+    opendir(DIR, &quot;.&quot;) or die &quot;Unable to open current directory! $!\n&quot;;
+    my @entries = readdir(DIR) or die &quot;Unable to read directory! $!\n&quot;;
     closedir(DIR);
 
-    <span class="hljs-comment"># Loop through the files and folders in the directory</span>
-    <span class="hljs-keyword">foreach</span> <span class="hljs-keyword">my</span> $entry (@entries)
+    # Loop through the files and folders in the directory
+    foreach my $entry (@entries)
     {
-        <span class="hljs-comment"># Skip this one and the one above it in the filesystem hierarchy</span>
-        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>($entry eq <span class="hljs-string">"."</span>);
-        <span class="hljs-keyword">next</span> <span class="hljs-keyword">if</span>($entry eq <span class="hljs-string">".."</span>);
+        # Skip this one and the one above it in the filesystem hierarchy
+        next if($entry eq &quot;.&quot;);
+        next if($entry eq &quot;..&quot;);
 
-        <span class="hljs-comment"># If a file is a directory, call the searchDir subroutine recursively in order to scan it</span>
-        <span class="hljs-keyword">if</span>(-d $entry)
+        # If a file is a directory, call the searchDir subroutine recursively in order to scan it
+        if(-d $entry)
         {
             searchDir($entry);
-            <span class="hljs-keyword">next</span>;
+            next;
         }
 
-        <span class="hljs-comment"># Use a regular expression to check to see if the current file starts with a period, and ends with .swp - if it does, it's a Vim swap file</span>
-        <span class="hljs-keyword">if</span>($entry =~ <span class="hljs-regexp">m/^\..*\.swp$/</span>)
+        # Use a regular expression to check to see if the current file starts with a period, and ends with .swp - if it does, it&#39;s a Vim swap file
+        if($entry =~ m/^\..*\.swp$/)
         {
-            <span class="hljs-comment"># Inform the user that a Vim swap file has been found and print out the path to it</span>
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"Found a Vim swap file!\n"</span>;
-            <span class="hljs-keyword">my</span> $swppath = cwd();
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"It's the file $entry in $swppath.\n"</span>;
-            <span class="hljs-keyword">my</span> $fullpath = $swppath . <span class="hljs-string">"/"</span> . $entry;
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"The full path is $fullpath.\n"</span>;
+            # Inform the user that a Vim swap file has been found and print out the path to it
+            print &quot;Found a Vim swap file!\n&quot;;
+            my $swppath = cwd();
+            print &quot;It&#39;s the file $entry in $swppath.\n&quot;;
+            my $fullpath = $swppath . &quot;/&quot; . $entry;
+            print &quot;The full path is $fullpath.\n&quot;;
 
-            <span class="hljs-comment"># Prompt the user to delete the file</span>
-            <span class="hljs-keyword">print</span> <span class="hljs-string">"Do you wish to delete this file? (Y/N)\t"</span>;
-            <span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> $reply = );
-            <span class="hljs-keyword">if</span>($reply =~ <span class="hljs-regexp">m/y/i</span>)
+            # Prompt the user to delete the file
+            print &quot;Do you wish to delete this file? (Y/N)\t&quot;;
+            chomp(my $reply = );
+            if($reply =~ m/y/i)
             {
-                <span class="hljs-keyword">print</span> <span class="hljs-string">"Deleting $fullpath...\n"</span>;
-                <span class="hljs-keyword">unlink</span>($fullpath);
+                print &quot;Deleting $fullpath...\n&quot;;
+                unlink($fullpath);
             }
         }
     }
 
-    <span class="hljs-keyword">chdir</span>($startdir);
+    chdir($startdir);
 }
 
-<span class="hljs-comment"># Get directory to begin the search</span>
-<span class="hljs-keyword">print</span> <span class="hljs-string">"Enter directory to start search: "</span>;
-<span class="hljs-keyword">chomp</span>(<span class="hljs-keyword">my</span> $beginSearch = );
+# Get directory to begin the search
+print &quot;Enter directory to start search: &quot;;
+chomp(my $beginSearch = );
 
-<span class="hljs-comment"># call searchDir to start the search</span>
+# call searchDir to start the search
 searchDir($beginSearch);
 </code></pre><p>Thankfully, I’ve now discovered the <a href="https://wordpress.org/extend/plugins/preserve-code-formatting/">Preserve Code Formatting plugin</a> for WordPress, which seems to do a good job at making the code look presentable!</p><p>This isn’t perfect - it uses recursion to examine subdirectories, and when I ran it on my /home folder it somehow wound up in /sys on my Ubuntu machine and I ended up getting a deep recursion warning (a little research suggests this happens when it goes over 100 directories in). However, it seems to work fine for scanning individual folders in my /home directory, and that’s all I really wanted anyway.</p><p>I love how Perl makes writing this kind of simple script so easy. It’s a great language for that kind of systems administration task.</p><section><ul class="categories"><li><a href="/blog/categories/perl/">perl</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2010/10/29/deleting-unwanted-vim-swap-files-using-perl/">View the article with comments</a></section><section><a class="postlink" href="/blog/2010/11/13/a-slight-change/amp/">A Slight Change...</a> <a class="postlink" href="/blog/2010/10/27/a-couple-of-things-i-love-about-perl/amp/">A Couple of Things I Love About Perl</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {

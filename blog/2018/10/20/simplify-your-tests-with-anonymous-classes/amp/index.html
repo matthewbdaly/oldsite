@@ -183,81 +183,81 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th October 2018 2:48 pm</p><h1>Simplify Your Tests With Anonymous Classes</h1><p>Anonymous classes were added in PHP7, but so far I haven’t made all that much use of them. However, recently I’ve been working on building a simple dependency injection container for learning purposes. This uses the PHP Reflection API to determine how to resolve dependencies. For instance, if it’s asked for a class for which one of the dependencies required by the constructor is an instance of the <code>DateTime</code> class, it should create an instance, and then pass it into the constructor automatically when instantiating the class. Then it should return the newly created class.</p><p>Mocking isn’t really a suitable approach for this use case because the container needs to return a concrete class instance to do its job properly. You could just create a series of fixture classes purely for testing purposes, but that would mean either defining more than one class in a file (violating PSR-2), or defining a load of fixture classes in separate files, meaning you’d have to write a lot of boilerplate, and you’d have to move between several different files to understand what’s going on in the test.</p><p>Anonymous classes allow you a means to write simple classes for tests inline, as in this example for retrieving a very basic class. The tests use PHPSpec:</p><pre><code class="hljs lang-php7"><span class="php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th October 2018 2:48 pm</p><h1>Simplify Your Tests With Anonymous Classes</h1><p>Anonymous classes were added in PHP7, but so far I haven’t made all that much use of them. However, recently I’ve been working on building a simple dependency injection container for learning purposes. This uses the PHP Reflection API to determine how to resolve dependencies. For instance, if it’s asked for a class for which one of the dependencies required by the constructor is an instance of the <code>DateTime</code> class, it should create an instance, and then pass it into the constructor automatically when instantiating the class. Then it should return the newly created class.</p><p>Mocking isn’t really a suitable approach for this use case because the container needs to return a concrete class instance to do its job properly. You could just create a series of fixture classes purely for testing purposes, but that would mean either defining more than one class in a file (violating PSR-2), or defining a load of fixture classes in separate files, meaning you’d have to write a lot of boilerplate, and you’d have to move between several different files to understand what’s going on in the test.</p><p>Anonymous classes allow you a means to write simple classes for tests inline, as in this example for retrieving a very basic class. The tests use PHPSpec:</p><pre><code class="lang-php7">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">spec</span>\<span class="hljs-title">Vendor</span>\<span class="hljs-title">Package</span>;
+namespace spec\Vendor\Package;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Vendor</span>\<span class="hljs-title">Package</span>\<span class="hljs-title">MyClass</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">PhpSpec</span>\<span class="hljs-title">ObjectBehavior</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Prophecy</span>\<span class="hljs-title">Argument</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">DateTime</span>;
+use Vendor\Package\MyClass;
+use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
+use DateTime;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
-</span>{
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_registered_dependencies</span><span class="hljs-params">()</span>
-    </span>{
-        $toResolve = <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span> </span>{
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_registered_dependencies()
+    {
+        $toResolve = new class {
         };
-        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
-        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf($toResolve);
+        $this-&gt;set(&#39;Foo\Bar&#39;, $toResolve);
+        $this-&gt;get(&#39;Foo\Bar&#39;)-&gt;shouldReturnAnInstanceOf($toResolve);
     }
-}</span>
-</code></pre><p>You can also define your own methods inline. Here we implement the <code>invoke()</code> magic method so that the class is a callable:</p><pre><code class="hljs lang-php7"><span class="php"><span class="hljs-meta">&lt;?php</span>
+}
+</code></pre><p>You can also define your own methods inline. Here we implement the <code>invoke()</code> magic method so that the class is a callable:</p><pre><code class="lang-php7">&lt;?php
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
-</span>{
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_registered_invokable</span><span class="hljs-params">()</span>
-    </span>{
-        $toResolve = <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span> </span>{
-            <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">()</span> </span>{
-                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DateTime;
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_registered_invokable()
+    {
+        $toResolve = new class {
+            public function __invoke() {
+                return new DateTime;
             }
         };
-        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
-        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf(<span class="hljs-string">'DateTime'</span>);
+        $this-&gt;set(&#39;Foo\Bar&#39;, $toResolve);
+        $this-&gt;get(&#39;Foo\Bar&#39;)-&gt;shouldReturnAnInstanceOf(&#39;DateTime&#39;);
     }
-}</span>
-</code></pre><p>You can also define a constructor. Here, we’re getting the class name of a newly created anonymous class that accepts an instance of <code>DateTime</code> as an argument to the constructor. Then, we can resolve a new instance out of the container:</p><pre><code class="hljs lang-php7"><span class="php"><span class="hljs-meta">&lt;?php</span>
+}
+</code></pre><p>You can also define a constructor. Here, we’re getting the class name of a newly created anonymous class that accepts an instance of <code>DateTime</code> as an argument to the constructor. Then, we can resolve a new instance out of the container:</p><pre><code class="lang-php7">&lt;?php
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
-</span>{
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_dependencies</span><span class="hljs-params">()</span>
-    </span>{
-        $toResolve = get_class(<span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span>(<span class="hljs-title">new</span> <span class="hljs-title">DateTime</span>) </span>{
-            <span class="hljs-keyword">public</span> $datetime;
-            <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(DateTime $datetime)</span>
-            </span>{
-                <span class="hljs-keyword">$this</span>-&gt;datetime = $datetime;
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_dependencies()
+    {
+        $toResolve = get_class(new class(new DateTime) {
+            public $datetime;
+            public function __construct(DateTime $datetime)
+            {
+                $this-&gt;datetime = $datetime;
             }
         });
-        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
-        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf($toResolve);
+        $this-&gt;set(&#39;Foo\Bar&#39;, $toResolve);
+        $this-&gt;get(&#39;Foo\Bar&#39;)-&gt;shouldReturnAnInstanceOf($toResolve);
     }
-}</span>
-</code></pre><p>For classes that will extend an existing class or implement an interface, you can define those inline too. Or you can include a trait:</p><pre><code class="hljs lang-php7"><span class="php"><span class="hljs-meta">&lt;?php</span>
+}
+</code></pre><p>For classes that will extend an existing class or implement an interface, you can define those inline too. Or you can include a trait:</p><pre><code class="lang-php7">&lt;?php
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClassSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
-</span>{
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_resolve_dependencies</span><span class="hljs-params">()</span>
-    </span>{
-        $toResolve = get_class(<span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span>(<span class="hljs-title">new</span> <span class="hljs-title">DateTime</span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Foo</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Bar</span> </span>{
-            <span class="hljs-keyword">public</span> $datetime;
-            <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(DateTime $datetime)</span>
-            </span>{
-                <span class="hljs-keyword">$this</span>-&gt;datetime = $datetime;
+class MyClassSpec extends ObjectBehavior
+{
+    function it_can_resolve_dependencies()
+    {
+        $toResolve = get_class(new class(new DateTime) extends Foo implements Bar {
+            public $datetime;
+            public function __construct(DateTime $datetime)
+            {
+                $this-&gt;datetime = $datetime;
             }
 
-            <span class="hljs-keyword">use</span> <span class="hljs-title">MyTrait</span>;
+            use MyTrait;
         });
-        <span class="hljs-keyword">$this</span>-&gt;set(<span class="hljs-string">'Foo\Bar'</span>, $toResolve);
-        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'Foo\Bar'</span>)-&gt;shouldReturnAnInstanceOf($toResolve);
+        $this-&gt;set(&#39;Foo\Bar&#39;, $toResolve);
+        $this-&gt;get(&#39;Foo\Bar&#39;)-&gt;shouldReturnAnInstanceOf($toResolve);
     }
-}</span>
-</code></pre><p>In cases where the functionality is contained in a trait or abstract class, and you might need to add little or no additional functionality, this is a lot less verbose than creating a class the conventional way.</p><p>None of this is stuff you can’t do without anonymous classes, but by defining these sort of disposable fixture classes inline in your tests, you’re writing the minimum amount of code necessary to implement your test, and it’s logical to define it inline since it’s only ever used in the tests. One thing to bear in mind is that anonymous classes are created and instantiated at the same time, so you can’t easily create a class and then instantiate an instance of it separately. However, you can instantiate one, then use the <code>get_class()</code> function to get its class name and use that to resolve it, which worked well for my use case.</p><p>Another use case for anonymous classes is testing traits or abstract classes. I generally use Mockery as my mocking solution with PHPUnit tests, but I’ve sometimes missed the <code>getMockForTrait()</code> method from PHPUnit. However, another option is to instantiate an anonymous class that includes that trait for testing purposes:</p><pre><code class="hljs lang-php7"><span class="php"><span class="hljs-meta">&lt;?php</span>
+}
+</code></pre><p>In cases where the functionality is contained in a trait or abstract class, and you might need to add little or no additional functionality, this is a lot less verbose than creating a class the conventional way.</p><p>None of this is stuff you can’t do without anonymous classes, but by defining these sort of disposable fixture classes inline in your tests, you’re writing the minimum amount of code necessary to implement your test, and it’s logical to define it inline since it’s only ever used in the tests. One thing to bear in mind is that anonymous classes are created and instantiated at the same time, so you can’t easily create a class and then instantiate an instance of it separately. However, you can instantiate one, then use the <code>get_class()</code> function to get its class name and use that to resolve it, which worked well for my use case.</p><p>Another use case for anonymous classes is testing traits or abstract classes. I generally use Mockery as my mocking solution with PHPUnit tests, but I’ve sometimes missed the <code>getMockForTrait()</code> method from PHPUnit. However, another option is to instantiate an anonymous class that includes that trait for testing purposes:</p><pre><code class="lang-php7">&lt;?php
 
-$item = <span class="hljs-keyword">new</span> <span class="hljs-class"><span class="hljs-keyword">class</span>() </span>{
-    <span class="hljs-keyword">use</span> <span class="hljs-title">MyTrait</span>;
-};</span>
+$item = new class() {
+    use MyTrait;
+};
 </code></pre><p>This way, your test class is as minimal as possible, and you can test the trait/abstract class in a fairly isolated fashion.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/12/06/decorating-service-classes/amp/">Decorating Service Classes</a> <a class="postlink" href="/blog/2018/10/16/adding-react-to-a-legacy-project/amp/">Adding React to a Legacy Project</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

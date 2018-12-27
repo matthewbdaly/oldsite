@@ -4,7 +4,7 @@
         <title>mock | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/mock/</link>
         <description>mock | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 07 Dec 2018 12:13:51 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 27 Dec 2018 16:01:38 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2018</copyright>
@@ -18,18 +18,114 @@
 <h2 id="mocking-the-client-library">Mocking the client library</h2>
 <p>Nowadays many third-party services realise that providing developers with client libraries in a variety of languages is a good idea, so it’s quite common to find a library for interfacing with a third-party service. Under these circumstances, the library itself is usually already thoroughly tested, so there’s no point in you writing additional tests for that functionality. Instead, you can just mock the client library so that the request is never sent, and if you need a response, then you can specify one that will remain constant.</p>
 <p>I recently had to integrate Stripe with a mobile app backend, and I used their client library. I needed to ensure that I got the right result back. In this case I only needed to use the <code>Token</code> object’s <code>create()</code> method. I therefore created a new <code>MockToken</code> class that inherited from <code>Token</code>, and overrode its <code>create()</code> method so that it only accepted one card number and returned a hard-coded response for it:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">from</span> stripe.resource <span class="hljs-keyword">import</span> Token, convert_to_stripe_object</td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> stripe.error <span class="hljs-keyword">import</span> CardError</td><tr><td class="linenos" data-pseudo-content="3"></td><td></td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MockToken</span><span class="hljs-params">(Token)</span>:</span></td><tr><td class="linenos" data-pseudo-content="6"></td><td></td><tr><td class="linenos" data-pseudo-content="7"></td><td><span class="hljs-meta">    @classmethod</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">create</span><span class="hljs-params">(cls, api_key=None, idempotency_key=None,</td><tr><td class="linenos" data-pseudo-content="9"></td><td>               stripe_account=None, **params)</span>:</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td>        <span class="hljs-keyword">if</span> params[<span class="hljs-string">'card'</span>][<span class="hljs-string">'number'</span>] != <span class="hljs-string">'4242424242424242'</span>:</td><tr><td class="linenos" data-pseudo-content="11"></td><td>            <span class="hljs-keyword">raise</span> CardError(<span class="hljs-string">'Invalid card number'</span>, <span class="hljs-keyword">None</span>, <span class="hljs-number">402</span>)</td><tr><td class="linenos" data-pseudo-content="12"></td><td></td><tr><td class="linenos" data-pseudo-content="13"></td><td>        response = {</td><tr><td class="linenos" data-pseudo-content="14"></td><td>            <span class="hljs-string">"card"</span>: {</td><tr><td class="linenos" data-pseudo-content="15"></td><td>              <span class="hljs-string">"address_city"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="16"></td><td>              <span class="hljs-string">"address_country"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="17"></td><td>              <span class="hljs-string">"address_line1"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="18"></td><td>              <span class="hljs-string">"address_line1_check"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="19"></td><td>              <span class="hljs-string">"address_line2"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="20"></td><td>              <span class="hljs-string">"address_state"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="21"></td><td>              <span class="hljs-string">"address_zip"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="22"></td><td>              <span class="hljs-string">"address_zip_check"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="23"></td><td>              <span class="hljs-string">"brand"</span>: <span class="hljs-string">"Visa"</span>,</td><tr><td class="linenos" data-pseudo-content="24"></td><td>              <span class="hljs-string">"country"</span>: <span class="hljs-string">"US"</span>,</td><tr><td class="linenos" data-pseudo-content="25"></td><td>              <span class="hljs-string">"cvc_check"</span>: <span class="hljs-string">"unchecked"</span>,</td><tr><td class="linenos" data-pseudo-content="26"></td><td>              <span class="hljs-string">"dynamic_last4"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="27"></td><td>              <span class="hljs-string">"exp_month"</span>: <span class="hljs-number">12</span>,</td><tr><td class="linenos" data-pseudo-content="28"></td><td>              <span class="hljs-string">"exp_year"</span>: <span class="hljs-number">2017</span>,</td><tr><td class="linenos" data-pseudo-content="29"></td><td>              <span class="hljs-string">"fingerprint"</span>: <span class="hljs-string">"49gS1c4YhLaGEQbj"</span>,</td><tr><td class="linenos" data-pseudo-content="30"></td><td>              <span class="hljs-string">"funding"</span>: <span class="hljs-string">"credit"</span>,</td><tr><td class="linenos" data-pseudo-content="31"></td><td>              <span class="hljs-string">"id"</span>: <span class="hljs-string">"card_17XXdZGzvyST06Z022EiG1zt"</span>,</td><tr><td class="linenos" data-pseudo-content="32"></td><td>              <span class="hljs-string">"last4"</span>: <span class="hljs-string">"4242"</span>,</td><tr><td class="linenos" data-pseudo-content="33"></td><td>              <span class="hljs-string">"metadata"</span>: {},</td><tr><td class="linenos" data-pseudo-content="34"></td><td>              <span class="hljs-string">"name"</span>: <span class="hljs-keyword">None</span>,</td><tr><td class="linenos" data-pseudo-content="35"></td><td>              <span class="hljs-string">"object"</span>: <span class="hljs-string">"card"</span>,</td><tr><td class="linenos" data-pseudo-content="36"></td><td>              <span class="hljs-string">"tokenization_method"</span>: <span class="hljs-keyword">None</span></td><tr><td class="linenos" data-pseudo-content="37"></td><td>          },</td><tr><td class="linenos" data-pseudo-content="38"></td><td>            <span class="hljs-string">"client_ip"</span>: <span class="hljs-string">"192.168.1.1"</span>,</td><tr><td class="linenos" data-pseudo-content="39"></td><td>            <span class="hljs-string">"created"</span>: <span class="hljs-number">1453817861</span>,</td><tr><td class="linenos" data-pseudo-content="40"></td><td>            <span class="hljs-string">"id"</span>: <span class="hljs-string">"tok_42XXdZGzvyST06Z0LA6h5gJp"</span>,</td><tr><td class="linenos" data-pseudo-content="41"></td><td>            <span class="hljs-string">"livemode"</span>: <span class="hljs-keyword">False</span>,</td><tr><td class="linenos" data-pseudo-content="42"></td><td>            <span class="hljs-string">"object"</span>: <span class="hljs-string">"token"</span>,</td><tr><td class="linenos" data-pseudo-content="43"></td><td>            <span class="hljs-string">"type"</span>: <span class="hljs-string">"card"</span>,</td><tr><td class="linenos" data-pseudo-content="44"></td><td>            <span class="hljs-string">"used"</span>: <span class="hljs-keyword">False</span></td><tr><td class="linenos" data-pseudo-content="45"></td><td>        }</td><tr><td class="linenos" data-pseudo-content="46"></td><td>        <span class="hljs-keyword">return</span> convert_to_stripe_object(response, api_key, stripe_account)</td></table></code></pre>
+<pre><code class="lang-python">from stripe.resource import Token, convert_to_stripe_object
+from stripe.error import CardError
+
+
+class MockToken(Token):
+
+    @classmethod
+    def create(cls, api_key=None, idempotency_key=None,
+               stripe_account=None, **params):
+        if params[&#39;card&#39;][&#39;number&#39;] != &#39;4242424242424242&#39;:
+            raise CardError(&#39;Invalid card number&#39;, None, 402)
+
+        response = {
+            &quot;card&quot;: {
+              &quot;address_city&quot;: None,
+              &quot;address_country&quot;: None,
+              &quot;address_line1&quot;: None,
+              &quot;address_line1_check&quot;: None,
+              &quot;address_line2&quot;: None,
+              &quot;address_state&quot;: None,
+              &quot;address_zip&quot;: None,
+              &quot;address_zip_check&quot;: None,
+              &quot;brand&quot;: &quot;Visa&quot;,
+              &quot;country&quot;: &quot;US&quot;,
+              &quot;cvc_check&quot;: &quot;unchecked&quot;,
+              &quot;dynamic_last4&quot;: None,
+              &quot;exp_month&quot;: 12,
+              &quot;exp_year&quot;: 2017,
+              &quot;fingerprint&quot;: &quot;49gS1c4YhLaGEQbj&quot;,
+              &quot;funding&quot;: &quot;credit&quot;,
+              &quot;id&quot;: &quot;card_17XXdZGzvyST06Z022EiG1zt&quot;,
+              &quot;last4&quot;: &quot;4242&quot;,
+              &quot;metadata&quot;: {},
+              &quot;name&quot;: None,
+              &quot;object&quot;: &quot;card&quot;,
+              &quot;tokenization_method&quot;: None
+          },
+            &quot;client_ip&quot;: &quot;192.168.1.1&quot;,
+            &quot;created&quot;: 1453817861,
+            &quot;id&quot;: &quot;tok_42XXdZGzvyST06Z0LA6h5gJp&quot;,
+            &quot;livemode&quot;: False,
+            &quot;object&quot;: &quot;token&quot;,
+            &quot;type&quot;: &quot;card&quot;,
+            &quot;used&quot;: False
+        }
+        return convert_to_stripe_object(response, api_key, stripe_account)
+</code></pre>
 <p>Much of this was lifted straight from the source code for the library. I then wrote a test for the payment endpoint and patched the <code>Token</code> class:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PaymentTest</span><span class="hljs-params">(TestCase)</span>:</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta">    @mock.patch('stripe.Token', MockToken)</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_payments</span><span class="hljs-params">(self)</span>:</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>        data = {</td><tr><td class="linenos" data-pseudo-content="5"></td><td>            <span class="hljs-string">"number"</span>: <span class="hljs-string">'1111111111111111'</span>,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>            <span class="hljs-string">"exp_month"</span>: <span class="hljs-number">12</span>,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>            <span class="hljs-string">"exp_year"</span>: <span class="hljs-number">2017</span>,</td><tr><td class="linenos" data-pseudo-content="8"></td><td>            <span class="hljs-string">"cvc"</span>: <span class="hljs-string">'123'</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td>        }</td><tr><td class="linenos" data-pseudo-content="10"></td><td>        response = self.client.post(reverse(<span class="hljs-string">'payments'</span>), data=data, format=<span class="hljs-string">'json'</span>)</td><tr><td class="linenos" data-pseudo-content="11"></td><td>        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)</td></table></code></pre>
+<pre><code class="lang-python">class PaymentTest(TestCase):
+    @mock.patch(&#39;stripe.Token&#39;, MockToken)
+    def test_payments(self):
+        data = {
+            &quot;number&quot;: &#39;1111111111111111&#39;,
+            &quot;exp_month&quot;: 12,
+            &quot;exp_year&quot;: 2017,
+            &quot;cvc&quot;: &#39;123&#39;
+        }
+        response = self.client.post(reverse(&#39;payments&#39;), data=data, format=&#39;json&#39;)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+</code></pre>
 <p>This replaced <code>stripe.Token</code> with <code>MockToken</code> so that in this test, the response from the client library was always going to be the expected one.</p>
 <p>If the response doesn’t matter and all you need to do is be sure that the right method would have been called, this is easier. You can just mock the method in question using <code>MagicMock</code> and assert that it has been called afterwards, as in this example:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ReminderTest</span><span class="hljs-params">(TestCase)</span>:</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_send_reminder</span><span class="hljs-params">(self)</span>:</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>        <span class="hljs-comment"># Mock PushService.create_message()</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>        PushService.create_message = mock.MagicMock(name=<span class="hljs-string">"create_message"</span>)</td><tr><td class="linenos" data-pseudo-content="5"></td><td></td><tr><td class="linenos" data-pseudo-content="6"></td><td>        <span class="hljs-comment"># Call reminder task</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>        send_reminder()</td><tr><td class="linenos" data-pseudo-content="8"></td><td></td><tr><td class="linenos" data-pseudo-content="9"></td><td>        <span class="hljs-comment"># Check user would have received a push notification</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td>        PushService.create_message.assert_called_with([{<span class="hljs-string">'text'</span>: <span class="hljs-string">'My push'</span>, <span class="hljs-string">'conditions'</span>: [<span class="hljs-string">'UserID'</span>, <span class="hljs-string">'EQ'</span>, <span class="hljs-number">1</span>]}])</td></table></code></pre>
+<pre><code class="lang-python">class ReminderTest(TestCase):
+    def test_send_reminder(self):
+        # Mock PushService.create_message()
+        PushService.create_message = mock.MagicMock(name=&quot;create_message&quot;)
+
+        # Call reminder task
+        send_reminder()
+
+        # Check user would have received a push notification
+        PushService.create_message.assert_called_with([{&#39;text&#39;: &#39;My push&#39;, &#39;conditions&#39;: [&#39;UserID&#39;, &#39;EQ&#39;, 1]}])
+</code></pre>
 <h2 id="mocking-lower-level-requests">Mocking lower-level requests</h2>
 <p>Sometimes, no client library is available, or it’s not worth using one as you only have to make one or two requests. Under these circumstances, there are ways to mock the actual request to the external API. If you’re using the <code>requests</code> module, then there’s a <code>responses</code> module that’s ideal for mocking the API request.</p>
 <p>Suppose we have the following code:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-keyword">import</span> json, requests</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">send_request_to_api</span><span class="hljs-params">(data)</span>:</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>    <span class="hljs-comment"># Put together the request</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>    params = {</td><tr><td class="linenos" data-pseudo-content="6"></td><td>        <span class="hljs-string">'auth'</span>: settings.AUTH_KEY,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>        <span class="hljs-string">'data'</span>: data</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    }</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    response = requests.post(settings.API_URL, data={<span class="hljs-string">'params'</span>: json.dumps(params)})</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    <span class="hljs-keyword">return</span> response</td></table></code></pre>
+<pre><code class="lang-python">import json, requests
+
+def send_request_to_api(data):
+    # Put together the request
+    params = {
+        &#39;auth&#39;: settings.AUTH_KEY,
+        &#39;data&#39;: data
+    }
+    response = requests.post(settings.API_URL, data={&#39;params&#39;: json.dumps(params)})
+    return response
+</code></pre>
 <p>Using <code>responses</code> we can mock the response from the server in our test:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">APITest</span><span class="hljs-params">(TestCase)</span>:</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-meta">    @responses.activate</span></td><tr><td class="linenos" data-pseudo-content="3"></td><td>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">test_send_request</span><span class="hljs-params">(self)</span>:</span></td><tr><td class="linenos" data-pseudo-content="4"></td><td>        <span class="hljs-comment"># Mock the API</span></td><tr><td class="linenos" data-pseudo-content="5"></td><td>        responses.add(responses.POST,</td><tr><td class="linenos" data-pseudo-content="6"></td><td>            settings.API_URL,</td><tr><td class="linenos" data-pseudo-content="7"></td><td>            status=<span class="hljs-number">200</span>,</td><tr><td class="linenos" data-pseudo-content="8"></td><td>            content_type=<span class="hljs-string">"application/json"</span>,</td><tr><td class="linenos" data-pseudo-content="9"></td><td>            body=<span class="hljs-string">'{"item_id": "12345678"}'</span>)</td><tr><td class="linenos" data-pseudo-content="10"></td><td></td><tr><td class="linenos" data-pseudo-content="11"></td><td>        <span class="hljs-comment"># Call function</span></td><tr><td class="linenos" data-pseudo-content="12"></td><td>        data = {</td><tr><td class="linenos" data-pseudo-content="13"></td><td>            <span class="hljs-string">"surname"</span>: <span class="hljs-string">"Smith"</span>,</td><tr><td class="linenos" data-pseudo-content="14"></td><td>            <span class="hljs-string">"location"</span>: <span class="hljs-string">"London"</span></td><tr><td class="linenos" data-pseudo-content="15"></td><td>        }</td><tr><td class="linenos" data-pseudo-content="16"></td><td>        send_request_to_api(data)</td><tr><td class="linenos" data-pseudo-content="17"></td><td></td><tr><td class="linenos" data-pseudo-content="18"></td><td>        <span class="hljs-comment"># Check request went to correct URL</span></td><tr><td class="linenos" data-pseudo-content="19"></td><td>        <span class="hljs-keyword">assert</span> responses.calls[<span class="hljs-number">0</span>].request.url == settings.API_URL</td></table></code></pre>
+<pre><code class="lang-python">class APITest(TestCase):
+    @responses.activate
+    def test_send_request(self):
+        # Mock the API
+        responses.add(responses.POST,
+            settings.API_URL,
+            status=200,
+            content_type=&quot;application/json&quot;,
+            body=&#39;{&quot;item_id&quot;: &quot;12345678&quot;}&#39;)
+
+        # Call function
+        data = {
+            &quot;surname&quot;: &quot;Smith&quot;,
+            &quot;location&quot;: &quot;London&quot;
+        }
+        send_request_to_api(data)
+
+        # Check request went to correct URL
+        assert responses.calls[0].request.url == settings.API_URL
+</code></pre>
 <p>Note the use of the <a href="mailto:`@responses.activate">`@responses.activate</a><code>decorator. We use</code>responses.add()` to set up each URL we want to be able to mock, and pass through details of the response we want to return. We then make the request, and check that it was made as expected.</p>
 <p>You can find more details of the <code>responses</code> module <a href="https://github.com/getsentry/responses">here</a>.</p>
 <h2 id="summary">Summary</h2>

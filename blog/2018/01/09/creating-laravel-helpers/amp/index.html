@@ -183,46 +183,46 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th January 2018 5:26 pm</p><h1>Creating Laravel Helpers</h1><p>Although helpers are an important part of Laravel, the documentation doesn’t really touch on creating them. Fortunately, doing so it fairly easy.</p><p>Here I’m building a helper for formatting dates for the HTML5 <code>datetime-local</code> form input. First we define the helper function in <code>app\Helpers.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th January 2018 5:26 pm</p><h1>Creating Laravel Helpers</h1><p>Although helpers are an important part of Laravel, the documentation doesn’t really touch on creating them. Fortunately, doing so it fairly easy.</p><p>Here I’m building a helper for formatting dates for the HTML5 <code>datetime-local</code> form input. First we define the helper function in <code>app\Helpers.php</code>:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Carbon</span>\<span class="hljs-title">Carbon</span>;
+use Carbon\Carbon;
 
-<span class="hljs-keyword">if</span> (!function_exists(<span class="hljs-string">'format_date'</span>)) {
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">format_date</span><span class="hljs-params">(string $date)</span>
-    </span>{
-        <span class="hljs-keyword">return</span> Carbon::parse($date, config(<span class="hljs-string">'app.timezone'</span>))-&gt;format(<span class="hljs-string">'Y-m-d\TH:i:s'</span>);
+if (!function_exists(&#39;format_date&#39;)) {
+    function format_date(string $date)
+    {
+        return Carbon::parse($date, config(&#39;app.timezone&#39;))-&gt;format(&#39;Y-m-d\TH:i:s&#39;);
     }
 }
-</code></pre><p>Then we create a service provider to load them:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>Then we create a service provider to load them:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
+namespace App\Providers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
+use Illuminate\Support\ServiceProvider;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HelperServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
-</span>{
-    <span class="hljs-comment">/**
+class HelperServiceProvider extends ServiceProvider
+{
+    /**
      * Bootstrap the application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
+     * @return void
+     */
+    public function boot()
+    {
+        //
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Register the application services.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">//</span>
-        <span class="hljs-keyword">require_once</span> app_path() . <span class="hljs-string">'/Helpers.php'</span>;
+     * @return void
+     */
+    public function register()
+    {
+        //
+        require_once app_path() . &#39;/Helpers.php&#39;;
     }
 }
-</code></pre><p>Finally,we register the service provider in <code>config/app.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-string">'providers'</span> =&gt; [
+</code></pre><p>Finally,we register the service provider in <code>config/app.php</code>:</p><pre><code class="lang-php">    &#39;providers&#39; =&gt; [
 
        ...
         App\Providers\HelperServiceProvider::class,

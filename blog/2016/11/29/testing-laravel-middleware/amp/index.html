@@ -183,144 +183,144 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th November 2016 11:00 pm</p><h1>Testing Laravel Middleware</h1><p>It’s widely accepted that high-level integration tests alone do not make for a good test suite. Ideally each individual component of your application should have unit tests, which test that component in isolation. These unit tests are usually much quicker to run, making it easier to practice test-driven development. However, it can sometimes be hard to grasp how to test that one component on its own.</p><p>The other day I had an issue with several middleware classes for a Laravel application and I wanted to verify that they were working as expected. Sounds like a job for dedicated unit tests, but I hadn’t tested custom middleware in isolation before, and figuring out how to do so took a while.</p><p>Laravel middleware accepts an instance of <code>Illuminate\Http\Request</code>, itself based on the Symfony request object, as well as a closure for the action to take next. Depending on what the middleware does, it may return a redirect or simply amend the existing request or response. So in theory you can instantiate a request object, pass it to the middleware, and check the response. For middleware that does something simple, such as redirecting users based on certain conditions, this is fairly straightforward.</p><p>In this example we have a fairly useless piece of middleware that checks to see what the route is for a request and redirects it if it matches a certain pattern:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">29th November 2016 11:00 pm</p><h1>Testing Laravel Middleware</h1><p>It’s widely accepted that high-level integration tests alone do not make for a good test suite. Ideally each individual component of your application should have unit tests, which test that component in isolation. These unit tests are usually much quicker to run, making it easier to practice test-driven development. However, it can sometimes be hard to grasp how to test that one component on its own.</p><p>The other day I had an issue with several middleware classes for a Laravel application and I wanted to verify that they were working as expected. Sounds like a job for dedicated unit tests, but I hadn’t tested custom middleware in isolation before, and figuring out how to do so took a while.</p><p>Laravel middleware accepts an instance of <code>Illuminate\Http\Request</code>, itself based on the Symfony request object, as well as a closure for the action to take next. Depending on what the middleware does, it may return a redirect or simply amend the existing request or response. So in theory you can instantiate a request object, pass it to the middleware, and check the response. For middleware that does something simple, such as redirecting users based on certain conditions, this is fairly straightforward.</p><p>In this example we have a fairly useless piece of middleware that checks to see what the route is for a request and redirects it if it matches a certain pattern:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Middleware</span>;
+namespace App\Http\Middleware;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Closure</span>;
+use Closure;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedirectFromAdminMiddleware</span>
-</span>{
-    <span class="hljs-comment">/**
+class RedirectFromAdminMiddleware
+{
+    /**
      * Handle an incoming request.
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  \Closure  $next
-     * <span class="hljs-doctag">@return</span> mixed
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">($request, Closure $next)</span>
-    </span>{
-        <span class="hljs-keyword">if</span> ($request-&gt;is(<span class="hljs-string">'admin*'</span>)) {
-            <span class="hljs-keyword">return</span> redirect(<span class="hljs-string">'/'</span>);
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        if ($request-&gt;is(&#39;admin*&#39;)) {
+            return redirect(&#39;/&#39;);
         }
-        <span class="hljs-keyword">return</span> $next($request);
+        return $next($request);
     }
 }
-</code></pre><p>While this example is of limited use, it wouldn’t take much work to develop it to redirect conditionally based on an account type, and it’s simple enough to demonstrate the principles involved. In these tests, we create instances of <code>Illuminate\Http\Request</code> and pass them to the middleware’s <code>handle()</code> method, along with an empty closure representing the response. If the middleware does not amend the request, we get the empty response from the closure. If it does amend the request, we get a redirect response.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>While this example is of limited use, it wouldn’t take much work to develop it to redirect conditionally based on an account type, and it’s simple enough to demonstrate the principles involved. In these tests, we create instances of <code>Illuminate\Http\Request</code> and pass them to the middleware’s <code>handle()</code> method, along with an empty closure representing the response. If the middleware does not amend the request, we get the empty response from the closure. If it does amend the request, we get a redirect response.</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RedirectFromAdminMiddlewareTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testRedirectMiddlewareCalledOnAdmin</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create request</span>
-        $request = Request::create(<span class="hljs-string">'http://example.com/admin'</span>, <span class="hljs-string">'GET'</span>);
+class RedirectFromAdminMiddlewareTest extends TestCase
+{
+    public function testRedirectMiddlewareCalledOnAdmin()
+    {
+        // Create request
+        $request = Request::create(&#39;http://example.com/admin&#39;, &#39;GET&#39;);
 
-        <span class="hljs-comment">// Pass it to the middleware</span>
-        $middleware = <span class="hljs-keyword">new</span> App\Http\Middleware\RedirectFromAdminMiddleware();
-        $response = $middleware-&gt;handle($request, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{});
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($response-&gt;getStatusCode(), <span class="hljs-number">302</span>);
+        // Pass it to the middleware
+        $middleware = new App\Http\Middleware\RedirectFromAdminMiddleware();
+        $response = $middleware-&gt;handle($request, function () {});
+        $this-&gt;assertEquals($response-&gt;getStatusCode(), 302);
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testRedirectMiddlewareNotCalledOnNonAdmin</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create request</span>
-        $request = Request::create(<span class="hljs-string">'http://example.com/pages'</span>, <span class="hljs-string">'GET'</span>);
+    public function testRedirectMiddlewareNotCalledOnNonAdmin()
+    {
+        // Create request
+        $request = Request::create(&#39;http://example.com/pages&#39;, &#39;GET&#39;);
 
-        <span class="hljs-comment">// Pass it to the middleware</span>
-        $middleware = <span class="hljs-keyword">new</span> App\Http\Middleware\RedirectFromAdminMiddleware();
-        $response = $middleware-&gt;handle($request, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{});
-        <span class="hljs-keyword">$this</span>-&gt;assertEquals($response, <span class="hljs-keyword">null</span>);
+        // Pass it to the middleware
+        $middleware = new App\Http\Middleware\RedirectFromAdminMiddleware();
+        $response = $middleware-&gt;handle($request, function () {});
+        $this-&gt;assertEquals($response, null);
     }
 }
-</code></pre><p>For middleware that fetches the response and acts on it, things are a little more complex. For instance, this is the Etag middleware I use on many projects:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>For middleware that fetches the response and acts on it, things are a little more complex. For instance, this is the Etag middleware I use on many projects:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Middleware</span>;
+namespace App\Http\Middleware;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Closure</span>;
+use Closure;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ETagMiddleware</span> </span>{
-    <span class="hljs-comment">/**
+class ETagMiddleware {
+    /**
      * Implement Etag support
      *
-     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
-     * <span class="hljs-doctag">@param</span>  \Closure  $next
-     * <span class="hljs-doctag">@return</span> mixed
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">($request, Closure $next)</span>
-    </span>{
-        <span class="hljs-comment">// Get response</span>
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        // Get response
         $response = $next($request);
-        <span class="hljs-comment">// If this was a GET request...</span>
-        <span class="hljs-keyword">if</span> ($request-&gt;isMethod(<span class="hljs-string">'get'</span>)) {
-            <span class="hljs-comment">// Generate Etag</span>
+        // If this was a GET request...
+        if ($request-&gt;isMethod(&#39;get&#39;)) {
+            // Generate Etag
             $etag = md5($response-&gt;getContent());
-            $requestEtag = str_replace(<span class="hljs-string">'"'</span>, <span class="hljs-string">''</span>, $request-&gt;getETags());
-            <span class="hljs-comment">// Check to see if Etag has changed</span>
-            <span class="hljs-keyword">if</span>($requestEtag &amp;&amp; $requestEtag[<span class="hljs-number">0</span>] == $etag) {
+            $requestEtag = str_replace(&#39;&quot;&#39;, &#39;&#39;, $request-&gt;getETags());
+            // Check to see if Etag has changed
+            if($requestEtag &amp;&amp; $requestEtag[0] == $etag) {
                 $response-&gt;setNotModified();
             }
-            <span class="hljs-comment">// Set Etag</span>
+            // Set Etag
             $response-&gt;setEtag($etag);
         }
-        <span class="hljs-comment">// Send response</span>
-        <span class="hljs-keyword">return</span> $response;
+        // Send response
+        return $response;
     }
 }
-</code></pre><p>This acts on the response object, so we need to pass that through as well. Fortunately, Mockery allows us to create a mock of our response object and set it up to handle only those methods we anticipate being called:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+</code></pre><p>This acts on the response object, so we need to pass that through as well. Fortunately, Mockery allows us to create a mock of our response object and set it up to handle only those methods we anticipate being called:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
+use Illuminate\Http\Request;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ETagMiddlewareTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-comment">/**
+class ETagMiddlewareTest extends TestCase
+{
+    /**
      * Test new request not cached
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testModified</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create mock response</span>
-        $response = Mockery::mock(<span class="hljs-string">'Illuminate\Http\Response'</span>)-&gt;shouldReceive(<span class="hljs-string">'getContent'</span>)-&gt;once()-&gt;andReturn(<span class="hljs-string">'blah'</span>)-&gt;getMock();
-        $response-&gt;shouldReceive(<span class="hljs-string">'setEtag'</span>)-&gt;with(md5(<span class="hljs-string">'blah'</span>));
+     * @return void
+     */
+    public function testModified()
+    {
+        // Create mock response
+        $response = Mockery::mock(&#39;Illuminate\Http\Response&#39;)-&gt;shouldReceive(&#39;getContent&#39;)-&gt;once()-&gt;andReturn(&#39;blah&#39;)-&gt;getMock();
+        $response-&gt;shouldReceive(&#39;setEtag&#39;)-&gt;with(md5(&#39;blah&#39;));
 
-        <span class="hljs-comment">// Create request</span>
-        $request = Request::create(<span class="hljs-string">'http://example.com/admin'</span>, <span class="hljs-string">'GET'</span>);
+        // Create request
+        $request = Request::create(&#39;http://example.com/admin&#39;, &#39;GET&#39;);
 
-        <span class="hljs-comment">// Pass it to the middleware</span>
-        $middleware = <span class="hljs-keyword">new</span> App\Http\Middleware\ETagMiddleware();
-        $middlewareResponse = $middleware-&gt;handle($request, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">($response)</span> </span>{ 
-            <span class="hljs-keyword">return</span> $response;
+        // Pass it to the middleware
+        $middleware = new App\Http\Middleware\ETagMiddleware();
+        $middlewareResponse = $middleware-&gt;handle($request, function () use ($response) { 
+            return $response;
         });
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Test repeated request not modified
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testNotModified</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Create mock response</span>
-        $response = Mockery::mock(<span class="hljs-string">'Illuminate\Http\Response'</span>)-&gt;shouldReceive(<span class="hljs-string">'getContent'</span>)-&gt;once()-&gt;andReturn(<span class="hljs-string">'blah'</span>)-&gt;getMock();
-        $response-&gt;shouldReceive(<span class="hljs-string">'setEtag'</span>)-&gt;with(md5(<span class="hljs-string">'blah'</span>));
-        $response-&gt;shouldReceive(<span class="hljs-string">'setNotModified'</span>);
+     * @return void
+     */
+    public function testNotModified()
+    {
+        // Create mock response
+        $response = Mockery::mock(&#39;Illuminate\Http\Response&#39;)-&gt;shouldReceive(&#39;getContent&#39;)-&gt;once()-&gt;andReturn(&#39;blah&#39;)-&gt;getMock();
+        $response-&gt;shouldReceive(&#39;setEtag&#39;)-&gt;with(md5(&#39;blah&#39;));
+        $response-&gt;shouldReceive(&#39;setNotModified&#39;);
 
-        <span class="hljs-comment">// Create request</span>
-        $request = Request::create(<span class="hljs-string">'http://example.com/admin'</span>, <span class="hljs-string">'GET'</span>, [], [], [], [
-            <span class="hljs-string">'ETag'</span> =&gt; md5(<span class="hljs-string">'blah'</span>)
+        // Create request
+        $request = Request::create(&#39;http://example.com/admin&#39;, &#39;GET&#39;, [], [], [], [
+            &#39;ETag&#39; =&gt; md5(&#39;blah&#39;)
         ]);
 
-        <span class="hljs-comment">// Pass it to the middleware</span>
-        $middleware = <span class="hljs-keyword">new</span> App\Http\Middleware\ETagMiddleware();
-        $middlewareResponse = $middleware-&gt;handle($request, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">($response)</span> </span>{ 
-            <span class="hljs-keyword">return</span> $response;
+        // Pass it to the middleware
+        $middleware = new App\Http\Middleware\ETagMiddleware();
+        $middlewareResponse = $middleware-&gt;handle($request, function () use ($response) { 
+            return $response;
         });
     }
 
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">teardown</span><span class="hljs-params">()</span>
-    </span>{
+    public function teardown()
+    {
         Mockery::close();
     }
 }

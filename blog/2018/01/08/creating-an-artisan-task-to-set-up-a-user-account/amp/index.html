@@ -183,71 +183,71 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th January 2018 12:52 pm</p><h1>Creating An Artisan Task to Set Up a User Account</h1><p>When working with any Laravel application that implements authentication, you’ll need to set up a user account to be able to work with it. One way of doing that is to add a user in a seeder, but that’s only really suitable if every user is going to use the same details.</p><p>Instead, you may want to create an Artisan command to set up the user account. Here’s an example of a command that does that:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">8th January 2018 12:52 pm</p><h1>Creating An Artisan Task to Set Up a User Account</h1><p>When working with any Laravel application that implements authentication, you’ll need to set up a user account to be able to work with it. One way of doing that is to add a user in a seeder, but that’s only really suitable if every user is going to use the same details.</p><p>Instead, you may want to create an Artisan command to set up the user account. Here’s an example of a command that does that:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Commands</span>;
+namespace App\Console\Commands;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Command</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
+use Illuminate\Console\Command;
+use Hash;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateUser</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Command</span>
-</span>{
-    <span class="hljs-comment">/**
+class CreateUser extends Command
+{
+    /**
      * The name and signature of the console command.
      *
-     * <span class="hljs-doctag">@var</span> string
-     */</span>
-    <span class="hljs-keyword">protected</span> $signature = <span class="hljs-string">'create:user'</span>;
+     * @var string
+     */
+    protected $signature = &#39;create:user&#39;;
 
-    <span class="hljs-comment">/**
+    /**
      * The console command description.
      *
-     * <span class="hljs-doctag">@var</span> string
-     */</span>
-    <span class="hljs-keyword">protected</span> $description = <span class="hljs-string">'Creates a single user'</span>;
+     * @var string
+     */
+    protected $description = &#39;Creates a single user&#39;;
 
-    <span class="hljs-comment">/**
+    /**
      * Create a new command instance.
      *
-     * <span class="hljs-doctag">@return</span> void
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-keyword">parent</span>::__construct();
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
     }
 
-    <span class="hljs-comment">/**
+    /**
      * Execute the console command.
      *
-     * <span class="hljs-doctag">@return</span> mixed
-     */</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">()</span>
-    </span>{
-        <span class="hljs-comment">// Get user model from config</span>
-        $model = config(<span class="hljs-string">'auth.providers.users.model'</span>);
+     * @return mixed
+     */
+    public function handle()
+    {
+        // Get user model from config
+        $model = config(&#39;auth.providers.users.model&#39;);
 
-        <span class="hljs-comment">// Let user know what this will do</span>
-        <span class="hljs-keyword">$this</span>-&gt;info(<span class="hljs-string">'I\'ll ask you for the details I need to set up the user'</span>);
+        // Let user know what this will do
+        $this-&gt;info(&#39;I\&#39;ll ask you for the details I need to set up the user&#39;);
 
-        <span class="hljs-comment">// Get username</span>
-        $name = <span class="hljs-keyword">$this</span>-&gt;ask(<span class="hljs-string">'Please provide the username'</span>);
+        // Get username
+        $name = $this-&gt;ask(&#39;Please provide the username&#39;);
 
-        <span class="hljs-comment">// Get email</span>
-        $email = <span class="hljs-keyword">$this</span>-&gt;ask(<span class="hljs-string">'Please provide the email address'</span>);
+        // Get email
+        $email = $this-&gt;ask(&#39;Please provide the email address&#39;);
 
-        <span class="hljs-comment">// Get password</span>
-        $password = <span class="hljs-keyword">$this</span>-&gt;secret(<span class="hljs-string">'Please provide the password'</span>);
+        // Get password
+        $password = $this-&gt;secret(&#39;Please provide the password&#39;);
 
-        <span class="hljs-comment">// Create model</span>
-        $user = <span class="hljs-keyword">new</span> $model;
+        // Create model
+        $user = new $model;
         $user-&gt;name = $name;
         $user-&gt;email = $email;
         $user-&gt;password = Hash::make($password);
         $user-&gt;save();
-        <span class="hljs-keyword">$this</span>-&gt;info(<span class="hljs-string">'User saved'</span>);
+        $this-&gt;info(&#39;User saved&#39;);
     }
 }
-</code></pre><p>We fetch the user model from the config, before asking the user for the data we need. Then we insert it into the database and confirm it to the user.</p><p>Then we just need to register the command in <code>App\Console\Kernel.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">protected</span> $commands = [
+</code></pre><p>We fetch the user model from the config, before asking the user for the data we need. Then we insert it into the database and confirm it to the user.</p><p>Then we just need to register the command in <code>App\Console\Kernel.php</code>:</p><pre><code class="lang-php">    protected $commands = [
         \App\Console\Commands\CreateUser::class,
     ];
 </code></pre><p>And we can run our command with <code>php artisan create:user</code>.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/artisan/">artisan</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/01/08/creating-an-artisan-task-to-set-up-a-user-account/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/01/08/getting-the-type-of-an-unsupported-postgres-field-in-laravel/amp/">Getting the Type of An Unsupported Postgres Field in Laravel</a> <a class="postlink" href="/blog/2018/01/07/adding-comments-to-models-in-laravel/amp/">Adding Comments to Models in Laravel</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

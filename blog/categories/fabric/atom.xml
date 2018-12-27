@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>fabric | Matthew Daly&apos;s Blog</title>
-    <updated>2018-12-07T12:13:51Z</updated>
+    <updated>2018-12-27T16:01:38Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -19,11 +19,61 @@
         </link>
         <updated>2016-09-05T21:22:16Z</updated>
         <summary type="html"><![CDATA[<p><a href="https://laravel.com/docs/5.3/envoy">Envoy</a> is the official way to run tasks on a remote server for Laravel apps. A typical Envoy task for deploying a new version might look like this:</p>
-<pre><code class="hljs lang-blade"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-variable">@servers</span>([<span class="hljs-string">'web'</span> =&gt; <span class="hljs-string">'matthew@server1.example.com'</span>])</td><tr><td class="linenos" data-pseudo-content="2"></td><td></td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-variable">@task</span>(<span class="hljs-string">'deploy'</span>, [<span class="hljs-string">'on'</span> =&gt; <span class="hljs-string">'web'</span>])</td><tr><td class="linenos" data-pseudo-content="4"></td><td>    cd /var/www</td><tr><td class="linenos" data-pseudo-content="5"></td><td>    sudo chown -R <span class="hljs-attribute">matthew</span>:matthew .</td><tr><td class="linenos" data-pseudo-content="6"></td><td>    git pull origin master</td><tr><td class="linenos" data-pseudo-content="7"></td><td>    php artisan migrate</td><tr><td class="linenos" data-pseudo-content="8"></td><td>    php artisan <span class="hljs-attribute">view</span>:clear</td><tr><td class="linenos" data-pseudo-content="9"></td><td>    composer dump-autoload</td><tr><td class="linenos" data-pseudo-content="10"></td><td>    sudo chown -R <span class="hljs-attribute">www-data</span>:www-data .</td><tr><td class="linenos" data-pseudo-content="11"></td><td>    sudo supervisorctl restart mail-queue</td><tr><td class="linenos" data-pseudo-content="12"></td><td><span class="hljs-variable">@endtask</span></td></table></code></pre>
+<pre><code class="lang-blade">@servers([&#39;web&#39; =&gt; &#39;matthew@server1.example.com&#39;])
+
+@task(&#39;deploy&#39;, [&#39;on&#39; =&gt; &#39;web&#39;])
+    cd /var/www
+    sudo chown -R matthew:matthew .
+    git pull origin master
+    php artisan migrate
+    php artisan view:clear
+    composer dump-autoload
+    sudo chown -R www-data:www-data .
+    sudo supervisorctl restart mail-queue
+@endtask
+</code></pre>
 <p>This would be defined in <code>Envoy.blade.php</code>. With this in place, and Envoy set up globally, you can then run <code>envoy run deploy</code> to run the <code>deploy</code> command.</p>
 <p>However, Envoy requires the PHP SSH library, which I haven’t been able to get working with PHP 7. Fortunately I was already familiar with <a href="http://www.fabfile.org/">Fabric</a>, which makes an excellent alternative as long as you don’t mind writing the task in Python.</p>
 <p>The same kind of task might look like this in a Fabric script, saved as <code>fabfile.py</code>:</p>
-<pre><code class="hljs lang-python"><table><tr><td class="linenos" data-pseudo-content="1"></td><td><span class="hljs-comment">#!/usr/bin/env python</span></td><tr><td class="linenos" data-pseudo-content="2"></td><td><span class="hljs-keyword">from</span> fabric.api <span class="hljs-keyword">import</span> local, env, run, sudo</td><tr><td class="linenos" data-pseudo-content="3"></td><td><span class="hljs-keyword">from</span> fabric.context_managers <span class="hljs-keyword">import</span> cd, prefix</td><tr><td class="linenos" data-pseudo-content="4"></td><td></td><tr><td class="linenos" data-pseudo-content="5"></td><td>env.hosts = [<span class="hljs-string">'server1.example.com'</span>]</td><tr><td class="linenos" data-pseudo-content="6"></td><td>env.path = <span class="hljs-string">"/var/www"</span></td><tr><td class="linenos" data-pseudo-content="7"></td><td>env.user = <span class="hljs-string">"matthew"</span></td><tr><td class="linenos" data-pseudo-content="8"></td><td>env.password = <span class="hljs-string">"password"</span></td><tr><td class="linenos" data-pseudo-content="9"></td><td><span class="hljs-comment"># Or...</span></td><tr><td class="linenos" data-pseudo-content="10"></td><td>env.key_filename = <span class="hljs-string">'/path/to/ssh/key'</span></td><tr><td class="linenos" data-pseudo-content="11"></td><td></td><tr><td class="linenos" data-pseudo-content="12"></td><td><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deploy</span><span class="hljs-params">()</span>:</span></td><tr><td class="linenos" data-pseudo-content="13"></td><td>    <span class="hljs-string">"""</td><tr><td class="linenos" data-pseudo-content="14"></td><td>    Deploy the latest version</td><tr><td class="linenos" data-pseudo-content="15"></td><td>    """</span></td><tr><td class="linenos" data-pseudo-content="16"></td><td>    <span class="hljs-comment"># Push changes to Bitbucket</span></td><tr><td class="linenos" data-pseudo-content="17"></td><td>    local(<span class="hljs-string">"git push origin master"</span>)</td><tr><td class="linenos" data-pseudo-content="18"></td><td></td><tr><td class="linenos" data-pseudo-content="19"></td><td>    <span class="hljs-comment"># Switch to project directory</span></td><tr><td class="linenos" data-pseudo-content="20"></td><td>    <span class="hljs-keyword">with</span> cd(env.path):</td><tr><td class="linenos" data-pseudo-content="21"></td><td>        <span class="hljs-comment"># Change owner</span></td><tr><td class="linenos" data-pseudo-content="22"></td><td>        sudo(<span class="hljs-string">'chown -R matthew:matthew .'</span>)</td><tr><td class="linenos" data-pseudo-content="23"></td><td></td><tr><td class="linenos" data-pseudo-content="24"></td><td>        <span class="hljs-comment"># Pull changes to server</span></td><tr><td class="linenos" data-pseudo-content="25"></td><td>        run(<span class="hljs-string">'git pull origin master'</span>)</td><tr><td class="linenos" data-pseudo-content="26"></td><td></td><tr><td class="linenos" data-pseudo-content="27"></td><td>        <span class="hljs-comment"># Run migrations</span></td><tr><td class="linenos" data-pseudo-content="28"></td><td>        run(<span class="hljs-string">'php artisan migrate'</span>)</td><tr><td class="linenos" data-pseudo-content="29"></td><td></td><tr><td class="linenos" data-pseudo-content="30"></td><td>        <span class="hljs-comment"># Clear cached files</span></td><tr><td class="linenos" data-pseudo-content="31"></td><td>        run(<span class="hljs-string">'php artisan view:clear'</span>)</td><tr><td class="linenos" data-pseudo-content="32"></td><td>        run(<span class="hljs-string">'composer dump-autoload'</span>)</td><tr><td class="linenos" data-pseudo-content="33"></td><td></td><tr><td class="linenos" data-pseudo-content="34"></td><td>        <span class="hljs-comment"># Change owner back</span></td><tr><td class="linenos" data-pseudo-content="35"></td><td>        sudo(<span class="hljs-string">'chown -R www-data:www-data .'</span>)</td><tr><td class="linenos" data-pseudo-content="36"></td><td></td><tr><td class="linenos" data-pseudo-content="37"></td><td>        <span class="hljs-comment"># restart mail queue</span></td><tr><td class="linenos" data-pseudo-content="38"></td><td>        sudo(<span class="hljs-string">'supervisorctl restart mail-queue'</span>)</td></table></code></pre>
+<pre><code class="lang-python">#!/usr/bin/env python
+from fabric.api import local, env, run, sudo
+from fabric.context_managers import cd, prefix
+
+env.hosts = [&#39;server1.example.com&#39;]
+env.path = &quot;/var/www&quot;
+env.user = &quot;matthew&quot;
+env.password = &quot;password&quot;
+# Or...
+env.key_filename = &#39;/path/to/ssh/key&#39;
+
+def deploy():
+    &quot;&quot;&quot;
+    Deploy the latest version
+    &quot;&quot;&quot;
+    # Push changes to Bitbucket
+    local(&quot;git push origin master&quot;)
+
+    # Switch to project directory
+    with cd(env.path):
+        # Change owner
+        sudo(&#39;chown -R matthew:matthew .&#39;)
+
+        # Pull changes to server
+        run(&#39;git pull origin master&#39;)
+
+        # Run migrations
+        run(&#39;php artisan migrate&#39;)
+
+        # Clear cached files
+        run(&#39;php artisan view:clear&#39;)
+        run(&#39;composer dump-autoload&#39;)
+
+        # Change owner back
+        sudo(&#39;chown -R www-data:www-data .&#39;)
+
+        # restart mail queue
+        sudo(&#39;supervisorctl restart mail-queue&#39;)
+</code></pre>
 <p>Then, assuming Fabric is already installed locally, you can run <code>fab deploy</code> to push up the latest revision.</p>
 <p>Either of these solutions will do a fine job of deploying your app. If you do need to store user-specific data in your Fabric script, it’s probably prudent to keep it out of version control.</p>
 <p>Whichever way you choose, it’s a really good idea to do what you can to automate deployment. It can be a boring, repetitive job, and both of these solutions make it much easier.</p>

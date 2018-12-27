@@ -183,28 +183,28 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">16th November 2017 3:15 pm</p><h1>Creating Custom Assertions With Phpunit</h1><p>Today I’ve been working on a library I’m building for making it easier to build RESTful API’s with Laravel. It uses an abstract RESTful controller, which inherits from the default Laravel controller, and I wanted to verify that the instantiated controller includes all the traits from the base controller.</p><p>However, there was a problem. The only practical way to verify that a class includes a trait is with the <code>class_uses()</code> function, but this doesn’t work if the class inherits from a parent that includes these traits. As the class is abstract, it can’t be instantiated directly, so you must either create a dummy class just for testing that extends it, or mock the class, and that means that <code>class_uses()</code> won’t work. As a result, I needed to first get the parent class, then call <code>class_uses()</code> on that, which is possible, but a bit verbose to do repeatedly for several tests.</p><p>Fortunately it’s quite easy to create your own custom assertions in PHPUnit. I started out by setting up the test with the assertion I wanted to have:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">16th November 2017 3:15 pm</p><h1>Creating Custom Assertions With Phpunit</h1><p>Today I’ve been working on a library I’m building for making it easier to build RESTful API’s with Laravel. It uses an abstract RESTful controller, which inherits from the default Laravel controller, and I wanted to verify that the instantiated controller includes all the traits from the base controller.</p><p>However, there was a problem. The only practical way to verify that a class includes a trait is with the <code>class_uses()</code> function, but this doesn’t work if the class inherits from a parent that includes these traits. As the class is abstract, it can’t be instantiated directly, so you must either create a dummy class just for testing that extends it, or mock the class, and that means that <code>class_uses()</code> won’t work. As a result, I needed to first get the parent class, then call <code>class_uses()</code> on that, which is possible, but a bit verbose to do repeatedly for several tests.</p><p>Fortunately it’s quite easy to create your own custom assertions in PHPUnit. I started out by setting up the test with the assertion I wanted to have:</p><pre><code class="lang-php">&lt;?php
 
-<span class="hljs-keyword">namespace</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">Unit</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
+namespace Tests\Unit\Http\Controllers;
 
-<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">TestCase</span>;
-<span class="hljs-keyword">use</span> <span class="hljs-title">Mockery</span> <span class="hljs-title">as</span> <span class="hljs-title">m</span>;
+use Tests\TestCase;
+use Mockery as m;
 
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RestfulControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
-</span>{
-    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testTraits</span><span class="hljs-params">()</span>
-    </span>{
-        $controller = m::mock(<span class="hljs-string">'Matthewbdaly\Harmony\Http\Controllers\RestfulController'</span>)-&gt;makePartial();
-        <span class="hljs-keyword">$this</span>-&gt;assertParentHasTrait(<span class="hljs-string">'Illuminate\Foundation\Bus\DispatchesJobs'</span>, $controller);
-        <span class="hljs-keyword">$this</span>-&gt;assertParentHasTrait(<span class="hljs-string">'Illuminate\Foundation\Validation\ValidatesRequests'</span>, $controller);
-        <span class="hljs-keyword">$this</span>-&gt;assertParentHasTrait(<span class="hljs-string">'Illuminate\Foundation\Auth\Access\AuthorizesRequests'</span>, $controller);
+class RestfulControllerTest extends TestCase
+{
+    public function testTraits()
+    {
+        $controller = m::mock(&#39;Matthewbdaly\Harmony\Http\Controllers\RestfulController&#39;)-&gt;makePartial();
+        $this-&gt;assertParentHasTrait(&#39;Illuminate\Foundation\Bus\DispatchesJobs&#39;, $controller);
+        $this-&gt;assertParentHasTrait(&#39;Illuminate\Foundation\Validation\ValidatesRequests&#39;, $controller);
+        $this-&gt;assertParentHasTrait(&#39;Illuminate\Foundation\Auth\Access\AuthorizesRequests&#39;, $controller);
     }
 }
-</code></pre><p>Actually implementing the assertion is fairly straightforward. You simply add the assertion as a method on the base test case you’re using. and accept whatever arguments are required, plus a final argument of <code>$message = &#39;&#39;</code>. Then you call <code>self::assertThat()</code>, as demonstrated below:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">assertParentHasTrait</span><span class="hljs-params">($trait, $class, $message = <span class="hljs-string">''</span>)</span>
-    </span>{
+</code></pre><p>Actually implementing the assertion is fairly straightforward. You simply add the assertion as a method on the base test case you’re using. and accept whatever arguments are required, plus a final argument of <code>$message = &#39;&#39;</code>. Then you call <code>self::assertThat()</code>, as demonstrated below:</p><pre><code class="lang-php">    public function assertParentHasTrait($trait, $class, $message = &#39;&#39;)
+    {
         $parent = get_parent_class($class);
         $traits = class_uses($parent);
-        <span class="hljs-keyword">self</span>::assertThat(in_array($trait, $traits), <span class="hljs-keyword">self</span>::isTrue(), $message);
+        self::assertThat(in_array($trait, $traits), self::isTrue(), $message);
     }
 </code></pre><p>In this case we’re asserting that the specified trait appears in the list of traits on the parent class. Note the use of <code>self::isTrue()</code> - this just verifies that the response is truthy.</p><p>Using this method it’s quite easy to create custom assertions, which can help make your tests less verbose and easier to read.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/testing/">testing</a></li><li><a href="/blog/categories/phpunit/">phpunit</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/11/16/creating-custom-assertions-with-phpunit/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/11/28/building-a-postcode-lookup-client-with-httplug-and-phpspec/amp/">Building a Postcode Lookup Client With Httplug and Phpspec</a> <a class="postlink" href="/blog/2017/11/06/catching-debug-statements-in-php/amp/">Catching Debug Statements in PHP</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
