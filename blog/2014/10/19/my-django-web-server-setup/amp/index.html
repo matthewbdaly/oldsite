@@ -183,48 +183,48 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">19th October 2014 7:52 pm</p><h1>My Django Web Server Setup</h1><p>This isn’t really part of my Django tutorial series (that has now definitely concluded!), but I thought I’d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don’t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p><h2 id="operating-system">Operating system</h2><p>This isn’t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it’s fanatically stable.</p><h2 id="database-server">Database server</h2><p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn’t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I’m currently in the process of deploying at work. So far I haven’t had any problems with it.</p><h2 id="web-server">Web server</h2><p>It’s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p><p>For serving the static files, I use Nginx - it’s generally considered to be faster than Apache for this use case. Here’s a typical Nginx config file:</p><pre><code class="lang-nginx">server {
-    listen 80;
-    server_name example.com;
-    client_max_body_size 50M;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">19th October 2014 7:52 pm</p><h1>My Django Web Server Setup</h1><p>This isn’t really part of my Django tutorial series (that has now definitely concluded!), but I thought I’d share the setup I generally use for deploying Django applications, partly for my own reference, and partly because it is quite complex, and those readers who don’t wish to deploy to Heroku may want some guidance on how to deploy their new blogs to a VPS.</p><h2 id="operating-system">Operating system</h2><p>This isn’t actually that much of a big deal, but while I prefer Ubuntu on desktops, I generally use Debian Stable on servers, since it’s fanatically stable.</p><h2 id="database-server">Database server</h2><p>For my first commercial Django app, I used MySQL. However, South had one or two issues with MySQL, and I figured that since using an ORM and migrations meant that I wouldn’t need to write much SQL anyway, I might as well jump to PostgreSQL for the Django app I’m currently in the process of deploying at work. So far I haven’t had any problems with it.</p><h2 id="web-server">Web server</h2><p>It’s customary to use two web servers with Django. One handles the static content, and reverse proxies everything else to a different port, where another web server serves the dynamic content.</p><p>For serving the static files, I use Nginx - it’s generally considered to be faster than Apache for this use case. Here’s a typical Nginx config file:</p><pre><code class="hljs lang-nginx"><span class="hljs-section">server</span> {
+    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;
+    <span class="hljs-attribute">server_name</span> example.com;
+    <span class="hljs-attribute">client_max_body_size</span> <span class="hljs-number">50M</span>;
 
-    access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log;
+    <span class="hljs-attribute">access_log</span> /var/log/nginx/access.log;
+    <span class="hljs-attribute">error_log</span> /var/log/nginx/error.log;
 
-    location /static {
-        root /var/www/mysite;
+    <span class="hljs-attribute">location</span> /static {
+        <span class="hljs-attribute">root</span> /var/www/mysite;
     }
 
-    location /media {
-        root /var/www/mysite;
+    <span class="hljs-attribute">location</span> /media {
+        <span class="hljs-attribute">root</span> /var/www/mysite;
     }
 
-    location / {
-        proxy_pass http://127.0.0.1:8000;
+    <span class="hljs-attribute">location</span> / {
+        <span class="hljs-attribute">proxy_pass</span> http://127.0.0.1:8000;
     }
 }
-</code></pre><p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project, as <code>gunicorn.conf.py</code>:</p><pre><code class="lang-python">bind = &quot;127.0.0.1:8000&quot;
-logfile = &quot;/var/log/gunicorn.log&quot;
-loglevel = &quot;debug&quot;
-workers = 3
-</code></pre><p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p><p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app, named <code>mysite-supervisor.conf</code>:</p><pre><code class="lang-ini">[program:mysite]
-command=/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=3
-directory=/var/www/mysite/
-user=nobody
-autostart=true
-autorestart=true
-</code></pre><p>Once that’s in place, you can easily add the new app:</p><pre><code class="lang-bash">$ sudo supervisorctl reread
+</code></pre><p>For the application server, I use Gunicorn. You can install this with <code>pip install gunicorn</code>, then add it to <code>INSTALLED_APPS</code>. Then add the following config file to the root of your project, as <code>gunicorn.conf.py</code>:</p><pre><code class="hljs lang-python">bind = <span class="hljs-string">"127.0.0.1:8000"</span>
+logfile = <span class="hljs-string">"/var/log/gunicorn.log"</span>
+loglevel = <span class="hljs-string">"debug"</span>
+workers = <span class="hljs-number">3</span>
+</code></pre><p>You should normally set the number of workers to 2 times the number of cores on your machine, plus one.</p><p>In order to keep Gunicorn running, I use Supervisor. As the installation commands will depend on your OS, I won’t give details here - your package manager of choice should have a suitable package available. Here’s a typical Supervisor config file I might use for running Gunicorn for a Django app, named <code>mysite-supervisor.conf</code>:</p><pre><code class="hljs lang-ini"><span class="hljs-section">[program:mysite]</span>
+<span class="hljs-attr">command</span>=/var/www/mysite/venv/bin/gunicorn myapp.wsgi:application --workers=<span class="hljs-number">3</span>
+<span class="hljs-attr">directory</span>=/var/www/mysite/
+<span class="hljs-attr">user</span>=nobody
+<span class="hljs-attr">autostart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">autorestart</span>=<span class="hljs-literal">true</span>
+</code></pre><p>Once that’s in place, you can easily add the new app:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl reread
 $ sudo supervisorctl update
-</code></pre><p>Then to start it:</p><pre><code class="lang-bash">$ sudo supervisorctl start mysite
-</code></pre><p>Or stop it with:</p><pre><code class="lang-bash">$ sudo supervisorctl stop mysite
-</code></pre><p>Or restart it:</p><pre><code class="lang-bash">$ sudo supervisorctl restart mysite
-</code></pre><h2 id="celery">Celery</h2><p>So far, both of the web apps I’ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p><ul><li>The user doesn’t need to wait for the task to be completed before getting a response, improving performance</li><li>It’s more robust, since if the task fails, it can be automatically retried</li><li>The task queue can be moved to another server if desired, making it easier to scale</li><li>Scheduling tasks</li></ul><p>I’ve used it in cases where I needed to send an email or a push notification, since these don’t have to be done within the context of the same HTTP request, but need to be reliable.</p><p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file, which might be called <code>celery-supervisor.conf</code>:</p><pre><code class="lang-ini">[program:celeryd]
-command=/var/www/mysite/venv/bin/python manage.py celery worker
-directory=/var/www/mysite/
-user=nobody
-autostart=true
-autorestart=true
-</code></pre><p>Then start it up:</p><pre><code class="lang-bash">$ sudo supervisorctl reread
+</code></pre><p>Then to start it:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl start mysite
+</code></pre><p>Or stop it with:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl stop mysite
+</code></pre><p>Or restart it:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl restart mysite
+</code></pre><h2 id="celery">Celery</h2><p>So far, both of the web apps I’ve built professionally have been ones where it made sense to use <a href="http://www.celeryproject.org/">Celery</a> for some tasks. For the uninitiated, Celery lets you pass a task to a queue to be handled, rather than handling it within the context of the same HTTP request. This offers the following advantages:</p><ul><li>The user doesn’t need to wait for the task to be completed before getting a response, improving performance</li><li>It’s more robust, since if the task fails, it can be automatically retried</li><li>The task queue can be moved to another server if desired, making it easier to scale</li><li>Scheduling tasks</li></ul><p>I’ve used it in cases where I needed to send an email or a push notification, since these don’t have to be done within the context of the same HTTP request, but need to be reliable.</p><p>I generally use RabbitMQ as my message queue. I’ll leave setting this up as an exercise for the reader since it’s covered pretty well in the Celery documentation, but like with Gunicorn, I use Supervisor to run the Celery worker. Here’s a typical config file, which might be called <code>celery-supervisor.conf</code>:</p><pre><code class="hljs lang-ini"><span class="hljs-section">[program:celeryd]</span>
+<span class="hljs-attr">command</span>=/var/www/mysite/venv/bin/python manage.py celery worker
+<span class="hljs-attr">directory</span>=/var/www/mysite/
+<span class="hljs-attr">user</span>=nobody
+<span class="hljs-attr">autostart</span>=<span class="hljs-literal">true</span>
+<span class="hljs-attr">autorestart</span>=<span class="hljs-literal">true</span>
+</code></pre><p>Then start it up:</p><pre><code class="hljs lang-bash">$ sudo supervisorctl reread
 $ sudo supervisorctl update
 $ sudo supervisorctl start celeryd
 </code></pre><p>I make no claims about how good this setup is, but it works well for me. I haven’t yet had the occasion to deploy a Django app to anywhere other than Heroku that really benefited from caching, so I haven’t got any tips to share about that, but if I were building a content-driven web app, I would use Memcached since it’s well-supported.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2014/10/19/my-django-web-server-setup/">View the article with comments</a></section><section><a class="postlink" href="/blog/2014/11/09/building-a-url-shortener-with-node-dot-js-and-redis/amp/">Building a URL Shortener With Node.js and Redis</a> <a class="postlink" href="/blog/2014/10/05/introducing-generator-simple-static-blog/amp/">Introducing Generator-simple-static-blog</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

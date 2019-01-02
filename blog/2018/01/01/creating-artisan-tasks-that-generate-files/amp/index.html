@@ -183,99 +183,99 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">1st January 2018 4:06 pm</p><h1>Creating Artisan Tasks That Generate Files</h1><p>While the documentation for creating Artisan tasks is generally pretty good, it doesn’t really touch on creating tasks that generate new files. The only way to figure it out was to go digging through the source code. In this case, I was building an Artisan command to create Fractal transformers as part of a package I’m working on.</p><p>There’s a specialised class for generating files at <code>Illuminate\Console\GeneratorCommand</code>, which your command class should extend instead of <code>Illuminate\Console\Command</code>. In addition to the usual properties such as the signature and description, you also need to specify <code>$type</code> to give the type of class being generated. Also, note that the constructor is different, so if you use <code>php artisan make:console</code> to create the boilerplate for this command, you’ll need to delete the constructor.</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">1st January 2018 4:06 pm</p><h1>Creating Artisan Tasks That Generate Files</h1><p>While the documentation for creating Artisan tasks is generally pretty good, it doesn’t really touch on creating tasks that generate new files. The only way to figure it out was to go digging through the source code. In this case, I was building an Artisan command to create Fractal transformers as part of a package I’m working on.</p><p>There’s a specialised class for generating files at <code>Illuminate\Console\GeneratorCommand</code>, which your command class should extend instead of <code>Illuminate\Console\Command</code>. In addition to the usual properties such as the signature and description, you also need to specify <code>$type</code> to give the type of class being generated. Also, note that the constructor is different, so if you use <code>php artisan make:console</code> to create the boilerplate for this command, you’ll need to delete the constructor.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace Matthewbdaly\MyPackage\Console\Commands;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Commands</span>;
 
-use Illuminate\Console\GeneratorCommand;
-use Symfony\Component\Console\Input\InputArgument;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">GeneratorCommand</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Console</span>\<span class="hljs-title">Input</span>\<span class="hljs-title">InputArgument</span>;
 
-class TransformerMakeCommand extends GeneratorCommand
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TransformerMakeCommand</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">GeneratorCommand</span>
+</span>{
+    <span class="hljs-comment">/**
      * The name and signature of the console command.
      *
-     * @var string
-     */
-    protected $signature = &#39;make:transformer {name : The required name of the transformer class}&#39;;
+     * <span class="hljs-doctag">@var</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> $signature = <span class="hljs-string">'make:transformer {name : The required name of the transformer class}'</span>;
 
-    /**
+    <span class="hljs-comment">/**
      * The console command description.
      *
-     * @var string
-     */
-    protected $description = &#39;Create a Fractal transformer&#39;;
+     * <span class="hljs-doctag">@var</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> $description = <span class="hljs-string">'Create a Fractal transformer'</span>;
 
-    /**
+    <span class="hljs-comment">/**
      * The type of class being generated.
      *
-     * @var string
-     */
-    protected $type = &#39;Fractal transformer&#39;;
+     * <span class="hljs-doctag">@var</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> $type = <span class="hljs-string">'Fractal transformer'</span>;
 
-    /**
+    <span class="hljs-comment">/**
      * Get the stub file for the generator.
      *
-     * @return string
-     */
-    protected function getStub()
-    {
-        return __DIR__.&#39;/stubs/transformer.stub&#39;;
+     * <span class="hljs-doctag">@return</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getStub</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">__DIR__</span>.<span class="hljs-string">'/stubs/transformer.stub'</span>;
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Get the console command arguments.
      *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return [
-            [&#39;name&#39;, InputArgument::REQUIRED, &#39;The name of the command.&#39;],
+     * <span class="hljs-doctag">@return</span> array
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArguments</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            [<span class="hljs-string">'name'</span>, InputArgument::REQUIRED, <span class="hljs-string">'The name of the command.'</span>],
         ];
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Get the default namespace for the class.
      *
-     * @param  string  $rootNamespace
-     * @return string
-     */
-    protected function getDefaultNamespace($rootNamespace)
-    {
-        return $rootNamespace.&#39;\Transformers&#39;;
+     * <span class="hljs-doctag">@param</span>  string  $rootNamespace
+     * <span class="hljs-doctag">@return</span> string
+     */</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDefaultNamespace</span><span class="hljs-params">($rootNamespace)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> $rootNamespace.<span class="hljs-string">'\Transformers'</span>;
     }
 }
-</code></pre><p>Note the <code>getDefaultNamespace()</code> method. If your class will live directly under the <code>app</code> folder this is not necessary. Otherwise, it needs to return the root namespace, with the folder structure you want after it. Here my class will live under <code>app\Transformers</code>, so I’ve set it to reflect that.</p><p>Also, note the <code>getStub()</code> method. This tells Artisan that it should use the specified stub file as the basis for our class. Below you’ll find the stub file I used for my transformer:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Note the <code>getDefaultNamespace()</code> method. If your class will live directly under the <code>app</code> folder this is not necessary. Otherwise, it needs to return the root namespace, with the folder structure you want after it. Here my class will live under <code>app\Transformers</code>, so I’ve set it to reflect that.</p><p>Also, note the <code>getStub()</code> method. This tells Artisan that it should use the specified stub file as the basis for our class. Below you’ll find the stub file I used for my transformer:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace DummyNamespace;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">DummyNamespace</span>;
 
-use Matthewbdaly\MyPackage\Transformers\BaseTransformer;
-use Illuminate\Database\Eloquent\Model;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Transformers</span>\<span class="hljs-title">BaseTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;
 
-class DummyClass extends BaseTransformer
-{
-    public function transform(Model $model)
-    {
-        return [
-            &#39;id&#39;            =&gt; (int) $model-&gt;id,
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DummyClass</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseTransformer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(Model $model)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'id'</span>            =&gt; (int) $model-&gt;id,
         ];
     }
 }
-</code></pre><p>Note that the <code>DummyNamespace</code> and <code>DummyClass</code> fields will be overwritten with the correct values.</p><p>Once this Artisan command is registered in the usual way, you can then run it as follows:</p><pre><code class="lang-bash">$ php artisan make:transformer Example
-</code></pre><p>And it will generate a boilerplate class something like this:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Note that the <code>DummyNamespace</code> and <code>DummyClass</code> fields will be overwritten with the correct values.</p><p>Once this Artisan command is registered in the usual way, you can then run it as follows:</p><pre><code class="hljs lang-bash">$ php artisan make:transformer Example
+</code></pre><p>And it will generate a boilerplate class something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Transformers;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Transformers</span>;
 
-use Matthewbdaly\MyPackage\Transformers\BaseTransformer;
-use Illuminate\Database\Eloquent\Model;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">MyPackage</span>\<span class="hljs-title">Transformers</span>\<span class="hljs-title">BaseTransformer</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;
 
-class Example extends BaseTransformer
-{
-    public function transform(Model $model)
-    {
-        return [
-            &#39;id&#39;            =&gt; (int) $model-&gt;id,
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Example</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BaseTransformer</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">transform</span><span class="hljs-params">(Model $model)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            <span class="hljs-string">'id'</span>            =&gt; (int) $model-&gt;id,
         ];
     }
 }

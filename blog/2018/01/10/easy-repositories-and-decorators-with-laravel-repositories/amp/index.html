@@ -183,35 +183,35 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">10th January 2018 12:22 pm</p><h1>Easy Repositories and Decorators With Laravel Repositories</h1><p>Creating repositories for your Laravel models, as well as creating caching decorators for them, is a useful way of not only implementing caching in your web app, but decoupling the application from a specific ORM. Unfortunately, it can involve writing a fair amount of boilerplate code.</p><p><a href="https://github.com/matthewbdaly/laravel-repositories">Laravel Repositories</a> is a set of base classes and interfaces for creating repositories and decorators in your application. It consists of:</p><ul><li>A generic interface for repositories</li><li>A base repository that implements the interface and can be extended for your own repositories</li><li>A base decorator that also implements the interface and can similarly be extended</li></ul><p>By using these, not only are you able to implement caching quickly and easily for most use cases, but you can easily extend the base classes to add additional methods for your use case. By creating new interfaces that extend the base interface, then having your repositories extend the repository and decorator, you can minimise the amount of work required to set up new repositories.</p><p>The main interface used is <code>Matthewbdaly\LaravelRepositories\Repositories\Interfaces\AbstractRepositoryInterface</code>, and your interfaces should extend this. Your decorators should extend <code>Matthewbdaly\LaravelRepositories\Repositories\Decorators\BaseDecorator</code>, and your repositories should extend <code>Matthewbdaly\LaravelRepositories\Repositories\Base</code>. Then, if you add any additional methods to your interface and ensure your repository and decorator implement that interface, it should be straightforward to type-hint the interface and get back the decorated repository, which will handle caching for you.</p><p>To be able to type-hint the repositories, you need to set them up in a service provider:</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">10th January 2018 12:22 pm</p><h1>Easy Repositories and Decorators With Laravel Repositories</h1><p>Creating repositories for your Laravel models, as well as creating caching decorators for them, is a useful way of not only implementing caching in your web app, but decoupling the application from a specific ORM. Unfortunately, it can involve writing a fair amount of boilerplate code.</p><p><a href="https://github.com/matthewbdaly/laravel-repositories">Laravel Repositories</a> is a set of base classes and interfaces for creating repositories and decorators in your application. It consists of:</p><ul><li>A generic interface for repositories</li><li>A base repository that implements the interface and can be extended for your own repositories</li><li>A base decorator that also implements the interface and can similarly be extended</li></ul><p>By using these, not only are you able to implement caching quickly and easily for most use cases, but you can easily extend the base classes to add additional methods for your use case. By creating new interfaces that extend the base interface, then having your repositories extend the repository and decorator, you can minimise the amount of work required to set up new repositories.</p><p>The main interface used is <code>Matthewbdaly\LaravelRepositories\Repositories\Interfaces\AbstractRepositoryInterface</code>, and your interfaces should extend this. Your decorators should extend <code>Matthewbdaly\LaravelRepositories\Repositories\Decorators\BaseDecorator</code>, and your repositories should extend <code>Matthewbdaly\LaravelRepositories\Repositories\Base</code>. Then, if you add any additional methods to your interface and ensure your repository and decorator implement that interface, it should be straightforward to type-hint the interface and get back the decorated repository, which will handle caching for you.</p><p>To be able to type-hint the repositories, you need to set them up in a service provider:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Providers;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
 
-use Illuminate\Support\ServiceProvider;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">ServiceProvider</span>;
 
-class AppServiceProvider extends ServiceProvider
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
+</span>{
+    <span class="hljs-comment">/**
      * Bootstrap any application services.
      *
-     * @return void
-     */
-    public function boot()
-    {
-        //
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Register any application services.
      *
-     * @return void
-     */
-    public function register()
-    {
-        $this-&gt;app-&gt;singleton(&#39;App\Repositories\Interfaces\ExampleRepositoryInterface&#39;, function () {
-            $baseRepo = new \App\Repositories\EloquentExampleRepository(new \App\Example);
-            $cachingRepo = new \App\Repositories\Decorators\ExampleDecorator($baseRepo, $this-&gt;app[&#39;cache.store&#39;]);
-            return $cachingRepo;
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;app-&gt;singleton(<span class="hljs-string">'App\Repositories\Interfaces\ExampleRepositoryInterface'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            $baseRepo = <span class="hljs-keyword">new</span> \App\Repositories\EloquentExampleRepository(<span class="hljs-keyword">new</span> \App\Example);
+            $cachingRepo = <span class="hljs-keyword">new</span> \App\Repositories\Decorators\ExampleDecorator($baseRepo, <span class="hljs-keyword">$this</span>-&gt;app[<span class="hljs-string">'cache.store'</span>]);
+            <span class="hljs-keyword">return</span> $cachingRepo;
         });
     }
 }

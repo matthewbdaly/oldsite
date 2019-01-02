@@ -183,11 +183,11 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">22nd January 2018 12:00 pm</p><h1>Deploying Your Laravel Application With Deployer</h1><p>Deployment processes have a nasty tendency to be a mish-mash of cobbled-together scripts or utilities in many web shops, with little or no consistency in practice between them. As a result, it’s all too easy for even the most experienced developer to mess up a deployment.</p><p>I personally have used all kinds of bodged-together solutions. For a while I used Envoy scripts to deploy my Laravel apps, but then there was an issue with the SSH library in PHP 7 that made it impractical to use it. Then I adopted Fabric, which I’d used before for deploying Django apps and will do fine for deploying PHP apps too, but it wasn’t much more sophisticated than using shell scripts for deployment purposes. There are third-party services like Deploybot, but these are normally quite expensive for what they are.</p><p>A while back I heard of <a href="https://deployer.org/">Deployer</a>, but I didn’t have the opportunity to try it until recently on a personal project as I was working somewhere that had its own in-house deployment process. It’s a PHP-specific deployment tool with recipes for deploying applications built with various frameworks and CMS’s, including Laravel, Symfony, CodeIgniter and Drupal.</p><h2 id="installing-deployer">Installing Deployer</h2><p>Deployer is installed as a <code>.phar</code> file, much like you would with Composer:</p><pre><code class="lang-bash">$ curl -LO https://deployer.org/deployer.phar
-$ mv deployer.phar /usr/local/bin/dep
-$ chmod +x /usr/local/bin/dep
-</code></pre><p>With that done, you should be able to run the following command in your project’s directory to create a Deployer script:</p><pre><code class="lang-bash">$ dep init
-</code></pre><p>In response, you should see a list of project types:</p><pre><code class="lang-bash">  Welcome to the Deployer config generator  
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">22nd January 2018 12:00 pm</p><h1>Deploying Your Laravel Application With Deployer</h1><p>Deployment processes have a nasty tendency to be a mish-mash of cobbled-together scripts or utilities in many web shops, with little or no consistency in practice between them. As a result, it’s all too easy for even the most experienced developer to mess up a deployment.</p><p>I personally have used all kinds of bodged-together solutions. For a while I used Envoy scripts to deploy my Laravel apps, but then there was an issue with the SSH library in PHP 7 that made it impractical to use it. Then I adopted Fabric, which I’d used before for deploying Django apps and will do fine for deploying PHP apps too, but it wasn’t much more sophisticated than using shell scripts for deployment purposes. There are third-party services like Deploybot, but these are normally quite expensive for what they are.</p><p>A while back I heard of <a href="https://deployer.org/">Deployer</a>, but I didn’t have the opportunity to try it until recently on a personal project as I was working somewhere that had its own in-house deployment process. It’s a PHP-specific deployment tool with recipes for deploying applications built with various frameworks and CMS’s, including Laravel, Symfony, CodeIgniter and Drupal.</p><h2 id="installing-deployer">Installing Deployer</h2><p>Deployer is installed as a <code>.phar</code> file, much like you would with Composer:</p><pre><code class="hljs lang-bash">$ curl -LO https://deployer.org/deployer.phar
+$ mv deployer.phar /usr/<span class="hljs-built_in">local</span>/bin/dep
+$ chmod +x /usr/<span class="hljs-built_in">local</span>/bin/dep
+</code></pre><p>With that done, you should be able to run the following command in your project’s directory to create a Deployer script:</p><pre><code class="hljs lang-bash">$ dep init
+</code></pre><p>In response, you should see a list of project types:</p><pre><code class="hljs lang-bash">  Welcome to the Deployer config generator  
 
 
 
@@ -196,7 +196,7 @@ $ chmod +x /usr/local/bin/dep
 
  Press ^C at any time to quit.
 
- Please select your project type [Common]:
+ Please select your project <span class="hljs-built_in">type</span> [Common]:
   [0] Common
   [1] Laravel
   [2] Symfony
@@ -208,65 +208,65 @@ $ chmod +x /usr/local/bin/dep
   [8] CodeIgniter
   [9] Drupal
  &gt;
-</code></pre><p>Here I chose Laravel as I was deploying a Laravel project. I was then prompted for the repository URL - this will be filled in with the origin remote if the current folder is already a Git repository:</p><pre><code class="lang-bash">Repository [git@gitlab.com:Group/Project.git]:
+</code></pre><p>Here I chose Laravel as I was deploying a Laravel project. I was then prompted for the repository URL - this will be filled in with the origin remote if the current folder is already a Git repository:</p><pre><code class="hljs lang-bash">Repository [git@gitlab.com:Group/Project.git]:
  &gt; 
-</code></pre><p>You’ll also see a message about contributing anonymous usage data. After answering this, the file <code>deploy.php</code> will be generated:</p><pre><code class="lang-php">&lt;?php
-namespace Deployer;
+</code></pre><p>You’ll also see a message about contributing anonymous usage data. After answering this, the file <code>deploy.php</code> will be generated:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Deployer</span>;
 
-require &#39;recipe/laravel.php&#39;;
+<span class="hljs-keyword">require</span> <span class="hljs-string">'recipe/laravel.php'</span>;
 
-// Configuration
+<span class="hljs-comment">// Configuration</span>
 
-set(&#39;repository&#39;, &#39;git@gitlab.com:Group/Project.git&#39;);
-set(&#39;git_tty&#39;, true); // [Optional] Allocate tty for git on first deployment
-add(&#39;shared_files&#39;, []);
-add(&#39;shared_dirs&#39;, []);
-add(&#39;writable_dirs&#39;, []);
-
-
-// Hosts
-
-host(&#39;project.com&#39;)
-    -&gt;stage(&#39;production&#39;)
-    -&gt;set(&#39;deploy_path&#39;, &#39;/var/www/project.com&#39;);
-
-host(&#39;beta.project.com&#39;)
-    -&gt;stage(&#39;beta&#39;)
-    -&gt;set(&#39;deploy_path&#39;, &#39;/var/www/project.com&#39;);  
+set(<span class="hljs-string">'repository'</span>, <span class="hljs-string">'git@gitlab.com:Group/Project.git'</span>);
+set(<span class="hljs-string">'git_tty'</span>, <span class="hljs-keyword">true</span>); <span class="hljs-comment">// [Optional] Allocate tty for git on first deployment</span>
+add(<span class="hljs-string">'shared_files'</span>, []);
+add(<span class="hljs-string">'shared_dirs'</span>, []);
+add(<span class="hljs-string">'writable_dirs'</span>, []);
 
 
-// Tasks
+<span class="hljs-comment">// Hosts</span>
 
-desc(&#39;Restart PHP-FPM service&#39;);
-task(&#39;php-fpm:restart&#39;, function () {
-    // The user must have rights for restart service
-    // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service
-    run(&#39;sudo systemctl restart php-fpm.service&#39;);
+host(<span class="hljs-string">'project.com'</span>)
+    -&gt;stage(<span class="hljs-string">'production'</span>)
+    -&gt;set(<span class="hljs-string">'deploy_path'</span>, <span class="hljs-string">'/var/www/project.com'</span>);
+
+host(<span class="hljs-string">'beta.project.com'</span>)
+    -&gt;stage(<span class="hljs-string">'beta'</span>)
+    -&gt;set(<span class="hljs-string">'deploy_path'</span>, <span class="hljs-string">'/var/www/project.com'</span>);  
+
+
+<span class="hljs-comment">// Tasks</span>
+
+desc(<span class="hljs-string">'Restart PHP-FPM service'</span>);
+task(<span class="hljs-string">'php-fpm:restart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// The user must have rights for restart service</span>
+    <span class="hljs-comment">// /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service</span>
+    run(<span class="hljs-string">'sudo systemctl restart php-fpm.service'</span>);
 });
-after(&#39;deploy:symlink&#39;, &#39;php-fpm:restart&#39;);
+after(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'php-fpm:restart'</span>);
 
-// [Optional] if deploy fails automatically unlock.
-after(&#39;deploy:failed&#39;, &#39;deploy:unlock&#39;);
+<span class="hljs-comment">// [Optional] if deploy fails automatically unlock.</span>
+after(<span class="hljs-string">'deploy:failed'</span>, <span class="hljs-string">'deploy:unlock'</span>);
 
-// Migrate database before symlink new release.
+<span class="hljs-comment">// Migrate database before symlink new release.</span>
 
-before(&#39;deploy:symlink&#39;, &#39;artisan:migrate&#39;);
-</code></pre><p>By default it has two hosts, <code>beta</code> and <code>production</code>, and you can refer to them by these names. You can also add or remove hosts, and amend the existing ones. Note the deploy path as well - this sets the place where the application gets deployed to.</p><p>Note that it’s set up to expect the server to be using PHP-FPM and Nginx by default, so if you’re using Apache you may need to amend the command to restart the server. Also, note that if like me you’re using PHP 7 on a distro like Debian that also has PHP 5 around, you’ll probably need to change the references to <code>php-fpm</code> as follows:</p><pre><code class="lang-php">desc(&#39;Restart PHP-FPM service&#39;);
-task(&#39;php-fpm:restart&#39;, function () {
-    // The user must have rights for restart service
-    // /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service
-    run(&#39;sudo systemctl restart php7.0-fpm.service&#39;);
+before(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'artisan:migrate'</span>);
+</code></pre><p>By default it has two hosts, <code>beta</code> and <code>production</code>, and you can refer to them by these names. You can also add or remove hosts, and amend the existing ones. Note the deploy path as well - this sets the place where the application gets deployed to.</p><p>Note that it’s set up to expect the server to be using PHP-FPM and Nginx by default, so if you’re using Apache you may need to amend the command to restart the server. Also, note that if like me you’re using PHP 7 on a distro like Debian that also has PHP 5 around, you’ll probably need to change the references to <code>php-fpm</code> as follows:</p><pre><code class="hljs lang-php">desc(<span class="hljs-string">'Restart PHP-FPM service'</span>);
+task(<span class="hljs-string">'php-fpm:restart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">// The user must have rights for restart service</span>
+    <span class="hljs-comment">// /etc/sudoers: username ALL=NOPASSWD:/bin/systemctl restart php-fpm.service</span>
+    run(<span class="hljs-string">'sudo systemctl restart php7.0-fpm.service'</span>);
 });
-after(&#39;deploy:symlink&#39;, &#39;php-fpm:restart&#39;);
-</code></pre><p>You will also need to make sure the <code>acl</code> package is installed - on Debian and Ubuntu you can install it as follows:</p><pre><code class="lang-bash">$ sudo apt-get install acl
-</code></pre><p>Now, the recipe for deploying a Laravel app will include the following:</p><ul><li>Pulling from the Git remote</li><li>Updating any Composer dependencies to match <code>composer.json</code></li><li>Running the migrations</li><li>Optimizing the application</li></ul><p>In addition, one really great feature Deployer offers is rollbacks. Rather than checking out your application directly into the project root you specify, it numbers each release and deploys it in a separate folder, before symlinking that folder to the project root as <code>current</code>. That way, if a release cannot be deployed successfully, rather than leaving your application in an unfinished state, Deployer will symlink the previous version so that you still have a working version of your application.</p><p>If you have configured Deployer for that project, you can deploy using the following command where <code>production</code> is the name of the host you’re deploying to:</p><pre><code class="lang-bash">$ dep deploy production
-</code></pre><p>The output will look something like this:</p><pre><code class="lang-bash">✔ Executing task deploy:prepare
+after(<span class="hljs-string">'deploy:symlink'</span>, <span class="hljs-string">'php-fpm:restart'</span>);
+</code></pre><p>You will also need to make sure the <code>acl</code> package is installed - on Debian and Ubuntu you can install it as follows:</p><pre><code class="hljs lang-bash">$ sudo apt-get install acl
+</code></pre><p>Now, the recipe for deploying a Laravel app will include the following:</p><ul><li>Pulling from the Git remote</li><li>Updating any Composer dependencies to match <code>composer.json</code></li><li>Running the migrations</li><li>Optimizing the application</li></ul><p>In addition, one really great feature Deployer offers is rollbacks. Rather than checking out your application directly into the project root you specify, it numbers each release and deploys it in a separate folder, before symlinking that folder to the project root as <code>current</code>. That way, if a release cannot be deployed successfully, rather than leaving your application in an unfinished state, Deployer will symlink the previous version so that you still have a working version of your application.</p><p>If you have configured Deployer for that project, you can deploy using the following command where <code>production</code> is the name of the host you’re deploying to:</p><pre><code class="hljs lang-bash">$ dep deploy production
+</code></pre><p>The output will look something like this:</p><pre><code class="hljs lang-bash">✔ Executing task deploy:prepare
 ✔ Executing task deploy:lock
 ✔ Executing task deploy:release
 ➤ Executing task deploy:update_code
-Counting objects: 761, done.
-Compressing objects: 100% (313/313), done.
-Writing objects: 100% (761/761), done.
+Counting objects: 761, <span class="hljs-keyword">done</span>.
+Compressing objects: 100% (313/313), <span class="hljs-keyword">done</span>.
+Writing objects: 100% (761/761), <span class="hljs-keyword">done</span>.
 Total 761 (delta 384), reused 757 (delta 380)
 Connection to linklater.shellshocked.info closed.
 ✔ Ok
@@ -285,7 +285,7 @@ Connection to linklater.shellshocked.info closed.
 ✔ Executing task cleanup
 ✔ Executing task success
 Successfully deployed!
-</code></pre><p>As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the <code>.env</code> file, the <code>storage/</code> directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimize our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.</p><p>In the event you discover a problem after deploy and need to rollback manually, you can do so with the following command:</p><pre><code class="lang-bash">$ dep rollback production
+</code></pre><p>As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the <code>.env</code> file, the <code>storage/</code> directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimize our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.</p><p>In the event you discover a problem after deploy and need to rollback manually, you can do so with the following command:</p><pre><code class="hljs lang-bash">$ dep rollback production
 </code></pre><p>That makes it easy to ensure that in the event of something going wrong, you can quickly switch back to an earlier version with zero downtime.</p><p>Deployer has made deployments a lot less painful for me than any other solution I’ve tried. The support for rollbacks means that if something goes wrong it’s trivial to switch back to an earlier revision.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/deployment/">deployment</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/01/22/deploying-your-laravel-application-with-deployer/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/01/28/why-the-speed-of-your-mvc-framework-is-usually-a-red-herring/amp/">Why the Speed of Your MVC Framework Is Usually a Red Herring</a> <a class="postlink" href="/blog/2018/01/12/creating-a-caching-user-provider-for-laravel/amp/">Creating a Caching User Provider for Laravel</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

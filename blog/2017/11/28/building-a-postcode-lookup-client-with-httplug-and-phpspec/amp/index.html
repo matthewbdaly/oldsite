@@ -183,47 +183,47 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">28th November 2017 11:40 am</p><h1>Building a Postcode Lookup Client With Httplug and Phpspec</h1><p>While PHPUnit is my normal go-to PHP testing framework, for some applications I find <a href="http://www.phpspec.net/en/stable/">PHPSpec</a> superior, in particular REST API clients. I’ve found that it makes for a better flow when doing test-driven development, because it makes it very natural to write a test first, then run it, then make the test pass.</p><p>In this tutorial I’ll show you how to build a lookup API client for UK postcodes. In the process of doing so, we’ll use PHPSpec to drive our development process. We’ll also use <a href="http://docs.php-http.org/en/latest/httplug/tutorial.html">HTTPlug</a> as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.</p><h2 id="background">Background</h2><p>If you’re unfamiliar with it, the UK postcode system is our equivalent of a zip code in the US, but with two major differences:</p><ul><li>The codes themselves are alphanumeric instead of numeric, with the first part including one or two letters usually (but not always) derived from the nearest large town or city (eg L for Liverpool, B for Birmingham, OX for Oxford), or for London, based on the part of the city (eg NW for the north-west of London)</li><li>A full postcode is in two parts (eg NW1 8TQ), and the first part narrows the location down to a similar area to a US-style zip code, while the second part usually narrows it down to a street (although sometimes large organisations that receive a lot of mail will have a postcode to themselves).</li></ul><p>This means that if you have someone’s postcode and house name or address, you can use those details to look up the rest of their address details. This obviously makes it easier for users to fill out a form, such as when placing an order on an e-commerce site - you can just request those two details and then autofill the rest from them.</p><p>Unfortunately, it’s not quite that simple. The data is owned by Royal Mail, and they charge through the nose for access to the raw data, which places this data well outside the budgets of many web app developers. Fortunately, <a href="https://ideal-postcodes.co.uk/">Ideal Postcodes</a> offer a REST API for querying this data. It’s not free, but at 2.5p per request it’s not going to break the bank unless used excessively, and they offer some dummy postcodes that are free to query, which is perfectly fine for testing.</p><p>For those of you outside the UK, this may not be of much immediate use, but the underlying principles will still be useful, and you can probably build a similar client for your own nation’s postal code system. For instance, there’s a <a href="https://www.zipcodeapi.com/API">Zipcode API</a> that those of you in the US can use, and if you understand what’s going on here it shouldn’t be hard to adapt it to work with that. If you do produce a similar client for your country’s postal code system, submit a pull request to update the README with a link to it and I’ll include it.</p><h2 id="setting-up">Setting up</h2><p>First we’ll create a <code>composer.json</code> to specify our dependencies:</p><pre><code class="lang-json">{
-    &quot;name&quot;: &quot;matthewbdaly/postcode-client&quot;,
-    &quot;description&quot;: &quot;A postcode lookup client.&quot;,
-    &quot;type&quot;: &quot;library&quot;,
-    &quot;keywords&quot;: [&quot;postcode&quot;],
-    &quot;require&quot;: {
-        &quot;psr/http-message&quot;: &quot;^1.0&quot;,
-        &quot;php-http/client-implementation&quot;: &quot;^1.0&quot;,
-        &quot;php-http/httplug&quot;: &quot;^1.0&quot;,
-        &quot;php-http/message-factory&quot;: &quot;^1.0&quot;,
-        &quot;php-http/discovery&quot;: &quot;^1.0&quot;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">28th November 2017 11:40 am</p><h1>Building a Postcode Lookup Client With Httplug and Phpspec</h1><p>While PHPUnit is my normal go-to PHP testing framework, for some applications I find <a href="http://www.phpspec.net/en/stable/">PHPSpec</a> superior, in particular REST API clients. I’ve found that it makes for a better flow when doing test-driven development, because it makes it very natural to write a test first, then run it, then make the test pass.</p><p>In this tutorial I’ll show you how to build a lookup API client for UK postcodes. In the process of doing so, we’ll use PHPSpec to drive our development process. We’ll also use <a href="http://docs.php-http.org/en/latest/httplug/tutorial.html">HTTPlug</a> as our underlying HTTP library. The advantage of this over using something like Guzzle is that we give library users the freedom to choose the HTTP library they feel is most appropriate to their situation.</p><h2 id="background">Background</h2><p>If you’re unfamiliar with it, the UK postcode system is our equivalent of a zip code in the US, but with two major differences:</p><ul><li>The codes themselves are alphanumeric instead of numeric, with the first part including one or two letters usually (but not always) derived from the nearest large town or city (eg L for Liverpool, B for Birmingham, OX for Oxford), or for London, based on the part of the city (eg NW for the north-west of London)</li><li>A full postcode is in two parts (eg NW1 8TQ), and the first part narrows the location down to a similar area to a US-style zip code, while the second part usually narrows it down to a street (although sometimes large organisations that receive a lot of mail will have a postcode to themselves).</li></ul><p>This means that if you have someone’s postcode and house name or address, you can use those details to look up the rest of their address details. This obviously makes it easier for users to fill out a form, such as when placing an order on an e-commerce site - you can just request those two details and then autofill the rest from them.</p><p>Unfortunately, it’s not quite that simple. The data is owned by Royal Mail, and they charge through the nose for access to the raw data, which places this data well outside the budgets of many web app developers. Fortunately, <a href="https://ideal-postcodes.co.uk/">Ideal Postcodes</a> offer a REST API for querying this data. It’s not free, but at 2.5p per request it’s not going to break the bank unless used excessively, and they offer some dummy postcodes that are free to query, which is perfectly fine for testing.</p><p>For those of you outside the UK, this may not be of much immediate use, but the underlying principles will still be useful, and you can probably build a similar client for your own nation’s postal code system. For instance, there’s a <a href="https://www.zipcodeapi.com/API">Zipcode API</a> that those of you in the US can use, and if you understand what’s going on here it shouldn’t be hard to adapt it to work with that. If you do produce a similar client for your country’s postal code system, submit a pull request to update the README with a link to it and I’ll include it.</p><h2 id="setting-up">Setting up</h2><p>First we’ll create a <code>composer.json</code> to specify our dependencies:</p><pre><code class="hljs lang-json">{
+    <span class="hljs-attr">"name"</span>: <span class="hljs-string">"matthewbdaly/postcode-client"</span>,
+    <span class="hljs-attr">"description"</span>: <span class="hljs-string">"A postcode lookup client."</span>,
+    <span class="hljs-attr">"type"</span>: <span class="hljs-string">"library"</span>,
+    <span class="hljs-attr">"keywords"</span>: [<span class="hljs-string">"postcode"</span>],
+    <span class="hljs-attr">"require"</span>: {
+        <span class="hljs-attr">"psr/http-message"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"php-http/client-implementation"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"php-http/httplug"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"php-http/message-factory"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"php-http/discovery"</span>: <span class="hljs-string">"^1.0"</span>
     },
-    &quot;require-dev&quot;: {
-        &quot;psy/psysh&quot;: &quot;^0.8.0&quot;,
-        &quot;phpspec/phpspec&quot;: &quot;^3.2&quot;,
-        &quot;squizlabs/php_codesniffer&quot;: &quot;^2.7&quot;,
-        &quot;php-http/mock-client&quot;: &quot;^1.0&quot;,
-        &quot;php-http/message&quot;: &quot;^1.0&quot;,
-        &quot;guzzlehttp/psr7&quot;: &quot;^1.0&quot;
+    <span class="hljs-attr">"require-dev"</span>: {
+        <span class="hljs-attr">"psy/psysh"</span>: <span class="hljs-string">"^0.8.0"</span>,
+        <span class="hljs-attr">"phpspec/phpspec"</span>: <span class="hljs-string">"^3.2"</span>,
+        <span class="hljs-attr">"squizlabs/php_codesniffer"</span>: <span class="hljs-string">"^2.7"</span>,
+        <span class="hljs-attr">"php-http/mock-client"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"php-http/message"</span>: <span class="hljs-string">"^1.0"</span>,
+        <span class="hljs-attr">"guzzlehttp/psr7"</span>: <span class="hljs-string">"^1.0"</span>
     },
-    &quot;license&quot;: &quot;MIT&quot;,
-    &quot;authors&quot;: [
+    <span class="hljs-attr">"license"</span>: <span class="hljs-string">"MIT"</span>,
+    <span class="hljs-attr">"authors"</span>: [
         {
-            &quot;name&quot;: &quot;Matthew Daly&quot;,
-            &quot;email&quot;: &quot;matthewbdaly@gmail.com&quot;
+            <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Matthew Daly"</span>,
+            <span class="hljs-attr">"email"</span>: <span class="hljs-string">"matthewbdaly@gmail.com"</span>
         }
     ],
-    &quot;autoload&quot;: {
-        &quot;psr-4&quot;: {
-            &quot;Matthewbdaly\\Postcode\\&quot;: &quot;src/&quot;
+    <span class="hljs-attr">"autoload"</span>: {
+        <span class="hljs-attr">"psr-4"</span>: {
+            <span class="hljs-attr">"Matthewbdaly\\Postcode\\"</span>: <span class="hljs-string">"src/"</span>
         }
     }
 }
-</code></pre><p>Note that we don’t install an actual HTTPlug client, other than the mock one, which is only useful for testing. This is deliberate - we’re giving developers working with this library the choice of working with whatever HTTP client they see fit. We do use the Guzzle PSR7 library, but that’s just for the PSR7 library.</p><p>Then we install our dependencies:</p><pre><code class="lang-bash">$ composer install
-</code></pre><p>We also need to tell PHPSpec what our namespace will be. Save this as <code>phpspec.yml</code>:</p><pre><code class="lang-yml">suites:
+</code></pre><p>Note that we don’t install an actual HTTPlug client, other than the mock one, which is only useful for testing. This is deliberate - we’re giving developers working with this library the choice of working with whatever HTTP client they see fit. We do use the Guzzle PSR7 library, but that’s just for the PSR7 library.</p><p>Then we install our dependencies:</p><pre><code class="hljs lang-bash">$ composer install
+</code></pre><p>We also need to tell PHPSpec what our namespace will be. Save this as <code>phpspec.yml</code>:</p><pre><code class="hljs lang-yml">suites:
     test_suite:
-        namespace: Matthewbdaly\Postcode
-        psr4_prefix: Matthewbdaly\Postcode
-</code></pre><p>Don’t forget to update the namespace in both files to whatever you’re using, which should have a vendor name and a package name.</p><p>With that done, it’s time to introduce the next component.</p><h2 id="introducing-httplug">Introducing HTTPlug</h2><p>In the past I’ve usually used either Curl or Guzzle to carry out HTTP requests. However, the problem with this approach is that you’re forcing whoever uses your library to use whatever HTTP client, and whatever version of that client, that you deem appropriate. If they’re also using another library that someone else has written and they made different choices, you could have problems.</p><p>HTTPlug is an excellent way of solving this problem. By requiring only an interface and not a concrete implementation, using HTTPlug means that you can specify that the consumer of the library must provide a suitable implementation of that library, but leave the choice of implementation up to them. This means that they can choose whatever implementation best fits their use case. There are <a href="http://docs.php-http.org/en/latest/clients.html">adapters for many different clients</a>, so it’s unlikely that they won’t be able to find one that meets their needs.</p><p>In addition, HTTPlug provides the means to automatically determine what HTTP client to use, so that if one is not explicitly provided, it can be resolved without any action on the part of the developer. As long as a suitable HTTP adapter is installed, it will be used.</p><h2 id="getting-started">Getting started</h2><p>One advantage of PHPSpec is that it will automatically generate much of the boilerplate for our client and specs. To create our client spec, run this command:</p><pre><code class="lang-bash">$ vendor/bin/phpspec desc Matthewbdaly/Postcode/Client
-Specification for Matthewbdaly\Postcode\Client created in /home/matthew/Projects/postcode-client/spec/ClientSpec.php.
-</code></pre><p>Now that we have a spec for our client, we can generate the client itself:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+        <span class="hljs-keyword">namespace</span>: <span class="hljs-symbol">Matthewbdaly</span>\<span class="hljs-symbol">Postcode</span>
+        <span class="hljs-symbol">psr4_prefix</span>: <span class="hljs-symbol">Matthewbdaly</span>\<span class="hljs-symbol">Postcode</span>
+</code></pre><p>Don’t forget to update the namespace in both files to whatever you’re using, which should have a vendor name and a package name.</p><p>With that done, it’s time to introduce the next component.</p><h2 id="introducing-httplug">Introducing HTTPlug</h2><p>In the past I’ve usually used either Curl or Guzzle to carry out HTTP requests. However, the problem with this approach is that you’re forcing whoever uses your library to use whatever HTTP client, and whatever version of that client, that you deem appropriate. If they’re also using another library that someone else has written and they made different choices, you could have problems.</p><p>HTTPlug is an excellent way of solving this problem. By requiring only an interface and not a concrete implementation, using HTTPlug means that you can specify that the consumer of the library must provide a suitable implementation of that library, but leave the choice of implementation up to them. This means that they can choose whatever implementation best fits their use case. There are <a href="http://docs.php-http.org/en/latest/clients.html">adapters for many different clients</a>, so it’s unlikely that they won’t be able to find one that meets their needs.</p><p>In addition, HTTPlug provides the means to automatically determine what HTTP client to use, so that if one is not explicitly provided, it can be resolved without any action on the part of the developer. As long as a suitable HTTP adapter is installed, it will be used.</p><h2 id="getting-started">Getting started</h2><p>One advantage of PHPSpec is that it will automatically generate much of the boilerplate for our client and specs. To create our client spec, run this command:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec desc Matthewbdaly/Postcode/Client
+Specification <span class="hljs-keyword">for</span> Matthewbdaly\Postcode\Client created <span class="hljs-keyword">in</span> /home/matthew/Projects/postcode-client/spec/ClientSpec.php.
+</code></pre><p>Now that we have a spec for our client, we can generate the client itself:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                    
   11  - it is initializable
       class Matthewbdaly\Postcode\Client does not exist.
@@ -234,38 +234,38 @@ Matthewbdaly/Postcode/Client
 14ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client` for you?              
+  Do you want me to create `Matthewbdaly\Postcode\Client` <span class="hljs-keyword">for</span> you?              
                                                                          [Y/n] 
 y
-Class Matthewbdaly\Postcode\Client created in /home/matthew/Projects/postcode-client/src/Client.php.
+Class Matthewbdaly\Postcode\Client created <span class="hljs-keyword">in</span> /home/matthew/Projects/postcode-client/src/Client.php.
 
                                       100%                                       1
 1 specs
 1 example (1 passed)
 16ms
-</code></pre><p>You will need to enter <code>Y</code> when prompted. We now have an empty class for our client.</p><p>Next, we need to make sure that the constructor for our client accepts two parameters:</p><ul><li>The HTTP client</li><li>A message factory instance, which is used to create the request</li></ul><p>Amend <code>spec/ClientSpec.php</code> as follows:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>You will need to enter <code>Y</code> when prompted. We now have an empty class for our client.</p><p>Next, we need to make sure that the constructor for our client accepts two parameters:</p><ul><li>The HTTP client</li><li>A message factory instance, which is used to create the request</li></ul><p>Amend <code>spec/ClientSpec.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace spec\Matthewbdaly\Postcode;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">spec</span>\<span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>;
 
-use Matthewbdaly\Postcode\Client;
-use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
-use Http\Client\HttpClient;
-use Http\Message\MessageFactory;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Client</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">PhpSpec</span>\<span class="hljs-title">ObjectBehavior</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Prophecy</span>\<span class="hljs-title">Argument</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Client</span>\<span class="hljs-title">HttpClient</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">MessageFactory</span>;
 
-class ClientSpec extends ObjectBehavior
-{
-    function let (HttpClient $client, MessageFactory $messageFactory)
-    {
-        $this-&gt;beConstructedWith($client, $messageFactory);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ClientSpec</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ObjectBehavior</span>
+</span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">let</span> <span class="hljs-params">(HttpClient $client, MessageFactory $messageFactory)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;beConstructedWith($client, $messageFactory);
     }
 
-    function it_is_initializable()
-    {
-        $this-&gt;shouldHaveType(Client::class);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_is_initializable</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;shouldHaveType(Client::class);
     }
 }
-</code></pre><p>Note the use of the <code>let()</code> method here. This lets us specify how the object is constructed, with the <code>beConstructedWith()</code> method. Also, note that <code>$this</code> refers not to the test, but to the object being tested - this takes a bit of getting used to if you’re used to working with PHPUnit.</p><p>Also, note that the objects passed through are not actual instances of those objects - instead they are mocks created automatically by PHPSpec. This makes mocking extremely easy, and you can easily set up your own expectations on those mock objects in the test. If you want to use a real object, you can instantiate it in the spec as usual. If we need any other mocks, we can typehint them in our method in exactly the same way.</p><p>If we once again use <code>vendor/bin/phpspec run</code> we can now generate a constructor:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>Note the use of the <code>let()</code> method here. This lets us specify how the object is constructed, with the <code>beConstructedWith()</code> method. Also, note that <code>$this</code> refers not to the test, but to the object being tested - this takes a bit of getting used to if you’re used to working with PHPUnit.</p><p>Also, note that the objects passed through are not actual instances of those objects - instead they are mocks created automatically by PHPSpec. This makes mocking extremely easy, and you can easily set up your own expectations on those mock objects in the test. If you want to use a real object, you can instantiate it in the spec as usual. If we need any other mocks, we can typehint them in our method in exactly the same way.</p><p>If we once again use <code>vendor/bin/phpspec run</code> we can now generate a constructor:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                    
   18  - it is initializable
       method Matthewbdaly\Postcode\Client::__construct not found.
@@ -276,7 +276,7 @@ Matthewbdaly/Postcode/Client
 281ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client::__construct()` for    
+  Do you want me to create `Matthewbdaly\Postcode\Client::__construct()` <span class="hljs-keyword">for</span>    
   you?                                                                          
                                                                          [Y/n] 
 y
@@ -286,34 +286,34 @@ y
 1 specs
 1 example (1 passed)
 50ms
-</code></pre><p>This will only create a placeholder for the constructor. You need to populate it yourself, so update <code>src/Client.php</code> as follows:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>This will only create a placeholder for the constructor. You need to populate it yourself, so update <code>src/Client.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace Matthewbdaly\Postcode;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>;
 
-use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Message\MessageFactory;
-use Http\Discovery\MessageFactoryDiscovery;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Client</span>\<span class="hljs-title">HttpClient</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Discovery</span>\<span class="hljs-title">HttpClientDiscovery</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">MessageFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Http</span>\<span class="hljs-title">Discovery</span>\<span class="hljs-title">MessageFactoryDiscovery</span>;
 
-class Client
-{
-    public function __construct(HttpClient $client = null, MessageFactory $messageFactory = null)
-    {
-        $this-&gt;client = $client ?: HttpClientDiscovery::find();
-        $this-&gt;messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Client</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(HttpClient $client = null, MessageFactory $messageFactory = null)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;client = $client ?: HttpClientDiscovery::find();
+        <span class="hljs-keyword">$this</span>-&gt;messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
     }
 }
-</code></pre><p>A little explanation is called for here. We need two arguments in our construct:</p><ul><li>An instance of <code>Http\Client\HttpClient</code> to send the request</li><li>An instance of <code>Http\Message\MessageFactory</code> to create the request</li></ul><p>However, we don’t want to force the user to create one. Therefore if they are not set, we use <code>Http\Discovery\HttpClientDiscovery</code> and <code>Http\Discovery\MessageFactoryDiscovery</code> to create them for us.</p><p>If we re-run PHPSpec, it should now pass:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>A little explanation is called for here. We need two arguments in our construct:</p><ul><li>An instance of <code>Http\Client\HttpClient</code> to send the request</li><li>An instance of <code>Http\Message\MessageFactory</code> to create the request</li></ul><p>However, we don’t want to force the user to create one. Therefore if they are not set, we use <code>Http\Discovery\HttpClientDiscovery</code> and <code>Http\Discovery\MessageFactoryDiscovery</code> to create them for us.</p><p>If we re-run PHPSpec, it should now pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       1
 1 specs
 1 example (1 passed)
 31ms
-</code></pre><p>Next, we want to have a method for retrieving the endpoint. Add the following method to <code>spec/ClientSpec.php</code>:</p><pre><code class="lang-php">    function it_can_retrieve_the_base_url()
-    {
-        $this-&gt;getBaseUrl()-&gt;shouldReturn(&#39;https://api.ideal-postcodes.co.uk/v1/postcodes/&#39;);
+</code></pre><p>Next, we want to have a method for retrieving the endpoint. Add the following method to <code>spec/ClientSpec.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_retrieve_the_base_url</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;getBaseUrl()-&gt;shouldReturn(<span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/'</span>);
     }
-</code></pre><p>Here we’re asserting that fetching the base URL returns the given result. Note how much simpler and more intuitive this syntax is than PHPUnit would be:</p><pre><code class="lang-php">$this-&gt;assertEquals(&#39;https://api.ideal-postcodes.co.uk/v1/postcodes/&#39;, $client-&gt;getBaseUrl());
-</code></pre><p>Running the tests again should prompt us to create the boilerplate for the new method:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>Here we’re asserting that fetching the base URL returns the given result. Note how much simpler and more intuitive this syntax is than PHPUnit would be:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">$this</span>-&gt;assertEquals(<span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/'</span>, $client-&gt;getBaseUrl());
+</code></pre><p>Running the tests again should prompt us to create the boilerplate for the new method:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                      
   23  - it can retrieve the base url
       method Matthewbdaly\Postcode\Client::getBaseUrl not found.
@@ -324,7 +324,7 @@ Matthewbdaly/Postcode/Client
 40ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client::getBaseUrl()` for     
+  Do you want me to create `Matthewbdaly\Postcode\Client::getBaseUrl()` <span class="hljs-keyword">for</span>     
   you?                                                                          
                                                                          [Y/n] 
 y
@@ -332,34 +332,34 @@ y
 
 Matthewbdaly/Postcode/Client                                                      
   23  - it can retrieve the base url
-      expected &quot;https://api.ideal-postcod...&quot;, but got null.
+      expected <span class="hljs-string">"https://api.ideal-postcod..."</span>, but got null.
 
                   50%                                     50%                    2
 1 specs
 2 examples (1 passed, 1 failed)
 72ms
-</code></pre><p>Now we need to update that method to work as expected:</p><pre><code class="lang-php">    protected $baseUrl = &#39;https://api.ideal-postcodes.co.uk/v1/postcodes/&#39;;
+</code></pre><p>Now we need to update that method to work as expected:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">protected</span> $baseUrl = <span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/'</span>;
 
      ...
 
-    public function getBaseUrl()
-    {
-        return $this-&gt;baseUrl;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBaseUrl</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;baseUrl;
     }
-</code></pre><p>This should make the tests pass:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>This should make the tests pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       2
 1 specs
 2 examples (2 passed)
 34ms
-</code></pre><p>Next, we need to be able to get and set the API key. Add the following to <code>spec/ClientSpec.php</code>:</p><pre><code class="lang-php">    function it_can_get_and_set_the_key()
-    {
-        $this-&gt;getKey()-&gt;shouldReturn(null);
-        $this-&gt;setKey(&#39;foo&#39;)-&gt;shouldReturn($this);
-        $this-&gt;getKey()-&gt;shouldReturn(&#39;foo&#39;);
+</code></pre><p>Next, we need to be able to get and set the API key. Add the following to <code>spec/ClientSpec.php</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_get_and_set_the_key</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;getKey()-&gt;shouldReturn(<span class="hljs-keyword">null</span>);
+        <span class="hljs-keyword">$this</span>-&gt;setKey(<span class="hljs-string">'foo'</span>)-&gt;shouldReturn(<span class="hljs-keyword">$this</span>);
+        <span class="hljs-keyword">$this</span>-&gt;getKey()-&gt;shouldReturn(<span class="hljs-string">'foo'</span>);
     }
-</code></pre><p>Note that we expect <code>$this-&gt;setKey(&#39;foo&#39;)</code> to return <code>$this</code>. This is an example of a <em>fluent</em> interface - by returning an instance of the object, it enables methods to be chained, eg <code>$client-&gt;setKey(&#39;foo&#39;)-&gt;get()</code>. Obviously it won’t work for anything that has to return a value, but it’s a useful way of making your classes more intuitive to use.</p><p>Next, run the tests again and agree to the prompts as before:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>Note that we expect <code>$this-&gt;setKey(&#39;foo&#39;)</code> to return <code>$this</code>. This is an example of a <em>fluent</em> interface - by returning an instance of the object, it enables methods to be chained, eg <code>$client-&gt;setKey(&#39;foo&#39;)-&gt;get()</code>. Obviously it won’t work for anything that has to return a value, but it’s a useful way of making your classes more intuitive to use.</p><p>Next, run the tests again and agree to the prompts as before:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                      
-  28  - it can get and set the key
+  28  - it can get and <span class="hljs-built_in">set</span> the key
       method Matthewbdaly\Postcode\Client::getKey not found.
 
                          66%                                     33%             3
@@ -368,13 +368,13 @@ Matthewbdaly/Postcode/Client
 51ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client::getKey()` for you?    
+  Do you want me to create `Matthewbdaly\Postcode\Client::getKey()` <span class="hljs-keyword">for</span> you?    
                                                                          [Y/n] 
 y
   Method Matthewbdaly\Postcode\Client::getKey() has been created.
 
 Matthewbdaly/Postcode/Client                                                      
-  28  - it can get and set the key
+  28  - it can get and <span class="hljs-built_in">set</span> the key
       method Matthewbdaly\Postcode\Client::setKey not found.
 
                          66%                                     33%             3
@@ -383,262 +383,262 @@ Matthewbdaly/Postcode/Client
 43ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client::setKey()` for you?    
+  Do you want me to create `Matthewbdaly\Postcode\Client::setKey()` <span class="hljs-keyword">for</span> you?    
                                                                          [Y/n] 
 y
   Method Matthewbdaly\Postcode\Client::setKey() has been created.
 
 Matthewbdaly/Postcode/Client                                                      
-  28  - it can get and set the key
+  28  - it can get and <span class="hljs-built_in">set</span> the key
       expected [obj:Matthewbdaly\Postcode\Client], but got null.
 
                          66%                                     33%             3
 1 specs
 3 examples (2 passed, 1 failed)
 52ms
-</code></pre><p>Next, add our getter and setter for the key, as well as declaring the property <code>$key</code>:</p><pre><code class="lang-php">    protected $key;
+</code></pre><p>Next, add our getter and setter for the key, as well as declaring the property <code>$key</code>:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">protected</span> $key;
 
-    public function getKey()
-    {
-        return $this-&gt;key;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getKey</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;key;
     }
 
-    public function setKey(string $key)
-    {
-        $this-&gt;key = $key;
-        return $this;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setKey</span><span class="hljs-params">(string $key)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;key = $key;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>;
     }
-</code></pre><p>That should make the tests pass:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>That should make the tests pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       3
 1 specs
 3 examples (3 passed)
 38ms
-</code></pre><p>With that done, our final task is to be able to handle sending requests. Add the following imports at the top of <code>spec/ClientSpec.php</code>:</p><pre><code class="lang-php">use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
-</code></pre><p>And add the following method at the bottom of the same file:</p><pre><code class="lang-php">    function it_can_send_the_request(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)
-    {
-        $this-&gt;beConstructedWith($client, $messageFactory);
-        $this-&gt;setKey(&#39;foo&#39;);
+</code></pre><p>With that done, our final task is to be able to handle sending requests. Add the following imports at the top of <code>spec/ClientSpec.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">RequestInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">ResponseInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Message</span>\<span class="hljs-title">StreamInterface</span>;
+</code></pre><p>And add the following method at the bottom of the same file:</p><pre><code class="hljs lang-php">    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_can_send_the_request</span><span class="hljs-params">(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;beConstructedWith($client, $messageFactory);
+        <span class="hljs-keyword">$this</span>-&gt;setKey(<span class="hljs-string">'foo'</span>);
         $data = json_encode([
-            &#39;result&#39; =&gt; [
-                &quot;postcode&quot; =&gt; &quot;SW1A 2AA&quot;,
-                &quot;postcode_inward&quot; =&gt; &quot;2AA&quot;,
-                &quot;postcode_outward&quot; =&gt; &quot;SW1A&quot;,
-                &quot;post_town&quot; =&gt; &quot;LONDON&quot;,
-                &quot;dependant_locality&quot; =&gt; &quot;&quot;,
-                &quot;double_dependant_locality&quot; =&gt; &quot;&quot;,
-                &quot;thoroughfare&quot; =&gt; &quot;Downing Street&quot;,
-                &quot;dependant_thoroughfare&quot; =&gt; &quot;&quot;,
-                &quot;building_number&quot; =&gt; &quot;10&quot;,
-                &quot;building_name&quot; =&gt; &quot;&quot;,
-                &quot;sub_building_name&quot; =&gt; &quot;&quot;,
-                &quot;po_box&quot; =&gt; &quot;&quot;,
-                &quot;department_name&quot; =&gt; &quot;&quot;,
-                &quot;organisation_name&quot; =&gt; &quot;Prime Minister &amp; First Lord Of The Treasury&quot;,
-                &quot;udprn&quot; =&gt; 23747771,
-                &quot;umprn&quot; =&gt; &quot;&quot;,
-                &quot;postcode_type&quot; =&gt; &quot;L&quot;,
-                &quot;su_organisation_indicator&quot; =&gt; &quot;&quot;,
-                &quot;delivery_point_suffix&quot; =&gt; &quot;1A&quot;,
-                &quot;line_1&quot; =&gt; &quot;Prime Minister &amp; First Lord Of The Treasury&quot;,
-                &quot;line_2&quot; =&gt; &quot;10 Downing Street&quot;,
-                &quot;line_3&quot; =&gt; &quot;&quot;,
-                &quot;premise&quot; =&gt; &quot;10&quot;,
-                &quot;longitude&quot; =&gt; -0.127695242183412,
-                &quot;latitude&quot; =&gt; 51.5035398826274,
-                &quot;eastings&quot; =&gt; 530047,
-                &quot;northings&quot; =&gt; 179951,
-                &quot;country&quot; =&gt; &quot;England&quot;,
-                &quot;traditional_county&quot; =&gt; &quot;Greater London&quot;,
-                &quot;administrative_county&quot; =&gt; &quot;&quot;,
-                &quot;postal_county&quot; =&gt; &quot;London&quot;,
-                &quot;county&quot; =&gt; &quot;London&quot;,
+            <span class="hljs-string">'result'</span> =&gt; [
+                <span class="hljs-string">"postcode"</span> =&gt; <span class="hljs-string">"SW1A 2AA"</span>,
+                <span class="hljs-string">"postcode_inward"</span> =&gt; <span class="hljs-string">"2AA"</span>,
+                <span class="hljs-string">"postcode_outward"</span> =&gt; <span class="hljs-string">"SW1A"</span>,
+                <span class="hljs-string">"post_town"</span> =&gt; <span class="hljs-string">"LONDON"</span>,
+                <span class="hljs-string">"dependant_locality"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"double_dependant_locality"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"thoroughfare"</span> =&gt; <span class="hljs-string">"Downing Street"</span>,
+                <span class="hljs-string">"dependant_thoroughfare"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"building_number"</span> =&gt; <span class="hljs-string">"10"</span>,
+                <span class="hljs-string">"building_name"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"sub_building_name"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"po_box"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"department_name"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"organisation_name"</span> =&gt; <span class="hljs-string">"Prime Minister &amp; First Lord Of The Treasury"</span>,
+                <span class="hljs-string">"udprn"</span> =&gt; <span class="hljs-number">23747771</span>,
+                <span class="hljs-string">"umprn"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"postcode_type"</span> =&gt; <span class="hljs-string">"L"</span>,
+                <span class="hljs-string">"su_organisation_indicator"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"delivery_point_suffix"</span> =&gt; <span class="hljs-string">"1A"</span>,
+                <span class="hljs-string">"line_1"</span> =&gt; <span class="hljs-string">"Prime Minister &amp; First Lord Of The Treasury"</span>,
+                <span class="hljs-string">"line_2"</span> =&gt; <span class="hljs-string">"10 Downing Street"</span>,
+                <span class="hljs-string">"line_3"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"premise"</span> =&gt; <span class="hljs-string">"10"</span>,
+                <span class="hljs-string">"longitude"</span> =&gt; <span class="hljs-number">-0.127695242183412</span>,
+                <span class="hljs-string">"latitude"</span> =&gt; <span class="hljs-number">51.5035398826274</span>,
+                <span class="hljs-string">"eastings"</span> =&gt; <span class="hljs-number">530047</span>,
+                <span class="hljs-string">"northings"</span> =&gt; <span class="hljs-number">179951</span>,
+                <span class="hljs-string">"country"</span> =&gt; <span class="hljs-string">"England"</span>,
+                <span class="hljs-string">"traditional_county"</span> =&gt; <span class="hljs-string">"Greater London"</span>,
+                <span class="hljs-string">"administrative_county"</span> =&gt; <span class="hljs-string">""</span>,
+                <span class="hljs-string">"postal_county"</span> =&gt; <span class="hljs-string">"London"</span>,
+                <span class="hljs-string">"county"</span> =&gt; <span class="hljs-string">"London"</span>,
             ]
         ]);
-        $messageFactory-&gt;createRequest(&#39;GET&#39;, &#39;https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo&#39;, [], null, &#39;1.1&#39;)-&gt;willReturn($request);
+        $messageFactory-&gt;createRequest(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo'</span>, [], <span class="hljs-keyword">null</span>, <span class="hljs-string">'1.1'</span>)-&gt;willReturn($request);
         $client-&gt;sendRequest($request)-&gt;willReturn($response);
-        $response-&gt;getStatusCode()-&gt;willReturn(200);
+        $response-&gt;getStatusCode()-&gt;willReturn(<span class="hljs-number">200</span>);
         $response-&gt;getBody()-&gt;willReturn($stream);
         $stream-&gt;getContents()-&gt;willReturn($data);
-        $this-&gt;get(&#39;SW1A 2AA&#39;)-&gt;shouldBeLike(json_decode($data, true));
+        <span class="hljs-keyword">$this</span>-&gt;get(<span class="hljs-string">'SW1A 2AA'</span>)-&gt;shouldBeLike(json_decode($data, <span class="hljs-keyword">true</span>));
     }
-</code></pre><p>This test is by far the biggest so far, so it merits some degree of explanation.</p><p>Note that we don’t make a real HTTP request against the API. This may sound strange, but bear with me. We have no control whatsoever over that API, and it could in theory become inaccessible or be subject to breaking changes at any time. We also don’t want to be shelling out for a paid service just to test our API client works. All we can do is test that our implementation will send the request we expect it to send - we don’t want our test suite reporting a bug when the API goes down.</p><p>We therefore typehint not just the dependencies for the constructor, but a request, response and stream instance. We mock our our responses from those instances using the <code>willReturn()</code> method, so we have complete control over what we pass to our client. That way we can return any appropriate response or throw any exception we deem fit to test the behaviour under those circumstances. For the message factory, we specify what arguments it should receive to create the request, and return our mocked-out request object.</p><p>Also, note we use <code>shouldBeLike()</code> to verify the response - this is effectively using the <code>==</code> operator, whereas <code>shouldBe()</code> uses the <code>===</code> operator, making it stricter.</p><p>Let’s run the tests, and don’t forget the prompt:</p><pre><code class="lang-php">$ vendor/bin/phpspec run
+</code></pre><p>This test is by far the biggest so far, so it merits some degree of explanation.</p><p>Note that we don’t make a real HTTP request against the API. This may sound strange, but bear with me. We have no control whatsoever over that API, and it could in theory become inaccessible or be subject to breaking changes at any time. We also don’t want to be shelling out for a paid service just to test our API client works. All we can do is test that our implementation will send the request we expect it to send - we don’t want our test suite reporting a bug when the API goes down.</p><p>We therefore typehint not just the dependencies for the constructor, but a request, response and stream instance. We mock our our responses from those instances using the <code>willReturn()</code> method, so we have complete control over what we pass to our client. That way we can return any appropriate response or throw any exception we deem fit to test the behaviour under those circumstances. For the message factory, we specify what arguments it should receive to create the request, and return our mocked-out request object.</p><p>Also, note we use <code>shouldBeLike()</code> to verify the response - this is effectively using the <code>==</code> operator, whereas <code>shouldBe()</code> uses the <code>===</code> operator, making it stricter.</p><p>Let’s run the tests, and don’t forget the prompt:</p><pre><code class="hljs lang-php">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                      
-  38  - it can send the request
+  <span class="hljs-number">38</span>  - it can send the request
       method Matthewbdaly\Postcode\Client::get not found.
 
-                            75%                                     25%          4
-1 specs
-4 examples (3 passed, 1 broken)
-55ms
+                            <span class="hljs-number">75</span>%                                     <span class="hljs-number">25</span>%          <span class="hljs-number">4</span>
+<span class="hljs-number">1</span> specs
+<span class="hljs-number">4</span> examples (<span class="hljs-number">3</span> passed, <span class="hljs-number">1</span> broken)
+<span class="hljs-number">55</span>ms
 
 
-  Do you want me to create `Matthewbdaly\Postcode\Client::get()` for you?       
+  <span class="hljs-keyword">Do</span> you want me to create `Matthewbdaly\Postcode\Client::get()` <span class="hljs-keyword">for</span> you?       
                                                                          [Y/n] 
 y
   Method Matthewbdaly\Postcode\Client::get() has been created.
 
 Matthewbdaly/Postcode/Client                                                      
-  38  - it can send the request
-      expected [array:1], but got null.
+  <span class="hljs-number">38</span>  - it can send the request
+      expected [<span class="hljs-keyword">array</span>:<span class="hljs-number">1</span>], but got <span class="hljs-keyword">null</span>.
 
-                            75%                                     25%          4
-1 specs
-4 examples (3 passed, 1 failed)
-56ms
-</code></pre><p>Now we can implement the <code>get()</code> method:</p><pre><code class="lang-php">    public function get(string $postcode)
-    {
-        $url = $this-&gt;getBaseUrl() . rawurlencode($postcode) . &#39;?&#39; . http_build_query([
-            &#39;api_key&#39; =&gt; $this-&gt;getKey()
+                            <span class="hljs-number">75</span>%                                     <span class="hljs-number">25</span>%          <span class="hljs-number">4</span>
+<span class="hljs-number">1</span> specs
+<span class="hljs-number">4</span> examples (<span class="hljs-number">3</span> passed, <span class="hljs-number">1</span> failed)
+<span class="hljs-number">56</span>ms
+</code></pre><p>Now we can implement the <code>get()</code> method:</p><pre><code class="hljs lang-php">    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span><span class="hljs-params">(string $postcode)</span>
+    </span>{
+        $url = <span class="hljs-keyword">$this</span>-&gt;getBaseUrl() . rawurlencode($postcode) . <span class="hljs-string">'?'</span> . http_build_query([
+            <span class="hljs-string">'api_key'</span> =&gt; <span class="hljs-keyword">$this</span>-&gt;getKey()
         ]);
-        $request = $this-&gt;messageFactory-&gt;createRequest(
-            &#39;GET&#39;,
+        $request = <span class="hljs-keyword">$this</span>-&gt;messageFactory-&gt;createRequest(
+            <span class="hljs-string">'GET'</span>,
             $url,
             [],
-            null,
-            &#39;1.1&#39;
+            <span class="hljs-keyword">null</span>,
+            <span class="hljs-string">'1.1'</span>
         );
-        $response = $this-&gt;client-&gt;sendRequest($request);
-        $data = json_decode($response-&gt;getBody()-&gt;getContents(), true);
-        return $data;
+        $response = <span class="hljs-keyword">$this</span>-&gt;client-&gt;sendRequest($request);
+        $data = json_decode($response-&gt;getBody()-&gt;getContents(), <span class="hljs-keyword">true</span>);
+        <span class="hljs-keyword">return</span> $data;
     }
-</code></pre><p>We first build up our URL, before using the message factory to create a request object. We then pass the built request to our client to send, before decoding the response into the format we want.</p><p>This should make our tests pass:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>We first build up our URL, before using the message factory to create a request object. We then pass the built request to our client to send, before decoding the response into the format we want.</p><p>This should make our tests pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       4
 1 specs
 4 examples (4 passed)
 307ms
-</code></pre><p>Our client now works, but there are a couple of situations we need to account for. First, the API will raise a 402 if you make a request for a real postcode without having paid. We need to catch this and throw an exception. Add this to <code>spec/ClientSpec.php</code>:</p><pre><code class="lang-php">use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
+</code></pre><p>Our client now works, but there are a couple of situations we need to account for. First, the API will raise a 402 if you make a request for a real postcode without having paid. We need to catch this and throw an exception. Add this to <code>spec/ClientSpec.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">PaymentRequired</span>;
 
     ...
 
-    function it_throws_an_exception_if_payment_required(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)
-    {
-        $this-&gt;beConstructedWith($client, $messageFactory);
-        $this-&gt;setKey(&#39;foo&#39;);
-        $messageFactory-&gt;createRequest(&#39;GET&#39;, &#39;https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo&#39;, [], null, &#39;1.1&#39;)-&gt;willReturn($request);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_throws_an_exception_if_payment_required</span><span class="hljs-params">(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;beConstructedWith($client, $messageFactory);
+        <span class="hljs-keyword">$this</span>-&gt;setKey(<span class="hljs-string">'foo'</span>);
+        $messageFactory-&gt;createRequest(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo'</span>, [], <span class="hljs-keyword">null</span>, <span class="hljs-string">'1.1'</span>)-&gt;willReturn($request);
         $client-&gt;sendRequest($request)-&gt;willReturn($response);
-        $response-&gt;getStatusCode()-&gt;willReturn(402);
-        $this-&gt;shouldThrow(PaymentRequired::class)-&gt;duringGet(&#39;SW1A 2AA&#39;);
+        $response-&gt;getStatusCode()-&gt;willReturn(<span class="hljs-number">402</span>);
+        <span class="hljs-keyword">$this</span>-&gt;shouldThrow(PaymentRequired::class)-&gt;duringGet(<span class="hljs-string">'SW1A 2AA'</span>);
     }
-</code></pre><p>With that done, run the tests again:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>With that done, run the tests again:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                      
-  87  - it throws an exception if payment required
-      expected exception of class &quot;Matthewbdaly\Postcode\Exc...&quot;, but got
-      [exc:Prophecy\Exception\Call\UnexpectedCallException(&quot;Method call:
+  87  - it throws an exception <span class="hljs-keyword">if</span> payment required
+      expected exception of class <span class="hljs-string">"Matthewbdaly\Postcode\Exc..."</span>, but got
+      [exc:Prophecy\Exception\Call\UnexpectedCallException(<span class="hljs-string">"Method call:
         - getBody()
       on Double\ResponseInterface\P15 was not expected, expected calls were:
-        - getStatusCode()&quot;)].
+        - getStatusCode()"</span>)].
 
                               80%                                     20%        5
 1 specs
 5 examples (4 passed, 1 failed)
 130ms
-</code></pre><p>Let’s amend the client to throw this exception:</p><pre><code class="lang-php">use Matthewbdaly\Postcode\Exceptions\PaymentRequired;
+</code></pre><p>Let’s amend the client to throw this exception:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">PaymentRequired</span>;
 
     ...
 
-    public function get(string $postcode)
-    {
-        $url = $this-&gt;getBaseUrl() . rawurlencode($postcode) . &#39;?&#39; . http_build_query([
-            &#39;api_key&#39; =&gt; $this-&gt;getKey()
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span><span class="hljs-params">(string $postcode)</span>
+    </span>{
+        $url = <span class="hljs-keyword">$this</span>-&gt;getBaseUrl() . rawurlencode($postcode) . <span class="hljs-string">'?'</span> . http_build_query([
+            <span class="hljs-string">'api_key'</span> =&gt; <span class="hljs-keyword">$this</span>-&gt;getKey()
         ]);
-        $request = $this-&gt;messageFactory-&gt;createRequest(
-            &#39;GET&#39;,
+        $request = <span class="hljs-keyword">$this</span>-&gt;messageFactory-&gt;createRequest(
+            <span class="hljs-string">'GET'</span>,
             $url,
             [],
-            null,
-            &#39;1.1&#39;
+            <span class="hljs-keyword">null</span>,
+            <span class="hljs-string">'1.1'</span>
         );
-        $response = $this-&gt;client-&gt;sendRequest($request);
-        if ($response-&gt;getStatusCode() == 402) {
-            throw new PaymentRequired;
+        $response = <span class="hljs-keyword">$this</span>-&gt;client-&gt;sendRequest($request);
+        <span class="hljs-keyword">if</span> ($response-&gt;getStatusCode() == <span class="hljs-number">402</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PaymentRequired;
         }
-        $data = json_decode($response-&gt;getBody()-&gt;getContents(), true);
-        return $data;
+        $data = json_decode($response-&gt;getBody()-&gt;getContents(), <span class="hljs-keyword">true</span>);
+        <span class="hljs-keyword">return</span> $data;
     }
-</code></pre><p>And let’s re-run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>And let’s re-run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                    
-  87  - it throws an exception if payment required
-      expected exception of class &quot;Matthewbdaly\Postcode\Exc...&quot;, but got [obj:Error] with the
-      message: &quot;Class &#39;Matthewbdaly\Postcode\Exceptions\PaymentRequired&#39; not found&quot;
+  87  - it throws an exception <span class="hljs-keyword">if</span> payment required
+      expected exception of class <span class="hljs-string">"Matthewbdaly\Postcode\Exc..."</span>, but got [obj:Error] with the
+      message: <span class="hljs-string">"Class 'Matthewbdaly\Postcode\Exceptions\PaymentRequired' not found"</span>
 
                               80%                                     20%        5
 1 specs
 5 examples (4 passed, 1 failed)
 389ms
-</code></pre><p>It fails now because the exception doesn’t exist. Let’s create it at <code>src/Exceptions/PaymentRequired.php</code>:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>It fails now because the exception doesn’t exist. Let’s create it at <code>src/Exceptions/PaymentRequired.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace Matthewbdaly\Postcode\Exceptions;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>;
 
-class PaymentRequired extends \Exception
-{
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PaymentRequired</span> <span class="hljs-keyword">extends</span> \<span class="hljs-title">Exception</span>
+</span>{
 }
-</code></pre><p>That should be enough to make our tests pass:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>That should be enough to make our tests pass:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       5
 1 specs
 5 examples (5 passed)
 89ms
-</code></pre><p>We also need to raise an exception when the postcode is not found, which raises a 404 error. Add the following spec:</p><pre><code class="lang-php">use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
+</code></pre><p>We also need to raise an exception when the postcode is not found, which raises a 404 error. Add the following spec:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">PostcodeNotFound</span>;
     ...
-    function it_throws_an_exception_if_postcode_not_found(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)
-    {
-        $this-&gt;beConstructedWith($client, $messageFactory);
-        $this-&gt;setKey(&#39;foo&#39;);
-        $messageFactory-&gt;createRequest(&#39;GET&#39;, &#39;https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo&#39;, [], null, &#39;1.1&#39;)-&gt;willReturn($request);
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">it_throws_an_exception_if_postcode_not_found</span><span class="hljs-params">(HttpClient $client, MessageFactory $messageFactory, RequestInterface $request, ResponseInterface $response, StreamInterface $stream)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;beConstructedWith($client, $messageFactory);
+        <span class="hljs-keyword">$this</span>-&gt;setKey(<span class="hljs-string">'foo'</span>);
+        $messageFactory-&gt;createRequest(<span class="hljs-string">'GET'</span>, <span class="hljs-string">'https://api.ideal-postcodes.co.uk/v1/postcodes/SW1A%202AA?api_key=foo'</span>, [], <span class="hljs-keyword">null</span>, <span class="hljs-string">'1.1'</span>)-&gt;willReturn($request);
         $client-&gt;sendRequest($request)-&gt;willReturn($response);
-        $response-&gt;getStatusCode()-&gt;willReturn(404);
-        $this-&gt;shouldThrow(PostcodeNotFound::class)-&gt;duringGet(&#39;SW1A 2AA&#39;);
+        $response-&gt;getStatusCode()-&gt;willReturn(<span class="hljs-number">404</span>);
+        <span class="hljs-keyword">$this</span>-&gt;shouldThrow(PostcodeNotFound::class)-&gt;duringGet(<span class="hljs-string">'SW1A 2AA'</span>);
     }
-</code></pre><p>Run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>Run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
 Matthewbdaly/Postcode/Client                                                    
-  98  - it throws an exception if postcode not found
-      expected exception of class &quot;Matthewbdaly\Postcode\Exc...&quot;, but got
-      [exc:Prophecy\Exception\Call\UnexpectedCallException(&quot;Method call:
+  98  - it throws an exception <span class="hljs-keyword">if</span> postcode not found
+      expected exception of class <span class="hljs-string">"Matthewbdaly\Postcode\Exc..."</span>, but got
+      [exc:Prophecy\Exception\Call\UnexpectedCallException(<span class="hljs-string">"Method call:
         - getBody()
       on Double\ResponseInterface\P20 was not expected, expected calls were:
-        - getStatusCode()&quot;)].
+        - getStatusCode()"</span>)].
 
                                 83%                                     16%      6
 1 specs
 6 examples (5 passed, 1 failed)
 538ms
-</code></pre><p>This time we’ll create the exception class before updating the client. Create the following class at <code>src/Exceptions/PostcodeNotFound.php</code>:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>This time we’ll create the exception class before updating the client. Create the following class at <code>src/Exceptions/PostcodeNotFound.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace Matthewbdaly\Postcode\Exceptions;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>;
 
-/**
+<span class="hljs-comment">/**
  * Postcode not found exception
  *
- */
-class PostcodeNotFound extends \Exception
-{
+ */</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostcodeNotFound</span> <span class="hljs-keyword">extends</span> \<span class="hljs-title">Exception</span>
+</span>{
 }
-</code></pre><p>And update the client:</p><pre><code class="lang-php">use Matthewbdaly\Postcode\Exceptions\PostcodeNotFound;
+</code></pre><p>And update the client:</p><pre><code class="hljs lang-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Matthewbdaly</span>\<span class="hljs-title">Postcode</span>\<span class="hljs-title">Exceptions</span>\<span class="hljs-title">PostcodeNotFound</span>;
     ...
-    public function get(string $postcode)
-    {
-        $url = $this-&gt;getBaseUrl() . rawurlencode($postcode) . &#39;?&#39; . http_build_query([
-            &#39;api_key&#39; =&gt; $this-&gt;getKey()
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">get</span><span class="hljs-params">(string $postcode)</span>
+    </span>{
+        $url = <span class="hljs-keyword">$this</span>-&gt;getBaseUrl() . rawurlencode($postcode) . <span class="hljs-string">'?'</span> . http_build_query([
+            <span class="hljs-string">'api_key'</span> =&gt; <span class="hljs-keyword">$this</span>-&gt;getKey()
         ]);
-        $request = $this-&gt;messageFactory-&gt;createRequest(
-            &#39;GET&#39;,
+        $request = <span class="hljs-keyword">$this</span>-&gt;messageFactory-&gt;createRequest(
+            <span class="hljs-string">'GET'</span>,
             $url,
             [],
-            null,
-            &#39;1.1&#39;
+            <span class="hljs-keyword">null</span>,
+            <span class="hljs-string">'1.1'</span>
         );
-        $response = $this-&gt;client-&gt;sendRequest($request);
-        if ($response-&gt;getStatusCode() == 402) {
-            throw new PaymentRequired;
+        $response = <span class="hljs-keyword">$this</span>-&gt;client-&gt;sendRequest($request);
+        <span class="hljs-keyword">if</span> ($response-&gt;getStatusCode() == <span class="hljs-number">402</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PaymentRequired;
         }
-        if ($response-&gt;getStatusCode() == 404) {
-            throw new PostcodeNotFound;
+        <span class="hljs-keyword">if</span> ($response-&gt;getStatusCode() == <span class="hljs-number">404</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PostcodeNotFound;
         }
-        $data = json_decode($response-&gt;getBody()-&gt;getContents(), true);
-        return $data;
+        $data = json_decode($response-&gt;getBody()-&gt;getContents(), <span class="hljs-keyword">true</span>);
+        <span class="hljs-keyword">return</span> $data;
     }
-</code></pre><p>Re-run the tests:</p><pre><code class="lang-bash">$ vendor/bin/phpspec run
+</code></pre><p>Re-run the tests:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpspec run
                                       100%                                       6
 1 specs
 6 examples (6 passed)

@@ -183,85 +183,85 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd December 2017 11:30 pm</p><h1>Full Text Search With Laravel and Postgresql</h1><p>I’ve touched on <a href="/blog/2017/10/03/simple-fuzzy-search-with-laravel-and-postgresql/">using PostgreSQL to implement fuzzy search with Laravel before</a>, but another type of search that PostgreSQL can handle fairly easily is full-text search. Here I’ll show you how to use it in a Laravel application.</p><p>An obvious use case for this kind of search is a personal blogging engine. It’s unlikely something like this is going to have enough content for it to be worth using a heavier solution like Elasticsearch, but a <code>LIKE</code> or <code>ILIKE</code> statement doesn’t really cut it either, so Postgres’s full text search is a good fit. Below you’ll see a Laravel migration for the blog posts table:</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">2nd December 2017 11:30 pm</p><h1>Full Text Search With Laravel and Postgresql</h1><p>I’ve touched on <a href="/blog/2017/10/03/simple-fuzzy-search-with-laravel-and-postgresql/">using PostgreSQL to implement fuzzy search with Laravel before</a>, but another type of search that PostgreSQL can handle fairly easily is full-text search. Here I’ll show you how to use it in a Laravel application.</p><p>An obvious use case for this kind of search is a personal blogging engine. It’s unlikely something like this is going to have enough content for it to be worth using a heavier solution like Elasticsearch, but a <code>LIKE</code> or <code>ILIKE</code> statement doesn’t really cut it either, so Postgres’s full text search is a good fit. Below you’ll see a Laravel migration for the blog posts table:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;
 
-class CreatePostsTable extends Migration
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreatePostsTable</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the migrations.
      *
-     * @return void
-     */
-    public function up()
-    {
-        Schema::create(&#39;posts&#39;, function (Blueprint $table) {
-            $table-&gt;increments(&#39;id&#39;);
-            $table-&gt;string(&#39;title&#39;);
-            $table-&gt;datetime(&#39;pub_date&#39;);
-            $table-&gt;text(&#39;text&#39;);
-            $table-&gt;string(&#39;slug&#39;);
-            $table-&gt;integer(&#39;author_id&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span>
+    </span>{
+        Schema::create(<span class="hljs-string">'posts'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{
+            $table-&gt;increments(<span class="hljs-string">'id'</span>);
+            $table-&gt;string(<span class="hljs-string">'title'</span>);
+            $table-&gt;datetime(<span class="hljs-string">'pub_date'</span>);
+            $table-&gt;text(<span class="hljs-string">'text'</span>);
+            $table-&gt;string(<span class="hljs-string">'slug'</span>);
+            $table-&gt;integer(<span class="hljs-string">'author_id'</span>);
             $table-&gt;timestamps();
         });
-        DB::statement(&quot;ALTER TABLE posts ADD COLUMN searchtext TSVECTOR&quot;);
-        DB::statement(&quot;UPDATE posts SET searchtext = to_tsvector(&#39;english&#39;, title || &#39;&#39; || text)&quot;);
-        DB::statement(&quot;CREATE INDEX searchtext_gin ON posts USING GIN(searchtext)&quot;);
-        DB::statement(&quot;CREATE TRIGGER ts_searchtext BEFORE INSERT OR UPDATE ON posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(&#39;searchtext&#39;, &#39;pg_catalog.english&#39;, &#39;title&#39;, &#39;text&#39;)&quot;);
+        DB::statement(<span class="hljs-string">"ALTER TABLE posts ADD COLUMN searchtext TSVECTOR"</span>);
+        DB::statement(<span class="hljs-string">"UPDATE posts SET searchtext = to_tsvector('english', title || '' || text)"</span>);
+        DB::statement(<span class="hljs-string">"CREATE INDEX searchtext_gin ON posts USING GIN(searchtext)"</span>);
+        DB::statement(<span class="hljs-string">"CREATE TRIGGER ts_searchtext BEFORE INSERT OR UPDATE ON posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger('searchtext', 'pg_catalog.english', 'title', 'text')"</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Reverse the migrations.
      *
-     * @return void
-     */
-    public function down()
-    {
-        DB::statement(&quot;DROP TRIGGER IF EXISTS tsvector_update_trigger ON posts&quot;);
-        DB::statement(&quot;DROP INDEX IF EXISTS searchtext_gin&quot;);
-        DB::statement(&quot;ALTER TABLE posts DROP COLUMN searchtext&quot;);
-        Schema::dropIfExists(&#39;posts&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span>
+    </span>{
+        DB::statement(<span class="hljs-string">"DROP TRIGGER IF EXISTS tsvector_update_trigger ON posts"</span>);
+        DB::statement(<span class="hljs-string">"DROP INDEX IF EXISTS searchtext_gin"</span>);
+        DB::statement(<span class="hljs-string">"ALTER TABLE posts DROP COLUMN searchtext"</span>);
+        Schema::dropIfExists(<span class="hljs-string">'posts'</span>);
     }
 }
-</code></pre><p>Note that after we create the basic layout of our <code>posts</code> table, we then have to drop down to raw DB statements to achieve the next steps:</p><ul><li>We add a column called <code>searchtext</code> with a type of <code>TSVECTOR</code> (unfortunately Laravel doesn’t have a convenient method to create this column type, so we need to do it with a raw statement). This column will hold our searchable document.</li><li>We use the <code>to_tsvector()</code> method to generate a document on each row that combines the title and text fields and store it in the <code>searchtext</code> column. Note also that we specify the language as the first argument. This is because Postgres’s full text search understands so-called “stopwords”, which are words that are so common as to not be worth bothering with at all, such as “the” - these will obviously differ between languages, so it’s prudent to explicitly state this so Postgres knows what stopwords to expect.</li><li>We create a <code>GIN</code> index on the <code>posts</code> table using our new <code>searchtext</code> column.</li><li>Finally we create a trigger which, when the table is amended, regenerates the search text.</li></ul><p>With that done, we can now look at actually performing a full-text search. To facilitate easy re-use, we’ll create a local scope on our <code>Post</code> model. If you haven’t used scopes in Laravel before, they essentially allow you to break queries into reusable chunks. In this case, we expect our scope to receive two arguments, the query instance (which is passed through automatically), and the search text:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Note that after we create the basic layout of our <code>posts</code> table, we then have to drop down to raw DB statements to achieve the next steps:</p><ul><li>We add a column called <code>searchtext</code> with a type of <code>TSVECTOR</code> (unfortunately Laravel doesn’t have a convenient method to create this column type, so we need to do it with a raw statement). This column will hold our searchable document.</li><li>We use the <code>to_tsvector()</code> method to generate a document on each row that combines the title and text fields and store it in the <code>searchtext</code> column. Note also that we specify the language as the first argument. This is because Postgres’s full text search understands so-called “stopwords”, which are words that are so common as to not be worth bothering with at all, such as “the” - these will obviously differ between languages, so it’s prudent to explicitly state this so Postgres knows what stopwords to expect.</li><li>We create a <code>GIN</code> index on the <code>posts</code> table using our new <code>searchtext</code> column.</li><li>Finally we create a trigger which, when the table is amended, regenerates the search text.</li></ul><p>With that done, we can now look at actually performing a full-text search. To facilitate easy re-use, we’ll create a local scope on our <code>Post</code> model. If you haven’t used scopes in Laravel before, they essentially allow you to break queries into reusable chunks. In this case, we expect our scope to receive two arguments, the query instance (which is passed through automatically), and the search text:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>;
 
-use Illuminate\Database\Eloquent\Model;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Model</span>;
 
-class Post extends Model
-{
-    protected $fillable = [
-        &#39;title&#39;,
-        &#39;pub_date&#39;,
-        &#39;text&#39;,
-        &#39;slug&#39;,
-        &#39;author_id&#39;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Model</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $fillable = [
+        <span class="hljs-string">'title'</span>,
+        <span class="hljs-string">'pub_date'</span>,
+        <span class="hljs-string">'text'</span>,
+        <span class="hljs-string">'slug'</span>,
+        <span class="hljs-string">'author_id'</span>
     ];
 
-    public function scopeSearch($query, $search)
-    {
-        if (!$search) {
-            return $query;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">scopeSearch</span><span class="hljs-params">($query, $search)</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (!$search) {
+            <span class="hljs-keyword">return</span> $query;
         }
-        return $query-&gt;whereRaw(&#39;searchtext @@ to_tsquery(\&#39;english\&#39;, ?)&#39;, [$search])
-            -&gt;orderByRaw(&#39;ts_rank(searchtext, to_tsquery(\&#39;english\&#39;, ?)) DESC&#39;, [$search]);
+        <span class="hljs-keyword">return</span> $query-&gt;whereRaw(<span class="hljs-string">'searchtext @@ to_tsquery(\'english\', ?)'</span>, [$search])
+            -&gt;orderByRaw(<span class="hljs-string">'ts_rank(searchtext, to_tsquery(\'english\', ?)) DESC'</span>, [$search]);
     }
 }
-</code></pre><p>If <code>$search</code> is empty, we just return the query object as is. Otherwise, we first of all construct a <code>WHERE</code> clause that matches our search text against the <code>searchtext</code> column. Note the syntax used here:</p><pre><code class="lang-sql">searchtext @@ to_tsquery(&#39;english&#39;, &#39;foo&#39;)
-</code></pre><p>We use the <code>to_tsquery()</code> method to match our text against our search document. As before, note that we specify the language.</p><p>Finally, we specify an order - we want the highest ranked matches to appear first, and this section of the query does that:</p><pre><code class="lang-sql">ts_rank(searchtext, to_tsquery(&#39;english&#39;, &#39;foo&#39;)) DESC
-</code></pre><p>Here we use <code>ts_rank()</code> to ensure we get our results in the appropriate order. Note that for both queries, we passed the arguments through as parameterized queries, rather than constructing a raw string - we have to watch out for SQL injection when we’re writing raw queries, but we can use PDO’s parameterized queries from Eloquent in a raw statement, which makes things a bit easier.</p><p>Now we can call our new search scope as follows:</p><pre><code class="lang-php">$posts = Post::search($search)-&gt;get();
-</code></pre><p>Because the scope receives and returns a query builder instance, you can continue to add the rest of your query, or paginate it, as necessary:</p><pre><code class="lang-php">$posts = Post::search($search)-&gt;where(&#39;draft&#39;, false)-&gt;simplePaginate(5);
-</code></pre><p>If you’re working in a language that makes heavy use of accents, such as French, you might also want to install the <code>unaccent</code> extension (you can do this in the migration with <code>CREATE EXTENSION unaccent</code>). Then, any time we call <code>to_tsvector()</code>, you should pass any strings through the <code>unaccent()</code> method to strip out the accents.</p><h2 id="do-we-need-the-migrations-">Do we need the migrations?</h2><p>Technically, we could do without the additional changes to the database structure - we could create a document on the fly inside a subquery and use that to query against, which would look something like this in SQL:</p><pre><code class="lang-sql">SELECT *
-FROM
-  (SELECT *,
-          to_tsvector(&#39;english&#39;, posts.title) || to_tsvector(&#39;english&#39;, posts.text) AS document
-   FROM &quot;posts&quot;) search
-WHERE search.document @@ to_tsquery(&#39;Redis&#39;)
-ORDER BY ts_rank(search.document, to_tsquery(&#39;english&#39;, &#39;Redis&#39;)) DESC;
+</code></pre><p>If <code>$search</code> is empty, we just return the query object as is. Otherwise, we first of all construct a <code>WHERE</code> clause that matches our search text against the <code>searchtext</code> column. Note the syntax used here:</p><pre><code class="hljs lang-sql">searchtext @@ to_tsquery(&#39;english&#39;, &#39;foo&#39;)
+</code></pre><p>We use the <code>to_tsquery()</code> method to match our text against our search document. As before, note that we specify the language.</p><p>Finally, we specify an order - we want the highest ranked matches to appear first, and this section of the query does that:</p><pre><code class="hljs lang-sql">ts_rank(searchtext, to_tsquery(&#39;english&#39;, &#39;foo&#39;)) DESC
+</code></pre><p>Here we use <code>ts_rank()</code> to ensure we get our results in the appropriate order. Note that for both queries, we passed the arguments through as parameterized queries, rather than constructing a raw string - we have to watch out for SQL injection when we’re writing raw queries, but we can use PDO’s parameterized queries from Eloquent in a raw statement, which makes things a bit easier.</p><p>Now we can call our new search scope as follows:</p><pre><code class="hljs lang-php">$posts = Post::search($search)-&gt;get();
+</code></pre><p>Because the scope receives and returns a query builder instance, you can continue to add the rest of your query, or paginate it, as necessary:</p><pre><code class="hljs lang-php">$posts = Post::search($search)-&gt;where(<span class="hljs-string">'draft'</span>, <span class="hljs-keyword">false</span>)-&gt;simplePaginate(<span class="hljs-number">5</span>);
+</code></pre><p>If you’re working in a language that makes heavy use of accents, such as French, you might also want to install the <code>unaccent</code> extension (you can do this in the migration with <code>CREATE EXTENSION unaccent</code>). Then, any time we call <code>to_tsvector()</code>, you should pass any strings through the <code>unaccent()</code> method to strip out the accents.</p><h2 id="do-we-need-the-migrations-">Do we need the migrations?</h2><p>Technically, we could do without the additional changes to the database structure - we could create a document on the fly inside a subquery and use that to query against, which would look something like this in SQL:</p><pre><code class="hljs lang-sql"><span class="hljs-keyword">SELECT</span> *
+<span class="hljs-keyword">FROM</span>
+  (<span class="hljs-keyword">SELECT</span> *,
+          to_tsvector(<span class="hljs-string">'english'</span>, posts.title) || to_tsvector(<span class="hljs-string">'english'</span>, posts.text) <span class="hljs-keyword">AS</span> <span class="hljs-keyword">document</span>
+   <span class="hljs-keyword">FROM</span> <span class="hljs-string">"posts"</span>) <span class="hljs-keyword">search</span>
+<span class="hljs-keyword">WHERE</span> search.document @@ to_tsquery(<span class="hljs-string">'Redis'</span>)
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> ts_rank(search.document, to_tsquery(<span class="hljs-string">'english'</span>, <span class="hljs-string">'Redis'</span>)) <span class="hljs-keyword">DESC</span>;
 </code></pre><p>However, the performance is likely to be significantly worse using this approach as it has to recreate the document, and doesn’t have an existing index to query against. It’s also a pig to write something like this with an ORM.</p><p>I’m currently working on a more generic solution for implementing full text search with Postgres and Laravel, however so far it looks like that solution will not only be considerably more complex than this (consistently producing a suitable query for unknown data is rather fiddly), but you can’t create a column for the vector ahead of time, meaning the query will be slower. This approach, while it requires more work than simply installing a package, is not terribly hard to implement on a per-model basis and is easy to customise for your use case.</p><section><ul class="categories"><li><a href="/blog/categories/postgresql/">postgresql</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/12/02/full-text-search-with-laravel-and-postgresql/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/12/29/using-uuids-as-primary-keys-with-laravel-and-postgresql/amp/">Using Uuids As Primary Keys With Laravel and Postgresql</a> <a class="postlink" href="/blog/2017/11/28/building-a-postcode-lookup-client-with-httplug-and-phpspec/amp/">Building a Postcode Lookup Client With Httplug and Phpspec</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

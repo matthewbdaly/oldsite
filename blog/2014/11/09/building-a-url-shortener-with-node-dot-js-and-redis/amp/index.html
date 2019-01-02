@@ -183,151 +183,151 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th November 2014 5:13 pm</p><h1>Building a URL Shortener With Node.js and Redis</h1><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p><p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p><h2 id="what-is-redis-">What is Redis?</h2><p>Redis is described as follows on the website:</p><blockquote><p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p></blockquote><p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p><p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p><ul><li>A string to identify the correct URL</li><li>The URL</li></ul><p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p><h2 id="getting-started">Getting started</h2><p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p><p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p><pre><code class="lang-bash">$ sudo npm install -g grunt-cli
-</code></pre><p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p><p>Now, let’s create our <code>package.json</code> file:</p><pre><code class="lang-bash">$ npm init
-</code></pre><p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p><pre><code class="lang-json">{
-  &quot;name&quot;: &quot;url-shortener&quot;,
-  &quot;version&quot;: &quot;1.0.0&quot;,
-  &quot;description&quot;: &quot;A URL shortener&quot;,
-  &quot;main&quot;: &quot;index.js&quot;,
-  &quot;scripts&quot;: {
-    &quot;test&quot;: &quot;grunt test&quot;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">9th November 2014 5:13 pm</p><h1>Building a URL Shortener With Node.js and Redis</h1><p>The NoSQL movement is an exciting one for web developers. While relational databases such as MySQL are applicable to solving a wide range of problems, they aren’t the best solution for every problem. Sometimes you may find yourself dealing with a problem where an alternative data store may make more sense.</p><p>Redis is one of the data stores that have appeared as part of this movement, and is arguably one of the more generally useful ones. Since it solves different problems to a relational database, it’s not generally useful as an alternative to them - instead it is often used alongside them.</p><h2 id="what-is-redis-">What is Redis?</h2><p>Redis is described as follows on the website:</p><blockquote><p>“Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs”.</p></blockquote><p>In other words, its core functionality is that it allows you to store a value by a key, and later retrieve that data using the key. It also allows you to set an optional expiry time for that key-value pair. It’s quite similar to Memcached in that respect, and indeed one obvious use case for Redis is as an alternative to Memcached. However, it offers a number of additional benefits - for one thing, it supports more data types, and for another, it allows you to persist your data to disk (unlike Memcached, which only retains the data in memory, meaning it’s lost on restart or if Memcached crashes). The latter means that for some very simple web applications, Redis can be used as your sole data store.</p><p>In this tutorial, we’ll build a simple URL shortener, using Redis as the sole data store. A URL shortener only really requires two fields:</p><ul><li>A string to identify the correct URL</li><li>The URL</li></ul><p>That makes Redis a good fit for this use case since all we need to do is generate an ID for each URL, then when a link is followed, look up the URL for that key, and redirect the user to it. As long as this is all our application needs to do, we can quite happily use Redis for this rather than a relational database, and it will be significantly faster than a relational database would be for this use case.</p><h2 id="getting-started">Getting started</h2><p>We’re more interested in the fundamentals of using Redis in our application than a specific language here. As JavaScript is pretty much required to be a web developer, I think it’s a fairly safe bet to use Node.js rather than PHP or Python, since that way, even if your only experience of JavaScript is client-side, you shouldn’t have too much trouble following along.</p><p>You’ll need to have Node.js installed, and I’ll leave the details of installing this to you. You’ll also need the Grunt CLI - install this globally as follows:</p><pre><code class="hljs lang-bash">$ sudo npm install -g grunt-cli
+</code></pre><p>Finally, you’ll want to have Redis itself installed. You might also want to install hiredis, which is a faster Redis client that gets used automatically where available.</p><p>Now, let’s create our <code>package.json</code> file:</p><pre><code class="hljs lang-bash">$ npm init
+</code></pre><p>You’ll see a number of questions. Your generated <code>package.json</code> file should look something like this:</p><pre><code class="hljs lang-json">{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"url-shortener"</span>,
+  <span class="hljs-attr">"version"</span>: <span class="hljs-string">"1.0.0"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">"A URL shortener"</span>,
+  <span class="hljs-attr">"main"</span>: <span class="hljs-string">"index.js"</span>,
+  <span class="hljs-attr">"scripts"</span>: {
+    <span class="hljs-attr">"test"</span>: <span class="hljs-string">"grunt test"</span>
   },
-  &quot;keywords&quot;: [
-    &quot;URL&quot;,
-    &quot;shortener&quot;
+  <span class="hljs-attr">"keywords"</span>: [
+    <span class="hljs-string">"URL"</span>,
+    <span class="hljs-string">"shortener"</span>
   ],
-  &quot;author&quot;: &quot;Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)&quot;,
-  &quot;license&quot;: &quot;GPLv2&quot;
+  <span class="hljs-attr">"author"</span>: <span class="hljs-string">"Matthew Daly &lt;matthew@matthewdaly.co.uk&gt; (http://matthewdaly.co.uk/)"</span>,
+  <span class="hljs-attr">"license"</span>: <span class="hljs-string">"GPLv2"</span>
 }
-</code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
-</code></pre><p>Next, install the development dependencies:</p><pre><code class="lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
-</code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="lang-javascript">module.exports = function (grunt) {
-    &#39;use strict&#39;;
+</code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
+</code></pre><p>Next, install the development dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
+</code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">grunt</span>) </span>{
+<span class="hljs-meta">    'use strict'</span>;
 
     grunt.initConfig({
-        jshint: {
-            all: [
-                &#39;test/*.js&#39;,
-                &#39;index.js&#39;
+        <span class="hljs-attr">jshint</span>: {
+            <span class="hljs-attr">all</span>: [
+                <span class="hljs-string">'test/*.js'</span>,
+                <span class="hljs-string">'index.js'</span>
             ]
         },
-        mocha_istanbul: {
-            coverage: {
-                src: &#39;test&#39;, // the folder, not the files,
+        <span class="hljs-attr">mocha_istanbul</span>: {
+            <span class="hljs-attr">coverage</span>: {
+                <span class="hljs-attr">src</span>: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
                 options: {
-                    mask: &#39;*.js&#39;,
-                    reportFormats: [&#39;cobertura&#39;, &#39;html&#39;]
+                    <span class="hljs-attr">mask</span>: <span class="hljs-string">'*.js'</span>,
+                    <span class="hljs-attr">reportFormats</span>: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
                 }
             }
         }
     });
 
-    // Load tasks
-    grunt.loadNpmTasks(&#39;grunt-contrib-jshint&#39;);
-    grunt.loadNpmTasks(&#39;grunt-mocha-istanbul&#39;);
+    <span class="hljs-comment">// Load tasks</span>
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-contrib-jshint'</span>);
+    grunt.loadNpmTasks(<span class="hljs-string">'grunt-mocha-istanbul'</span>);
 
-    // Register tasks
-    grunt.registerTask(&#39;test&#39;, [&#39;jshint&#39;, &#39;mocha_istanbul:coverage&#39;]);
+    <span class="hljs-comment">// Register tasks</span>
+    grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
 };
-</code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="lang-bash">web: node index.js
-</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="lang-jade">doctype html
-html(lang=&quot;en&quot;)
+</code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="hljs lang-bash">web: node index.js
+</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade">doctype <span class="hljs-selector-tag">html</span>
+<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
     head
-        title=&quot;Shortbread&quot;
+        title=<span class="hljs-string">"Shortbread"</span>
 
-    body
-        div.container
-            div.row
-                h1 Shortbread
+    <span class="hljs-selector-tag">body</span>
+        <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.container</span>
+            <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.row</span>
+                <span class="hljs-selector-tag">h1</span> Shortbread
 
-            div.row
-                form(action=&quot;/&quot;, method=&quot;POST&quot;)
-                    input(type=&quot;url&quot;, name=&quot;url&quot;)
-                    input(type=&quot;submit&quot;, value=&quot;Submit&quot;)
-</code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="lang-jade">doctype html
-html(lang=&quot;en&quot;)
+            <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.row</span>
+                form(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)
+                    input(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)
+                    input(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)
+</code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="hljs lang-jade">doctype html
+html(lang=<span class="hljs-string">"en"</span>)
     head
         title=Shortbread
 
     body
-        div.container
-            div.row
+        <span class="hljs-keyword">div</span>.container
+            <span class="hljs-keyword">div</span>.row
                 h1 Shortbread
                 p
-                    | Your shortened URL is
-                    a(href=base_url+&#39;/&#39;+id) #{base_url}/#{id}
-</code></pre><p>and <code>views/error.jade</code>:</p><pre><code class="lang-jade">doctype html
-html(lang=&quot;en&quot;)
+                    | Your shortened <span class="hljs-built_in">URL</span> is
+                    <span class="hljs-keyword">a</span>(href=base_url+<span class="hljs-string">'/'</span>+id) <span class="hljs-comment">#{base_url}/#{id}</span>
+</code></pre><p>and <code>views/error.jade</code>:</p><pre><code class="hljs lang-jade">doctype <span class="hljs-selector-tag">html</span>
+<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
     head
-        title=&quot;Shortbread&quot;
+        title=<span class="hljs-string">"Shortbread"</span>
 
-    body
-        div.container
-            div.row
-                h1 Shortbread
-                p Link not found
-</code></pre><h2 id="writing-our-first-test">Writing our first test</h2><p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p><pre><code class="lang-javascript">/*jslint node: true */
-/*global describe: false, before: false, after: false, it: false */
-&quot;use strict&quot;;
+    <span class="hljs-selector-tag">body</span>
+        <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.container</span>
+            <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.row</span>
+                <span class="hljs-selector-tag">h1</span> Shortbread
+                <span class="hljs-selector-tag">p</span> Link not found
+</code></pre><h2 id="writing-our-first-test">Writing our first test</h2><p>We’re going to use Mocha for our tests, together with the Chai assertion library. Create a folder called <code>test</code>, and put the following in <code>test/test.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-comment">/*global describe: false, before: false, after: false, it: false */</span>
+<span class="hljs-meta">"use strict"</span>;
 
-// Declare the variables used
-var expect = require(&#39;chai&#39;).expect,
-    request = require(&#39;request&#39;),
-    server = require(&#39;../index&#39;),
-    redis = require(&#39;redis&#39;),
+<span class="hljs-comment">// Declare the variables used</span>
+<span class="hljs-keyword">var</span> expect = <span class="hljs-built_in">require</span>(<span class="hljs-string">'chai'</span>).expect,
+    request = <span class="hljs-built_in">require</span>(<span class="hljs-string">'request'</span>),
+    server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../index'</span>),
+    redis = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>),
     client;
 client = redis.createClient();
 
-// Server tasks
-describe(&#39;server&#39;, function () {
+<span class="hljs-comment">// Server tasks</span>
+describe(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
-    // Beforehand, start the server
-    before(function (done) {
-        console.log(&#39;Starting the server&#39;);
+    <span class="hljs-comment">// Beforehand, start the server</span>
+    before(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Starting the server'</span>);
         done();
     });
 
-    // Afterwards, stop the server and empty the database
-    after(function (done) {
-        console.log(&#39;Stopping the server&#39;);
+    <span class="hljs-comment">// Afterwards, stop the server and empty the database</span>
+    after(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Stopping the server'</span>);
         client.flushdb();
         done();
     });
 
-    // Test the index route
-    describe(&#39;Test the index route&#39;, function () {
-        it(&#39;should return a page with the title Shortbread&#39;, function (done) {
-            request.get({ url: &#39;http://localhost:5000&#39; }, function (error, response, body) {
-                expect(body).to.include(&#39;Shortbread&#39;);
-                expect(response.statusCode).to.equal(200);
-                expect(response.headers[&#39;content-type&#39;]).to.equal(&#39;text/html; charset=utf-8&#39;);
+    <span class="hljs-comment">// Test the index route</span>
+    describe(<span class="hljs-string">'Test the index route'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should return a page with the title Shortbread'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.get({ <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000'</span> }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                expect(body).to.include(<span class="hljs-string">'Shortbread'</span>);
+                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
                 done();
             });
         });
     });
 });
-</code></pre><p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p><p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p><p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p><p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p><pre><code class="lang-bash">$ touch index.js
-</code></pre><p>Let’s run our tests:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+</code></pre><p>This code bears a little explanation. First, we import the required modules, as well as our <code>index.js</code> file (which we have yet to add). Then we create a callback to contain our tests.</p><p>Inside the callback, we call the <code>before()</code> and <code>after()</code> functions, which let us set up and tear down our tests. As part of the teardown process, we flush the Redis database.</p><p>Finally, we fetch our home page and verify that it returns a 200 status code and a content type of text/html, as well as including the name or our application.</p><p>We’ll need to create our <code>index.js</code> file to avoid a nasty error, but we won’t populate it just yet:</p><pre><code class="hljs lang-bash">$ touch index.js
+</code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 
 
   server
 Starting the server
     Test the index route
-      1) should return a page with the title Shortbread
+      1) should <span class="hljs-built_in">return</span> a page with the title Shortbread
 Stopping the server
 
 
   0 passing (152ms)
   1 failing
 
-  1) server Test the index route should return a page with the title Shortbread:
-     Uncaught AssertionError: expected undefined to include &#39;Shortbread&#39;
-      at Request._callback (/Users/matthewdaly/Projects/url-shortener/test/test.js:33:33)
+  1) server Test the index route should <span class="hljs-built_in">return</span> a page with the title Shortbread:
+     Uncaught AssertionError: expected undefined to include <span class="hljs-string">'Shortbread'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:33:33)
       at self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22)
       at Request.emit (events.js:95:17)
       at Request.onRequestError (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:963:8)
@@ -351,69 +351,69 @@ Functions    : 100% ( 0/0 )
 Lines        : 100% ( 0/0 )
 ================================================================================
 &gt;&gt;
-Warning: Task &quot;mocha_istanbul:coverage&quot; failed. Use --force to continue.
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to <span class="hljs-built_in">continue</span>.
 
 Aborted due to warnings.
-</code></pre><p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p><pre><code class="lang-javascript">/*jslint node: true */
-&#39;use strict&#39;;
+</code></pre><p>Now that we have a failing test, we can start work on our app proper. Open up <code>index.js</code> and add the following code:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/*jslint node: true */</span>
+<span class="hljs-meta">'use strict'</span>;
 
-// Declare variables used
-var app, base_url, bodyParser, client, express, port, rtg, shortid;
+<span class="hljs-comment">// Declare variables used</span>
+<span class="hljs-keyword">var</span> app, base_url, bodyParser, client, express, port, rtg, shortid;
 
-// Define values
-express = require(&#39;express&#39;);
+<span class="hljs-comment">// Define values</span>
+express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
 app = express();
-port = process.env.PORT || 5000;
-shortid = require(&#39;shortid&#39;);
-bodyParser = require(&#39;body-parser&#39;);
-base_url = process.env.BASE_URL || &#39;http://localhost:5000&#39;;
+port = process.env.PORT || <span class="hljs-number">5000</span>;
+shortid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'shortid'</span>);
+bodyParser = <span class="hljs-built_in">require</span>(<span class="hljs-string">'body-parser'</span>);
+base_url = process.env.BASE_URL || <span class="hljs-string">'http://localhost:5000'</span>;
 
-// Set up connection to Redis
-if (process.env.REDISTOGO_URL) {
-  rtg  = require(&quot;url&quot;).parse(process.env.REDISTOGO_URL);
-  client = require(&quot;redis&quot;).createClient(rtg.port, rtg.hostname);
-  client.auth(rtg.auth.split(&quot;:&quot;)[1]);
-} else {
-  client = require(&#39;redis&#39;).createClient();
+<span class="hljs-comment">// Set up connection to Redis</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+  rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+  client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+  client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
 }
 
-// Set up templating
-app.set(&#39;views&#39;, __dirname + &#39;/views&#39;);
-app.set(&#39;view engine&#39;, &quot;jade&quot;);
-app.engine(&#39;jade&#39;, require(&#39;jade&#39;).__express);
+<span class="hljs-comment">// Set up templating</span>
+app.set(<span class="hljs-string">'views'</span>, __dirname + <span class="hljs-string">'/views'</span>);
+app.set(<span class="hljs-string">'view engine'</span>, <span class="hljs-string">"jade"</span>);
+app.engine(<span class="hljs-string">'jade'</span>, <span class="hljs-built_in">require</span>(<span class="hljs-string">'jade'</span>).__express);
 
-// Set URL
-app.set(&#39;base_url&#39;, base_url);
+<span class="hljs-comment">// Set URL</span>
+app.set(<span class="hljs-string">'base_url'</span>, base_url);
 
-// Handle POST data
+<span class="hljs-comment">// Handle POST data</span>
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: true
+  <span class="hljs-attr">extended</span>: <span class="hljs-literal">true</span>
 }));
 
-// Define index route
-app.get(&#39;/&#39;, function (req, res) {
-  res.render(&#39;index&#39;);
+<span class="hljs-comment">// Define index route</span>
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+  res.render(<span class="hljs-string">'index'</span>);
 });
 
-// Serve static files
-app.use(express.static(__dirname + &#39;/static&#39;));
+<span class="hljs-comment">// Serve static files</span>
+app.use(express.static(__dirname + <span class="hljs-string">'/static'</span>));
 
-// Listen
+<span class="hljs-comment">// Listen</span>
 app.listen(port);
-console.log(&#39;Listening on port &#39; + port);
-</code></pre><p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p><p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p><p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p><p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p><p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p><p>Let’s run our test:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Listening on port '</span> + port);
+</code></pre><p>Let’s go through this code. First we confirm that linting tools should treat this as a Node app, and use strict mode (I recommend always using strict mode in JavaScript).</p><p>Then we declare our variables and import the required modules. Note here that we set the port to 5000, but can also set it based on the <code>PORT</code> environment variable, which is used by Heroku. We also define a base URL, which again can be overriden from an environment variable when hosted on Heroku.</p><p>We then set up our connection to our Redis instance. When we push the code up to Heroku, we’ll use the Redis To Go addon, so we check for an environment variable containing the Redis URL. If it’s set, we use that to connect. Otherwise, we just connect as normal.</p><p>We then set up templating using Jade, and define the folder containing our views, and store the base URL within the app. Then we set up <code>bodyParser</code> so that Express can handle POST data.</p><p>Next, we define our index route to just render the <code>index.jade</code> file. Finally, we set up our static folder and set the app to listen on the correct port.</p><p>Let’s run our test:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 Listening on port 5000
 
 
   server
 Starting the server
     Test the index route
-      ✓ should return a page with the title Shortbread (116ms)
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (116ms)
 Stopping the server
 
 
@@ -433,48 +433,48 @@ Lines        : 86.96% ( 20/23 )
 &gt;&gt; Done. Check coverage folder.
 
 Done, without errors.
-</code></pre><p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p><pre><code class="lang-javascript">/* istanbul ignore if */
-if (process.env.REDISTOGO_URL) {
-    rtg  = require(&quot;url&quot;).parse(process.env.REDISTOGO_URL);
-    client = require(&quot;redis&quot;).createClient(rtg.port, rtg.hostname);
-    client.auth(rtg.auth.split(&quot;:&quot;)[1]);
-} else {
-    client = require(&#39;redis&#39;).createClient();
+</code></pre><p>Note that Istanbul will have generated a nice HTML coverage report, which will be at <code>coverage/index.html</code>, but this won’t show 100% test coverage due to the Heroku-specific Redis section. To fix this, amend that section as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">/* istanbul ignore if */</span>
+<span class="hljs-keyword">if</span> (process.env.REDISTOGO_URL) {
+    rtg  = <span class="hljs-built_in">require</span>(<span class="hljs-string">"url"</span>).parse(process.env.REDISTOGO_URL);
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">"redis"</span>).createClient(rtg.port, rtg.hostname);
+    client.auth(rtg.auth.split(<span class="hljs-string">":"</span>)[<span class="hljs-number">1</span>]);
+} <span class="hljs-keyword">else</span> {
+    client = <span class="hljs-built_in">require</span>(<span class="hljs-string">'redis'</span>).createClient();
 }
-</code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="lang-javascript">    // Test submitting a URL
-    describe(&#39;Test submitting a URL&#39;, function () {
-        it(&#39;should return the shortened URL&#39;, function (done) {
-            request.post(&#39;http://localhost:5000&#39;, {form: {url: &#39;http://www.google.co.uk&#39;}}, function (error, response, body) {
-                expect(body).to.include(&#39;Your shortened URL is&#39;);
-                expect(response.statusCode).to.equal(200);
-                expect(response.headers[&#39;content-type&#39;]).to.equal(&#39;text/html; charset=utf-8&#39;);
+</code></pre><p>Telling Istanbul to ignore the if clause resolves that problem nicely.</p><h2 id="submitting-a-url">Submitting a URL</h2><p>Next, let’s add the ability to add a URL. First, add the following test, after the one for the index:</p><pre><code class="hljs lang-javascript">    <span class="hljs-comment">// Test submitting a URL</span>
+    describe(<span class="hljs-string">'Test submitting a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should return the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            request.post(<span class="hljs-string">'http://localhost:5000'</span>, {<span class="hljs-attr">form</span>: {<span class="hljs-attr">url</span>: <span class="hljs-string">'http://www.google.co.uk'</span>}}, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                expect(body).to.include(<span class="hljs-string">'Your shortened URL is'</span>);
+                expect(response.statusCode).to.equal(<span class="hljs-number">200</span>);
+                expect(response.headers[<span class="hljs-string">'content-type'</span>]).to.equal(<span class="hljs-string">'text/html; charset=utf-8'</span>);
                 done();
             });
         });
     });
-</code></pre><p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+</code></pre><p>This test submits a URL via POST, and checks to see that the response view gets returned. Now, let’s run our tests again:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 Listening on port 5000
 
 
   server
 Starting the server
     Test the index route
-      ✓ should return a page with the title Shortbread (223ms)
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (223ms)
     Test submitting a URL
-      1) should return the shortened URL
+      1) should <span class="hljs-built_in">return</span> the shortened URL
 Stopping the server
 
 
   1 passing (318ms)
   1 failing
 
-  1) server Test submitting a URL should return the shortened URL:
-     Uncaught AssertionError: expected &#39;Cannot POST /\n&#39; to include &#39;Your shortened URL is&#39;
-      at Request._callback (/Users/matthewdaly/Projects/url-shortener/test/test.js:45:33)
+  1) server Test submitting a URL should <span class="hljs-built_in">return</span> the shortened URL:
+     Uncaught AssertionError: expected <span class="hljs-string">'Cannot POST /\n'</span> to include <span class="hljs-string">'Your shortened URL is'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:45:33)
       at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22)
       at Request.emit (events.js:98:17)
       at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14)
@@ -498,40 +498,40 @@ Functions    : 100% ( 1/1 )
 Lines        : 100% ( 23/23 )
 ================================================================================
 &gt;&gt;
-Warning: Task &quot;mocha_istanbul:coverage&quot; failed. Use --force to continue.
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to <span class="hljs-built_in">continue</span>.
 
 Aborted due to warnings.
-</code></pre><p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p><pre><code class="lang-javascript">// Define submit route
-app.post(&#39;/&#39;, function (req, res) {
-    // Declare variables
-    var url, id;
+</code></pre><p>We have a failing test, so let’s make it pass. Add the following route after the index one:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define submit route</span>
+app.post(<span class="hljs-string">'/'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Declare variables</span>
+    <span class="hljs-keyword">var</span> url, id;
 
-    // Get URL
+    <span class="hljs-comment">// Get URL</span>
     url = req.body.url;
 
-    // Create a hashed short version
+    <span class="hljs-comment">// Create a hashed short version</span>
     id = shortid.generate();
 
-    // Store them in Redis
-    client.set(id, url, function () {
-        // Display the response
-        res.render(&#39;output&#39;, { id: id, base_url: base_url });
+    <span class="hljs-comment">// Store them in Redis</span>
+    client.set(id, url, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-comment">// Display the response</span>
+        res.render(<span class="hljs-string">'output'</span>, { <span class="hljs-attr">id</span>: id, <span class="hljs-attr">base_url</span>: base_url });
     });
 });
-</code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+</code></pre><p>This route is fairly simple. It handles POST requests to the index route, and first of all it gets the URL from the POST request. Then it randomly generates a hash to use as the key.</p><p>The next part is where we see Redis in action. We create a new key-value pair, with the key set to the newly generated ID, and the value set to the URL. Once Redis confirms that has been done, the callback is fired, which renders the <code>output.jade</code> view with the ID and base URL passed through, so that we can see our shortened URL.</p><p>With that done, our test should pass:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 Listening on port 5000
 
 
   server
 Starting the server
     Test the index route
-      ✓ should return a page with the title Shortbread (89ms)
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (89ms)
     Test submitting a URL
-      ✓ should return the shortened URL (65ms)
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (65ms)
 Stopping the server
 
 
@@ -551,57 +551,57 @@ Lines        : 100% ( 29/29 )
 &gt;&gt; Done. Check coverage folder.
 
 Done, without errors.
-</code></pre><p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p><pre><code class="lang-javascript">
-    // Test following a URL
-    describe(&#39;Test following a URL&#39;, function () {
-        it(&#39;should redirect the user to the shortened URL&#39;, function (done) {
-            // Create the URL
-            client.set(&#39;testurl&#39;, &#39;http://www.google.com&#39;, function () {
-                // Follow the link
+</code></pre><p>Our final task is to implement the short URL handling. We want to check to see if a short URL exists. If it does, we redirect the user to the destination. If it doesn’t, we raise a 404 error. For that we need two more tests. Here they are:</p><pre><code class="hljs lang-javascript">
+    <span class="hljs-comment">// Test following a URL</span>
+    describe(<span class="hljs-string">'Test following a URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should redirect the user to the shortened URL'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            <span class="hljs-comment">// Create the URL</span>
+            client.set(<span class="hljs-string">'testurl'</span>, <span class="hljs-string">'http://www.google.com'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+                <span class="hljs-comment">// Follow the link</span>
                 request.get({
-                    url: &#39;http://localhost:5000/testurl&#39;,
-                    followRedirect: false
-                }, function (error, response, body) {
-                    expect(response.headers.location).to.equal(&#39;http://www.google.com&#39;);
-                    expect(response.statusCode).to.equal(301);
+                    <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000/testurl'</span>,
+                    <span class="hljs-attr">followRedirect</span>: <span class="hljs-literal">false</span>
+                }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                    expect(response.headers.location).to.equal(<span class="hljs-string">'http://www.google.com'</span>);
+                    expect(response.statusCode).to.equal(<span class="hljs-number">301</span>);
                     done();
                 });
             });
         });
     });
 
-    // Test non-existent link
-    describe(&#39;Test following a non-existent-link&#39;, function () {
-        it(&#39;should return a 404 error&#39;, function (done) {
-            // Follow the link
+    <span class="hljs-comment">// Test non-existent link</span>
+    describe(<span class="hljs-string">'Test following a non-existent-link'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        it(<span class="hljs-string">'should return a 404 error'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">done</span>) </span>{
+            <span class="hljs-comment">// Follow the link</span>
             request.get({
-                url: &#39;http://localhost:5000/nonexistenturl&#39;,
-                followRedirect: false
-            }, function (error, response, body) {
-                expect(response.statusCode).to.equal(404);
-                expect(body).to.include(&#39;Link not found&#39;);
+                <span class="hljs-attr">url</span>: <span class="hljs-string">'http://localhost:5000/nonexistenturl'</span>,
+                <span class="hljs-attr">followRedirect</span>: <span class="hljs-literal">false</span>
+            }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error, response, body</span>) </span>{
+                expect(response.statusCode).to.equal(<span class="hljs-number">404</span>);
+                expect(body).to.include(<span class="hljs-string">'Link not found'</span>);
                 done();
             });
         });
     });
-</code></pre><p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p><p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p><p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p><p>If we run our tests, they should now fail:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+</code></pre><p>The first test creates a URL for testing purposes. It then navigates to that URL. Note that we set <code>followRedirect</code> to <code>true</code> - this is because, by default, <code>request</code> will follow any redirect, so we need to prevent it from doing so to ensure that the headers to redirect the user are set correctly.</p><p>Once the response has been received, we then check that the status code is 301 (Moved Permanently), and that the <code>Location</code> header is set to the correct destination. When a real browser visits this page, it will be redirected accordingly.</p><p>The second test tries to fetch a non-existent URL, and checks that the status code is 404, and the response contains the words <code>Link not found</code>.</p><p>If we run our tests, they should now fail:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 Listening on port 5000
 
 
   server
 Starting the server
     Test the index route
-      ✓ should return a page with the title Shortbread (252ms)
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (252ms)
     Test submitting a URL
-      ✓ should return the shortened URL (47ms)
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (47ms)
     Test following a URL
       1) should redirect the user to the shortened URL
     Test following a non-existent-link
-      2) should return a 404 error
+      2) should <span class="hljs-built_in">return</span> a 404 error
 Stopping the server
 
 
@@ -609,8 +609,8 @@ Stopping the server
   2 failing
 
   1) server Test following a URL should redirect the user to the shortened URL:
-     Uncaught AssertionError: expected undefined to equal &#39;http://www.google.com&#39;
-      at Request._callback (/Users/matthewdaly/Projects/url-shortener/test/test.js:63:58)
+     Uncaught AssertionError: expected undefined to equal <span class="hljs-string">'http://www.google.com'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:63:58)
       at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22)
       at Request.emit (events.js:98:17)
       at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14)
@@ -620,9 +620,9 @@ Stopping the server
       at _stream_readable.js:943:16
       at process._tickCallback (node.js:419:13)
 
-  2) server Test following a non-existent-link should return a 404 error:
-     Uncaught AssertionError: expected &#39;Cannot GET /nonexistenturl\n&#39; to include &#39;Link not found&#39;
-      at Request._callback (/Users/matthewdaly/Projects/url-shortener/test/test.js:80:33)
+  2) server Test following a non-existent-link should <span class="hljs-built_in">return</span> a 404 error:
+     Uncaught AssertionError: expected <span class="hljs-string">'Cannot GET /nonexistenturl\n'</span> to include <span class="hljs-string">'Link not found'</span>
+      at Request._callback (/Users/matthewdaly/Projects/url-shortener/<span class="hljs-built_in">test</span>/test.js:80:33)
       at Request.self.callback (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:372:22)
       at Request.emit (events.js:98:17)
       at Request.&lt;anonymous&gt; (/Users/matthewdaly/Projects/url-shortener/node_modules/request/request.js:1310:14)
@@ -646,46 +646,46 @@ Functions    : 100% ( 3/3 )
 Lines        : 100% ( 29/29 )
 ================================================================================
 &gt;&gt;
-Warning: Task &quot;mocha_istanbul:coverage&quot; failed. Use --force to continue.
+Warning: Task <span class="hljs-string">"mocha_istanbul:coverage"</span> failed. Use --force to <span class="hljs-built_in">continue</span>.
 
 Aborted due to warnings.
-</code></pre><p>Now, let’s add our final route:</p><pre><code class="lang-javascript">// Define link route
-app.route(&#39;/:id&#39;).all(function (req, res) {
-    // Get ID
-    var id = req.params.id.trim();
+</code></pre><p>Now, let’s add our final route:</p><pre><code class="hljs lang-javascript"><span class="hljs-comment">// Define link route</span>
+app.route(<span class="hljs-string">'/:id'</span>).all(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) </span>{
+    <span class="hljs-comment">// Get ID</span>
+    <span class="hljs-keyword">var</span> id = req.params.id.trim();
 
-    // Look up the URL
-    client.get(id, function (err, reply) {
-        if (!err &amp;&amp; reply) {
-            // Redirect user to it
-            res.status(301);
-            res.set(&#39;Location&#39;, reply);
+    <span class="hljs-comment">// Look up the URL</span>
+    client.get(id, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err, reply</span>) </span>{
+        <span class="hljs-keyword">if</span> (!err &amp;&amp; reply) {
+            <span class="hljs-comment">// Redirect user to it</span>
+            res.status(<span class="hljs-number">301</span>);
+            res.set(<span class="hljs-string">'Location'</span>, reply);
             res.send();
-        } else {
-            // Confirm no such link in database
-            res.status(404);
-            res.render(&#39;error&#39;);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-comment">// Confirm no such link in database</span>
+            res.status(<span class="hljs-number">404</span>);
+            res.render(<span class="hljs-string">'error'</span>);
         }
     });
 });
-</code></pre><p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p><p>Now, let’s check it passes:</p><pre><code class="lang-bash">$ grunt test
-Running &quot;jshint:all&quot; (jshint) task
+</code></pre><p>We accept the ID as a parameter in the URL. We trim off any whitespace around it, and then we query Redis for a URL with that ID. If we find one, we set the status code to 301, and the location to the URL, and send the response. Otherwise, we set the status to 404 and render the error view.</p><p>Now, let’s check it passes:</p><pre><code class="hljs lang-bash">$ grunt <span class="hljs-built_in">test</span>
+Running <span class="hljs-string">"jshint:all"</span> (jshint) task
 &gt;&gt; 2 files lint free.
 
-Running &quot;mocha_istanbul:coverage&quot; (mocha_istanbul) task
+Running <span class="hljs-string">"mocha_istanbul:coverage"</span> (mocha_istanbul) task
 Listening on port 5000
 
 
   server
 Starting the server
     Test the index route
-      ✓ should return a page with the title Shortbread (90ms)
+      ✓ should <span class="hljs-built_in">return</span> a page with the title Shortbread (90ms)
     Test submitting a URL
-      ✓ should return the shortened URL (47ms)
+      ✓ should <span class="hljs-built_in">return</span> the shortened URL (47ms)
     Test following a URL
       ✓ should redirect the user to the shortened URL
     Test following a non-existent-link
-      ✓ should return a 404 error
+      ✓ should <span class="hljs-built_in">return</span> a 404 error
 Stopping the server
 
 

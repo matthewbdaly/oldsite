@@ -183,99 +183,99 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">3rd October 2017 11:56 pm</p><h1>Simple Fuzzy Search With Laravel and Postgresql</h1><p>When implementing fuzzy search, many developers reach straight for specialised tools like Elasticsearch. However, for simple implementations, this is often overkill. PostgreSQL, my relational database of choice, can natively handle fuzzy search quite easily if you know how. Here’s how you might use this with Laravel.</p><p>Suppose we have the following migration to create a <code>locations</code> table, storing towns, cities and villages:</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">3rd October 2017 11:56 pm</p><h1>Simple Fuzzy Search With Laravel and Postgresql</h1><p>When implementing fuzzy search, many developers reach straight for specialised tools like Elasticsearch. However, for simple implementations, this is often overkill. PostgreSQL, my relational database of choice, can natively handle fuzzy search quite easily if you know how. Here’s how you might use this with Laravel.</p><p>Suppose we have the following migration to create a <code>locations</code> table, storing towns, cities and villages:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;
 
-class CreateLocations extends Migration
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CreateLocations</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the migrations.
      *
-     * @return void
-     */
-    public function up()
-    {
-        // Create locations table
-        Schema::create(&#39;locations&#39;, function (Blueprint $table) {
-            $table-&gt;increments(&#39;id&#39;)-&gt;unsigned();
-            $table-&gt;string(&#39;name&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Create locations table</span>
+        Schema::create(<span class="hljs-string">'locations'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(Blueprint $table)</span> </span>{
+            $table-&gt;increments(<span class="hljs-string">'id'</span>)-&gt;unsigned();
+            $table-&gt;string(<span class="hljs-string">'name'</span>);
             $table-&gt;timestamps();
         });
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Reverse the migrations.
      *
-     * @return void
-     */
-    public function down()
-    {
-        // Drop locations table
-        Schema::drop(&#39;locations&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Drop locations table</span>
+        Schema::drop(<span class="hljs-string">'locations'</span>);
     }
 }
-</code></pre><p>The key to this implementation of fuzzy search is <em>trigrams</em>. A trigram is a group of three consecutive characters taken from a string. Using the <code>pg_trgm</code> module, which comes with PostgreSQL, we can break a string into as many trigrams as possible, and then return the strings with the most matching trigrams.</p><p>We can ensure that <code>pg_trgm</code> is set up on the database by creating a migration:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>The key to this implementation of fuzzy search is <em>trigrams</em>. A trigram is a group of three consecutive characters taken from a string. Using the <code>pg_trgm</code> module, which comes with PostgreSQL, we can break a string into as many trigrams as possible, and then return the strings with the most matching trigrams.</p><p>We can ensure that <code>pg_trgm</code> is set up on the database by creating a migration:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;
 
-class AddTrgmExtension extends Migration
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddTrgmExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the migrations.
      *
-     * @return void
-     */
-    public function up()
-    {
-        DB::statement(&#39;CREATE EXTENSION IF NOT EXISTS pg_trgm&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span>
+    </span>{
+        DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS pg_trgm'</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Reverse the migrations.
      *
-     * @return void
-     */
-    public function down()
-    {
-        DB::statement(&#39;DROP EXTENSION IF EXISTS pg_trgm&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span>
+    </span>{
+        DB::statement(<span class="hljs-string">'DROP EXTENSION IF EXISTS pg_trgm'</span>);
     }
 }
-</code></pre><p>Make sure you run the migration as well. Once that is done, we can make a raw fuzzy query against the <code>name</code> field as follows:</p><pre><code class="lang-sql">SELECT * FROM locations WHERE &#39;burgh&#39; % name;
-</code></pre><p>Translating that to work with the Eloquent ORM, we can perform fuzzy queries against the <code>name</code> field as follows:</p><pre><code class="lang-php">$location = Location::whereRaw(&quot;&#39;burgh&#39; % name&quot;)-&gt;get();
-</code></pre><p>This query might match both <code>Aldeburgh</code> and <code>Edinburgh</code>. It’s also able to handle slight misspellings, as in this example:</p><pre><code class="lang-php">$location = Location::whereRaw(&quot;&#39;hendrad&#39; % name&quot;)-&gt;get();
-</code></pre><p>This query will match <code>East Hendred</code> or <code>West Hendred</code> successfully. As you can see, we can match strings at any point in the name string, and handle slight mis-spellings without any problems.</p><p>In practice, rather than using <code>whereRaw()</code> every time, you’ll probably want to create a local scope that accepts the name you want to match against. You’ll also want to use query parameters to prevent SQL injection:</p><pre><code class="lang-php">$location = Location::whereRaw(&quot;? % name&quot;, [$name])-&gt;get();
-</code></pre><h2 id="improving-performance-with-an-index">Improving performance with an index</h2><p>The performance of these queries isn’t that great out of the box. We can improve them by creating an index:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Make sure you run the migration as well. Once that is done, we can make a raw fuzzy query against the <code>name</code> field as follows:</p><pre><code class="hljs lang-sql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> locations <span class="hljs-keyword">WHERE</span> <span class="hljs-string">'burgh'</span> % <span class="hljs-keyword">name</span>;
+</code></pre><p>Translating that to work with the Eloquent ORM, we can perform fuzzy queries against the <code>name</code> field as follows:</p><pre><code class="hljs lang-php">$location = Location::whereRaw(<span class="hljs-string">"'burgh' % name"</span>)-&gt;get();
+</code></pre><p>This query might match both <code>Aldeburgh</code> and <code>Edinburgh</code>. It’s also able to handle slight misspellings, as in this example:</p><pre><code class="hljs lang-php">$location = Location::whereRaw(<span class="hljs-string">"'hendrad' % name"</span>)-&gt;get();
+</code></pre><p>This query will match <code>East Hendred</code> or <code>West Hendred</code> successfully. As you can see, we can match strings at any point in the name string, and handle slight mis-spellings without any problems.</p><p>In practice, rather than using <code>whereRaw()</code> every time, you’ll probably want to create a local scope that accepts the name you want to match against. You’ll also want to use query parameters to prevent SQL injection:</p><pre><code class="hljs lang-php">$location = Location::whereRaw(<span class="hljs-string">"? % name"</span>, [$name])-&gt;get();
+</code></pre><h2 id="improving-performance-with-an-index">Improving performance with an index</h2><p>The performance of these queries isn’t that great out of the box. We can improve them by creating an index:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Schema</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Schema</span>\<span class="hljs-title">Blueprint</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Migrations</span>\<span class="hljs-title">Migration</span>;
 
-class AddTrgmExtension extends Migration
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AddTrgmExtension</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Migration</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the migrations.
      *
-     * @return void
-     */
-    public function up()
-    {
-        DB::statement(&#39;CREATE EXTENSION IF NOT EXISTS pg_trgm&#39;);
-        DB::statement(&#39;CREATE INDEX locations_name_trigram ON locations USING gist(name gist_trgm_ops);&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">up</span><span class="hljs-params">()</span>
+    </span>{
+        DB::statement(<span class="hljs-string">'CREATE EXTENSION IF NOT EXISTS pg_trgm'</span>);
+        DB::statement(<span class="hljs-string">'CREATE INDEX locations_name_trigram ON locations USING gist(name gist_trgm_ops);'</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Reverse the migrations.
      *
-     * @return void
-     */
-    public function down()
-    {
-        DB::statement(&#39;DROP INDEX IF EXISTS locations_name_trigram&#39;);
-        DB::statement(&#39;DROP EXTENSION IF EXISTS pg_trgm&#39;);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">down</span><span class="hljs-params">()</span>
+    </span>{
+        DB::statement(<span class="hljs-string">'DROP INDEX IF EXISTS locations_name_trigram'</span>);
+        DB::statement(<span class="hljs-string">'DROP EXTENSION IF EXISTS pg_trgm'</span>);
     }
 }
 </code></pre><p>Adding an index should produce a noticeable improvement in the response time.</p><h2 id="final-thoughts">Final thoughts</h2><p>PostgreSQL’s <code>pg_trgm</code> module is a fairly straightforward way of implementing fuzzy search. It’s not much more involved than a <code>LIKE</code> or <code>ILIKE</code> clause in your query, and for many use cases, it’s more than sufficient. If you don’t have a huge number of records, it’s probably a more appropriate choice than something like Elasticsearch, and has the advantage of a simpler stack. However, if you have a larger dataset, you may be better off with a dedicated search solution. As always, if you’re unsure it’s a good idea to try both and see what works best for that particular use case.</p><section><ul class="categories"><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/postgresql/">postgresql</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/10/03/simple-fuzzy-search-with-laravel-and-postgresql/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/10/20/using-phpiredis-with-laravel/amp/">Using Phpiredis With Laravel</a> <a class="postlink" href="/blog/2017/09/25/a-generic-php-sms-library/amp/">A Generic PHP SMS Library</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

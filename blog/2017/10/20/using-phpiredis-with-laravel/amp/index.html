@@ -183,26 +183,26 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th October 2017 10:55 pm</p><h1>Using Phpiredis With Laravel</h1><p>Laravel has support out of the box for using Redis. However, by default it uses a Redis client written in PHP, which will always be a little slower than one written in C. If you’re making heavy use of Redis, it may be worth using the <a href="https://github.com/nrk/phpiredis">phpiredis</a> extension to squeeze a little more performance out of it.</p><p>I’m using PHP 7.0 on Ubuntu Zesty and I installed the dependencies with the following command:</p><pre><code class="lang-bash">$ sudo apt-get install libhiredis-dev php-redis php7.0-dev
-</code></pre><p>Then I installed phpiredis as follows:</p><pre><code class="lang-bash">git clone https://github.com/nrk/phpiredis.git &amp;&amp; \
-       cd phpiredis &amp;&amp; \
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th October 2017 10:55 pm</p><h1>Using Phpiredis With Laravel</h1><p>Laravel has support out of the box for using Redis. However, by default it uses a Redis client written in PHP, which will always be a little slower than one written in C. If you’re making heavy use of Redis, it may be worth using the <a href="https://github.com/nrk/phpiredis">phpiredis</a> extension to squeeze a little more performance out of it.</p><p>I’m using PHP 7.0 on Ubuntu Zesty and I installed the dependencies with the following command:</p><pre><code class="hljs lang-bash">$ sudo apt-get install libhiredis-dev php-redis php7.0-dev
+</code></pre><p>Then I installed phpiredis as follows:</p><pre><code class="hljs lang-bash">git <span class="hljs-built_in">clone</span> https://github.com/nrk/phpiredis.git &amp;&amp; \
+       <span class="hljs-built_in">cd</span> phpiredis &amp;&amp; \
        phpize &amp;&amp; \
-       ./configure --enable-phpiredis &amp;&amp; \
+       ./configure --<span class="hljs-built_in">enable</span>-phpiredis &amp;&amp; \
        make &amp;&amp; \
        sudo make install
-</code></pre><p>Finally, I configured Redis to use phpiredis in the <code>redis</code> section of <code>config/database.php</code> for a Laravel app:</p><pre><code class="lang-php">    &#39;redis&#39; =&gt; [
+</code></pre><p>Finally, I configured Redis to use phpiredis in the <code>redis</code> section of <code>config/database.php</code> for a Laravel app:</p><pre><code class="hljs lang-php">    <span class="hljs-string">'redis'</span> =&gt; [
 
-        &#39;cluster&#39; =&gt; false,
+        <span class="hljs-string">'cluster'</span> =&gt; <span class="hljs-keyword">false</span>,
 
-        &#39;default&#39; =&gt; [
-            &#39;host&#39;     =&gt; env(&#39;REDIS_HOST&#39;, &#39;localhost&#39;),
-            &#39;password&#39; =&gt; env(&#39;REDIS_PASSWORD&#39;, null),
-            &#39;port&#39;     =&gt; env(&#39;REDIS_PORT&#39;, 6379),
-            &#39;database&#39; =&gt; 0,
-            &#39;options&#39; =&gt; [
-                &#39;connections&#39; =&gt; [
-                    &#39;tcp&#39; =&gt; &#39;Predis\Connection\PhpiredisStreamConnection&#39;, // PHP streams
-                    &#39;unix&#39; =&gt; &#39;Predis\Connection\PhpiredisSocketConnection&#39;, // ext-socket
+        <span class="hljs-string">'default'</span> =&gt; [
+            <span class="hljs-string">'host'</span>     =&gt; env(<span class="hljs-string">'REDIS_HOST'</span>, <span class="hljs-string">'localhost'</span>),
+            <span class="hljs-string">'password'</span> =&gt; env(<span class="hljs-string">'REDIS_PASSWORD'</span>, <span class="hljs-keyword">null</span>),
+            <span class="hljs-string">'port'</span>     =&gt; env(<span class="hljs-string">'REDIS_PORT'</span>, <span class="hljs-number">6379</span>),
+            <span class="hljs-string">'database'</span> =&gt; <span class="hljs-number">0</span>,
+            <span class="hljs-string">'options'</span> =&gt; [
+                <span class="hljs-string">'connections'</span> =&gt; [
+                    <span class="hljs-string">'tcp'</span> =&gt; <span class="hljs-string">'Predis\Connection\PhpiredisStreamConnection'</span>, <span class="hljs-comment">// PHP streams</span>
+                    <span class="hljs-string">'unix'</span> =&gt; <span class="hljs-string">'Predis\Connection\PhpiredisSocketConnection'</span>, <span class="hljs-comment">// ext-socket</span>
                 ],
             ]
         ],

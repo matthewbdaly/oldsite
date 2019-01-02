@@ -183,55 +183,55 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">19th August 2017 3:40 pm</p><h1>Run Your Tests Locally With Sismo</h1><p>Continuous integration is a veritable boon when working on any large software project. However, the popularity of distributed version control systems like Git over the older, more centralised ones like Subversion means that when you commit your changes, they don’t necessarily get pushed up to a remote repository immediately. While this is a good thing because it means you can commit at any stage without worrying about pushing up changes that break everyone else’s build, it has the downside that the tests aren’t automatically run on every commit, just every push, so if you get sloppy about running your tests before every commit you can more easily get caught out. In addition, a full CI server like Jenkins is a rather large piece of software that you don’t really want to run locally if you can help it, and has a lot of functionality you don’t need.</p><p><a href="https://sismo.symfony.com/">Sismo</a> is a small, simple continuous integration server, implemented in PHP, that’s ideal for running locally. You can set it up to run your tests on every commit, and it has an easy-to-use web interface. Although it’s a PHP application, there’s no reason why you couldn’t use it to run tests for projects in other languages, and because it’s focused solely on running your test suite without many of the other features of more advanced CI solutions, it’s a good fit for local use. Here I’ll show you how I use it.</p><h2 id="setting-up-sismo">Setting up Sismo</h2><p>Nowadays I don’t generally install a web server on a computer directly, preferring to use Vagrant or the dev server as appropriate, so Sismo generally doesn’t have to coexist with anything else. I normally install PHP7’s FastCGI implementation and Nginx, along with the SQLite bindings (which Sismo needs):</p><pre><code class="lang-bash">$ sudo apt-get install nginx php7.0-fpm php7.0-sqlite3
-</code></pre><p>Then we can set up our Nginx config at <code>/etc/nginx/sites-available/default</code>:</p><pre><code class="lang-nginx">server {
-    listen 80 default_server;
-    listen [::]:80 default_server ipv6only=on;
-    fastcgi_param HTTP_PROXY &quot;&quot;;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">19th August 2017 3:40 pm</p><h1>Run Your Tests Locally With Sismo</h1><p>Continuous integration is a veritable boon when working on any large software project. However, the popularity of distributed version control systems like Git over the older, more centralised ones like Subversion means that when you commit your changes, they don’t necessarily get pushed up to a remote repository immediately. While this is a good thing because it means you can commit at any stage without worrying about pushing up changes that break everyone else’s build, it has the downside that the tests aren’t automatically run on every commit, just every push, so if you get sloppy about running your tests before every commit you can more easily get caught out. In addition, a full CI server like Jenkins is a rather large piece of software that you don’t really want to run locally if you can help it, and has a lot of functionality you don’t need.</p><p><a href="https://sismo.symfony.com/">Sismo</a> is a small, simple continuous integration server, implemented in PHP, that’s ideal for running locally. You can set it up to run your tests on every commit, and it has an easy-to-use web interface. Although it’s a PHP application, there’s no reason why you couldn’t use it to run tests for projects in other languages, and because it’s focused solely on running your test suite without many of the other features of more advanced CI solutions, it’s a good fit for local use. Here I’ll show you how I use it.</p><h2 id="setting-up-sismo">Setting up Sismo</h2><p>Nowadays I don’t generally install a web server on a computer directly, preferring to use Vagrant or the dev server as appropriate, so Sismo generally doesn’t have to coexist with anything else. I normally install PHP7’s FastCGI implementation and Nginx, along with the SQLite bindings (which Sismo needs):</p><pre><code class="hljs lang-bash">$ sudo apt-get install nginx php7.0-fpm php7.0-sqlite3
+</code></pre><p>Then we can set up our Nginx config at <code>/etc/nginx/sites-available/default</code>:</p><pre><code class="hljs lang-nginx"><span class="hljs-section">server</span> {
+    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default_server;
+    <span class="hljs-attribute">listen</span> [::]:<span class="hljs-number">80</span> default_server ipv6only=<span class="hljs-literal">on</span>;
+    <span class="hljs-attribute">fastcgi_param</span> HTTP_PROXY <span class="hljs-string">""</span>;
 
-    access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log;
+    <span class="hljs-attribute">access_log</span> /var/log/nginx/access.log;
+    <span class="hljs-attribute">error_log</span> /var/log/nginx/error.log;
 
-    root /var/www/html;
-    index sismo.php index.html index.htm;
+    <span class="hljs-attribute">root</span> /var/www/html;
+    <span class="hljs-attribute">index</span> sismo.php index.html index.htm;
 
-    server_name server_domain_or_IP;
+    <span class="hljs-attribute">server_name</span> server_domain_or_IP;
 
-    location / {
-        try_files $uri $uri/ /sismo.php?$query_string;
+    <span class="hljs-attribute">location</span> / {
+        <span class="hljs-attribute">try_files</span> <span class="hljs-variable">$uri</span> <span class="hljs-variable">$uri</span>/ /sismo.php?<span class="hljs-variable">$query_string</span>;
     }
 
-    location ~ \.php$ {
-        try_files $uri /sismo.php =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
-        fastcgi_index sismo.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SISMO_DATA_PATH &quot;/home/matthew/.sismo/data&quot;;
-        fastcgi_param SISMO_CONFIG_PATH &quot;/home/matthew/.sismo/config.php&quot;;
-        include fastcgi_params;
+    <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ \.php$</span> {
+        <span class="hljs-attribute">try_files</span> <span class="hljs-variable">$uri</span> /sismo.php =<span class="hljs-number">404</span>;
+        <span class="hljs-attribute">fastcgi_split_path_info</span><span class="hljs-regexp"> ^(.+\.php)(/.+)$</span>;
+        <span class="hljs-attribute">fastcgi_pass</span> unix:/var/run/php/php7.0-fpm.sock;
+        <span class="hljs-attribute">fastcgi_index</span> sismo.php;
+        <span class="hljs-attribute">fastcgi_param</span> SCRIPT_FILENAME <span class="hljs-variable">$document_root</span><span class="hljs-variable">$fastcgi_script_name</span>;
+        <span class="hljs-attribute">fastcgi_param</span> SISMO_DATA_PATH <span class="hljs-string">"/home/matthew/.sismo/data"</span>;
+        <span class="hljs-attribute">fastcgi_param</span> SISMO_CONFIG_PATH <span class="hljs-string">"/home/matthew/.sismo/config.php"</span>;
+        <span class="hljs-attribute">include</span> fastcgi_params;
     }
 }
-</code></pre><p>You’ll probably want to adjust the paths as appropriate. Then set up the required folders:</p><pre><code class="lang-bash">$ mkdir ~/.sismo
+</code></pre><p>You’ll probably want to adjust the paths as appropriate. Then set up the required folders:</p><pre><code class="hljs lang-bash">$ mkdir ~/.sismo
 $ mkdir ~/.sismo/data
 $ touch ~/.sismo/config.php
 $ chmod -R a+w ~/.sismo/
-</code></pre><p>Then, <a href="https://sismo.symfony.com/get/sismo.php">download Sismo</a> and put it in your web root (here it’s at <code>/var/www/html/sismo.php</code>).</p><p>Now, say you have a project you want to test (I’m using my <a href="https://github.com/matthewbdaly/laravel-etag-middleware">Laravel ETag middleware</a> for this example). We need to specify the projects we want to test in <code>~/.sismo/config.php</code>:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Then, <a href="https://sismo.symfony.com/get/sismo.php">download Sismo</a> and put it in your web root (here it’s at <code>/var/www/html/sismo.php</code>).</p><p>Now, say you have a project you want to test (I’m using my <a href="https://github.com/matthewbdaly/laravel-etag-middleware">Laravel ETag middleware</a> for this example). We need to specify the projects we want to test in <code>~/.sismo/config.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-$projects = array();
+$projects = <span class="hljs-keyword">array</span>();
 
-$notifier = new Sismo\Notifier\DBusNotifier();
+$notifier = <span class="hljs-keyword">new</span> Sismo\Notifier\DBusNotifier();
 
-Sismo\Project::setDefaultCommand(&#39;if [ -f composer.json ]; then composer install; fi &amp;&amp; vendor/bin/phpunit&#39;);
+Sismo\Project::setDefaultCommand(<span class="hljs-string">'if [ -f composer.json ]; then composer install; fi &amp;&amp; vendor/bin/phpunit'</span>);
 
-$projects[] = new Sismo\GithubProject(&#39;Laravel ETag Middleware&#39;, &#39;/home/matthew/Projects/laravel-etag-middleware&#39;, $notifier);
+$projects[] = <span class="hljs-keyword">new</span> Sismo\GithubProject(<span class="hljs-string">'Laravel ETag Middleware'</span>, <span class="hljs-string">'/home/matthew/Projects/laravel-etag-middleware'</span>, $notifier);
 
-return $projects;
-</code></pre><p>Hopefully this shouldn’t be too difficult to understand. We create an array of projects, then specify a notifier (this is Linux-specific - refer to the documentation for using Growl on Mac OS). Next, we specify that by default the tests should run <code>composer install</code> followed by <code>vendor/bin/phpunit</code>. We then specify this project is a Github project - it also supports Bitbucket, or plain SSH, or the default Project, but in general it shouldn’t be a problem to use it with any repository as you can just run it against the local copy. Finally we return the list of projects.</p><p>Now, we should be able to run our tests as follows:</p><pre><code class="lang-bash">$ php /var/www/html/sismo.php build
-Building Project &quot;Laravel ETag Middleware&quot; (into &quot;68a087&quot;)
-</code></pre><p>That should be working, but it doesn’t get us anything we don’t get by running the tests ourselves. To trigger the build, we need to set up a post-commit hook for our project in <code>.git/hooks/post-commit</code>:</p><pre><code class="lang-bash">#!/bin/sh
-
-php /var/www/html/sismo.php --quiet --force build laravel-etag-middleware `git log -1 HEAD --pretty=&quot;%H&quot;` &amp;&gt;/dev/null &amp;
+<span class="hljs-keyword">return</span> $projects;
+</code></pre><p>Hopefully this shouldn’t be too difficult to understand. We create an array of projects, then specify a notifier (this is Linux-specific - refer to the documentation for using Growl on Mac OS). Next, we specify that by default the tests should run <code>composer install</code> followed by <code>vendor/bin/phpunit</code>. We then specify this project is a Github project - it also supports Bitbucket, or plain SSH, or the default Project, but in general it shouldn’t be a problem to use it with any repository as you can just run it against the local copy. Finally we return the list of projects.</p><p>Now, we should be able to run our tests as follows:</p><pre><code class="hljs lang-bash">$ php /var/www/html/sismo.php build
+Building Project <span class="hljs-string">"Laravel ETag Middleware"</span> (into <span class="hljs-string">"68a087"</span>)
+</code></pre><p>That should be working, but it doesn’t get us anything we don’t get by running the tests ourselves. To trigger the build, we need to set up a post-commit hook for our project in <code>.git/hooks/post-commit</code>:</p><pre><code class="hljs lang-bash"><span class="hljs-meta">#!/bin/sh
+</span>
+php /var/www/html/sismo.php --quiet --force build laravel-etag-middleware `git <span class="hljs-built_in">log</span> -1 HEAD --pretty=<span class="hljs-string">"%H"</span>` &amp;&gt;/dev/null &amp;
 </code></pre><p>You should now be able to view your project in the Sismo web interface at <a href="http://localhost">http://localhost</a>:</p><p></p><p>Clicking on the project should take you through to its build history:</p><p></p><p>From here on, it should be straightforward to add new projects as and when necessary. Because you can change the command on a per-project basis, you can quite happily use it to run tests for Python or Node.js projects as well as PHP ones, and it’s not hard to configure it.</p><p>I personally find it very useful to have something in place to run my tests on every commit like this, and while you could just use a post-commit hook for that, this approach is less obtrusive because it doesn’t force you to wait around for your test suite to finish.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2017/08/19/run-your-tests-locally-with-sismo/">View the article with comments</a></section><section><a class="postlink" href="/blog/2017/09/02/making-internal-requests-with-laravel/amp/">Making Internal Requests With Laravel</a> <a class="postlink" href="/blog/2017/08/14/profiling-your-laravel-application-with-clockwork/amp/">Profiling Your Laravel Application With Clockwork</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

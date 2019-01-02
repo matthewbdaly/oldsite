@@ -183,80 +183,80 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">16th October 2016 6:10 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 3</h1><p>Apologies for how long it’s taken for this post to appear. I’ve got a lot on my plate at present as I recently started a new job, so I haven’t been able to devote as much time to this series as I’d like.</p><p>In this instalment we’ll begin extending our app beyond the basic authentication we’ve already implemented. We’ll start by adding the means to sign up, before adding the list of pets.</p><h2 id="adding-a-signup-method-to-our-backend">Adding a signup method to our backend</h2><p>We’ll create a controller for our users in the Laravel backend. First we’ll create our tests:</p><pre><code class="lang-bash">$ php artisan make:test UserControllerTest
-</code></pre><p>We’ll create three tests. The first will check to see that an invalid request raises the correct status code (422). The second will check that a valid request returns the correct status code (201) and creates the user. The third will check that trying to create a duplicate user raises an error. Here they are - they should be saved in the new <code>tests/UserControllerTest.php</code> file:</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">16th October 2016 6:10 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 3</h1><p>Apologies for how long it’s taken for this post to appear. I’ve got a lot on my plate at present as I recently started a new job, so I haven’t been able to devote as much time to this series as I’d like.</p><p>In this instalment we’ll begin extending our app beyond the basic authentication we’ve already implemented. We’ll start by adding the means to sign up, before adding the list of pets.</p><h2 id="adding-a-signup-method-to-our-backend">Adding a signup method to our backend</h2><p>We’ll create a controller for our users in the Laravel backend. First we’ll create our tests:</p><pre><code class="hljs lang-bash">$ php artisan make:<span class="hljs-built_in">test</span> UserControllerTest
+</code></pre><p>We’ll create three tests. The first will check to see that an invalid request raises the correct status code (422). The second will check that a valid request returns the correct status code (201) and creates the user. The third will check that trying to create a duplicate user raises an error. Here they are - they should be saved in the new <code>tests/UserControllerTest.php</code> file:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">DatabaseMigrations</span>;
 
-class UserControllerTest extends TestCase
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserControllerTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">TestCase</span>
+</span>{
+    <span class="hljs-comment">/**
      * Test creating a user - invalid
      *
-     * @return void
-     */
-    public function testPostingInvalidUser()
-    {
-        // Create a request
-        $data = array(
-            &#39;name&#39; =&gt; &#39;Bob Smith&#39;,
-            &#39;email&#39; =&gt; &#39;bob@example.com&#39;
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testPostingInvalidUser</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Create a request</span>
+        $data = <span class="hljs-keyword">array</span>(
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Bob Smith'</span>,
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>
         );
-        $this-&gt;json(&#39;POST&#39;, &#39;/api/users&#39;, $data);
-        $this-&gt;assertResponseStatus(422);
+        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'/api/users'</span>, $data);
+        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">422</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Test creating a user
      *
-     * @return void
-     */
-    public function testPostingUser()
-    {
-        // Create a request
-        $data = array(
-            &#39;name&#39; =&gt; &#39;Bob Smith&#39;,
-            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
-            &#39;password&#39; =&gt; &#39;password&#39;,
-            &#39;password_confirmation&#39; =&gt; &#39;password&#39;
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testPostingUser</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Create a request</span>
+        $data = <span class="hljs-keyword">array</span>(
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Bob Smith'</span>,
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>,
+            <span class="hljs-string">'password_confirmation'</span> =&gt; <span class="hljs-string">'password'</span>
         );
-        $this-&gt;json(&#39;POST&#39;, &#39;/api/users&#39;, $data);
-        $this-&gt;assertResponseStatus(201);
-        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
+        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'/api/users'</span>, $data);
+        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">201</span>);
+        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
 
-        // Check user exists
+        <span class="hljs-comment">// Check user exists</span>
         $saved = User::first();
-        $this-&gt;assertEquals($saved-&gt;email, &#39;bob@example.com&#39;);
-        $this-&gt;assertEquals($saved-&gt;name, &#39;Bob Smith&#39;);
+        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;email, <span class="hljs-string">'bob@example.com'</span>);
+        <span class="hljs-keyword">$this</span>-&gt;assertEquals($saved-&gt;name, <span class="hljs-string">'Bob Smith'</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Test creating a duplicate user
      *
-     * @return void
-     */
-    public function testPostingDuplicateUser()
-    {
-        // Create user
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testPostingDuplicateUser</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Create user</span>
         $user = factory(AnimalFriend\User::class)-&gt;create([
-            &#39;name&#39; =&gt; &#39;Bob Smith&#39;,
-            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
-            &#39;password&#39; =&gt; &#39;password&#39;
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Bob Smith'</span>,
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>
         ]);
-        $this-&gt;seeInDatabase(&#39;users&#39;, [&#39;email&#39; =&gt; &#39;bob@example.com&#39;]);
+        <span class="hljs-keyword">$this</span>-&gt;seeInDatabase(<span class="hljs-string">'users'</span>, [<span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>]);
 
-        // Create a request
-        $data = array(
-            &#39;name&#39; =&gt; &#39;Bob Smith&#39;,
-            &#39;email&#39; =&gt; &#39;bob@example.com&#39;,
-            &#39;password&#39; =&gt; &#39;password&#39;,
-            &#39;password_confirmation&#39; =&gt; &#39;password&#39;
+        <span class="hljs-comment">// Create a request</span>
+        $data = <span class="hljs-keyword">array</span>(
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Bob Smith'</span>,
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'bob@example.com'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>,
+            <span class="hljs-string">'password_confirmation'</span> =&gt; <span class="hljs-string">'password'</span>
         );
-        $this-&gt;json(&#39;POST&#39;, &#39;/api/users&#39;, $data);
-        $this-&gt;assertResponseStatus(422);
+        <span class="hljs-keyword">$this</span>-&gt;json(<span class="hljs-string">'POST'</span>, <span class="hljs-string">'/api/users'</span>, $data);
+        <span class="hljs-keyword">$this</span>-&gt;assertResponseStatus(<span class="hljs-number">422</span>);
     }
 }
-</code></pre><p>Note the use of <code>$this-&gt;json()</code> to make the request. This method is ideal for testing a REST API.</p><p>Running our tests should confirm that they fail:</p><pre><code class="lang-bash">$ vendor/bin/phpunit
+</code></pre><p>Note the use of <code>$this-&gt;json()</code> to make the request. This method is ideal for testing a REST API.</p><p>Running our tests should confirm that they fail:</p><pre><code class="hljs lang-bash">$ vendor/bin/phpunit
 PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
 
 ........FFF.                                                      12 / 12 (100%)
@@ -288,416 +288,416 @@ Failed asserting that 404 matches expected 422.
 
 FAILURES!
 Tests: 12, Assertions: 43, Failures: 3.
-</code></pre><p>Next, we create our new controller:</p><pre><code class="lang-bash">$ php artisan make:controller UserController --resource
-</code></pre><p>Let’s populate it:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Next, we create our new controller:</p><pre><code class="hljs lang-bash">$ php artisan make:controller UserController --resource
+</code></pre><p>Let’s populate it:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace AnimalFriend\Http\Controllers;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Controllers</span>;
 
-use Illuminate\Http\Request;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Request</span>;
 
-use AnimalFriend\Http\Requests;
-use AnimalFriend\User;
-use JWTAuth;
-use Hash;
+<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">Http</span>\<span class="hljs-title">Requests</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">AnimalFriend</span>\<span class="hljs-title">User</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">JWTAuth</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Hash</span>;
 
-class UserController extends Controller
-{
-    private $user;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span>
+</span>{
+    <span class="hljs-keyword">private</span> $user;
 
-    public function __construct(User $user) {
-        $this-&gt;user = $user;
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $user)</span> </span>{
+        <span class="hljs-keyword">$this</span>-&gt;user = $user;
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        // Validate request
-        $valid = $this-&gt;validate($request, [
-            &#39;email&#39; =&gt; &#39;required|email|unique:users,email&#39;,
-            &#39;name&#39; =&gt; &#39;required|string&#39;,
-            &#39;password&#39; =&gt; &#39;required|confirmed&#39;,
+     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">store</span><span class="hljs-params">(Request $request)</span>
+    </span>{
+        <span class="hljs-comment">// Validate request</span>
+        $valid = <span class="hljs-keyword">$this</span>-&gt;validate($request, [
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'required|email|unique:users,email'</span>,
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'required|string'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'required|confirmed'</span>,
         ]);
 
-        // Create user
-        $user = new $this-&gt;user;
-        $user-&gt;email = $request-&gt;input(&#39;email&#39;);
-        $user-&gt;name = $request-&gt;input(&#39;name&#39;);
-        $user-&gt;password = Hash::make($request-&gt;input(&#39;password&#39;));
+        <span class="hljs-comment">// Create user</span>
+        $user = <span class="hljs-keyword">new</span> <span class="hljs-keyword">$this</span>-&gt;user;
+        $user-&gt;email = $request-&gt;input(<span class="hljs-string">'email'</span>);
+        $user-&gt;name = $request-&gt;input(<span class="hljs-string">'name'</span>);
+        $user-&gt;password = Hash::make($request-&gt;input(<span class="hljs-string">'password'</span>));
         $user-&gt;save();
 
-        // Create token
+        <span class="hljs-comment">// Create token</span>
         $token = JWTAuth::fromUser($user);
 
-        // Send response
-        return response()-&gt;json([&#39;token&#39; =&gt; $token], 201);
+        <span class="hljs-comment">// Send response</span>
+        <span class="hljs-keyword">return</span> response()-&gt;json([<span class="hljs-string">'token'</span> =&gt; $token], <span class="hljs-number">201</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+     * <span class="hljs-doctag">@param</span>  int  $id
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span><span class="hljs-params">($id)</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+     * <span class="hljs-doctag">@param</span>  int  $id
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">edit</span><span class="hljs-params">($id)</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+     * <span class="hljs-doctag">@param</span>  \Illuminate\Http\Request  $request
+     * <span class="hljs-doctag">@param</span>  int  $id
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">update</span><span class="hljs-params">(Request $request, $id)</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+     * <span class="hljs-doctag">@param</span>  int  $id
+     * <span class="hljs-doctag">@return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destroy</span><span class="hljs-params">($id)</span>
+    </span>{
+        <span class="hljs-comment">//</span>
     }
 }
-</code></pre><p>For now we’ll leave the other methods blank, but we’ll be using them later so we won’t get rid of them. At the top, note we load not only the <code>User</code> model, but also the <code>JWTAuth</code> and <code>Hash</code> facades. We use <code>JWTAuth::fromUser()</code> to return a JSON web token for the given user model.</p><p>In the <code>store()</code> method we first of all use <a href="https://laravel.com/docs/5.3/validation">Laravel’s validation support</a> to validate our input. We specify that the user must provide a unique email address, a username, and a password, which must be confirmed. Note that we don’t need to specify an action if the request is invalid, as Laravel will do that for us. Also, note that the <code>confirmed</code> rule means that the <code>password</code> field must be accompanied by a matching <code>password_confirmation</code> field.</p><p>Next, we create the user. Note that we hash the password before storing it, which is a best practice (storing passwords in plain text is a REALLY bad idea!). Then we create the token for the new user and return it. From then on, the user can use that token to authenticate their requests.</p><p>We also need to add this route in <code>routes/api.php</code>:</p><pre><code class="lang-php">Route::resource(&#39;users&#39;, &#39;UserController&#39;);
-</code></pre><p>Let’s check the test passes:</p><pre><code class="lang-php">$ vendor/bin/phpunit 
-PHPUnit 5.5.4 by Sebastian Bergmann and contributors.
+</code></pre><p>For now we’ll leave the other methods blank, but we’ll be using them later so we won’t get rid of them. At the top, note we load not only the <code>User</code> model, but also the <code>JWTAuth</code> and <code>Hash</code> facades. We use <code>JWTAuth::fromUser()</code> to return a JSON web token for the given user model.</p><p>In the <code>store()</code> method we first of all use <a href="https://laravel.com/docs/5.3/validation">Laravel’s validation support</a> to validate our input. We specify that the user must provide a unique email address, a username, and a password, which must be confirmed. Note that we don’t need to specify an action if the request is invalid, as Laravel will do that for us. Also, note that the <code>confirmed</code> rule means that the <code>password</code> field must be accompanied by a matching <code>password_confirmation</code> field.</p><p>Next, we create the user. Note that we hash the password before storing it, which is a best practice (storing passwords in plain text is a REALLY bad idea!). Then we create the token for the new user and return it. From then on, the user can use that token to authenticate their requests.</p><p>We also need to add this route in <code>routes/api.php</code>:</p><pre><code class="hljs lang-php">Route::resource(<span class="hljs-string">'users'</span>, <span class="hljs-string">'UserController'</span>);
+</code></pre><p>Let’s check the test passes:</p><pre><code class="hljs lang-php">$ vendor/bin/phpunit 
+PHPUnit <span class="hljs-number">5.5</span><span class="hljs-number">.4</span> by Sebastian Bergmann <span class="hljs-keyword">and</span> contributors.
 
-............                                                      12 / 12 (100%)
+............                                                      <span class="hljs-number">12</span> / <span class="hljs-number">12</span> (<span class="hljs-number">100</span>%)
 
-Time: 905 ms, Memory: 20.00MB
+Time: <span class="hljs-number">905</span> ms, Memory: <span class="hljs-number">20.00</span>MB
 
-OK (12 tests, 46 assertions)
-</code></pre><h2 id="building-the-registration-in-the-app">Building the registration in the app</h2><p>With registration in place on the server side, we can move back to the app. We need to create another route for the registration form. Add this to <code>test/routes.spec.js</code>:</p><pre><code class="lang-javascript">  it(&#39;should map register route to register controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[&#39;/register&#39;].controller).toBe(&#39;RegisterCtrl&#39;);
-      expect($route.routes[&#39;/register&#39;].templateUrl).toEqual(&#39;templates/register.html&#39;);
+OK (<span class="hljs-number">12</span> tests, <span class="hljs-number">46</span> assertions)
+</code></pre><h2 id="building-the-registration-in-the-app">Building the registration in the app</h2><p>With registration in place on the server side, we can move back to the app. We need to create another route for the registration form. Add this to <code>test/routes.spec.js</code>:</p><pre><code class="hljs lang-javascript">  it(<span class="hljs-string">'should map register route to register controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-string">'/register'</span>].controller).toBe(<span class="hljs-string">'RegisterCtrl'</span>);
+      expect($route.routes[<span class="hljs-string">'/register'</span>].templateUrl).toEqual(<span class="hljs-string">'templates/register.html'</span>);
     });
   });
-</code></pre><p>Running the tests should confirm that this fails. So next you should add this to the route provider section of <code>js/main.js</code>:</p><pre><code class="lang-javascript">  .when(&#39;/register&#39;, {
-    templateUrl: &#39;templates/register.html&#39;,
-    controller: &#39;RegisterCtrl&#39;
+</code></pre><p>Running the tests should confirm that this fails. So next you should add this to the route provider section of <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript">  .when(<span class="hljs-string">'/register'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/register.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'RegisterCtrl'</span>
   })
-</code></pre><p>We also need to allow the register path to be accessed when not logged in:</p><pre><code class="lang-javascript">.run([&#39;$rootScope&#39;, &#39;$location&#39;, &#39;Auth&#39;, function ($rootScope, $location, Auth) {
-  $rootScope.$on(&#39;$routeChangeStart&#39;, function (event) {
+</code></pre><p>We also need to allow the register path to be accessed when not logged in:</p><pre><code class="hljs lang-javascript">.run([<span class="hljs-string">'$rootScope'</span>, <span class="hljs-string">'$location'</span>, <span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $location, Auth</span>) </span>{
+  $rootScope.$on(<span class="hljs-string">'$routeChangeStart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
 
-    if (!Auth.isLoggedIn()) {
-      if ($location.path() !== &#39;/login&#39; &amp;&amp; $location.path() !== &#39;/register&#39;) {
-        $location.path(&#39;/login&#39;);
+    <span class="hljs-keyword">if</span> (!Auth.isLoggedIn()) {
+      <span class="hljs-keyword">if</span> ($location.path() !== <span class="hljs-string">'/login'</span> &amp;&amp; $location.path() !== <span class="hljs-string">'/register'</span>) {
+        $location.path(<span class="hljs-string">'/login'</span>);
       }
     }
   });
 }])
-</code></pre><p>Our next step is to create a service representing the <code>User</code> endpoint. Here’s the test for it:</p><pre><code class="lang-javascript">  describe(&#39;User service&#39;, function () {
-    var mockBackend, User;
+</code></pre><p>Our next step is to create a service representing the <code>User</code> endpoint. Here’s the test for it:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'User service'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> mockBackend, User;
 
-    beforeEach(inject(function (_User_, _$httpBackend_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_User_, _$httpBackend_</span>) </span>{
       User = _User_;
       mockBackend = _$httpBackend_;
     }));
 
-    it(&#39;can create a new user&#39;, function () {
-      mockBackend.expectPOST(&#39;http://localhost:8000/api/users&#39;, &#39;{&quot;email&quot;:&quot;bob@example.com&quot;,&quot;name&quot;:&quot;bobsmith&quot;,&quot;password&quot;:&quot;password&quot;,&quot;password_confirmation&quot;:&quot;password&quot;}&#39;).respond({token: &#39;mytoken&#39;});
-      var user = new User({
-        email: &#39;bob@example.com&#39;,
-        name: &#39;bobsmith&#39;,
-        password: &#39;password&#39;,
-        password_confirmation: &#39;password&#39;
+    it(<span class="hljs-string">'can create a new user'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"bob@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
+      <span class="hljs-keyword">var</span> user = <span class="hljs-keyword">new</span> User({
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'bob@example.com'</span>,
+        <span class="hljs-attr">name</span>: <span class="hljs-string">'bobsmith'</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>,
+        <span class="hljs-attr">password_confirmation</span>: <span class="hljs-string">'password'</span>
       });
-      user.$save(function (response) {
-        expect(response).toEqualData({token: &#39;mytoken&#39;});
+      user.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+        expect(response).toEqualData({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
       });
       mockBackend.flush();
     });
   });
-</code></pre><p>We’re only interested in using this model to create new users at this point, so this is the full scope of this test for now. Make sure the test fails, then we’re ready to create the new service in <code>js/services.js</code>:</p><pre><code class="lang-javascript">.factory(&#39;User&#39;, function ($resource) {
-  return $resource(&#39;http://localhost:8000/api/users/:id&#39;, null, {
-    &#39;update&#39;: { method: &#39;PATCH&#39; }
+</code></pre><p>We’re only interested in using this model to create new users at this point, so this is the full scope of this test for now. Make sure the test fails, then we’re ready to create the new service in <code>js/services.js</code>:</p><pre><code class="hljs lang-javascript">.factory(<span class="hljs-string">'User'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
+  <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/users/:id'</span>, <span class="hljs-literal">null</span>, {
+    <span class="hljs-string">'update'</span>: { <span class="hljs-attr">method</span>: <span class="hljs-string">'PATCH'</span> }
   });
 })
-</code></pre><p>Note that <code>angular-resource</code> does not support the <code>PUT</code> or <code>PATCH</code> methods by default, but as shown here it’s easy to implement it ourselves. That should be sufficient to make our test pass.</p><p>Next, we need to create the controller for registration. Here’s the test for it:</p><pre><code class="lang-javascript">  describe(&#39;Register Controller&#39;, function () {
-    var mockBackend, scope;
+</code></pre><p>Note that <code>angular-resource</code> does not support the <code>PUT</code> or <code>PATCH</code> methods by default, but as shown here it’s easy to implement it ourselves. That should be sufficient to make our test pass.</p><p>Next, we need to create the controller for registration. Here’s the test for it:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Register Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> mockBackend, scope;
 
-    beforeEach(inject(function ($rootScope, $controller, _$httpBackend_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $controller, _$httpBackend_</span>) </span>{
       mockBackend = _$httpBackend_;
-      scope = $rootScope.$new();
-      $controller(&#39;RegisterCtrl&#39;, {
-        $scope: scope
+      scope = $rootScope.$<span class="hljs-keyword">new</span>();
+      $controller(<span class="hljs-string">'RegisterCtrl'</span>, {
+        <span class="hljs-attr">$scope</span>: scope
       });
     }));
 
-    // Test controller scope is defined
-    it(&#39;should define the scope&#39;, function () {
+    <span class="hljs-comment">// Test controller scope is defined</span>
+    it(<span class="hljs-string">'should define the scope'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope).toBeDefined();
     });
 
-    // Test doRegister is defined
-    it(&#39;should define the register method&#39;, function () {
+    <span class="hljs-comment">// Test doRegister is defined</span>
+    it(<span class="hljs-string">'should define the register method'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope.doRegister).toBeDefined();
     });
 
-    // Test doRegister works
-    it(&#39;should allow the user to register&#39;, function () {
-      // Mock the backend
-      mockBackend.expectPOST(&#39;http://localhost:8000/api/users&#39;, &#39;{&quot;email&quot;:&quot;user@example.com&quot;,&quot;name&quot;:&quot;bobsmith&quot;,&quot;password&quot;:&quot;password&quot;,&quot;password_confirmation&quot;:&quot;password&quot;}&#39;).respond({token: 123});
+    <span class="hljs-comment">// Test doRegister works</span>
+    it(<span class="hljs-string">'should allow the user to register'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-comment">// Mock the backend</span>
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/users'</span>, <span class="hljs-string">'{"email":"user@example.com","name":"bobsmith","password":"password","password_confirmation":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-number">123</span>});
 
-      // Define login data
+      <span class="hljs-comment">// Define login data</span>
       scope.credentials = {
-        email: &#39;user@example.com&#39;,
-        name: &quot;bobsmith&quot;,
-        password: &#39;password&#39;,
-        password_confirmation: &#39;password&#39;
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'user@example.com'</span>,
+        <span class="hljs-attr">name</span>: <span class="hljs-string">"bobsmith"</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>,
+        <span class="hljs-attr">password_confirmation</span>: <span class="hljs-string">'password'</span>
       };
 
-      //  Submit the request
+      <span class="hljs-comment">//  Submit the request</span>
       scope.doRegister();
 
-      // Flush the backend
+      <span class="hljs-comment">// Flush the backend</span>
       mockBackend.flush();
 
-      // Check login complete
-      expect(localStorage.getItem(&#39;authHeader&#39;)).toEqual(&#39;Bearer 123&#39;);
+      <span class="hljs-comment">// Check login complete</span>
+      expect(localStorage.getItem(<span class="hljs-string">'authHeader'</span>)).toEqual(<span class="hljs-string">'Bearer 123'</span>);
     });
   });
-</code></pre><p>Make sure the test fails before proceeding. Our <code>RegisterCtrl</code> is very similar to the login controller:</p><pre><code class="lang-javascript">.controller(&#39;RegisterCtrl&#39;, function ($scope, $location, User, Auth) {
-  $scope.doRegister = function () {
-    var user = new User($scope.credentials);
-    user.$save(function (response) {
-      if (response.token) {
-        // Set up auth service
+</code></pre><p>Make sure the test fails before proceeding. Our <code>RegisterCtrl</code> is very similar to the login controller:</p><pre><code class="hljs lang-javascript">.controller(<span class="hljs-string">'RegisterCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, User, Auth</span>) </span>{
+  $scope.doRegister = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> user = <span class="hljs-keyword">new</span> User($scope.credentials);
+    user.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+      <span class="hljs-keyword">if</span> (response.token) {
+        <span class="hljs-comment">// Set up auth service</span>
         Auth.setUser(response.token);
 
-        // Redirect
-        $location.path(&#39;/&#39;);
+        <span class="hljs-comment">// Redirect</span>
+        $location.path(<span class="hljs-string">'/'</span>);
       }
-    }, function (err) {
-        alert(&#39;Unable to log in - please check your details are correct&#39;);
+    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+        alert(<span class="hljs-string">'Unable to log in - please check your details are correct'</span>);
     });
   };
 })
-</code></pre><p>Check the tests pass,and we’re ready to move on to creating our HTML template. Save this as <code>www/templates/register.html</code>:</p><pre><code class="lang-html">&lt;md-content md-theme=&quot;default&quot; layout-gt-sm=&quot;row&quot; layout-padding&gt;
+</code></pre><p>Check the tests pass,and we’re ready to move on to creating our HTML template. Save this as <code>www/templates/register.html</code>:</p><pre><code class="hljs lang-html">&lt;md-content md-theme=<span class="hljs-string">"default"</span> layout-gt-sm=<span class="hljs-string">"row"</span> layout-padding&gt;
     &lt;div&gt;
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Email&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.email&quot; type=&quot;email&quot;&gt;
-        &lt;/md-input-container&gt;
+        &lt;md-<span class="hljs-keyword">input</span>-container <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-block"</span>&gt;
+            &lt;<span class="hljs-keyword">label</span>&gt;Email&lt;/<span class="hljs-keyword">label</span>&gt;
+            &lt;<span class="hljs-keyword">input</span> ng-model=<span class="hljs-string">"credentials.email"</span> <span class="hljs-keyword">type</span>=<span class="hljs-string">"email"</span>&gt;
+        &lt;/md-<span class="hljs-keyword">input</span>-container&gt;
 
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Username&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.name&quot; type=&quot;text&quot;&gt;
-        &lt;/md-input-container&gt;
+        &lt;md-<span class="hljs-keyword">input</span>-container <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-block"</span>&gt;
+            &lt;<span class="hljs-keyword">label</span>&gt;Username&lt;/<span class="hljs-keyword">label</span>&gt;
+            &lt;<span class="hljs-keyword">input</span> ng-model=<span class="hljs-string">"credentials.name"</span> <span class="hljs-keyword">type</span>=<span class="hljs-string">"text"</span>&gt;
+        &lt;/md-<span class="hljs-keyword">input</span>-container&gt;
 
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Password&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.password&quot; type=&quot;password&quot;&gt;
-        &lt;/md-input-container&gt;
+        &lt;md-<span class="hljs-keyword">input</span>-container <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-block"</span>&gt;
+            &lt;<span class="hljs-keyword">label</span>&gt;Password&lt;/<span class="hljs-keyword">label</span>&gt;
+            &lt;<span class="hljs-keyword">input</span> ng-model=<span class="hljs-string">"credentials.password"</span> <span class="hljs-keyword">type</span>=<span class="hljs-string">"password"</span>&gt;
+        &lt;/md-<span class="hljs-keyword">input</span>-container&gt;
 
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Confirm Password&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.password_confirmation&quot; type=&quot;password&quot;&gt;
-        &lt;/md-input-container&gt;
+        &lt;md-<span class="hljs-keyword">input</span>-container <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-block"</span>&gt;
+            &lt;<span class="hljs-keyword">label</span>&gt;<span class="hljs-keyword">Confirm</span> Password&lt;/<span class="hljs-keyword">label</span>&gt;
+            &lt;<span class="hljs-keyword">input</span> ng-model=<span class="hljs-string">"credentials.password_confirmation"</span> <span class="hljs-keyword">type</span>=<span class="hljs-string">"password"</span>&gt;
+        &lt;/md-<span class="hljs-keyword">input</span>-container&gt;
 
-        &lt;md-button class=&quot;md-raised md-primary&quot; ng-click=&quot;doRegister()&quot;&gt;Submit&lt;/md-button&gt;
-        &lt;md-button class=&quot;md-raised md-primary&quot; href=&quot;/login&quot;&gt;Log in&lt;/md-button&gt;
+        &lt;md-button <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-raised md-primary"</span> ng-click=<span class="hljs-string">"doRegister()"</span>&gt;Submit&lt;/md-button&gt;
+        &lt;md-button <span class="hljs-keyword">class</span>=<span class="hljs-string">"md-raised md-primary"</span> href=<span class="hljs-string">"/login"</span>&gt;<span class="hljs-keyword">Log</span> <span class="hljs-keyword">in</span>&lt;/md-button&gt;
     &lt;/div&gt;
 &lt;/md-content&gt;
-</code></pre><p>It’s very similar to our login template. Speaking of which, we need to add a link to this route there:</p><pre><code class="lang-html">&lt;md-content md-theme=&quot;default&quot; layout-gt-sm=&quot;row&quot; layout-padding&gt;
-    &lt;div&gt;
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Email&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.email&quot; type=&quot;email&quot; /&gt;
-        &lt;/md-input-container&gt;
+</code></pre><p>It’s very similar to our login template. Speaking of which, we need to add a link to this route there:</p><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">md-content</span> <span class="hljs-attr">md-theme</span>=<span class="hljs-string">"default"</span> <span class="hljs-attr">layout-gt-sm</span>=<span class="hljs-string">"row"</span> <span class="hljs-attr">layout-padding</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-input-container</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-block"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>Email<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ng-model</span>=<span class="hljs-string">"credentials.email"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"email"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-input-container</span>&gt;</span>
 
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Password&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.password&quot; type=&quot;password&quot; /&gt;
-        &lt;/md-input-container&gt;
-        &lt;md-button class=&quot;md-raised md-primary&quot; ng-click=&quot;doLogin()&quot;&gt;Submit&lt;/md-button&gt;
-        &lt;md-button class=&quot;md-raised md-primary&quot; href=&quot;register&quot;&gt;Register&lt;/md-button&gt;
-    &lt;/div&gt;
-&lt;/md-content&gt;
-</code></pre><p>With that done, you should now be able to run the Gulp server for the app with <code>gulp</code> and the Laravel backend with <code>php artisan serve</code> and create a new user account.</p><h2 id="adding-pets-to-the-home-page">Adding pets to the home page</h2><p>Our final task for this lesson is to display a list of pets on the home page. Later we’ll refine that functionality, but for now we’ll just get a list of all current pets and display them. First we need to write a test for our <code>Pet</code> service:</p><pre><code class="lang-javascript">  describe(&#39;Pet service&#39;, function () {
-    var mockBackend, Pet;
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-input-container</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-block"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>Password<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ng-model</span>=<span class="hljs-string">"credentials.password"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"password"</span> /&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-input-container</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-raised md-primary"</span> <span class="hljs-attr">ng-click</span>=<span class="hljs-string">"doLogin()"</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-raised md-primary"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"register"</span>&gt;</span>Register<span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">md-content</span>&gt;</span>
+</code></pre><p>With that done, you should now be able to run the Gulp server for the app with <code>gulp</code> and the Laravel backend with <code>php artisan serve</code> and create a new user account.</p><h2 id="adding-pets-to-the-home-page">Adding pets to the home page</h2><p>Our final task for this lesson is to display a list of pets on the home page. Later we’ll refine that functionality, but for now we’ll just get a list of all current pets and display them. First we need to write a test for our <code>Pet</code> service:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Pet service'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> mockBackend, Pet;
 
-    beforeEach(inject(function (_Pet_, _$httpBackend_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_Pet_, _$httpBackend_</span>) </span>{
       Pet = _Pet_;
       mockBackend = _$httpBackend_;
     }));
 
-    it(&#39;can fetch pets&#39;, function () {
-      mockBackend.expectGET(&#39;http://localhost:8000/api/pets&#39;).respond([{id:1,name:&quot;Freddie&quot;,type:&quot;Cat&quot;}]);
+    it(<span class="hljs-string">'can fetch pets'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      mockBackend.expectGET(<span class="hljs-string">'http://localhost:8000/api/pets'</span>).respond([{<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">"Freddie"</span>,<span class="hljs-attr">type</span>:<span class="hljs-string">"Cat"</span>}]);
       expect(Pet).toBeDefined();
-      var pets = Pet.query();
+      <span class="hljs-keyword">var</span> pets = Pet.query();
       mockBackend.flush();
-      expect(pets).toEqualData([{id: 1,name:&quot;Freddie&quot;,type:&quot;Cat&quot;}]);
+      expect(pets).toEqualData([{<span class="hljs-attr">id</span>: <span class="hljs-number">1</span>,<span class="hljs-attr">name</span>:<span class="hljs-string">"Freddie"</span>,<span class="hljs-attr">type</span>:<span class="hljs-string">"Cat"</span>}]);
     });
   });
-</code></pre><p>Once you know that fails, it’s time to implement the service:</p><pre><code class="lang-javascript">.factory(&#39;Pet&#39;, function ($resource) {
-  return $resource(&#39;http://localhost:8000/api/pets/:id&#39;, null, {
-    &#39;update&#39;: { method: &#39;PATCH&#39; }
+</code></pre><p>Once you know that fails, it’s time to implement the service:</p><pre><code class="hljs lang-javascript">.factory(<span class="hljs-string">'Pet'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
+  <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/pets/:id'</span>, <span class="hljs-literal">null</span>, {
+    <span class="hljs-string">'update'</span>: { <span class="hljs-attr">method</span>: <span class="hljs-string">'PATCH'</span> }
   });
 })
-</code></pre><p>Next, we want to add the pets to the scope of the home controller. Amend the test for it as follows:</p><pre><code class="lang-javascript">  describe(&#39;Home Controller&#39;, function () {
-    var pets, scope;
+</code></pre><p>Next, we want to add the pets to the scope of the home controller. Amend the test for it as follows:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Home Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> pets, scope;
 
-    beforeEach(inject(function ($rootScope, $controller, Pet) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $controller, Pet</span>) </span>{
       pets = Pet;
-      scope = $rootScope.$new();
-      $controller(&#39;HomeCtrl&#39;, {
-        $scope: scope,
-        pets: [{id:1},{id:2}]
+      scope = $rootScope.$<span class="hljs-keyword">new</span>();
+      $controller(<span class="hljs-string">'HomeCtrl'</span>, {
+        <span class="hljs-attr">$scope</span>: scope,
+        <span class="hljs-attr">pets</span>: [{<span class="hljs-attr">id</span>:<span class="hljs-number">1</span>},{<span class="hljs-attr">id</span>:<span class="hljs-number">2</span>}]
       });
     }));
 
-    // Test controller scope is defined
-    it(&#39;should define the scope&#39;, function () {
+    <span class="hljs-comment">// Test controller scope is defined</span>
+    it(<span class="hljs-string">'should define the scope'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope).toBeDefined();
     });
 
-    // Test pets
-    it(&#39;should define the pets&#39;, function () {
-      expect(scope.pets).toEqualData([{id: 1}, {id: 2}]);
+    <span class="hljs-comment">// Test pets</span>
+    it(<span class="hljs-string">'should define the pets'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      expect(scope.pets).toEqualData([{<span class="hljs-attr">id</span>: <span class="hljs-number">1</span>}, {<span class="hljs-attr">id</span>: <span class="hljs-number">2</span>}]);
     });
   });
-</code></pre><p>We check to see if the scope contains the <code>pets</code> variable. Once you have a failing test, amend the home controller as follows:</p><pre><code class="lang-javascript">.controller(&#39;HomeCtrl&#39;, function ($scope, Pet, pets) {
+</code></pre><p>We check to see if the scope contains the <code>pets</code> variable. Once you have a failing test, amend the home controller as follows:</p><pre><code class="hljs lang-javascript">.controller(<span class="hljs-string">'HomeCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, Pet, pets</span>) </span>{
   $scope.pets = pets;
 });
-</code></pre><p>We could fetch the via AJAX inside the controller, but there’s a better way. We’ll create a loader for the pet data and have it resolve that before the page is displayed. To do so, first we need to add the loader service to <code>js/services.js</code>:</p><pre><code class="lang-javascript">.factory(&#39;PetsLoader&#39;, [&#39;Pet&#39;, &#39;$q&#39;, function (Pet, $q) {
-  return function () {
-    var delay = $q.defer();
-    Pet.query(function (response) {
+</code></pre><p>We could fetch the via AJAX inside the controller, but there’s a better way. We’ll create a loader for the pet data and have it resolve that before the page is displayed. To do so, first we need to add the loader service to <code>js/services.js</code>:</p><pre><code class="hljs lang-javascript">.factory(<span class="hljs-string">'PetsLoader'</span>, [<span class="hljs-string">'Pet'</span>, <span class="hljs-string">'$q'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">Pet, $q</span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> delay = $q.defer();
+    Pet.query(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
       delay.resolve(response);
-    }, function () {
-      delay.reject(&#39;Unable to fetch pets&#39;);
+    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      delay.reject(<span class="hljs-string">'Unable to fetch pets'</span>);
     });
-    return delay.promise;
+    <span class="hljs-keyword">return</span> delay.promise;
   };
 }])
-</code></pre><p>Then we set that route up to resolve it in <code>js/main.js</code>:</p><pre><code class="lang-javascript">  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;,
-    resolve: {
-      pets: [&#39;PetsLoader&#39;, function (PetsLoader) {
-        return PetsLoader();
+</code></pre><p>Then we set that route up to resolve it in <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript">  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>,
+    <span class="hljs-attr">resolve</span>: {
+      <span class="hljs-attr">pets</span>: [<span class="hljs-string">'PetsLoader'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">PetsLoader</span>) </span>{
+        <span class="hljs-keyword">return</span> PetsLoader();
       }]
     }
   })
-</code></pre><p>Now, when we load that route, it will first of all fetch those pets and populate <code>$scope.pets</code> with them.</p><p>Now, we need to have some pets in the database, so we’ll make a seeder for it. Head back to the backend and run this command:</p><pre><code class="lang-bash">$ php artisan make:seeder PetTableSeeder
-</code></pre><p>Then amend the file at <code>database/seeds/PetTableSeeder.php</code> as follows:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Now, when we load that route, it will first of all fetch those pets and populate <code>$scope.pets</code> with them.</p><p>Now, we need to have some pets in the database, so we’ll make a seeder for it. Head back to the backend and run this command:</p><pre><code class="hljs lang-bash">$ php artisan make:seeder PetTableSeeder
+</code></pre><p>Then amend the file at <code>database/seeds/PetTableSeeder.php</code> as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Database\Seeder;
-use Carbon\Carbon;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Seeder</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Carbon</span>\<span class="hljs-title">Carbon</span>;
 
-class PetTableSeeder extends Seeder
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PetTableSeeder</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Seeder</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the database seeds.
      *
-     * @return void
-     */
-    public function run()
-    {
-        // Add Pets
-        DB::table(&#39;pets&#39;)-&gt;insert([[
-            &#39;name&#39; =&gt; &#39;Freddie&#39;,
-            &#39;type&#39; =&gt; &#39;Cat&#39;,
-            &#39;available&#39; =&gt; 1,
-            &#39;picture&#39;   =&gt; &#39;https://placekitten.com/300/300&#39;,
-            &#39;created_at&#39; =&gt; Carbon::now(),
-            &#39;updated_at&#39; =&gt; Carbon::now(),
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-comment">// Add Pets</span>
+        DB::table(<span class="hljs-string">'pets'</span>)-&gt;insert([[
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Freddie'</span>,
+            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            <span class="hljs-string">'available'</span> =&gt; <span class="hljs-number">1</span>,
+            <span class="hljs-string">'picture'</span>   =&gt; <span class="hljs-string">'https://placekitten.com/300/300'</span>,
+            <span class="hljs-string">'created_at'</span> =&gt; Carbon::now(),
+            <span class="hljs-string">'updated_at'</span> =&gt; Carbon::now(),
         ], [
-            &#39;name&#39; =&gt; &#39;Sophie&#39;,
-            &#39;type&#39; =&gt; &#39;Cat&#39;,
-            &#39;available&#39; =&gt; 1,
-            &#39;picture&#39;   =&gt; &#39;https://placekitten.com/300/300&#39;,
-            &#39;created_at&#39; =&gt; Carbon::now(),
-            &#39;updated_at&#39; =&gt; Carbon::now(),
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Sophie'</span>,
+            <span class="hljs-string">'type'</span> =&gt; <span class="hljs-string">'Cat'</span>,
+            <span class="hljs-string">'available'</span> =&gt; <span class="hljs-number">1</span>,
+            <span class="hljs-string">'picture'</span>   =&gt; <span class="hljs-string">'https://placekitten.com/300/300'</span>,
+            <span class="hljs-string">'created_at'</span> =&gt; Carbon::now(),
+            <span class="hljs-string">'updated_at'</span> =&gt; Carbon::now(),
         ]]);
     }
 }
-</code></pre><p>And we need to update <code>database/seeds/DatabaseSeeder.php</code> to call our seeder:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>And we need to update <code>database/seeds/DatabaseSeeder.php</code> to call our seeder:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-use Illuminate\Database\Seeder;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">Seeder</span>;
 
-class DatabaseSeeder extends Seeder
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DatabaseSeeder</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Seeder</span>
+</span>{
+    <span class="hljs-comment">/**
      * Run the database seeds.
      *
-     * @return void
-     */
-    public function run()
-    {
-        $this-&gt;call(UserTableSeeder::class);
-        $this-&gt;call(PetTableSeeder::class);
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;call(UserTableSeeder::class);
+        <span class="hljs-keyword">$this</span>-&gt;call(PetTableSeeder::class);
     }
 }
-</code></pre><p>For now we’ll use placeholder images, but at a later point our backend will be set up to use images uploaded from the admin. Then we need to refresh our migrations and apply the seeders:</p><pre><code class="lang-bash">$ php artisan migrate:refresh
+</code></pre><p>For now we’ll use placeholder images, but at a later point our backend will be set up to use images uploaded from the admin. Then we need to refresh our migrations and apply the seeders:</p><pre><code class="hljs lang-bash">$ php artisan migrate:refresh
 $ php artisan db:seed
-</code></pre><p>Now we just need to amend our home template to show the pets and we’re done for today:</p><pre><code class="lang-html">&lt;md-toolbar&gt;
-    &lt;div class=&quot;md-toolbar-tools&quot;&gt;
-        &lt;md-button aria-label=&quot;Log out&quot; href=&quot;/logout&quot;&gt;
+</code></pre><p>Now we just need to amend our home template to show the pets and we’re done for today:</p><pre><code class="hljs lang-html"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">md-toolbar</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-toolbar-tools"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">"Log out"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/logout"</span>&gt;</span>
             Log out
-        &lt;/md-button&gt;
-    &lt;/div&gt;
-&lt;/md-toolbar&gt;
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">md-toolbar</span>&gt;</span>
 
-&lt;div layout=&quot;column&quot; flex=&quot;grow&quot; layout-align=&quot;center stretch&quot;&gt;
-    &lt;md-card md-theme=&quot;default&quot; ng-repeat=&quot;pet in pets&quot;&gt;
-        &lt;md-card-title&gt;
-            &lt;md-card-title-text&gt;
-                &lt;span class=&quot;md-headline&quot;&gt;{{ pet.name }}&lt;/span&gt;
-                &lt;span class=&quot;md-subhead&quot;&gt;{{ pet.type }}&lt;/span&gt;
-            &lt;/md-card-title-text&gt;
-        &lt;/md-card-title&gt;
-        &lt;md-card-content&gt;
-            &lt;img class=&quot;md-card-image md-media-lg&quot; ng-src=&quot;{{ pet.picture }}&quot;&gt;&lt;/img&gt;
-        &lt;/md-card-content&gt;
-    &lt;/md-card&gt;
-&lt;/div&gt;
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">layout</span>=<span class="hljs-string">"column"</span> <span class="hljs-attr">flex</span>=<span class="hljs-string">"grow"</span> <span class="hljs-attr">layout-align</span>=<span class="hljs-string">"center stretch"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">md-card</span> <span class="hljs-attr">md-theme</span>=<span class="hljs-string">"default"</span> <span class="hljs-attr">ng-repeat</span>=<span class="hljs-string">"pet in pets"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-card-title</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">md-card-title-text</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-headline"</span>&gt;</span></span><span class="hljs-template-variable">{{ pet.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-subhead"</span>&gt;</span></span><span class="hljs-template-variable">{{ pet.type }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">md-card-title-text</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-card-title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-card-content</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-card-image md-media-lg"</span> <span class="hljs-attr">ng-src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ pet.picture }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">img</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-card-content</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">md-card</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
 </code></pre><p>Now we can see our pets in the app.</p><h2 id="wrapping-up">Wrapping up</h2><p>That’s enough for today - the fact that we can log in and out, register, and view the home page is sufficient as a proof of concept for a client. As usual, the results are on Github, tagged <code>lesson-3</code>.</p><p>Next time, we’ll concentrate exclusively on the back end. We’ll build upon what we already have using Laravel to create a full REST API for our app. In a later instalment, we’ll move on to build our admin interface for the staff, before switching back to finish off the app. I hope you’ll join me then.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/angular/">angular</a></li><li><a href="/blog/categories/phonegap/">phonegap</a></li><li><a href="/blog/categories/laravel-phonegap-tutorial/">laravel-phonegap-tutorial</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/10/16/building-a-phonegap-app-with-laravel-and-angular-part-3/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/10/24/creating-an-azure-storage-adapter-for-laravel/amp/">Creating An Azure Storage Adapter for Laravel</a> <a class="postlink" href="/blog/2016/09/18/building-a-phonegap-app-with-laravel-and-angular-part-2/amp/">Building a Phonegap App With Laravel and Angular - Part 2</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

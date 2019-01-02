@@ -183,126 +183,126 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th September 2016 11:18 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 2</h1><p>In this lesson, the initial scope of the app will be extremely simple. We will implement functionality that:</p><ul><li>Allows users to log in and out</li><li>Displays the home page</li></ul><p>That’s fairly simple, and easily achievable within a fairly short timeframe. We’ll also write automated tests for our app. By the end of this lesson, we’ll have built a first pass for our app using Angular.js.</p><p>NOTE: As at time of writing, Angular 2 has just come out. I’m using Angular 1 here, and the two are not compatible, so make sure you’re using Angular 1.</p><h2 id="creating-our-app">Creating our app</h2><p>Start by creating a new folder, separate from the backend, for the app. Then, in there, run the following command:</p><pre><code class="lang-bash">$ npm init -y
-</code></pre><p>Then let’s install our dependencies:</p><pre><code class="lang-bash">$ npm install --save-dev gulp karma karma-browserify karma-phantomjs-launcher browserify angular angular-route angular-mocks angular-animate angular-messages angular-sanitize angular-material angular-resource vinyl-buffer vinyl-source-stream gulp-sass karma-coverage karma-jasmine jasmine-core gulp-webserver
-</code></pre><p>We’re going to use <a href="https://material.angularjs.org/latest/">Angular Material</a> for our user interface as it includes support out of the box for swiping left and right. You’ll notice it mentioned as one of the dependencies above.</p><p>We’ll also use Karma for running our tests. Save the following as <code>karma.conf.js</code>:</p><pre><code class="lang-javascript">module.exports = function(config) {
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">18th September 2016 11:18 pm</p><h1>Building a Phonegap App With Laravel and Angular - Part 2</h1><p>In this lesson, the initial scope of the app will be extremely simple. We will implement functionality that:</p><ul><li>Allows users to log in and out</li><li>Displays the home page</li></ul><p>That’s fairly simple, and easily achievable within a fairly short timeframe. We’ll also write automated tests for our app. By the end of this lesson, we’ll have built a first pass for our app using Angular.js.</p><p>NOTE: As at time of writing, Angular 2 has just come out. I’m using Angular 1 here, and the two are not compatible, so make sure you’re using Angular 1.</p><h2 id="creating-our-app">Creating our app</h2><p>Start by creating a new folder, separate from the backend, for the app. Then, in there, run the following command:</p><pre><code class="hljs lang-bash">$ npm init -y
+</code></pre><p>Then let’s install our dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev gulp karma karma-browserify karma-phantomjs-launcher browserify angular angular-route angular-mocks angular-animate angular-messages angular-sanitize angular-material angular-resource vinyl-buffer vinyl-source-stream gulp-sass karma-coverage karma-jasmine jasmine-core gulp-webserver
+</code></pre><p>We’re going to use <a href="https://material.angularjs.org/latest/">Angular Material</a> for our user interface as it includes support out of the box for swiping left and right. You’ll notice it mentioned as one of the dependencies above.</p><p>We’ll also use Karma for running our tests. Save the following as <code>karma.conf.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">config</span>) </span>{
     config.set({
-        basePath: &#39;&#39;,
-        frameworks: [&#39;browserify&#39;, &#39;jasmine&#39;],
-        files: [
-            &#39;node_modules/angular/angular.min.js&#39;,
-            &#39;node_modules/angular-mocks/angular-mocks.js&#39;,
-            &#39;node_modules/angular-material/angular-material-mocks.js&#39;,
-            &#39;js/*.js&#39;,
-            &#39;test/*.js&#39;
+        <span class="hljs-attr">basePath</span>: <span class="hljs-string">''</span>,
+        <span class="hljs-attr">frameworks</span>: [<span class="hljs-string">'browserify'</span>, <span class="hljs-string">'jasmine'</span>],
+        <span class="hljs-attr">files</span>: [
+            <span class="hljs-string">'node_modules/angular/angular.min.js'</span>,
+            <span class="hljs-string">'node_modules/angular-mocks/angular-mocks.js'</span>,
+            <span class="hljs-string">'node_modules/angular-material/angular-material-mocks.js'</span>,
+            <span class="hljs-string">'js/*.js'</span>,
+            <span class="hljs-string">'test/*.js'</span>
         ],
-        exclude: [
+        <span class="hljs-attr">exclude</span>: [
         ],
-        preprocessors: {
-            &#39;js/*.js&#39;: [&#39;browserify&#39;, &#39;coverage&#39;],
-            &#39;tests/js&#39;: [&#39;browserify&#39;]
+        <span class="hljs-attr">preprocessors</span>: {
+            <span class="hljs-string">'js/*.js'</span>: [<span class="hljs-string">'browserify'</span>, <span class="hljs-string">'coverage'</span>],
+            <span class="hljs-string">'tests/js'</span>: [<span class="hljs-string">'browserify'</span>]
         },
-        browserify: {
-          debug: true
+        <span class="hljs-attr">browserify</span>: {
+          <span class="hljs-attr">debug</span>: <span class="hljs-literal">true</span>
         },
-        reporters: [&#39;progress&#39;, &#39;coverage&#39;],
-        port: 9876,
-        colors: true,
-        logLevel: config.LOG_DEBUG,
-        autoWatch: true,
-        browsers: [&#39;PhantomJS&#39;],
-        singleRun: true,
-        coverageReporter: {
-          dir : &#39;coverage/&#39;,
-          reporters: [
-            { type: &#39;html&#39;, subdir: &#39;report-html&#39; },
-            { type: &#39;cobertura&#39;, subdir: &#39;report-cobertura&#39; }
+        <span class="hljs-attr">reporters</span>: [<span class="hljs-string">'progress'</span>, <span class="hljs-string">'coverage'</span>],
+        <span class="hljs-attr">port</span>: <span class="hljs-number">9876</span>,
+        <span class="hljs-attr">colors</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">logLevel</span>: config.LOG_DEBUG,
+        <span class="hljs-attr">autoWatch</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">browsers</span>: [<span class="hljs-string">'PhantomJS'</span>],
+        <span class="hljs-attr">singleRun</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">coverageReporter</span>: {
+          <span class="hljs-attr">dir</span> : <span class="hljs-string">'coverage/'</span>,
+          <span class="hljs-attr">reporters</span>: [
+            { <span class="hljs-attr">type</span>: <span class="hljs-string">'html'</span>, <span class="hljs-attr">subdir</span>: <span class="hljs-string">'report-html'</span> },
+            { <span class="hljs-attr">type</span>: <span class="hljs-string">'cobertura'</span>, <span class="hljs-attr">subdir</span>: <span class="hljs-string">'report-cobertura'</span> }
           ]
         }
     });
 };
-</code></pre><p>This is our Karma configuration. Karma can run the same test in multiple browsers. Here we’re going to use PhantomJS, but it’s trivial to amend the <code>browsers</code> section to add more. You just need to make sure you install the appropriate launchers for those browsers.</p><p>We’ll use Gulp to build the app. Here’s the <code>gulpfile.js</code>:</p><pre><code class="lang-javascript">var gulp = require(&#39;gulp&#39;);
-var source = require(&#39;vinyl-source-stream&#39;);
-var buffer = require(&#39;vinyl-buffer&#39;);
-var browserify = require(&#39;browserify&#39;);
-var sass = require(&#39;gulp-sass&#39;);
-var server = require(&#39;gulp-webserver&#39;);
+</code></pre><p>This is our Karma configuration. Karma can run the same test in multiple browsers. Here we’re going to use PhantomJS, but it’s trivial to amend the <code>browsers</code> section to add more. You just need to make sure you install the appropriate launchers for those browsers.</p><p>We’ll use Gulp to build the app. Here’s the <code>gulpfile.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> gulp = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp'</span>);
+<span class="hljs-keyword">var</span> source = <span class="hljs-built_in">require</span>(<span class="hljs-string">'vinyl-source-stream'</span>);
+<span class="hljs-keyword">var</span> buffer = <span class="hljs-built_in">require</span>(<span class="hljs-string">'vinyl-buffer'</span>);
+<span class="hljs-keyword">var</span> browserify = <span class="hljs-built_in">require</span>(<span class="hljs-string">'browserify'</span>);
+<span class="hljs-keyword">var</span> sass = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-sass'</span>);
+<span class="hljs-keyword">var</span> server = <span class="hljs-built_in">require</span>(<span class="hljs-string">'gulp-webserver'</span>);
 
-var paths = {
-  scripts: [&#39;js/*.js&#39;],
-  styles: [&#39;sass/*.scss&#39;]
+<span class="hljs-keyword">var</span> paths = {
+  <span class="hljs-attr">scripts</span>: [<span class="hljs-string">'js/*.js'</span>],
+  <span class="hljs-attr">styles</span>: [<span class="hljs-string">'sass/*.scss'</span>]
 };
 
-gulp.task(&#39;sass&#39;, function() {
-  gulp.src(&#39;sass/style.scss&#39;)
-   .pipe(sass().on(&#39;error&#39;, sass.logError))
-   .pipe(gulp.dest(&#39;www/css&#39;));
+gulp.task(<span class="hljs-string">'sass'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  gulp.src(<span class="hljs-string">'sass/style.scss'</span>)
+   .pipe(sass().on(<span class="hljs-string">'error'</span>, sass.logError))
+   .pipe(gulp.dest(<span class="hljs-string">'www/css'</span>));
 });;
 
-gulp.task(&#39;js&#39;, function () {
-  return browserify({ entries: [&#39;js/main.js&#39;], debug: true })
+gulp.task(<span class="hljs-string">'js'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> browserify({ <span class="hljs-attr">entries</span>: [<span class="hljs-string">'js/main.js'</span>], <span class="hljs-attr">debug</span>: <span class="hljs-literal">true</span> })
     .bundle()
-    .pipe(source(&#39;bundle.js&#39;))
+    .pipe(source(<span class="hljs-string">'bundle.js'</span>))
     .pipe(buffer())
-    .pipe(gulp.dest(&#39;www/js/&#39;));
+    .pipe(gulp.dest(<span class="hljs-string">'www/js/'</span>));
 });
 
-gulp.task(&#39;server&#39;, function () {
-  gulp.src(&#39;www/&#39;)
+gulp.task(<span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  gulp.src(<span class="hljs-string">'www/'</span>)
     .pipe(server({
-      livereload: true,
-      open: true,
-      port: 5000
+      <span class="hljs-attr">livereload</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">open</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">port</span>: <span class="hljs-number">5000</span>
     }));
 });
 
 
-gulp.task(&#39;watch&#39;, function () {
-  gulp.watch(paths.scripts, [&#39;js&#39;]);
-  gulp.watch(paths.styles, [&#39;sass&#39;]);
+gulp.task(<span class="hljs-string">'watch'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  gulp.watch(paths.scripts, [<span class="hljs-string">'js'</span>]);
+  gulp.watch(paths.styles, [<span class="hljs-string">'sass'</span>]);
 });
 
-gulp.task(&#39;default&#39;, [&#39;sass&#39;,&#39;js&#39;,&#39;server&#39;, &#39;watch&#39;]);
-</code></pre><p>Note that we’re going to be using Browserify to handle our dependencies. If you haven’t used it before, it lets you use the <code>require()</code> syntax from Node.js to include other JavaScript files, including ones available via NPM such as jQuery or Angular, allowing you to compile them all into a single file.</p><p>We should be able to test and run the app using NPM, so add these scripts to <code>package.json</code>:</p><pre><code class="lang-javascript">  &quot;scripts&quot;: {
-    &quot;test&quot;: &quot;karma start&quot;,
-    &quot;run&quot;: &quot;gulp&quot;
+gulp.task(<span class="hljs-string">'default'</span>, [<span class="hljs-string">'sass'</span>,<span class="hljs-string">'js'</span>,<span class="hljs-string">'server'</span>, <span class="hljs-string">'watch'</span>]);
+</code></pre><p>Note that we’re going to be using Browserify to handle our dependencies. If you haven’t used it before, it lets you use the <code>require()</code> syntax from Node.js to include other JavaScript files, including ones available via NPM such as jQuery or Angular, allowing you to compile them all into a single file.</p><p>We should be able to test and run the app using NPM, so add these scripts to <code>package.json</code>:</p><pre><code class="hljs lang-javascript">  <span class="hljs-string">"scripts"</span>: {
+    <span class="hljs-string">"test"</span>: <span class="hljs-string">"karma start"</span>,
+    <span class="hljs-string">"run"</span>: <span class="hljs-string">"gulp"</span>
   },
-</code></pre><p>We also need an HTML file. Save this as <code>www/index.html</code>:</p><pre><code class="lang-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-    &lt;head&gt;
-        &lt;meta charset=&quot;utf-8&quot;&gt;
-        &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
-        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, user-scalable=0&quot;&gt;
-        &lt;title&gt;My New Animal Friend&lt;/title&gt;
-        &lt;link href=&quot;/css/style.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-    &lt;div&gt;
-        &lt;div ng-app=&quot;mynewanimalfriend&quot; ng-cloak&gt;
-            &lt;div ng-view&gt;&lt;/div&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;/body&gt;
-    &lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot; src=&quot;/js/bundle.js&quot;&gt;&lt;/script&gt;
-&lt;/html&gt;
-</code></pre><p>Note the use of the Angular directives. <code>ng-app</code> denotes the name of the app namespace, <code>ng-cloak</code> hides the application until it’s fully loaded, and <code>ng-view</code> denotes the area containing our content.</p><p>You should also create the files <code>js/main.js</code>, <code>sass/style.scss</code>, and the <code>test</code> folder.</p><h2 id="creating-our-first-routes">Creating our first routes</h2><p>Our first task is to create the routes we need. Our default route will be <code>/</code>, representing the home page. However, users will need to be logged in to see this. Otherwise, they should be redirected to the login route, which will be <code>/login</code>, appropriately enough. We’ll also have a <code>/logout</code> route, which should be self-explanatory.</p><p>Before we implement these routes, we need to write a test for them. We’ll start with our login route, and we’ll test that for this route, the controller will be <code>LoginCtrl</code> and the template will be <code>templates/login.html</code>. The significance of these will become apparent later. Save this as <code>test/routes.spec.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>We also need an HTML file. Save this as <code>www/index.html</code>:</p><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1, user-scalable=0"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>My New Animal Friend<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/style.css"</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ng-app</span>=<span class="hljs-string">"mynewanimalfriend"</span> <span class="hljs-attr">ng-cloak</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ng-view</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">language</span>=<span class="hljs-string">"javascript"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/js/bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre><p>Note the use of the Angular directives. <code>ng-app</code> denotes the name of the app namespace, <code>ng-cloak</code> hides the application until it’s fully loaded, and <code>ng-view</code> denotes the area containing our content.</p><p>You should also create the files <code>js/main.js</code>, <code>sass/style.scss</code>, and the <code>test</code> folder.</p><h2 id="creating-our-first-routes">Creating our first routes</h2><p>Our first task is to create the routes we need. Our default route will be <code>/</code>, representing the home page. However, users will need to be logged in to see this. Otherwise, they should be redirected to the login route, which will be <code>/login</code>, appropriately enough. We’ll also have a <code>/logout</code> route, which should be self-explanatory.</p><p>Before we implement these routes, we need to write a test for them. We’ll start with our login route, and we’ll test that for this route, the controller will be <code>LoginCtrl</code> and the template will be <code>templates/login.html</code>. The significance of these will become apparent later. Save this as <code>test/routes.spec.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-describe(&#39;Routes&#39;, function () {
+describe(<span class="hljs-string">'Routes'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
-  beforeEach(angular.mock.module(&#39;mynewanimalfriend&#39;));
-  it(&#39;should map login route to login controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[&#39;/login&#39;].controller).toBe(&#39;LoginCtrl&#39;);
-      expect($route.routes[&#39;/login&#39;].templateUrl).toEqual(&#39;templates/login.html&#39;);
+  beforeEach(angular.mock.module(<span class="hljs-string">'mynewanimalfriend'</span>));
+  it(<span class="hljs-string">'should map login route to login controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-string">'/login'</span>].controller).toBe(<span class="hljs-string">'LoginCtrl'</span>);
+      expect($route.routes[<span class="hljs-string">'/login'</span>].templateUrl).toEqual(<span class="hljs-string">'templates/login.html'</span>);
     });
   });
 });
-</code></pre><p>Note the <code>beforeEach()</code> hook. This is used to set up the application.</p><p>We can run this test with <code>npm test</code> as that calls Karma directly. Note that we’re using Jasmine to write our tests.</p><pre><code class="lang-bash">$ npm test
+</code></pre><p>Note the <code>beforeEach()</code> hook. This is used to set up the application.</p><p>We can run this test with <code>npm test</code> as that calls Karma directly. Note that we’re using Jasmine to write our tests.</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
 
-&gt; mynewanimalfriend-app@1.0.0 test /home/matthew/Projects/mynewanimalfriend-app
+&gt; mynewanimalfriend-app@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/mynewanimalfriend-app
 &gt; karma start
 
-12 09 2016 22:22:34.168:DEBUG [config]: autoWatch set to false, because of singleRun
+12 09 2016 22:22:34.168:DEBUG [config]: autoWatch <span class="hljs-built_in">set</span> to <span class="hljs-literal">false</span>, because of singleRun
 12 09 2016 22:22:34.172:DEBUG [plugin]: Loading karma-* from /home/matthew/Projects/mynewanimalfriend-app/node_modules
 12 09 2016 22:22:34.176:DEBUG [plugin]: Loading plugin /home/matthew/Projects/mynewanimalfriend-app/node_modules/karma-browserify.
 12 09 2016 22:22:34.314:DEBUG [plugin]: Loading plugin /home/matthew/Projects/mynewanimalfriend-app/node_modules/karma-coverage.
@@ -313,11 +313,11 @@ describe(&#39;Routes&#39;, function () {
 12 09 2016 22:22:34.559:DEBUG [web-server]: Instantiating middleware
 12 09 2016 22:22:34.569:DEBUG [reporter]: Trying to load reporter: coverage
 12 09 2016 22:22:34.570:DEBUG [reporter]: Trying to load color-version of reporter: coverage (coverage_color)
-12 09 2016 22:22:34.571:DEBUG [reporter]: Couldn&#39;t load color-version.
+12 09 2016 22:22:34.571:DEBUG [reporter]: Couldn<span class="hljs-string">'t load color-version.
 12 09 2016 22:22:34.596:DEBUG [framework.browserify]: updating js/main.js in bundle
 12 09 2016 22:22:34.597:DEBUG [framework.browserify]: building bundle
 12 09 2016 22:22:35.302:DEBUG [framework.browserify]: bundling
-12 09 2016 22:22:35.328:DEBUG [preprocessor.coverage]: Processing &quot;/home/matthew/Projects/mynewanimalfriend-app/js/main.js&quot;.
+12 09 2016 22:22:35.328:DEBUG [preprocessor.coverage]: Processing "/home/matthew/Projects/mynewanimalfriend-app/js/main.js".
 12 09 2016 22:22:35.345:INFO [framework.browserify]: bundle built
 12 09 2016 22:22:35.352:INFO [karma]: Karma v1.3.0 server started at http://localhost:9876/
 12 09 2016 22:22:35.352:INFO [launcher]: Launching browser PhantomJS with unlimited concurrency
@@ -382,33 +382,33 @@ PhantomJS 2.1.1 (Linux 0.0.0): Executed 1 of 1 (1 FAILED) ERROR (0.044 secs / 0.
 12 09 2016 22:22:35.880:DEBUG [launcher]: Process PhantomJS exited with code 0
 12 09 2016 22:22:35.881:DEBUG [temp-dir]: Cleaning temp dir /tmp/karma-17657666
 12 09 2016 22:22:35.884:DEBUG [launcher]: Finished all browsers
-npm ERR! Test failed.  See above for more details.
-</code></pre><p>Now that we have a failing test, we can set about making it pass. Save this at <code>js/main.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+npm ERR! Test failed.  See above for more details.</span>
+</code></pre><p>Now that we have a failing test, we can set about making it pass. Save this at <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>
 ])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   });
 });
-</code></pre><p>As mentioned earlier, because we’re using Browserify, we can use the <code>require()</code> syntax to import our dependencies. Note we also give our module a name and specify the dependencies. Finally, note that we use <code>$routeProvider</code> to set up our first route, and we map the template URL and controller to match our test.</p><p>Let’s run the test again:</p><pre><code class="lang-bash">$ npm test
+</code></pre><p>As mentioned earlier, because we’re using Browserify, we can use the <code>require()</code> syntax to import our dependencies. Note we also give our module a name and specify the dependencies. Finally, note that we use <code>$routeProvider</code> to set up our first route, and we map the template URL and controller to match our test.</p><p>Let’s run the test again:</p><pre><code class="hljs lang-bash">$ npm <span class="hljs-built_in">test</span>
 
-&gt; mynewanimalfriend-app@1.0.0 test /home/matthew/Projects/mynewanimalfriend-app
+&gt; mynewanimalfriend-app@1.0.0 <span class="hljs-built_in">test</span> /home/matthew/Projects/mynewanimalfriend-app
 &gt; karma start
 
-12 09 2016 22:35:51.231:DEBUG [config]: autoWatch set to false, because of singleRun
+12 09 2016 22:35:51.231:DEBUG [config]: autoWatch <span class="hljs-built_in">set</span> to <span class="hljs-literal">false</span>, because of singleRun
 12 09 2016 22:35:51.235:DEBUG [plugin]: Loading karma-* from /home/matthew/Projects/mynewanimalfriend-app/node_modules
 12 09 2016 22:35:51.237:DEBUG [plugin]: Loading plugin /home/matthew/Projects/mynewanimalfriend-app/node_modules/karma-browserify.
 12 09 2016 22:35:51.354:DEBUG [plugin]: Loading plugin /home/matthew/Projects/mynewanimalfriend-app/node_modules/karma-coverage.
@@ -419,11 +419,11 @@ angular.module(&#39;mynewanimalfriend&#39;, [
 12 09 2016 22:35:51.564:DEBUG [web-server]: Instantiating middleware
 12 09 2016 22:35:51.581:DEBUG [reporter]: Trying to load reporter: coverage
 12 09 2016 22:35:51.582:DEBUG [reporter]: Trying to load color-version of reporter: coverage (coverage_color)
-12 09 2016 22:35:51.582:DEBUG [reporter]: Couldn&#39;t load color-version.
+12 09 2016 22:35:51.582:DEBUG [reporter]: Couldn<span class="hljs-string">'t load color-version.
 12 09 2016 22:35:51.602:DEBUG [framework.browserify]: updating js/main.js in bundle
 12 09 2016 22:35:51.603:DEBUG [framework.browserify]: building bundle
 12 09 2016 22:35:52.306:DEBUG [framework.browserify]: bundling
-12 09 2016 22:35:54.095:DEBUG [preprocessor.coverage]: Processing &quot;/home/matthew/Projects/mynewanimalfriend-app/js/main.js&quot;.
+12 09 2016 22:35:54.095:DEBUG [preprocessor.coverage]: Processing "/home/matthew/Projects/mynewanimalfriend-app/js/main.js".
 12 09 2016 22:35:54.170:INFO [framework.browserify]: bundle built
 12 09 2016 22:35:54.189:INFO [karma]: Karma v1.3.0 server started at http://localhost:9876/
 12 09 2016 22:35:54.189:INFO [launcher]: Launching browser PhantomJS with unlimited concurrency
@@ -471,7 +471,7 @@ angular.module(&#39;mynewanimalfriend&#39;, [
 12 09 2016 22:35:54.497:DEBUG [web-server]: serving: /home/matthew/Projects/mynewanimalfriend-app/node_modules/karma/static/context.js
 12 09 2016 22:35:54.582:DEBUG [phantomjs.launcher]: WARNING: Tried to load angular more than once.
 
-PhantomJS 2.1.1 (Linux 0.0.0) LOG: &#39;WARNING: Tried to load angular more than once.&#39;
+PhantomJS 2.1.1 (Linux 0.0.0) LOG: '</span>WARNING: Tried to load angular more than once.<span class="hljs-string">'
 
 PhantomJS 2.1.1 (Linux 0.0.0): Executed 1 of 1 SUCCESS (0.004 secs / 0.358 secs)
 12 09 2016 22:35:55.003:DEBUG [karma]: Run complete, exiting.
@@ -481,108 +481,108 @@ PhantomJS 2.1.1 (Linux 0.0.0): Executed 1 of 1 SUCCESS (0.004 secs / 0.358 secs)
 12 09 2016 22:35:55.078:DEBUG [coverage]: Writing coverage to /home/matthew/Projects/mynewanimalfriend-app/coverage/report-cobertura
 12 09 2016 22:35:55.082:DEBUG [launcher]: Process PhantomJS exited with code 0
 12 09 2016 22:35:55.082:DEBUG [temp-dir]: Cleaning temp dir /tmp/karma-91342786
-12 09 2016 22:35:55.085:DEBUG [launcher]: Finished all browsers
-</code></pre><p>Our first test has passed. Let’s add tests for the other routes:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+12 09 2016 22:35:55.085:DEBUG [launcher]: Finished all browsers</span>
+</code></pre><p>Our first test has passed. Let’s add tests for the other routes:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-describe(&#39;Routes&#39;, function () {
+describe(<span class="hljs-string">'Routes'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
-  beforeEach(angular.mock.module(&#39;mynewanimalfriend&#39;));
-  it(&#39;should map default route to home controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[&#39;/&#39;].controller).toBe(&#39;HomeCtrl&#39;);
-      expect($route.routes[&#39;/&#39;].templateUrl).toEqual(&#39;templates/home.html&#39;);
+  beforeEach(angular.mock.module(<span class="hljs-string">'mynewanimalfriend'</span>));
+  it(<span class="hljs-string">'should map default route to home controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-string">'/'</span>].controller).toBe(<span class="hljs-string">'HomeCtrl'</span>);
+      expect($route.routes[<span class="hljs-string">'/'</span>].templateUrl).toEqual(<span class="hljs-string">'templates/home.html'</span>);
     });
   });
 
-  it(&#39;should map login route to login controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[&#39;/login&#39;].controller).toBe(&#39;LoginCtrl&#39;);
-      expect($route.routes[&#39;/login&#39;].templateUrl).toEqual(&#39;templates/login.html&#39;);
+  it(<span class="hljs-string">'should map login route to login controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-string">'/login'</span>].controller).toBe(<span class="hljs-string">'LoginCtrl'</span>);
+      expect($route.routes[<span class="hljs-string">'/login'</span>].templateUrl).toEqual(<span class="hljs-string">'templates/login.html'</span>);
     });
   });
 
-  it(&#39;should map logout route to logout controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[&#39;/logout&#39;].controller).toBe(&#39;LogoutCtrl&#39;);
-      expect($route.routes[&#39;/logout&#39;].templateUrl).toEqual(&#39;templates/login.html&#39;);
+  it(<span class="hljs-string">'should map logout route to logout controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-string">'/logout'</span>].controller).toBe(<span class="hljs-string">'LogoutCtrl'</span>);
+      expect($route.routes[<span class="hljs-string">'/logout'</span>].templateUrl).toEqual(<span class="hljs-string">'templates/login.html'</span>);
     });
   });
 });
-</code></pre><p>Note that the logout route uses the login template. This is because all it will do is redirect the user to the login form.</p><p>For the sake of brevity I won’t display the test output, but two of these tests should now fail. We can easily set up the new routes in <code>js/main.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>Note that the logout route uses the login template. This is because all it will do is redirect the user to the login form.</p><p>For the sake of brevity I won’t display the test output, but two of these tests should now fail. We can easily set up the new routes in <code>js/main.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>
 ])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   })
-  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;
+  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>
   })
-  .when(&#39;/logout&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LogoutCtrl&#39;
+  .when(<span class="hljs-string">'/logout'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LogoutCtrl'</span>
   });
 });
-</code></pre><p>That’s looking good so far. But what if someone navigates to a URL that doesn’t exist? Our router should handle that. Add this to the test:</p><pre><code class="lang-javascript">  it(&#39;should redirect other or empty routes to the home controller&#39;, function () {
-    inject(function ($route) {
-      expect($route.routes[null].redirectTo).toEqual(&#39;/&#39;)
+</code></pre><p>That’s looking good so far. But what if someone navigates to a URL that doesn’t exist? Our router should handle that. Add this to the test:</p><pre><code class="hljs lang-javascript">  it(<span class="hljs-string">'should redirect other or empty routes to the home controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$route</span>) </span>{
+      expect($route.routes[<span class="hljs-literal">null</span>].redirectTo).toEqual(<span class="hljs-string">'/'</span>)
     });
   });
-</code></pre><p>Once again, the test should fail. Fixing it is fairly straightforward - we’ll use the <code>otherwise()</code> method to define a fallback route:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>Once again, the test should fail. Fixing it is fairly straightforward - we’ll use the <code>otherwise()</code> method to define a fallback route:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>
 ])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   })
-  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;
+  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>
   })
-  .when(&#39;/logout&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LogoutCtrl&#39;
+  .when(<span class="hljs-string">'/logout'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LogoutCtrl'</span>
   })
   .otherwise({
-    redirectTo: &#39;/&#39;
+    <span class="hljs-attr">redirectTo</span>: <span class="hljs-string">'/'</span>
   });
 });
-</code></pre><p>Now our routes are in place, we need to implement the three controllers we will need. However, as two of these controllers deal with authentication, we’ll first create some services to handle that, and they’ll need to be tested. Save this as <code>test/services.spec.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>Now our routes are in place, we need to implement the three controllers we will need. However, as two of these controllers deal with authentication, we’ll first create some services to handle that, and they’ll need to be tested. Save this as <code>test/services.spec.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-describe(&#39;Services&#39;, function () {
+describe(<span class="hljs-string">'Services'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
-  beforeEach(function(){
+  beforeEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
     jasmine.addMatchers({
-      toEqualData: function(util, customEqualityTesters) {
-        return {
-          compare: function(actual, expected) {
-            return {
-              pass: angular.equals(actual, expected)
+      <span class="hljs-attr">toEqualData</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">util, customEqualityTesters</span>) </span>{
+        <span class="hljs-keyword">return</span> {
+          <span class="hljs-attr">compare</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">actual, expected</span>) </span>{
+            <span class="hljs-keyword">return</span> {
+              <span class="hljs-attr">pass</span>: angular.equals(actual, expected)
             };
           }
         };
@@ -590,133 +590,133 @@ describe(&#39;Services&#39;, function () {
     });
   });
 
-  beforeEach(angular.mock.module(&#39;mynewanimalfriend.services&#39;));
+  beforeEach(angular.mock.module(<span class="hljs-string">'mynewanimalfriend.services'</span>));
 
-  describe(&#39;Token service&#39;, function () {
-    var mockBackend, Token;
+  describe(<span class="hljs-string">'Token service'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> mockBackend, Token;
 
-    beforeEach(inject(function (_Token_, _$httpBackend_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_Token_, _$httpBackend_</span>) </span>{
       Token = _Token_;
       mockBackend = _$httpBackend_;
     }));
 
-    it(&#39;can create a new token&#39;, function () {
-      mockBackend.expectPOST(&#39;http://localhost:8000/api/authenticate&#39;, &#39;{&quot;email&quot;:&quot;bob@example.com&quot;,&quot;password&quot;:&quot;password&quot;}&#39;).respond({token: &#39;mytoken&#39;});
-      var token = new Token({
-        email: &#39;bob@example.com&#39;,
-        password: &#39;password&#39;
+    it(<span class="hljs-string">'can create a new token'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/authenticate'</span>, <span class="hljs-string">'{"email":"bob@example.com","password":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
+      <span class="hljs-keyword">var</span> token = <span class="hljs-keyword">new</span> Token({
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'bob@example.com'</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>
       });
-      token.$save(function (response) {
-        expect(response).toEqualData({token: &#39;mytoken&#39;});
+      token.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+        expect(response).toEqualData({<span class="hljs-attr">token</span>: <span class="hljs-string">'mytoken'</span>});
       });
       mockBackend.flush();
     });
   });
 });
-</code></pre><p>In this test we use the <code>$httpBackend</code> facility from <code>ngMock</code> to mock out our API endpoints. We already have a REST API capable of generating a token, and we set this test up to behave similarly. We specify that it should expect to receive a certain POST request, and should respond with the token <code>mytoken</code>. Run the test to make sure it fails, then save this as <code>js/services.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>In this test we use the <code>$httpBackend</code> facility from <code>ngMock</code> to mock out our API endpoints. We already have a REST API capable of generating a token, and we set this test up to behave similarly. We specify that it should expect to receive a certain POST request, and should respond with the token <code>mytoken</code>. Run the test to make sure it fails, then save this as <code>js/services.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&quot;angular-resource&quot;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">"angular-resource"</span>);
 
-angular.module(&#39;mynewanimalfriend.services&#39;, [&#39;ngResource&#39;])
+angular.module(<span class="hljs-string">'mynewanimalfriend.services'</span>, [<span class="hljs-string">'ngResource'</span>])
 
-.factory(&#39;Token&#39;, function ($resource) {
-  return $resource(&#39;http://localhost:8000/api/authenticate/&#39;);
+.factory(<span class="hljs-string">'Token'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
+  <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/authenticate/'</span>);
 });
-</code></pre><p>A little explanation is called for. In Angular, the <code>$resource</code> dependency represents an HTTP resource. By default it supports making HTTP requests to the denoted endpoint via GET, POST and DELETE, and it’s trivial to add support for PUT or PATCH methods. Using <code>$resource</code>, you can easily interface with a RESTful web service, and it’s one of my favourite things about Angular.</p><p>We also need to load <code>services.js</code> in our <code>main.js</code> file:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>A little explanation is called for. In Angular, the <code>$resource</code> dependency represents an HTTP resource. By default it supports making HTTP requests to the denoted endpoint via GET, POST and DELETE, and it’s trivial to add support for PUT or PATCH methods. Using <code>$resource</code>, you can easily interface with a RESTful web service, and it’s one of my favourite things about Angular.</p><p>We also need to load <code>services.js</code> in our <code>main.js</code> file:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
-require(&#39;./services&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./services'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;,
-  &#39;mynewanimalfriend.services&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>,
+  <span class="hljs-string">'mynewanimalfriend.services'</span>
 ])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   })
-  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;
+  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>
   })
-  .when(&#39;/logout&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LogoutCtrl&#39;
+  .when(<span class="hljs-string">'/logout'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LogoutCtrl'</span>
   })
   .otherwise({
-    redirectTo: &#39;/&#39;
+    <span class="hljs-attr">redirectTo</span>: <span class="hljs-string">'/'</span>
   });
 });
-</code></pre><p>Now, running the tests should show that they pass.</p><p>With that in place, we will also create an authentication service that lets the app determine if the user is logged in. Add this to <code>test/services.spec.js</code>:</p><pre><code class="lang-javascript">  describe(&#39;Auth service&#39;, function () {
-    var Auth;
+</code></pre><p>Now, running the tests should show that they pass.</p><p>With that in place, we will also create an authentication service that lets the app determine if the user is logged in. Add this to <code>test/services.spec.js</code>:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Auth service'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> Auth;
 
-    beforeEach(inject(function (_Auth_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">_Auth_</span>) </span>{
       Auth = _Auth_;
     }));
 
-    it(&#39;can set user&#39;, function () {
-      Auth.setUser(&#39;mytoken&#39;);
-      var token = localStorage.getItem(&#39;authHeader&#39;);
-      expect(token).toEqual(&#39;Bearer mytoken&#39;);
+    it(<span class="hljs-string">'can set user'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      Auth.setUser(<span class="hljs-string">'mytoken'</span>);
+      <span class="hljs-keyword">var</span> token = localStorage.getItem(<span class="hljs-string">'authHeader'</span>);
+      expect(token).toEqual(<span class="hljs-string">'Bearer mytoken'</span>);
     });
 
-    it(&#39;can return login status&#39;, function () {
-      localStorage.setItem(&#39;authHeader&#39;, &#39;Bearer mytoken&#39;);
+    it(<span class="hljs-string">'can return login status'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      localStorage.setItem(<span class="hljs-string">'authHeader'</span>, <span class="hljs-string">'Bearer mytoken'</span>);
       expect(Auth.isLoggedIn()).toBeTruthy();
     });
 
-    it(&#39;can log the user out&#39;, function () {
-      localStorage.setItem(&#39;authHeader&#39;, &#39;Bearer mytoken&#39;);
+    it(<span class="hljs-string">'can log the user out'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      localStorage.setItem(<span class="hljs-string">'authHeader'</span>, <span class="hljs-string">'Bearer mytoken'</span>);
       Auth.logUserOut();
       expect(Auth.isLoggedIn()).toBeFalsy();
-      expect(localStorage.getItem(&#39;authHeader&#39;)).toBeFalsy();
+      expect(localStorage.getItem(<span class="hljs-string">'authHeader'</span>)).toBeFalsy();
     });
   });
-</code></pre><p>This service is expected to do three things:</p><ul><li>Set the current user’s details in local storage</li><li>Return whether the user is logged in</li><li>Log the user out</li></ul><p>Make sure the test fails, then amend <code>js/services.js</code> as follows:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>This service is expected to do three things:</p><ul><li>Set the current user’s details in local storage</li><li>Return whether the user is logged in</li><li>Log the user out</li></ul><p>Make sure the test fails, then amend <code>js/services.js</code> as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&quot;angular-resource&quot;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">"angular-resource"</span>);
 
-angular.module(&#39;mynewanimalfriend.services&#39;, [&#39;ngResource&#39;])
+angular.module(<span class="hljs-string">'mynewanimalfriend.services'</span>, [<span class="hljs-string">'ngResource'</span>])
 
-.factory(&#39;Auth&#39;, function(){
-  return{
-    setUser : function (aUser) {
-      localStorage.setItem(&#39;authHeader&#39;, &#39;Bearer &#39; + aUser);
+.factory(<span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">return</span>{
+    <span class="hljs-attr">setUser</span> : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">aUser</span>) </span>{
+      localStorage.setItem(<span class="hljs-string">'authHeader'</span>, <span class="hljs-string">'Bearer '</span> + aUser);
     },
-    isLoggedIn: function () {
-      var user = localStorage.getItem(&#39;authHeader&#39;);
-      return(user)? user : false;
+    <span class="hljs-attr">isLoggedIn</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">var</span> user = localStorage.getItem(<span class="hljs-string">'authHeader'</span>);
+      <span class="hljs-keyword">return</span>(user)? user : <span class="hljs-literal">false</span>;
     },
-    logUserOut: function () {
-      localStorage.removeItem(&#39;authHeader&#39;);
+    <span class="hljs-attr">logUserOut</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      localStorage.removeItem(<span class="hljs-string">'authHeader'</span>);
     }
   }
 })
 
-.factory(&#39;Token&#39;, function ($resource) {
-  return $resource(&#39;http://localhost:8000/api/authenticate/&#39;);
+.factory(<span class="hljs-string">'Token'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
+  <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/authenticate/'</span>);
 });
-</code></pre><p>When the user is set, we store the authentication details we need in local storage. We can then use that to determine if they are logged in. When they log out, we simply clear local storage,</p><p>That should be enough to make these tests pass. Now we can move on to our controllers. We’ll do the login controller first. Save this as <code>test/controllers.spec.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>When the user is set, we store the authentication details we need in local storage. We can then use that to determine if they are logged in. When they log out, we simply clear local storage,</p><p>That should be enough to make these tests pass. Now we can move on to our controllers. We’ll do the login controller first. Save this as <code>test/controllers.spec.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-describe(&#39;Controllers&#39;, function () {
+describe(<span class="hljs-string">'Controllers'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
 
-  beforeEach(function(){
+  beforeEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
     jasmine.addMatchers({
-      toEqualData: function(util, customEqualityTesters) {
-        return {
-          compare: function(actual, expected) {
-            return {
-              pass: angular.equals(actual, expected)
+      <span class="hljs-attr">toEqualData</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">util, customEqualityTesters</span>) </span>{
+        <span class="hljs-keyword">return</span> {
+          <span class="hljs-attr">compare</span>: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">actual, expected</span>) </span>{
+            <span class="hljs-keyword">return</span> {
+              <span class="hljs-attr">pass</span>: angular.equals(actual, expected)
             };
           }
         };
@@ -724,397 +724,397 @@ describe(&#39;Controllers&#39;, function () {
     });
   });
 
-  beforeEach(angular.mock.module(&#39;mynewanimalfriend.controllers&#39;));
+  beforeEach(angular.mock.module(<span class="hljs-string">'mynewanimalfriend.controllers'</span>));
 
-  describe(&#39;Login Controller&#39;, function () {
-    var mockBackend, scope;
+  describe(<span class="hljs-string">'Login Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> mockBackend, scope;
 
-    beforeEach(inject(function ($rootScope, $controller, _$httpBackend_) {
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $controller, _$httpBackend_</span>) </span>{
       mockBackend = _$httpBackend_;
-      scope = $rootScope.$new();
-      $controller(&#39;LoginCtrl&#39;, {
-        $scope: scope
+      scope = $rootScope.$<span class="hljs-keyword">new</span>();
+      $controller(<span class="hljs-string">'LoginCtrl'</span>, {
+        <span class="hljs-attr">$scope</span>: scope
       });
     }));
 
-    // Test controller scope is defined
-    it(&#39;should define the scope&#39;, function () {
+    <span class="hljs-comment">// Test controller scope is defined</span>
+    it(<span class="hljs-string">'should define the scope'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope).toBeDefined();
     });
 
-    // Test doLogin is defined
-    it(&#39;should define the login method&#39;, function () {
+    <span class="hljs-comment">// Test doLogin is defined</span>
+    it(<span class="hljs-string">'should define the login method'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope.doLogin).toBeDefined();
     });
 
-    // Test doLogin works
-    it(&#39;should allow the user to log in&#39;, function () {
-      // Mock the backend
-      mockBackend.expectPOST(&#39;http://localhost:8000/api/authenticate&#39;, &#39;{&quot;email&quot;:&quot;user@example.com&quot;,&quot;password&quot;:&quot;password&quot;}&#39;).respond({token: 123});
+    <span class="hljs-comment">// Test doLogin works</span>
+    it(<span class="hljs-string">'should allow the user to log in'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-comment">// Mock the backend</span>
+      mockBackend.expectPOST(<span class="hljs-string">'http://localhost:8000/api/authenticate'</span>, <span class="hljs-string">'{"email":"user@example.com","password":"password"}'</span>).respond({<span class="hljs-attr">token</span>: <span class="hljs-number">123</span>});
 
-      // Define login data
+      <span class="hljs-comment">// Define login data</span>
       scope.credentials = {
-        email: &#39;user@example.com&#39;,
-        password: &#39;password&#39;
+        <span class="hljs-attr">email</span>: <span class="hljs-string">'user@example.com'</span>,
+        <span class="hljs-attr">password</span>: <span class="hljs-string">'password'</span>
       };
 
-      //  Submit the request
+      <span class="hljs-comment">//  Submit the request</span>
       scope.doLogin();
 
-      // Flush the backend
+      <span class="hljs-comment">// Flush the backend</span>
       mockBackend.flush();
 
-      // Check login complete
-      expect(localStorage.getItem(&#39;authHeader&#39;)).toEqual(&#39;Bearer 123&#39;);
+      <span class="hljs-comment">// Check login complete</span>
+      expect(localStorage.getItem(<span class="hljs-string">'authHeader'</span>)).toEqual(<span class="hljs-string">'Bearer 123'</span>);
     });
   });
 });
-</code></pre><p>We check that the scope and the <code>doLogin()</code> method are defined. We then mock the backend’s <code>/api/authenticate</code> route to respond with a dummy token when our credentials are provided. Then, we set the credentials in the variable <code>$scope.credentials</code>, call <code>doLogin()</code>, flush the backend, and check the authentication header has been set.</p><p>Once you’ve verified these tests fail, we can start making them pass. Save this as <code>js/controllers.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>We check that the scope and the <code>doLogin()</code> method are defined. We then mock the backend’s <code>/api/authenticate</code> route to respond with a dummy token when our credentials are provided. Then, we set the credentials in the variable <code>$scope.credentials</code>, call <code>doLogin()</code>, flush the backend, and check the authentication header has been set.</p><p>Once you’ve verified these tests fail, we can start making them pass. Save this as <code>js/controllers.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;./services&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./services'</span>);
 
-angular.module(&#39;mynewanimalfriend.controllers&#39;, [
-  &#39;mynewanimalfriend.services&#39;,
-  &quot;ngMaterial&quot;
+angular.module(<span class="hljs-string">'mynewanimalfriend.controllers'</span>, [
+  <span class="hljs-string">'mynewanimalfriend.services'</span>,
+  <span class="hljs-string">"ngMaterial"</span>
 ])
 
-.controller(&#39;LoginCtrl&#39;, function ($scope, $location, Token, Auth) {
-  $scope.doLogin = function () {
-    var token = new Token($scope.credentials);
-    token.$save(function (response) {
-      if (response.token) {
-        // Set up auth service
+.controller(<span class="hljs-string">'LoginCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, Token, Auth</span>) </span>{
+  $scope.doLogin = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> token = <span class="hljs-keyword">new</span> Token($scope.credentials);
+    token.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+      <span class="hljs-keyword">if</span> (response.token) {
+        <span class="hljs-comment">// Set up auth service</span>
         Auth.setUser(response.token);
 
-        // Redirect
-        $location.path(&#39;/&#39;);
+        <span class="hljs-comment">// Redirect</span>
+        $location.path(<span class="hljs-string">'/'</span>);
       }
-    }, function (err) {
-        alert(&#39;Unable to log in - please check your details are correct&#39;);
+    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+        alert(<span class="hljs-string">'Unable to log in - please check your details are correct'</span>);
     });
   };
 });
-</code></pre><p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is alled, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p><p>Check the test now passes before moving onto the logout functionality. Add this to <code>test/controllers.spec.js</code>:</p><pre><code class="lang-javascript">  describe(&#39;Logout Controller&#39;, function () {
-    var scope;
+</code></pre><p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is alled, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p><p>Check the test now passes before moving onto the logout functionality. Add this to <code>test/controllers.spec.js</code>:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Logout Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> scope;
 
-    beforeEach(inject(function ($rootScope, $controller, Auth) {
-      Auth.setUser(&#39;Blah&#39;);
-      scope = $rootScope.$new();
-      $controller(&#39;LogoutCtrl&#39;, {
-        $scope: scope
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $controller, Auth</span>) </span>{
+      Auth.setUser(<span class="hljs-string">'Blah'</span>);
+      scope = $rootScope.$<span class="hljs-keyword">new</span>();
+      $controller(<span class="hljs-string">'LogoutCtrl'</span>, {
+        <span class="hljs-attr">$scope</span>: scope
       });
     }));
 
-    // Test controller scope is defined
-    it(&#39;should define the scope&#39;, function () {
+    <span class="hljs-comment">// Test controller scope is defined</span>
+    it(<span class="hljs-string">'should define the scope'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope).toBeDefined();
     });
 
-    // Test session cleared
-    it(&#39;should clear the session&#39;, function () {
-      expect(localStorage.getItem(&#39;authHeader&#39;)).toEqual(null);
+    <span class="hljs-comment">// Test session cleared</span>
+    it(<span class="hljs-string">'should clear the session'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      expect(localStorage.getItem(<span class="hljs-string">'authHeader'</span>)).toEqual(<span class="hljs-literal">null</span>);
     });
   });
-</code></pre><p>We want to ensure that when the user navigates to the route managed by the <code>LogoutCtrl</code> controller, the session is cleared, so we set up an existing session, call the controller, check it’s defined, and then check that local storage is empty.</p><p>Once you’ve verified that the test fails, amend the controllers as follows:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>We want to ensure that when the user navigates to the route managed by the <code>LogoutCtrl</code> controller, the session is cleared, so we set up an existing session, call the controller, check it’s defined, and then check that local storage is empty.</p><p>Once you’ve verified that the test fails, amend the controllers as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;./services&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./services'</span>);
 
-angular.module(&#39;mynewanimalfriend.controllers&#39;, [
-  &#39;mynewanimalfriend.services&#39;,
-  &quot;ngMaterial&quot;
+angular.module(<span class="hljs-string">'mynewanimalfriend.controllers'</span>, [
+  <span class="hljs-string">'mynewanimalfriend.services'</span>,
+  <span class="hljs-string">"ngMaterial"</span>
 ])
 
-.controller(&#39;LoginCtrl&#39;, function ($scope, $location, Token, Auth) {
-  $scope.doLogin = function () {
-    var token = new Token($scope.credentials);
-    token.$save(function (response) {
-      if (response.token) {
-        // Set up auth service
+.controller(<span class="hljs-string">'LoginCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, Token, Auth</span>) </span>{
+  $scope.doLogin = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> token = <span class="hljs-keyword">new</span> Token($scope.credentials);
+    token.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+      <span class="hljs-keyword">if</span> (response.token) {
+        <span class="hljs-comment">// Set up auth service</span>
         Auth.setUser(response.token);
 
-        // Redirect
-        $location.path(&#39;/&#39;);
+        <span class="hljs-comment">// Redirect</span>
+        $location.path(<span class="hljs-string">'/'</span>);
       }
-    }, function (err) {
-        alert(&#39;Unable to log in - please check your details are correct&#39;);
+    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+        alert(<span class="hljs-string">'Unable to log in - please check your details are correct'</span>);
     });
   };
 })
 
-.controller(&#39;LogoutCtrl&#39;, function ($scope, $location, Auth) {
-  // Log user out
+.controller(<span class="hljs-string">'LogoutCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, Auth</span>) </span>{
+  <span class="hljs-comment">// Log user out</span>
   Auth.logUserOut();
 
-  // Redirect to login page
-  $location.path(&#39;/login&#39;);
+  <span class="hljs-comment">// Redirect to login page</span>
+  $location.path(<span class="hljs-string">'/login'</span>);
 });
-</code></pre><p>Our <code>LogoutCtrl</code> controller is very simple - it just logs the user out and redirects them back to the login form. Our final controller is for the home page:</p><pre><code class="lang-javascript">  describe(&#39;Home Controller&#39;, function () {
-    var scope;
+</code></pre><p>Our <code>LogoutCtrl</code> controller is very simple - it just logs the user out and redirects them back to the login form. Our final controller is for the home page:</p><pre><code class="hljs lang-javascript">  describe(<span class="hljs-string">'Home Controller'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> scope;
 
-    beforeEach(inject(function ($rootScope, $controller) {
-      scope = $rootScope.$new();
-      $controller(&#39;HomeCtrl&#39;, {
-        $scope: scope
+    beforeEach(inject(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $controller</span>) </span>{
+      scope = $rootScope.$<span class="hljs-keyword">new</span>();
+      $controller(<span class="hljs-string">'HomeCtrl'</span>, {
+        <span class="hljs-attr">$scope</span>: scope
       });
     }));
 
-    // Test controller scope is defined
-    it(&#39;should define the scope&#39;, function () {
+    <span class="hljs-comment">// Test controller scope is defined</span>
+    it(<span class="hljs-string">'should define the scope'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       expect(scope).toBeDefined();
     });
   });
-</code></pre><p>For now our home controller does nothing except define the scope, so it’s easy to implement:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>For now our home controller does nothing except define the scope, so it’s easy to implement:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;./services&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./services'</span>);
 
-angular.module(&#39;mynewanimalfriend.controllers&#39;, [
-  &#39;mynewanimalfriend.services&#39;,
-  &quot;ngMaterial&quot;
+angular.module(<span class="hljs-string">'mynewanimalfriend.controllers'</span>, [
+  <span class="hljs-string">'mynewanimalfriend.services'</span>,
+  <span class="hljs-string">"ngMaterial"</span>
 ])
 
-.controller(&#39;LoginCtrl&#39;, function ($scope, $location, Token, Auth) {
-  $scope.doLogin = function () {
-    var token = new Token($scope.credentials);
-    token.$save(function (response) {
-      if (response.token) {
-        // Set up auth service
+.controller(<span class="hljs-string">'LoginCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, Token, Auth</span>) </span>{
+  $scope.doLogin = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> token = <span class="hljs-keyword">new</span> Token($scope.credentials);
+    token.$save(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+      <span class="hljs-keyword">if</span> (response.token) {
+        <span class="hljs-comment">// Set up auth service</span>
         Auth.setUser(response.token);
 
-        // Redirect
-        $location.path(&#39;/&#39;);
+        <span class="hljs-comment">// Redirect</span>
+        $location.path(<span class="hljs-string">'/'</span>);
       }
-    }, function (err) {
-        alert(&#39;Unable to log in - please check your details are correct&#39;);
+    }, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) </span>{
+        alert(<span class="hljs-string">'Unable to log in - please check your details are correct'</span>);
     });
   };
 })
 
-.controller(&#39;LogoutCtrl&#39;, function ($scope, $location, Auth) {
-  // Log user out
+.controller(<span class="hljs-string">'LogoutCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope, $location, Auth</span>) </span>{
+  <span class="hljs-comment">// Log user out</span>
   Auth.logUserOut();
 
-  // Redirect to login page
-  $location.path(&#39;/login&#39;);
+  <span class="hljs-comment">// Redirect to login page</span>
+  $location.path(<span class="hljs-string">'/login'</span>);
 })
 
-.controller(&#39;HomeCtrl&#39;, function ($scope) {
+.controller(<span class="hljs-string">'HomeCtrl'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$scope</span>) </span>{
 });
-</code></pre><p>Verify that the tests pass, and our controllers are done for now. However, we still have some work to do to hook the various elements up. First, of all, our <code>main.js</code> unnecessarily loads our services - since we only use those services in our controllers, we don’t need them there. We also need to be able to keep users out of routes other than <code>login</code> when not logged in. Here’s what you <code>main.js</code> should look like:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>Verify that the tests pass, and our controllers are done for now. However, we still have some work to do to hook the various elements up. First, of all, our <code>main.js</code> unnecessarily loads our services - since we only use those services in our controllers, we don’t need them there. We also need to be able to keep users out of routes other than <code>login</code> when not logged in. Here’s what you <code>main.js</code> should look like:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
-require(&#39;./controllers&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./controllers'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;,
-  &#39;mynewanimalfriend.controllers&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>,
+  <span class="hljs-string">'mynewanimalfriend.controllers'</span>
 ])
 
-.run([&#39;$rootScope&#39;, &#39;$location&#39;, &#39;Auth&#39;, function ($rootScope, $location, Auth) {
-  $rootScope.$on(&#39;$routeChangeStart&#39;, function (event) {
+.run([<span class="hljs-string">'$rootScope'</span>, <span class="hljs-string">'$location'</span>, <span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $location, Auth</span>) </span>{
+  $rootScope.$on(<span class="hljs-string">'$routeChangeStart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
 
-    if (!Auth.isLoggedIn()) {
-      if ($location.path() !== &#39;/login&#39;) {
-        $location.path(&#39;/login&#39;);
+    <span class="hljs-keyword">if</span> (!Auth.isLoggedIn()) {
+      <span class="hljs-keyword">if</span> ($location.path() !== <span class="hljs-string">'/login'</span>) {
+        $location.path(<span class="hljs-string">'/login'</span>);
       }
     }
   });
 }])
 
-.config([&#39;$httpProvider&#39;, function($httpProvider) {
-  $httpProvider.interceptors.push(&#39;sessionInjector&#39;);
-  $httpProvider.interceptors.push(&#39;authInterceptor&#39;);
+.config([<span class="hljs-string">'$httpProvider'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$httpProvider</span>) </span>{
+  $httpProvider.interceptors.push(<span class="hljs-string">'sessionInjector'</span>);
+  $httpProvider.interceptors.push(<span class="hljs-string">'authInterceptor'</span>);
 }])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   })
-  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;
+  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>
   })
-  .when(&#39;/logout&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LogoutCtrl&#39;
+  .when(<span class="hljs-string">'/logout'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LogoutCtrl'</span>
   })
   .otherwise({
-    redirectTo: &#39;/&#39;
+    <span class="hljs-attr">redirectTo</span>: <span class="hljs-string">'/'</span>
   });
 });
-</code></pre><p>Note that we set it up to intercept the HTTP request with the session injector and the auth interceptor. Next we need to create these in <code>js/services.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>Note that we set it up to intercept the HTTP request with the session injector and the auth interceptor. Next we need to create these in <code>js/services.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&quot;angular-resource&quot;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">"angular-resource"</span>);
 
-angular.module(&#39;mynewanimalfriend.services&#39;, [&#39;ngResource&#39;])
+angular.module(<span class="hljs-string">'mynewanimalfriend.services'</span>, [<span class="hljs-string">'ngResource'</span>])
 
-.factory(&#39;Auth&#39;, function(){
-  return{
-    setUser : function (aUser) {
-      localStorage.setItem(&#39;authHeader&#39;, &#39;Bearer &#39; + aUser);
+.factory(<span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)</span>{
+  <span class="hljs-keyword">return</span>{
+    <span class="hljs-attr">setUser</span> : <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">aUser</span>) </span>{
+      localStorage.setItem(<span class="hljs-string">'authHeader'</span>, <span class="hljs-string">'Bearer '</span> + aUser);
     },
-    isLoggedIn: function () {
-      var user = localStorage.getItem(&#39;authHeader&#39;);
-      return(user)? user : false;
+    <span class="hljs-attr">isLoggedIn</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">var</span> user = localStorage.getItem(<span class="hljs-string">'authHeader'</span>);
+      <span class="hljs-keyword">return</span>(user)? user : <span class="hljs-literal">false</span>;
     },
-    logUserOut: function () {
-      localStorage.removeItem(&#39;authHeader&#39;);
+    <span class="hljs-attr">logUserOut</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      localStorage.removeItem(<span class="hljs-string">'authHeader'</span>);
     }
   }
 })
 
-.factory(&#39;Token&#39;, function ($resource) {
-  return $resource(&#39;http://localhost:8000/api/authenticate/&#39;);
+.factory(<span class="hljs-string">'Token'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$resource</span>) </span>{
+  <span class="hljs-keyword">return</span> $resource(<span class="hljs-string">'http://localhost:8000/api/authenticate/'</span>);
 })
 
-.factory(&#39;sessionInjector&#39;, function (Auth) {
-  var sessionInjector = {
-    request: function (config) {
-      if (Auth.isLoggedIn()) {
+.factory(<span class="hljs-string">'sessionInjector'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">Auth</span>) </span>{
+  <span class="hljs-keyword">var</span> sessionInjector = {
+    <span class="hljs-attr">request</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">config</span>) </span>{
+      <span class="hljs-keyword">if</span> (Auth.isLoggedIn()) {
         config.headers.Authorization = Auth.isLoggedIn();
       }
-      return config;
+      <span class="hljs-keyword">return</span> config;
     }
   };
-  return sessionInjector;
+  <span class="hljs-keyword">return</span> sessionInjector;
 })
 
-.service(&#39;authInterceptor&#39;, function ($q, Auth, $location) {
-  var service = this;
+.service(<span class="hljs-string">'authInterceptor'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$q, Auth, $location</span>) </span>{
+  <span class="hljs-keyword">var</span> service = <span class="hljs-keyword">this</span>;
 
-  service.responseError = function (response) {
-    if (response.status == 400) {
+  service.responseError = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+    <span class="hljs-keyword">if</span> (response.status == <span class="hljs-number">400</span>) {
       Auth.logUserOut();
-      $location.path(&#39;/login&#39;);
+      $location.path(<span class="hljs-string">'/login'</span>);
     }
-    return $q.reject(response);
+    <span class="hljs-keyword">return</span> $q.reject(response);
   };
 });
-</code></pre><p>I’ll walk you through these. <code>sessionInjector</code> adds the authorization HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p><p>Now the logic of our app is in place, but that’s no use without some content…</p><h2 id="angular-templating">Angular templating</h2><p>We have one very basic HTML template, but that’s just a boilerplate for inserting the rest of our content. For the rest of the HTML we’ll need to load templates dynamically, and we’ll use Angular Material to help us build a nice UI quickly. Run the following commands to create the files:</p><pre><code class="lang-bash">$ mkdir www/templates
+</code></pre><p>I’ll walk you through these. <code>sessionInjector</code> adds the authorization HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p><p>Now the logic of our app is in place, but that’s no use without some content…</p><h2 id="angular-templating">Angular templating</h2><p>We have one very basic HTML template, but that’s just a boilerplate for inserting the rest of our content. For the rest of the HTML we’ll need to load templates dynamically, and we’ll use Angular Material to help us build a nice UI quickly. Run the following commands to create the files:</p><pre><code class="hljs lang-bash">$ mkdir www/templates
 $ touch www/templates/login.html
 $ touch www/templates/home.html
-</code></pre><p>We need to import the CSS for Angular Material. Add this to <code>sass/style.scss</code>:</p><pre><code class="lang-scss">// Angular Material
-@import &quot;node_modules/angular-material/angular-material.scss&quot;;
-</code></pre><p>With that done, we need to configure theming in <code>main.js</code>:</p><pre><code class="lang-javascript">&#39;use strict&#39;;
+</code></pre><p>We need to import the CSS for Angular Material. Add this to <code>sass/style.scss</code>:</p><pre><code class="hljs lang-scss"><span class="hljs-comment">// Angular Material</span>
+@<span class="hljs-keyword">import</span> <span class="hljs-string">"node_modules/angular-material/angular-material.scss"</span>;
+</code></pre><p>With that done, we need to configure theming in <code>main.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-meta">'use strict'</span>;
 
-require(&#39;angular&#39;);
-require(&#39;angular-route&#39;);
-require(&#39;angular-animate&#39;);
-require(&#39;angular-material&#39;);
-require(&#39;./controllers&#39;);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-route'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-animate'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'angular-material'</span>);
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'./controllers'</span>);
 
-angular.module(&#39;mynewanimalfriend&#39;, [
-  &#39;ngRoute&#39;,
-  &#39;ngAnimate&#39;,
-  &#39;ngMaterial&#39;,
-  &#39;mynewanimalfriend.controllers&#39;
+angular.module(<span class="hljs-string">'mynewanimalfriend'</span>, [
+  <span class="hljs-string">'ngRoute'</span>,
+  <span class="hljs-string">'ngAnimate'</span>,
+  <span class="hljs-string">'ngMaterial'</span>,
+  <span class="hljs-string">'mynewanimalfriend.controllers'</span>
 ])
 
-.config(function ($mdThemingProvider) {
-    $mdThemingProvider.theme(&#39;default&#39;)
-      .primaryPalette(&#39;purple&#39;)
-      .accentPalette(&#39;cyan&#39;);
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$mdThemingProvider</span>) </span>{
+    $mdThemingProvider.theme(<span class="hljs-string">'default'</span>)
+      .primaryPalette(<span class="hljs-string">'purple'</span>)
+      .accentPalette(<span class="hljs-string">'cyan'</span>);
 })
 
-.run([&#39;$rootScope&#39;, &#39;$location&#39;, &#39;Auth&#39;, function ($rootScope, $location, Auth) {
-  $rootScope.$on(&#39;$routeChangeStart&#39;, function (event) {
+.run([<span class="hljs-string">'$rootScope'</span>, <span class="hljs-string">'$location'</span>, <span class="hljs-string">'Auth'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$rootScope, $location, Auth</span>) </span>{
+  $rootScope.$on(<span class="hljs-string">'$routeChangeStart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
 
-    if (!Auth.isLoggedIn()) {
-      if ($location.path() !== &#39;/login&#39;) {
-        $location.path(&#39;/login&#39;);
+    <span class="hljs-keyword">if</span> (!Auth.isLoggedIn()) {
+      <span class="hljs-keyword">if</span> ($location.path() !== <span class="hljs-string">'/login'</span>) {
+        $location.path(<span class="hljs-string">'/login'</span>);
       }
     }
   });
 }])
 
-.config([&#39;$httpProvider&#39;, function($httpProvider) {
-  $httpProvider.interceptors.push(&#39;sessionInjector&#39;);
-  $httpProvider.interceptors.push(&#39;authInterceptor&#39;);
+.config([<span class="hljs-string">'$httpProvider'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$httpProvider</span>) </span>{
+  $httpProvider.interceptors.push(<span class="hljs-string">'sessionInjector'</span>);
+  $httpProvider.interceptors.push(<span class="hljs-string">'authInterceptor'</span>);
 }])
 
-.config(function ($routeProvider) {
+.config(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">$routeProvider</span>) </span>{
   $routeProvider
-  .when(&#39;/login&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LoginCtrl&#39;
+  .when(<span class="hljs-string">'/login'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LoginCtrl'</span>
   })
-  .when(&#39;/&#39;, {
-    templateUrl: &#39;templates/home.html&#39;,
-    controller: &#39;HomeCtrl&#39;
+  .when(<span class="hljs-string">'/'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/home.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'HomeCtrl'</span>
   })
-  .when(&#39;/logout&#39;, {
-    templateUrl: &#39;templates/login.html&#39;,
-    controller: &#39;LogoutCtrl&#39;
+  .when(<span class="hljs-string">'/logout'</span>, {
+    <span class="hljs-attr">templateUrl</span>: <span class="hljs-string">'templates/login.html'</span>,
+    <span class="hljs-attr">controller</span>: <span class="hljs-string">'LogoutCtrl'</span>
   })
   .otherwise({
-    redirectTo: &#39;/&#39;
+    <span class="hljs-attr">redirectTo</span>: <span class="hljs-string">'/'</span>
   });
 });
-</code></pre><p>You may want to look at the <a href="https://material.angularjs.org/latest/Theming/01_introduction">documentation</a> for Angular Material to choose your own theme options. Next, let’s create our login template at <code>www/templates/login.html</code>:</p><pre><code class="lang-html">&lt;md-content md-theme=&quot;default&quot; layout-gt-sm=&quot;row&quot; layout-padding&gt;
-    &lt;div&gt;
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Email&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.email&quot; type=&quot;email&quot;&gt;
-        &lt;/md-input-container&gt;
+</code></pre><p>You may want to look at the <a href="https://material.angularjs.org/latest/Theming/01_introduction">documentation</a> for Angular Material to choose your own theme options. Next, let’s create our login template at <code>www/templates/login.html</code>:</p><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">md-content</span> <span class="hljs-attr">md-theme</span>=<span class="hljs-string">"default"</span> <span class="hljs-attr">layout-gt-sm</span>=<span class="hljs-string">"row"</span> <span class="hljs-attr">layout-padding</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-input-container</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-block"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>Email<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ng-model</span>=<span class="hljs-string">"credentials.email"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"email"</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-input-container</span>&gt;</span>
 
-        &lt;md-input-container class=&quot;md-block&quot;&gt;
-            &lt;label&gt;Password&lt;/label&gt;
-            &lt;input ng-model=&quot;credentials.password&quot; type=&quot;password&quot;&gt;
-        &lt;/md-input-container&gt;
-        &lt;md-button class=&quot;md-raised md-primary&quot; ng-click=&quot;doLogin()&quot;&gt;Submit&lt;/md-button&gt;
-    &lt;/div&gt;
-&lt;/md-content&gt;
-</code></pre><p>We’re using Angular Material’s input and button directives to make our inputs look a bit nicer. Note that the <code>ng-click</code> handler calls the <code>doLogin()</code> method of our controller, and that the <code>ng-model</code> attributes contain the <code>credentials</code> object that gets passed to the API. If you haven’t used Angular before, <code>ng-model</code> essentially lets you bind a variable to an element’s value so, for instance, when an input is changed, it can be easily accessed via the variable.</p><p>Next, we’ll implement a placeholder for our home page with a log out button. Save this as <code>www/templates/home.html</code>:</p><pre><code class="lang-html">&lt;md-toolbar&gt;
-    &lt;div class=&quot;md-toolbar-tools&quot;&gt;
-        &lt;md-button aria-label=&quot;Log out&quot; href=&quot;#logout&quot;&gt;
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-input-container</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-block"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>Password<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ng-model</span>=<span class="hljs-string">"credentials.password"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"password"</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-input-container</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-raised md-primary"</span> <span class="hljs-attr">ng-click</span>=<span class="hljs-string">"doLogin()"</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">md-content</span>&gt;</span>
+</code></pre><p>We’re using Angular Material’s input and button directives to make our inputs look a bit nicer. Note that the <code>ng-click</code> handler calls the <code>doLogin()</code> method of our controller, and that the <code>ng-model</code> attributes contain the <code>credentials</code> object that gets passed to the API. If you haven’t used Angular before, <code>ng-model</code> essentially lets you bind a variable to an element’s value so, for instance, when an input is changed, it can be easily accessed via the variable.</p><p>Next, we’ll implement a placeholder for our home page with a log out button. Save this as <code>www/templates/home.html</code>:</p><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">md-toolbar</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-toolbar-tools"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">"Log out"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"#logout"</span>&gt;</span>
             Log out
-        &lt;/md-button&gt;
-    &lt;/div&gt;
-&lt;/md-toolbar&gt;
-</code></pre><p>That should be all we need to demonstrate logging in and out of our app. Let’s try it out. First run the Gulp task to show the app in the browser:</p><pre><code class="lang-bash">$ gulp
-</code></pre><p>Then, in another shell session, switch to the directory with the backend and run the server for that:</p><pre><code class="lang-bash">$ php artisan serve
-</code></pre><p>You should already have a user account set up and ready to use thanks to the seeder we wrote. The browser should show the login page by default, and if you fill in the login form and click the button you should see the home page. You should then be able to log out again.</p><p>Congratulations! We’ve got authentication working.</p><h2 id="switching-to-html5-routing">Switching to HTML5 routing</h2><p>You may note that the URLs use hashes - they are in the format <code>http://localhost:5000/#/login</code>. Wouldn’t it be better if we didn’t use the hash? Fortunately modern browsers support this via the HTML5 pushState API, and Angular has built-in support for this.</p><p>To enable it, we first need to declare a base URL in <code>www/index.html</code>. Amend it as follows:</p><pre><code class="lang-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-    &lt;head&gt;
-        &lt;meta charset=&quot;utf-8&quot;&gt;
-        &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
-        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, user-scalable=0&quot;&gt;
-        &lt;title&gt;My New Animal Friend&lt;/title&gt;
-        &lt;link href=&quot;/css/style.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
-        &lt;base href=&quot;/&quot;&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-    &lt;div&gt;
-        &lt;div ng-app=&quot;mynewanimalfriend&quot; ng-cloak&gt;
-            &lt;div ng-view&gt;&lt;/div&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;/body&gt;
-    &lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot; src=&quot;/js/bundle.js&quot;&gt;&lt;/script&gt;
-&lt;/html&gt;
-</code></pre><p>Here we’ve added the <code>&lt;base href=&quot;/&quot;&gt;</code> tag to denote our base URL. Next we configure Angular to use HTML5 routing in <code>main.js</code>:</p><pre><code class="lang-javascript">.config(function($locationProvider) {
-  $locationProvider.html5Mode(true);
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">md-toolbar</span>&gt;</span>
+</code></pre><p>That should be all we need to demonstrate logging in and out of our app. Let’s try it out. First run the Gulp task to show the app in the browser:</p><pre><code class="hljs lang-bash">$ gulp
+</code></pre><p>Then, in another shell session, switch to the directory with the backend and run the server for that:</p><pre><code class="hljs lang-bash">$ php artisan serve
+</code></pre><p>You should already have a user account set up and ready to use thanks to the seeder we wrote. The browser should show the login page by default, and if you fill in the login form and click the button you should see the home page. You should then be able to log out again.</p><p>Congratulations! We’ve got authentication working.</p><h2 id="switching-to-html5-routing">Switching to HTML5 routing</h2><p>You may note that the URLs use hashes - they are in the format <code>http://localhost:5000/#/login</code>. Wouldn’t it be better if we didn’t use the hash? Fortunately modern browsers support this via the HTML5 pushState API, and Angular has built-in support for this.</p><p>To enable it, we first need to declare a base URL in <code>www/index.html</code>. Amend it as follows:</p><pre><code class="hljs lang-html"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"X-UA-Compatible"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"IE=edge"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1, user-scalable=0"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>My New Animal Friend<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/css/style.css"</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">base</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/"</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ng-app</span>=<span class="hljs-string">"mynewanimalfriend"</span> <span class="hljs-attr">ng-cloak</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">ng-view</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">language</span>=<span class="hljs-string">"javascript"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/js/bundle.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre><p>Here we’ve added the <code>&lt;base href=&quot;/&quot;&gt;</code> tag to denote our base URL. Next we configure Angular to use HTML5 routing in <code>main.js</code>:</p><pre><code class="hljs lang-javascript">.config(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">$locationProvider</span>) </span>{
+  $locationProvider.html5Mode(<span class="hljs-literal">true</span>);
 })
-</code></pre><p>And amend the URL in the home template:</p><pre><code class="lang-html">&lt;md-toolbar&gt;
-    &lt;div class=&quot;md-toolbar-tools&quot;&gt;
-        &lt;md-button aria-label=&quot;Log out&quot; href=&quot;/logout&quot;&gt;
+</code></pre><p>And amend the URL in the home template:</p><pre><code class="hljs lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">md-toolbar</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"md-toolbar-tools"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md-button</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">"Log out"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/logout"</span>&gt;</span>
             Log out
-        &lt;/md-button&gt;
-    &lt;/div&gt;
-&lt;/md-toolbar&gt;
+        <span class="hljs-tag">&lt;/<span class="hljs-name">md-button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">md-toolbar</span>&gt;</span>
 </code></pre><p>Now, we should be using HTML5 routing throughout.</p><p>With that done, we can finish for today. We’ve got our basic app skeleton and authentication system up and running, and we’ll be in a good place to continue developing the rest of the app next time. I’ve put the source code on <a href="https://github.com/matthewbdaly/mynewanimalfriend-app">Github</a>, and you can find this lesson’s work under the <code>lesson-2</code> tag.</p><p>Next time we’ll develop the app further, including implementing the pet search functionality.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/angular/">angular</a></li><li><a href="/blog/categories/phonegap/">phonegap</a></li><li><a href="/blog/categories/laravel-phonegap-tutorial/">laravel-phonegap-tutorial</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2016/09/18/building-a-phonegap-app-with-laravel-and-angular-part-2/">View the article with comments</a></section><section><a class="postlink" href="/blog/2016/10/16/building-a-phonegap-app-with-laravel-and-angular-part-3/amp/">Building a Phonegap App With Laravel and Angular - Part 3</a> <a class="postlink" href="/blog/2016/09/11/building-a-phonegap-app-with-laravel-and-angular-part-1/amp/">Building a Phonegap App With Laravel and Angular - Part 1</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

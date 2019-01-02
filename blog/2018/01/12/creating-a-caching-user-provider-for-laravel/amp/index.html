@@ -183,239 +183,239 @@
       }
       blockquote p {
          font-size: 2.2em;
-      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">12th January 2018 1:16 pm</p><h1>Creating a Caching User Provider for Laravel</h1><p>If you have a Laravel application that requires users to log in and you use Clockwork or Laravel DebugBar to examine the queries that take place, you’ll probably notice a query that fetches the user model occurs quite a lot. This is because the user’s ID gets stored in the session, and is then used to retrieve the model.</p><p>This query is a good candidate for caching because not only is that query being made often, but it’s also not something that changes all that often. If you’re careful, it’s quite easy to set your application up to cache the user without having to worry about invalidating the cache.</p><p>Laravel allows you to define your own user providers in order to fetch the user’s details. These must implement <code>Illuminate\Contracts\Auth\UserProvider</code> and must return a user model from the identifier provided. Out of the box it comes with two implementations, <code>Illuminate\Auth\EloquentUserProvider</code> and <code>Illuminate\Auth\DatabaseUserProvider</code>, with the former being the default. Our caching user provider can extend the Eloquent one as follows:</p><pre><code class="lang-php">&lt;?php
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">12th January 2018 1:16 pm</p><h1>Creating a Caching User Provider for Laravel</h1><p>If you have a Laravel application that requires users to log in and you use Clockwork or Laravel DebugBar to examine the queries that take place, you’ll probably notice a query that fetches the user model occurs quite a lot. This is because the user’s ID gets stored in the session, and is then used to retrieve the model.</p><p>This query is a good candidate for caching because not only is that query being made often, but it’s also not something that changes all that often. If you’re careful, it’s quite easy to set your application up to cache the user without having to worry about invalidating the cache.</p><p>Laravel allows you to define your own user providers in order to fetch the user’s details. These must implement <code>Illuminate\Contracts\Auth\UserProvider</code> and must return a user model from the identifier provided. Out of the box it comes with two implementations, <code>Illuminate\Auth\EloquentUserProvider</code> and <code>Illuminate\Auth\DatabaseUserProvider</code>, with the former being the default. Our caching user provider can extend the Eloquent one as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Auth;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Auth</span>;
 
-use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Auth</span>\<span class="hljs-title">EloquentUserProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Repository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Hashing</span>\<span class="hljs-title">Hasher</span> <span class="hljs-title">as</span> <span class="hljs-title">HasherContract</span>;
 
-class CachingUserProvider extends EloquentUserProvider
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CachingUserProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">EloquentUserProvider</span>
+</span>{
+    <span class="hljs-comment">/**
      * The cache instance.
      *
-     * @var Repository
-     */
-    protected $cache;
+     * <span class="hljs-doctag">@var</span> Repository
+     */</span>
+    <span class="hljs-keyword">protected</span> $cache;
 
-    /**
+    <span class="hljs-comment">/**
      * Create a new database user provider.
      *
-     * @param  \Illuminate\Contracts\Hashing\Hasher  $hasher
-     * @param  string  $model
-     * @param  Repository  $cache
-     * @return void
-     */
-    public function __construct(HasherContract $hasher, $model, Repository $cache)
-    {
-        $this-&gt;model = $model;
-        $this-&gt;hasher = $hasher;
-        $this-&gt;cache = $cache;
+     * <span class="hljs-doctag">@param</span>  \Illuminate\Contracts\Hashing\Hasher  $hasher
+     * <span class="hljs-doctag">@param</span>  string  $model
+     * <span class="hljs-doctag">@param</span>  Repository  $cache
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(HasherContract $hasher, $model, Repository $cache)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;model = $model;
+        <span class="hljs-keyword">$this</span>-&gt;hasher = $hasher;
+        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Retrieve a user by their unique identifier.
      *
-     * @param  mixed  $identifier
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    public function retrieveById($identifier)
-    {
-        return $this-&gt;cache-&gt;tags($this-&gt;getModel())-&gt;remember(&#39;user_by_id_&#39;.$identifier, 60, function () use ($identifier) {
-            return parent::retrieveById($identifier);
+     * <span class="hljs-doctag">@param</span>  mixed  $identifier
+     * <span class="hljs-doctag">@return</span> \Illuminate\Contracts\Auth\Authenticatable|null
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">retrieveById</span><span class="hljs-params">($identifier)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(<span class="hljs-keyword">$this</span>-&gt;getModel())-&gt;remember(<span class="hljs-string">'user_by_id_'</span>.$identifier, <span class="hljs-number">60</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">($identifier)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">parent</span>::retrieveById($identifier);
         });
     }
 }
-</code></pre><p>Note that we override the constructor to accept a cache instance as well as the other arguments. We also override the <code>retrieveById()</code> method to wrap a call to the parent’s implementation inside a callback that caches the response. I usually tag anything I cache with the model name, but if you need to use a cache backend that doesn’t support tagging this may not be an option. Our cache key also includes the identifier so that it’s unique to that user.</p><p>We then need to add our user provider to the auth service provider:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Note that we override the constructor to accept a cache instance as well as the other arguments. We also override the <code>retrieveById()</code> method to wrap a call to the parent’s implementation inside a callback that caches the response. I usually tag anything I cache with the model name, but if you need to use a cache backend that doesn’t support tagging this may not be an option. Our cache key also includes the identifier so that it’s unique to that user.</p><p>We then need to add our user provider to the auth service provider:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Providers;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use App\Auth\CachingUserProvider;
-use Illuminate\Support\Facades\Auth;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Gate</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Providers</span>\<span class="hljs-title">AuthServiceProvider</span> <span class="hljs-title">as</span> <span class="hljs-title">ServiceProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Auth</span>\<span class="hljs-title">CachingUserProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Auth</span>;
 
-class AuthServiceProvider extends ServiceProvider
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AuthServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
+</span>{
+    <span class="hljs-comment">/**
      * Register any authentication / authorization services.
      *
-     * @return void
-     */
-    public function boot()
-    {
-        $this-&gt;registerPolicies();
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;registerPolicies();
 
-        Auth::provider(&#39;caching&#39;, function ($app, array $config) {
-            return new CachingUserProvider(
-                $app-&gt;make(&#39;Illuminate\Contracts\Hashing\Hasher&#39;),
-                $config[&#39;model&#39;],
-                $app-&gt;make(&#39;Illuminate\Contracts\Cache\Repository&#39;)
+        Auth::provider(<span class="hljs-string">'caching'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">($app, array $config)</span> </span>{
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> CachingUserProvider(
+                $app-&gt;make(<span class="hljs-string">'Illuminate\Contracts\Hashing\Hasher'</span>),
+                $config[<span class="hljs-string">'model'</span>],
+                $app-&gt;make(<span class="hljs-string">'Illuminate\Contracts\Cache\Repository'</span>)
             );
         });
     }
 }
-</code></pre><p>Note here that we call this provider <code>caching</code>, and we pass it the hasher, the model name, and an instance of the cache. Then, we need to update <code>config/auth.php</code> to use this provider:</p><pre><code class="lang-php">    &#39;providers&#39; =&gt; [
-        &#39;users&#39; =&gt; [
-            &#39;driver&#39; =&gt; &#39;caching&#39;,
-            &#39;model&#39; =&gt; App\Eloquent\Models\User::class,
+</code></pre><p>Note here that we call this provider <code>caching</code>, and we pass it the hasher, the model name, and an instance of the cache. Then, we need to update <code>config/auth.php</code> to use this provider:</p><pre><code class="hljs lang-php">    <span class="hljs-string">'providers'</span> =&gt; [
+        <span class="hljs-string">'users'</span> =&gt; [
+            <span class="hljs-string">'driver'</span> =&gt; <span class="hljs-string">'caching'</span>,
+            <span class="hljs-string">'model'</span> =&gt; App\Eloquent\Models\User::class,
         ],
     ],
-</code></pre><p>The only issue now is that our user models will continue to be cached, even when they are updated. To be able to flush the cache, we can create a model event that fires whenever the user model is updated:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>The only issue now is that our user models will continue to be cached, even when they are updated. To be able to flush the cache, we can create a model event that fires whenever the user model is updated:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Eloquent\Models;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Models</span>;
 
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Events\UserAmended;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Notifications</span>\<span class="hljs-title">Notifiable</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Auth</span>\<span class="hljs-title">User</span> <span class="hljs-title">as</span> <span class="hljs-title">Authenticatable</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Events</span>\<span class="hljs-title">UserAmended</span>;
 
-class User extends Authenticatable
-{
-    use Notifiable;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Authenticatable</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">Notifiable</span>;
 
-    protected $dispatchesEvents = [
-        &#39;saved&#39; =&gt; UserAmended::class,
-        &#39;deleted&#39; =&gt; UserAmended::class,
-        &#39;restored&#39; =&gt; UserAmended::class,
+    <span class="hljs-keyword">protected</span> $dispatchesEvents = [
+        <span class="hljs-string">'saved'</span> =&gt; UserAmended::class,
+        <span class="hljs-string">'deleted'</span> =&gt; UserAmended::class,
+        <span class="hljs-string">'restored'</span> =&gt; UserAmended::class,
     ];
 }
-</code></pre><p>This will call the <code>UserAmended</code> event when a user model is created, updated, deleted or restored. Then we can define that event:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>This will call the <code>UserAmended</code> event when a user model is created, updated, deleted or restored. Then we can define that event:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Events;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Events</span>;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\Eloquent\Models\User;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Broadcasting</span>\<span class="hljs-title">Channel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Queue</span>\<span class="hljs-title">SerializesModels</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Broadcasting</span>\<span class="hljs-title">PrivateChannel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Broadcasting</span>\<span class="hljs-title">PresenceChannel</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Events</span>\<span class="hljs-title">Dispatchable</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Broadcasting</span>\<span class="hljs-title">InteractsWithSockets</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Broadcasting</span>\<span class="hljs-title">ShouldBroadcast</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Eloquent</span>\<span class="hljs-title">Models</span>\<span class="hljs-title">User</span>;
 
-class UserAmended
-{
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserAmended</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">Dispatchable</span>, <span class="hljs-title">InteractsWithSockets</span>, <span class="hljs-title">SerializesModels</span>;
 
-    /**
+    <span class="hljs-comment">/**
      * Create a new event instance.
      *
-     * @return void
-     */
-    public function __construct(User $model)
-    {
-        $this-&gt;model = $model;
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(User $model)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;model = $model;
     }
 }
-</code></pre><p>Note our event contains an instance of the user model. Then we set up a listener to do the work of clearing the cache:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Note our event contains an instance of the user model. Then we set up a listener to do the work of clearing the cache:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Listeners;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Listeners</span>;
 
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Events\UserAmended;
-use Illuminate\Contracts\Cache\Repository;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Queue</span>\<span class="hljs-title">InteractsWithQueue</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Queue</span>\<span class="hljs-title">ShouldQueue</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Events</span>\<span class="hljs-title">UserAmended</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Repository</span>;
 
-class ClearUserId
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ClearUserId</span>
+</span>{
+    <span class="hljs-comment">/**
      * Create the event listener.
      *
-     * @return void
-     */
-    public function __construct(Repository $cache)
-    {
-        $this-&gt;cache = $cache;
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(Repository $cache)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Handle the event.
      *
-     * @param  object  $event
-     * @return void
-     */
-    public function handle(UserAmended $event)
-    {
-        $this-&gt;cache-&gt;tags(get_class($event-&gt;model))-&gt;forget(&#39;user_by_id_&#39;.$event-&gt;model-&gt;id);
+     * <span class="hljs-doctag">@param</span>  object  $event
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">handle</span><span class="hljs-params">(UserAmended $event)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(get_class($event-&gt;model))-&gt;forget(<span class="hljs-string">'user_by_id_'</span>.$event-&gt;model-&gt;id);
     }
 }
-</code></pre><p>Here, we get the user model’s class again, and clear the cache entry for that user model.</p><p>Finally, we hook up the event and listener in the event service provider:</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>Here, we get the user model’s class again, and clear the cache entry for that user model.</p><p>Finally, we hook up the event and listener in the event service provider:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Providers;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Providers</span>;
 
-use Illuminate\Support\Facades\Event;
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Facades</span>\<span class="hljs-title">Event</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Support</span>\<span class="hljs-title">Providers</span>\<span class="hljs-title">EventServiceProvider</span> <span class="hljs-title">as</span> <span class="hljs-title">ServiceProvider</span>;
 
-class EventServiceProvider extends ServiceProvider
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EventServiceProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ServiceProvider</span>
+</span>{
+    <span class="hljs-comment">/**
      * The event listener mappings for the application.
      *
-     * @var array
-     */
-    protected $listen = [
-        &#39;App\Events\UserAmended&#39; =&gt; [
-            &#39;App\Listeners\ClearUserId&#39;,
+     * <span class="hljs-doctag">@var</span> array
+     */</span>
+    <span class="hljs-keyword">protected</span> $listen = [
+        <span class="hljs-string">'App\Events\UserAmended'</span> =&gt; [
+            <span class="hljs-string">'App\Listeners\ClearUserId'</span>,
         ],
     ];
 
-    /**
+    <span class="hljs-comment">/**
      * Register any events for your application.
      *
-     * @return void
-     */
-    public function boot()
-    {
-        parent::boot();
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">parent</span>::boot();
 
-        //
+        <span class="hljs-comment">//</span>
     }
 }
-</code></pre><p>With that done, our user should be cached after the first load, and flushed when the model is amended.</p><h2 id="handling-eager-loaded-data">Handling eager-loaded data</h2><p>It may be that you’re pulling in additional data from the user model in your application, such as roles, permissions, or a separate profile model. Under those circumstances it makes sense to treat that data in the same way by eager-loading it along with your user model.</p><pre><code class="lang-php">&lt;?php
+</code></pre><p>With that done, our user should be cached after the first load, and flushed when the model is amended.</p><h2 id="handling-eager-loaded-data">Handling eager-loaded data</h2><p>It may be that you’re pulling in additional data from the user model in your application, such as roles, permissions, or a separate profile model. Under those circumstances it makes sense to treat that data in the same way by eager-loading it along with your user model.</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Auth;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Auth</span>;
 
-use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Auth</span>\<span class="hljs-title">EloquentUserProvider</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Cache</span>\<span class="hljs-title">Repository</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Contracts</span>\<span class="hljs-title">Hashing</span>\<span class="hljs-title">Hasher</span> <span class="hljs-title">as</span> <span class="hljs-title">HasherContract</span>;
 
-class CachingUserProvider extends EloquentUserProvider
-{
-    /**
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CachingUserProvider</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">EloquentUserProvider</span>
+</span>{
+    <span class="hljs-comment">/**
      * The cache instance.
      *
-     * @var Repository
-     */
-    protected $cache;
+     * <span class="hljs-doctag">@var</span> Repository
+     */</span>
+    <span class="hljs-keyword">protected</span> $cache;
 
-    /**
+    <span class="hljs-comment">/**
      * Create a new database user provider.
      *
-     * @param  \Illuminate\Contracts\Hashing\Hasher  $hasher
-     * @param  string  $model
-     * @param  Repository  $cache
-     * @return void
-     */
-    public function __construct(HasherContract $hasher, $model, Repository $cache)
-    {
-        $this-&gt;model = $model;
-        $this-&gt;hasher = $hasher;
-        $this-&gt;cache = $cache;
+     * <span class="hljs-doctag">@param</span>  \Illuminate\Contracts\Hashing\Hasher  $hasher
+     * <span class="hljs-doctag">@param</span>  string  $model
+     * <span class="hljs-doctag">@param</span>  Repository  $cache
+     * <span class="hljs-doctag">@return</span> void
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(HasherContract $hasher, $model, Repository $cache)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;model = $model;
+        <span class="hljs-keyword">$this</span>-&gt;hasher = $hasher;
+        <span class="hljs-keyword">$this</span>-&gt;cache = $cache;
     }
 
-    /**
+    <span class="hljs-comment">/**
      * Retrieve a user by their unique identifier.
      *
-     * @param  mixed  $identifier
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    public function retrieveById($identifier)
-    {
-        return $this-&gt;cache-&gt;tags($this-&gt;getModel())-&gt;remember(&#39;user_by_id_&#39;.$identifier, 60, function () use ($identifier) {
-          $model = $this-&gt;createModel();
-          return $model-&gt;newQuery()
-            -&gt;with(&#39;roles&#39;, &#39;permissions&#39;, &#39;profile&#39;)
+     * <span class="hljs-doctag">@param</span>  mixed  $identifier
+     * <span class="hljs-doctag">@return</span> \Illuminate\Contracts\Auth\Authenticatable|null
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">retrieveById</span><span class="hljs-params">($identifier)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;cache-&gt;tags(<span class="hljs-keyword">$this</span>-&gt;getModel())-&gt;remember(<span class="hljs-string">'user_by_id_'</span>.$identifier, <span class="hljs-number">60</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> <span class="hljs-title">use</span> <span class="hljs-params">($identifier)</span> </span>{
+          $model = <span class="hljs-keyword">$this</span>-&gt;createModel();
+          <span class="hljs-keyword">return</span> $model-&gt;newQuery()
+            -&gt;with(<span class="hljs-string">'roles'</span>, <span class="hljs-string">'permissions'</span>, <span class="hljs-string">'profile'</span>)
             -&gt;where($model-&gt;getAuthIdentifierName(), $identifier)
             -&gt;first();
         });
