@@ -17,7 +17,7 @@ Bad code is harder to understand, navigate and reason about than good code. Deve
 
 If one particular class or function gets too big and starts doing too much, it quickly becomes very, very hard to get your head around what that code does. Developers typically have to build a mental model of how a class or function works before they can use it effectively, and the smaller and simpler you can keep each unit of code, the less time and effort it takes to do so. The mark of a skilled developer is not the complexity of their code bases, but their simplicity - they've learned to make their code as small, simple, and readable as possible. A clean and well laid-out code base makes it easy for developers to get into the mental state called "flow" that is significantly more productive.
 
-In addition, if an application doesn't conform to accepted conventions in some way, such as using inappropriate HTTP verbs (eg `GET` to change the state of something), then quite apart from the fact that it won't play well with proxy servers, it imposes an additional mental load on developers by forcing them to drop a reasonable set of assumptions about hot the application works. If the application used the correct HTTP verbs, experienced developers would know without being told that to create a new report, you'd send a `POST` request to the `reports` API endpoint.
+In addition, if an application doesn't conform to accepted conventions in some way, such as using inappropriate HTTP verbs (eg `GET` to change the state of something), then quite apart from the fact that it won't play well with proxy servers, it imposes an additional mental load on developers by forcing them to drop a reasonable set of assumptions about how the application works. If the application used the correct HTTP verbs, experienced developers would know without being told that to create a new report, you'd send a `POST` request to the `reports` API endpoint.
 
 During the initial stages of a project, functionality can be delivered quite quickly, but if the code quality is poor, then over time developer velocity can decrease. Ensuring a higher quality code base helps to maintain velocity at a consistent level as it gets bigger. This also means estimates will be more accurate, so if you quote a given number of hours for a feature, you're more likely to deliver inside that number of hours.
 
@@ -57,7 +57,7 @@ A bad code base may inadvertently expose user's data, or be at risk from all kin
 
 For any business with EU-based users, the risks of exposing user's data are very serious. Under the GDPR, there's a potential fine of up to &euro;20 million, or 4% of turnover. That's potentially an existential risk for many companies.
 
-In addition, a bad code base is often more vulnerable to denial-of-service attacks. If it has poor or no caching, excessive queries, or inefficient queries, then every time a page loads it will carry out more queries than a more optimised site would. Given the same servers specs, the inefficient site will be overwhelmed quicker than the efficient one.
+In addition, a bad code base is often more vulnerable to denial-of-service attacks. If it has poor or no caching, excessive queries, or inefficient queries, then every time a page loads it will carry out more queries than a more optimised site would. Given the same server specs, the inefficient site will be overwhelmed quicker than the efficient one.
 
 Summary
 =======
