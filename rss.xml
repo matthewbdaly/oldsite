@@ -4,10 +4,60 @@
         <title>Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk</link>
         <description>I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Thu, 03 Jan 2019 21:52:42 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 04 Jan 2019 00:07:29 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
+        <item>
+            <title><![CDATA[You don't need that module package]]></title>
+            <link>https://matthewdaly.co.uk/blog/2019/01/03/you-dont-need-that-module-package/</link>
+            <guid>https://matthewdaly.co.uk/blog/2019/01/03/you-dont-need-that-module-package/</guid>
+            <pubDate>Thu, 03 Jan 2019 23:55:49 GMT</pubDate>
+            <description><![CDATA[<p>Lately I’ve seen a number of Laravel packages being posted on places like Reddit that offer ways to make your project more modular by letting you break their classes out of the usual structure and place them in a separate folder called something like <code>packages/</code> or <code>modules/</code>. However, these packages are completely redundant, and it requires very little work to achieve the same thing with Composer alone. In addition, much of it is not specific to Laravel and can also be applied to any other framework that uses Composer.</p>
+<p>There are two main approaches I’m aware of - keeping it in a single project, and moving the modules to separate Composer packages.</p>
+<h1 id="single-project">Single project</h1>
+<p>Suppose we have a brand new Laravel project with the namespace left as the default <code>App</code>. This is what the <code>autoload</code> section of the <code>composer.json</code> file will look like:</p>
+<pre><code class="lang-json">    &quot;autoload&quot;: {
+        &quot;psr-4&quot;: {
+            &quot;App\\&quot;: &quot;app/&quot;
+        },
+        &quot;classmap&quot;: [
+            &quot;database/seeds&quot;,
+            &quot;database/factories&quot;
+        ]
+    },
+</code></pre>
+<p>Composer allows for numerous ways to autoload classes and you can add additional namespaces as you wish. Probably the best approach is to use PSR-4 autoloading, as in this example:</p>
+<pre><code class="lang-json">    &quot;autoload&quot;: {
+        &quot;psr-4&quot;: {
+            &quot;App\\&quot;: &quot;app/&quot;,
+            &quot;Packages\\&quot;: &quot;packages&quot;
+        },
+        &quot;classmap&quot;: [
+            &quot;database/seeds&quot;,
+            &quot;database/factories&quot;
+        ]
+    },
+</code></pre>
+<p>Now, if you put the model <code>Post.php</code> in the folder, <code>packages/Blog/Models/</code>, then this will map to the namespace <code>Packages\Blog\Models\Post</code>, and if you set the namespace to this in the file, and run <code>composer dump-autoload</code>, you should be able to import it from that namespace without trouble. As with the <code>App\</code> namespace, because it’s using PSR-4 you’re only specifying the top-level namespace and the folders and files underneath have to mirror the namespace, so for instance, <code>Packages\Foo\Bar</code> maps to <code>packages/Foo/Bar.php</code>. If for some reason PSR-4 autoloading doesn’t map well to what you want to do, then there are other methods you can use - refer to the <a href="https://getcomposer.org/doc/04-schema.md#autoload">relevant section of the Composer documentation</a> for the other methods available.</p>
+<p>The controllers are the toughest part, because by default Laravel’s routing works on the assumption that the controllers are all under the <code>App\Http\Controllers</code> namespace, so you can shorten the namespace used. There are two ways around this I’m aware of. One is to specify the full namespace when referencing each controller:</p>
+<pre><code class="lang-php">Route::get(&#39;/&#39;, &#39;\App\Modules\Http\Controllers\FooController@index&#39;);
+</code></pre>
+<p>The other option is to update the <code>RouteServiceProvider.php</code>‘s namespace property. It defaults to this:</p>
+<pre><code class="lang-php">protected $namespace = &#39;App\Http\Controllers&#39;;
+</code></pre>
+<p>If there’s a more convenient namespace you want to place all your controllers under, then you can replace this, and it will become the default namespace applied in your route files.</p>
+<p>Other application components such as migrations, routes and views can be loaded from a service provider very easily. Just create a service provider for your module, register it in <code>config/app.php</code>, and set up the <code>boot()</code> method to load whichever components you want from the appropriate place, as in this example:</p>
+<pre><code class="lang-php">        $this-&gt;loadMigrationsFrom(__DIR__.&#39;/../database/migrations&#39;);
+        $this-&gt;loadRoutesFrom(__DIR__.&#39;/../routes.php&#39;);
+        $this-&gt;loadViewsFrom(__DIR__.&#39;/../views&#39;, &#39;comments&#39;);
+</code></pre>
+<h1 id="separate-packages">Separate packages</h1>
+<p>The above approach works particularly well in the initial stages of a project, when you may need to jump around a lot to edit different parts of the project. However, later on, once many parts of the project have stabilised, it may make more sense to pull the modules out into separate repositories and use Composer to pull them in as dependencies, using its support for private repositories. I’ve also often taken this approach right from the start without issue.</p>
+<p>This approach has a number of advantages. It makes it easier to reuse parts of the project in other projects if need be. Also, if you put your tests in the packages containing the components they test, it means that rather than running one monolithic test suite for the whole project, you can instead run each module’s tests each time you change it, and limit the test suite of the main project to those integration and acceptance tests that verify the whole thing, along with any unit tests for code that remains in the main repository, resulting in quicker test runs.</p>
+<p>Don’t get me wrong, making your code more modular is definitely a good thing and I’m wholly in favour of it. However, it only takes a little knowledge of Composer to be able to achieve this without any third party package at all, which is good because you’re no longer dependent on a package that may at any time fall behind the curve or be abandoned.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Why bad code is bad]]></title>
             <link>https://matthewdaly.co.uk/blog/2019/01/02/why-bad-code-is-bad/</link>
@@ -2152,87 +2202,6 @@ Cache cleared
 <pre><code class="lang-php">$file = $input-&gt;getArgument(&#39;file&#39;);
 </code></pre>
 <p>This tutorial is just skimming the surface of what you can do with the Symfony Console components - indeed, many other console interfaces, such as Laravel’s Artisan, are built on top of it. If you have a legacy application built in a framework that lacks any sort of console interface, such as CodeIgniter, then you can quite quickly produce basic console commands for working with that application. The <a href="https://symfony.com/doc/current/console.html">documentation is very good</a>, and with a little work you can soon have something up and running.</p>
-]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Rendering different views for mobile and desktop clients in Laravel]]></title>
-            <link>https://matthewdaly.co.uk/blog/2018/04/22/rendering-different-views-for-mobile-and-desktop-clients-in-laravel/</link>
-            <guid>https://matthewdaly.co.uk/blog/2018/04/22/rendering-different-views-for-mobile-and-desktop-clients-in-laravel/</guid>
-            <pubDate>Sun, 22 Apr 2018 22:50:10 GMT</pubDate>
-            <description><![CDATA[<p>This was a bit of a weird post to write. It started out explaining how I resolved an issue years ago on a CodeIgniter site, but amended to work for Laravel. In the process, I realised it made sense to implement it as middleware, and I ended up pulling it out into <a href="https://github.com/matthewbdaly/laravel-dynamic-serving">a package</a>. However, it’s still useful to understand the concept behind it, even if you prefer to just install the complete package, because your needs might be slightly different to mine.</p>
-<p>On web development forums, it’s quite common to see variants of the following question:</p>
-<blockquote>
-<p>How do I redirect a user on a mobile device to a mobile version of the site?</p>
-</blockquote>
-<p>It’s quite surprising that this is still an issue that crops up. For many years, it’s been widely accepted that the correct solution for this problem is responsive design. However, there are ways in which this may not be adequate for certain applications. For instance, you may have an application where certain functionality only makes sense in a certain context, or your user interface may need to be optimised for specific environments.</p>
-<p>The trouble is that a dedicated mobile site isn’t a good idea either. Among other things, it means that users can’t easily use the same bookmarks between desktop and mobile versions, and can result in at least some of the server-side logic being duplicated.</p>
-<p>Fortunately, there is another way - <a href="https://developers.google.com/search/mobile-sites/mobile-seo/dynamic-serving">dynamic serving</a> allows you to render different content based on the user agent. You can also easily enable users to switch between desktop and mobile versions themselves if their client isn’t detected correctly or they just prefer the other one. I’ve implemented this years ago for a CodeIgniter site. Here’s how you might implement it in Laravel, although if you understand the principle behind it, it should be easy to adapt for any other framework.</p>
-<p>Don’t try to implement mobile user agent detection yourself. Instead, find an implementation that’s actively maintained and install it with Composer. That way you can be reasonably sure that as new mobile devices come onto the market the package will detect them correctly as long as you keep it up to date. I would be inclined to go for <a href="https://github.com/jenssegers/agent">Agent</a>, since it has Laravel support baked in.</p>
-<p>We could just use Agent to serve up different content based on the user agent. However, user agent strings are notoriously unreliable - if a new mobile device appears and it doesn’t show up correctly in Agent, users could find themselves forced to use the wrong UI. Instead, we need to check for a flag in the session that indicates if the session is mobile or not. If it’s not set, we set it based on the user agent. That way, if you need to offer functionality to override the detected session type, you can just update that session variable to correct that elsewhere in the application. I would be inclined to use a button in the footer that makes an AJAX request to toggle the flag, then reloads the page.</p>
-<p>You also need to set the HTTP response header <code>Vary: User-Agent</code> to notify clients (including not only search engines, but also proxies at either end of the connection, such as Varnish or Squid) that the response will differ by user agent, in order to prevent users being served the wrong version.</p>
-<p>Middleware is the obvious place to do this. Here’s a middleware that sets the session variable and the appropriate response headers:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Http\Middleware;
-
-use Closure;
-use Jenssegers\Agent\Agent;
-use Illuminate\Contracts\Session\Session;
-
-class DetectMobile
-{
-    protected $agent;
-
-    protected $session;
-
-    public function __construct(Agent $agent, Session $session)
-    {
-        $this-&gt;agent = $agent;
-        $this-&gt;session = $session;
-    }
-
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
-    public function handle($request, Closure $next)
-    {
-        if (!$this-&gt;session-&gt;exists(&#39;mobile&#39;)) {
-            if ($this-&gt;agent-&gt;isMobile() || $this-&gt;agent-&gt;isTablet()) {
-                $this-&gt;session-&gt;put(&#39;mobile&#39;, true);
-            } else {
-                $this-&gt;session-&gt;put(&#39;mobile&#39;, false);
-            }
-        }
-        $response = $next($request);
-        return $response-&gt;setVary(&#39;User-Agent&#39;);
-    }
-}
-</code></pre>
-<p>Now, you could then work with the session directly to retrieve the <code>mobile</code> flag, but as you may be working in the view, it makes sense to create helpers for this:</p>
-<pre><code class="lang-php">&lt;?php
-
-if (!function_exists(&#39;is_mobile&#39;)) {
-    function is_mobile()
-    {
-        $session = app()-&gt;make(&#39;Illuminate\Contracts\Session\Session&#39;);
-        return $session-&gt;get(&#39;mobile&#39;) == true;
-    }
-}
-
-if (!function_exists(&#39;is_desktop&#39;)) {
-    function is_desktop()
-    {
-        $session = app()-&gt;make(&#39;Illuminate\Contracts\Session\Session&#39;);
-        return $session-&gt;get(&#39;mobile&#39;) == false;
-    }
-}
-</code></pre>
-<p>Now, if you want to serve up completely different views, you can use these helpers in your controllers. If you instead want to selectively show and hide parts of the UI based on the user agent, you can instead use these in the views to determine what parts of the page should be shown.</p>
-<p>Agent offers more functionality than just detecting if a user agent is a mobile or desktop device, and you may find this useful as a starting point for developing middleware for detecting bots, or showing different content to users based on their device type or operating system. If you just need to detect if a user is a mobile or desktop client, this middleware should be sufficient.</p>
 ]]></description>
         </item>
     </channel>
