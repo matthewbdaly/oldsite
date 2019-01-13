@@ -20,8 +20,8 @@ The `ruleset.xml` file was fairly simple in this case, as this is a very simple 
 ```xml
 <?xml version="1.0"?>
 <ruleset name="AbstractOrFinalClassesOnly">
-     <description>Checks all classes are marked as either abstract or final.</description>
- </ruleset>
+    <description>Checks all classes are marked as either abstract or final.</description>
+</ruleset>
 ```
 
 The sniff is intended to do the following:
