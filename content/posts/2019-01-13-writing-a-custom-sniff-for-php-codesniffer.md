@@ -150,4 +150,4 @@ final class AbstractOrFinalSniff implements Sniff
 
 I've made the resulting standard [available via Github](https://github.com/matthewbdaly/abstract-or-final-sniff).
 
-This is a bit rough and ready and I'll probably refactor it a bit when I have time, but it's proven fairly easy to create this sniff, except for the fact I had to go rooting around various tutorials that weren't all that clear. Hopefully this example is a bit simpler and easier to follow.
+This is a bit rough and ready and I'll probably refactor it a bit when I have time. In addition, it's not quite displaying the behaviour I want as it should, since ideally it should only be looking for the `abstract` and `final` keywords in classes that implement an interface. However, it's proven fairly easy to create this sniff, except for the fact I had to go rooting around various tutorials that weren't all that clear. Hopefully this example is a bit simpler and easier to follow.

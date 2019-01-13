@@ -30,7 +30,7 @@ I've worked extensively with the following technologies:
   * Use of Fabric for automating common server tasks
 * Perl (primarily for systems administration purposes)
 * PHP, including:
-  * Commercial experience with the CodeIgniter, Laravel and Slim frameworks
+  * Commercial experience with the CodeIgniter, Laravel, Zend and Slim frameworks
   * Building reusable libraries, including [an interface to PushWoosh](https://packagist.org/packages/matthewbdaly/pushwoosh-php-library) and [a Laravel middleware for adding ETags to responses](https://github.com/matthewbdaly/laravel-etag-middleware)
   * Building WordPress themes and plugins, and setting up and administering WordPress
   * Extensive unit and integration testing with PHPSpec, PHPUnit and Mockery
