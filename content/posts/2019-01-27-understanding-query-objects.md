@@ -6,7 +6,7 @@ categories:
 comments: true
 ---
 
-The project I've been maintaining for the last year has inherited a rather dubious database structure that would currently be very difficult to refactor, which also makes many queries more convoluted than they should be. At present, I'm involved in buiding a whole new home page, which has necessitated adding some new queries. Since some of these involve carrying out unions between several similar tables (that should have been one table, grr...), they can involve some quite large chunks for each query.
+The project I've been maintaining for the last year has inherited a rather dubious database structure that would currently be very difficult to refactor, which also makes many queries more convoluted than they should be. At present, I'm involved in building a whole new home page, which has necessitated adding some new queries. Since some of these involve carrying out unions between several similar tables (that should have been one table, grr...), they can involve some quite large chunks for each query.
 
 As a result, it's made sense to break those queries down further. Since Zend 1 doesn't have anything analogous to scopes in Eloquent, I don't really have an easy way to break these queries up in the models (and I'm trying to get the query logic out of the models at present anyway), so I opted to make them into query objects instead, which is a pattern I hadn't used before (but probably should have).
 
@@ -72,7 +72,7 @@ What about repositories?
 
 I regularly use the repository pattern in my code bases, whether that's for Laravel projects or the current Zend 1-based legacy project. It's an ongoing effort to refactor it so that all the queries are called from repository classes, leaving the models to act as containers for the data. So how do query objects fit in here?
 
-The relevant parts of the application structure for my current application looks a bit like this:
+It's important to note that while a repository represents all queries relating to a table, a query object represents only a single query, and so the repository should still be the place where the query is caled from. However, the repository should just defer the actual querying to the query object. The relevant parts of the application structure for my current application looks a bit like this:
 
 ```bash
 └── app
