@@ -72,7 +72,7 @@ What about repositories?
 
 I regularly use the repository pattern in my code bases, whether that's for Laravel projects or the current Zend 1-based legacy project. It's an ongoing effort to refactor it so that all the queries are called from repository classes, leaving the models to act as containers for the data. So how do query objects fit in here?
 
-It's important to note that while a repository represents all queries relating to a table, a query object represents only a single query, and so the repository should still be the place where the query is caled from. However, the repository should just defer the actual querying to the query object. The relevant parts of the application structure for my current application looks a bit like this:
+It's important to note that while a repository represents all queries relating to a table, a query object represents only a single query, and so the repository should still be the place where the query is called from. However, the repository should just defer the actual querying to the query object. The relevant parts of the application structure for my current application look a bit like this:
 
 ```bash
 └── app
@@ -126,12 +126,12 @@ final class DashboardRepository
 }
 ```
 
-Th only real difference is that we can instantiate the query object out of the container, simplifying setup.
+The only real difference is that we can instantiate the query object out of the container, simplifying setup.
 
 When to use query objects
 =========================
 
-I think it probably goes without saying, but it should be a rare query that actually needs to be implemented as a query object, especially if you're using an ORM like Eloquent that provides feaatures like scopes, and as yet I only have two using this pattern, as well as two others that were implemented as "reporter" classes, but could be query objects instead. So far, my experience has been that the sort of queries that are large enough to be worth considering include:
+I think it probably goes without saying, but it should be a rare query that actually needs to be implemented as a query object, especially if you're using an ORM like Eloquent that provides features like scopes, and as yet I only have two using this pattern, as well as two others that were implemented as "reporter" classes, but could be query objects instead. So far, my experience has been that the sort of queries that are large enough to be worth considering include:
 
 * Queries that generate reports, particularly if they have various options
 * Queries that use unions, as in the above example, since it makes sense to use a private method to fetch each table
@@ -139,4 +139,4 @@ I think it probably goes without saying, but it should be a rare query that actu
 
 Smaller queries will typically fit happily inside a single method in your repository classes. If that's the case, then they can live there without trouble. However, if you have a query that's becoming too big to fit inside a single method, rather than adding private methods to your repository class, it may make more sense to refactor it out into a query object in its own right. You can still call it via the same method on your repository class, but the repository can just defer to the query object. As I usually use decorators to cache the responses from my repository classes anyway, then it makes sense to stick with this approach to keep caching consistent too.
 
-Query objects only offer any value for particularly large queries. However, they can be invaluable in those circumstances. By enabling you to break those big queries up into a series of steps, they help make them easier to understand.
+Query objects only really offer any value for particularly large queries. However, they can be invaluable in those circumstances. By enabling you to break those big queries up into a series of steps, they help make them easier to understand.
