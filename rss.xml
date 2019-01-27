@@ -4,7 +4,7 @@
         <title>Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk</link>
         <description>I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sun, 27 Jan 2019 23:12:05 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 27 Jan 2019 23:17:58 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
@@ -13,7 +13,7 @@
             <link>https://matthewdaly.co.uk/blog/2019/01/27/understanding-query-objects/</link>
             <guid>https://matthewdaly.co.uk/blog/2019/01/27/understanding-query-objects/</guid>
             <pubDate>Sun, 27 Jan 2019 23:10:39 GMT</pubDate>
-            <description><![CDATA[<p>The project I’ve been maintaining for the last year has inherited a rather dubious database structure that would currently be very difficult to refactor, which also makes many queries more convoluted than they should be. At present, I’m involved in buiding a whole new home page, which has necessitated adding some new queries. Since some of these involve carrying out unions between several similar tables (that should have been one table, grr…), they can involve some quite large chunks for each query.</p>
+            <description><![CDATA[<p>The project I’ve been maintaining for the last year has inherited a rather dubious database structure that would currently be very difficult to refactor, which also makes many queries more convoluted than they should be. At present, I’m involved in building a whole new home page, which has necessitated adding some new queries. Since some of these involve carrying out unions between several similar tables (that should have been one table, grr…), they can involve some quite large chunks for each query.</p>
 <p>As a result, it’s made sense to break those queries down further. Since Zend 1 doesn’t have anything analogous to scopes in Eloquent, I don’t really have an easy way to break these queries up in the models (and I’m trying to get the query logic out of the models at present anyway), so I opted to make them into query objects instead, which is a pattern I hadn’t used before (but probably should have).</p>
 <p>A query object is pretty much what it says on the tin - it’s a PHP object that executes a single, very specific query. This may seem like overkill, but it’s only really useful for the most complex and convoluted of queries. It can accept parameters, as you’d expect, and some parts of the query may be optional based on that, but fundamentally it should build and run only one single query.</p>
 <p>In this post I’ll go through how you might create one, how it relates to the repository pattern, and when to create one.</p>
@@ -65,7 +65,7 @@ final class DashboardItems
 <p>Note that we break each one of the tables we want to perform a <code>UNION</code> on into a private method. This is probably the biggest advantage of query objects - it lets you break particularly unwieldy queries up into logical steps, making them more readable. You could do this by adding private methods on a repository class too, but I’d be reluctant to add private methods to a repository that were only used in one query - to my mind, a query object is a better home for that.</p>
 <h1 id="what-about-repositories-">What about repositories?</h1>
 <p>I regularly use the repository pattern in my code bases, whether that’s for Laravel projects or the current Zend 1-based legacy project. It’s an ongoing effort to refactor it so that all the queries are called from repository classes, leaving the models to act as containers for the data. So how do query objects fit in here?</p>
-<p>The relevant parts of the application structure for my current application looks a bit like this:</p>
+<p>It’s important to note that while a repository represents all queries relating to a table, a query object represents only a single query, and so the repository should still be the place where the query is caled from. However, the repository should just defer the actual querying to the query object. The relevant parts of the application structure for my current application looks a bit like this:</p>
 <pre><code class="lang-bash">└── app
     ├── Queries
     │   └── DashboardItems.php
