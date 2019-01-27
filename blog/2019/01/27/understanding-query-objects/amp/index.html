@@ -1,0 +1,270 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Understanding Query Objects - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2019/01/27/understanding-query-objects/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2019/01/27/understanding-query-objects/",
+         "headline": "Understanding Query Objects",
+         "datePublished": "2019-01-27T23:10:39.000Z",
+         "dateModified": "2019-01-27T23:10:39.000Z",
+         "description": "&lt;p&gt;The project I’ve been maintaining for the last year has inherited a rather dubious database struc...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">27th January 2019 11:10 pm</p><h1>Understanding Query Objects</h1><p>The project I’ve been maintaining for the last year has inherited a rather dubious database structure that would currently be very difficult to refactor, which also makes many queries more convoluted than they should be. At present, I’m involved in buiding a whole new home page, which has necessitated adding some new queries. Since some of these involve carrying out unions between several similar tables (that should have been one table, grr…), they can involve some quite large chunks for each query.</p><p>As a result, it’s made sense to break those queries down further. Since Zend 1 doesn’t have anything analogous to scopes in Eloquent, I don’t really have an easy way to break these queries up in the models (and I’m trying to get the query logic out of the models at present anyway), so I opted to make them into query objects instead, which is a pattern I hadn’t used before (but probably should have).</p><p>A query object is pretty much what it says on the tin - it’s a PHP object that executes a single, very specific query. This may seem like overkill, but it’s only really useful for the most complex and convoluted of queries. It can accept parameters, as you’d expect, and some parts of the query may be optional based on that, but fundamentally it should build and run only one single query.</p><p>In this post I’ll go through how you might create one, how it relates to the repository pattern, and when to create one.</p><h1 id="creating-a-query-object-class">Creating a query object class</h1><p>I’m a big fan of the <code>__invoke()</code> magic method in PHP. For the uninitiated, it lets you instantiate the class, and then use it in the same way you would a function, making it very useful for callbacks. This also brings some other advantages:</p><ul><li>Unlike with a function, you can create private methods to do other parts of the work, making it easier to understand the main method.</li><li>It can have a constructor, and can therefore both accept dependencies via the constructor, and be instantiated via dependency injection, simplifying setup and testing when compared to using a callback.</li><li>Since <code>__invoke()</code> is an innate part of the PHP language, it makes more sense for classes that have a single responsibility to use that method name to do that, rather than picking something like <code>handle()</code> or <code>run()</code>.</li></ul><p>As a result, my query objects generally use the <code>__invoke()</code> method to trigger the query.</p><p>Since Zend 1 is no longer supported, I won’t bother displaying how I’d write the query in that specific context. I have yet to use this pattern with Laravel, but if I did, it would look something like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Queries</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Database</span>\<span class="hljs-title">DatabaseManager</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DashboardItems</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $db;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(DatabaseManager $db)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;db = $db;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(int $days = <span class="hljs-number">7</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;fooTable()
+            -&gt;union(<span class="hljs-keyword">$this</span>-&gt;barTable())
+            -&gt;whereRaw(<span class="hljs-string">'start_date &gt;= (NOW() - INTERVAL ? DAY)'</span>, [$days]);
+            -&gt;get();
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fooTable</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;db-&gt;table(<span class="hljs-string">'foo'</span>)
+            -&gt;where(<span class="hljs-string">'type'</span>, <span class="hljs-string">'='</span>, <span class="hljs-string">'fooType'</span>);
+    }
+
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">barTable</span><span class="hljs-params">(int $days)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;db-&gt;table(<span class="hljs-string">'bar'</span>)
+            -&gt;where(<span class="hljs-string">'type'</span>, <span class="hljs-string">'='</span>, <span class="hljs-string">'barType'</span>);
+    }
+}
+</code></pre><p>Note that we break each one of the tables we want to perform a <code>UNION</code> on into a private method. This is probably the biggest advantage of query objects - it lets you break particularly unwieldy queries up into logical steps, making them more readable. You could do this by adding private methods on a repository class too, but I’d be reluctant to add private methods to a repository that were only used in one query - to my mind, a query object is a better home for that.</p><h1 id="what-about-repositories-">What about repositories?</h1><p>I regularly use the repository pattern in my code bases, whether that’s for Laravel projects or the current Zend 1-based legacy project. It’s an ongoing effort to refactor it so that all the queries are called from repository classes, leaving the models to act as containers for the data. So how do query objects fit in here?</p><p>The relevant parts of the application structure for my current application looks a bit like this:</p><pre><code class="hljs lang-bash">└── app
+    ├── Queries
+    │   └── DashboardItems.php
+    └── Repositories
+        └── DashboardRepository.php
+</code></pre><p>And the repository might call the query object as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Queries</span>\<span class="hljs-title">DashboardItems</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DashboardRepository</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dashboardItems</span><span class="hljs-params">(int $days = <span class="hljs-number">7</span>)</span>
+    </span>{
+        $query = <span class="hljs-keyword">new</span> DashboardItems;
+        <span class="hljs-keyword">return</span> $query($days);
+    }
+}
+</code></pre><p>At present my repositories all use static methods as I’m still in the process of migrating the queries over to the repository classes. That also means I can’t easily use dependency injection. For a Laravel application, a similar call might look like this:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">App</span>\<span class="hljs-title">Repositories</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">Queries</span>\<span class="hljs-title">DashboardItems</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DashboardRepository</span>
+</span>{
+    <span class="hljs-keyword">protected</span> $dashboardQuery;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span><span class="hljs-params">(DashboardItems $dashboardQuery)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;dashboardQuery = $dashboardQuery;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dashboardItems</span><span class="hljs-params">(int $days = <span class="hljs-number">7</span>)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;dashboardQuery($days);
+    }
+}
+</code></pre><p>Th only real difference is that we can instantiate the query object out of the container, simplifying setup.</p><h1 id="when-to-use-query-objects">When to use query objects</h1><p>I think it probably goes without saying, but it should be a rare query that actually needs to be implemented as a query object, especially if you’re using an ORM like Eloquent that provides feaatures like scopes, and as yet I only have two using this pattern, as well as two others that were implemented as “reporter” classes, but could be query objects instead. So far, my experience has been that the sort of queries that are large enough to be worth considering include:</p><ul><li>Queries that generate reports, particularly if they have various options</li><li>Queries that use unions, as in the above example, since it makes sense to use a private method to fetch each table</li><li>Queries with multiple complex joins</li></ul><p>Smaller queries will typically fit happily inside a single method in your repository classes. If that’s the case, then they can live there without trouble. However, if you have a query that’s becoming too big to fit inside a single method, rather than adding private methods to your repository class, it may make more sense to refactor it out into a query object in its own right. You can still call it via the same method on your repository class, but the repository can just defer to the query object. As I usually use decorators to cache the responses from my repository classes anyway, then it makes sense to stick with this approach to keep caching consistent too.</p><p>Query objects only offer any value for particularly large queries. However, they can be invaluable in those circumstances. By enabling you to break those big queries up into a series of steps, they help make them easier to understand.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2019/01/27/understanding-query-objects/">View the article with comments</a></section><section><a class="postlink" href="/blog/2019/01/13/writing-a-custom-sniff-for-php-codesniffer/amp/">Writing a Custom Sniff for PHP Codesniffer</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
