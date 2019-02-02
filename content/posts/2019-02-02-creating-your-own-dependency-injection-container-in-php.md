@@ -791,4 +791,4 @@ Final thoughts
 
 As I've said, this is a pretty minimal example of a dependency injection container, and I wouldn't advise using this in production when there are so many existing, mature solutions available. I have no idea how the performance would stack up against existing solutions, or whether there are any issues with it, and quite frankly that's besides the point - this is intended as a learning exercise to understand how dependency injection containers in general work, not as an actual useful piece of code for production. If you want an off-the-shelf container, I'd point you in the direction of `league/container`, which has served me well.
 
-You can find the code for this tutorial on [GitHub](https://github.com/matthewbdaly/ernie), so if you have any problems, refer to that as a guide.
+You can find the code for this tutorial on [GitHub](https://github.com/matthewbdaly/ernie), so if you have any problems, you should take a look there to see where the problem lies. Of course, if you go on to create your own kick-ass container based on this, do let me know!
