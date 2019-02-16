@@ -4,10 +4,113 @@
         <title>javascript | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/javascript/</link>
         <description>javascript | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sat, 02 Feb 2019 21:56:17 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 16 Feb 2019 18:57:56 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
+        <item>
+            <title><![CDATA[Higher-order components in React]]></title>
+            <link>https://matthewdaly.co.uk/blog/2019/02/16/higher-order-components-in-react/</link>
+            <guid>https://matthewdaly.co.uk/blog/2019/02/16/higher-order-components-in-react/</guid>
+            <pubDate>Sat, 16 Feb 2019 19:00:30 GMT</pubDate>
+            <description><![CDATA[<p>In the last few weeks I’ve been working on a big rebuild of the homepage of the legacy application I maintain. As I’ve been slowly transitioning it to use React on the front end, I used that, and it’s by far the largest React project I’ve worked on to date. This has pushed me to use some more advanced React techniques I hadn’t touched on before. I’ve also had to create some different components that have common functionality.</p>
+<p>React used to use mixins to share common functionality, but the consensus is now that <a href="https://reactjs.org/blog/2016/07/13/mixins-considered-harmful.html">mixins are considered harmful</a>, so they have been removed. Instead, developers are encouraged to create higher-order components to contain the shared functionality.</p>
+<p>A higher-order component is a function that accepts a React component as an argument, and then returns another component that wraps the provided one. The shared functionality is defined inside the wrapping component, and so any state or methods defined in the wrapping component can then be passed as props into the wrapped one, as in this simple example:</p>
+<pre><code class="lang-javascript">import React, { Component } from &#39;react&#39;;
+
+export default function hocExample(WrappedComponent) {
+  class hocExample extends Component {
+    constructor(props) {
+      this.state = {
+        foo: false
+      };
+      this.doStuff = this.doStuff.bind(this);
+    }
+    doStuff() {
+      this.setState({
+        foo: true
+      });
+    }
+    render() {
+      return (
+        &lt;WrappedComponent foo={this.state.foo} doStuff={this.doStuff} /&gt;
+      );
+    }
+  }
+  return hocExample;
+}
+</code></pre>
+<p>If you’ve been working with React for a while, even if you haven’t written a higher-order component, you’ve probably used one. For instance, <code>withRouter()</code> from <code>react-router</code> is a good example of a higher-order component that forms part of an existing library.</p>
+<h1 id="a-real-world-example">A real-world example</h1>
+<p>A very common use case I’ve come across is handling a click outside of a component. For instance, if you have a sidebar or popup component, it’s common to want to close it when the user clicks outside the component. As such, it’s worth taking the time to refactor it to make it reusable.</p>
+<p>In principle you can achieve this on any component as follows:</p>
+<ul>
+<li>The component should accept two props - an <code>active</code> prop that denotes whether the component is active or not, and an <code>onClickOutside()</code> prop method that is called on a click outside</li>
+<li>On mount, an event listener should be added to the document to listen for <code>mousedown</code> events, and it should be removed on unmount</li>
+<li>When the event listener is fired, it should use a ref on the component to determine if the ref contains the event target. If so, and the status is active, the <code>onClickOutside()</code> method should be called</li>
+</ul>
+<p>Moving this to a higher order component makes a couple of issues slightly more complex, but not very. We can’t easily get a ref of the wrapped component, so I had to resort to using <code>ReactDOM.findDOMNode()</code> instead, which is potentially a bit dodgy as they’re talking about deprecating that.</p>
+<pre><code class="lang-javascript">import React, { Component } from &#39;react&#39;;
+import { findDOMNode } from &#39;react-dom&#39;;
+
+export default function clicksOutside(WrappedComponent) {
+  class clicksOutside extends Component {
+    constructor(props) {
+      super(props);
+      this.setWrapperRef = this.setWrapperRef.bind(this);
+      this.handleClickOutside = this.handleClickOutside.bind(this);
+    }
+    componentDidMount() {
+      document.addEventListener(&#39;mousedown&#39;, this.handleClickOutside);
+    }
+    componentWillUnmount() {
+      document.removeEventListener(&#39;mousedown&#39;, this.handleClickOutside);
+    }
+    setWrapperRef(node) {
+      this.wrapperRef = node;
+    }
+    handleClickOutside(event) {
+      const {target} = event;
+      if (this.wrapperRef &amp;&amp; target instanceof Node) {
+        const ref = findDOMNode(this.wrapperRef);
+        if (ref &amp;&amp; !ref.contains(target) &amp;&amp; this.props.active === true) {
+          this.props.onClickOutside();
+        }
+      }
+    }
+    render() {
+      return (
+        &lt;WrappedComponent {...this.props} ref={this.setWrapperRef} /&gt;
+      );
+    }
+  };
+  return clicksOutside;
+}
+</code></pre>
+<p>Now we can use this as follows:</p>
+<pre><code class="lang-javascript">import React, { Component } from &#39;react&#39;;
+import ReactDOM from &#39;react-dom&#39;;
+import Sidebar from &#39;./src/Components/Sidebar&#39;;
+import clicksOutside from &#39;./src/Components/clicksOutside&#39;;
+
+const SidebarComponent = clicksOutside(Sidebar);
+
+function handleClickOutside() {
+  alert(&#39;You have clicked outside&#39;);
+}
+
+ReactDOM.render(
+  &lt;SidebarComponent 
+    links={links} 
+    active={true} 
+    onClickOutside={handleClickOutside} 
+  /&gt;,
+  document.getElementById(&#39;root&#39;)
+);
+</code></pre>
+<p>Higher order components sound a lot harder than they actually are. In reality, they’re actually quite simple to implement, but I’m not sure the <a href="https://reactjs.org/docs/higher-order-components.html">documentation</a> is necessarily the best example to use since it’s a bit on the complex side.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Adding React to a legacy project]]></title>
             <link>https://matthewdaly.co.uk/blog/2018/10/16/adding-react-to-a-legacy-project/</link>
