@@ -1,0 +1,251 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Searching Content With Fuse.js - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2019/02/20/searching-content-with-fuse-dot-js/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2019/02/20/searching-content-with-fuse-dot-js/",
+         "headline": "Searching Content With Fuse.js",
+         "datePublished": "2019-02-20T17:25:58.000Z",
+         "dateModified": "2019-02-20T17:25:58.000Z",
+         "description": "&lt;p&gt;Search is a problem I’m currently taking a big interest in. The legacy project I maintain has an ...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">20th February 2019 5:25 pm</p><h1>Searching Content With Fuse.js</h1><p>Search is a problem I’m currently taking a big interest in. The legacy project I maintain has an utterly abominable search facility, one that I’m eager to replace with something like Elasticsearch. But smaller sites that are too small for Elasticsearch to be worth the bother can still benefit from having a decent search implementation. Despite some recent improvements, relational databases aren’t generally that good a fit for search because they don’t really understand the concept of relevance - you can’t easily order something by how good a match it is, and your database may not deal with fuzzy matching well.</p><p>I’m currently working on a small flat-file CMS as a personal project. It’s built with PHP, but it’s intended to be as simple as possible, with no database, no caching service, and certainly no search service, so it needs something small and simple, but still effective for search.</p><p>In the past I’ve used Lunr.js on my own site, and it works very well for this use case. However, it’s problematic for this case as the index needs to be generated in Javascript on the server side, and adding Node.js to the stack for a flat-file PHP CMS is not really an option. What I needed was something where I could generate the index in any language I chose, load it via AJAX, and search it on the client side. I recently happened to stumble across <a href="https://fusejs.io/">Fuse.js</a>, which was pretty much exactly what I was after.</p><p>Suppose we have the following index:</p><pre><code class="hljs lang-json">[  
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"About me"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"about/"</span>
+   },
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"Meet the team"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"about/meet-the-team/"</span>
+   },
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"Alice"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"about/meet-the-team/alice/"</span>
+   },
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"Bob"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"about/meet-the-team/bob/"</span>
+   },
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"Chris"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"about/meet-the-team/chris/"</span>
+   },
+   {  
+      <span class="hljs-attr">"title"</span>:<span class="hljs-string">"Home"</span>,
+      <span class="hljs-attr">"path"</span>:<span class="hljs-string">"index/"</span>
+   }
+]
+</code></pre><p>This index can be generated in any way you see fit. In this case, the page content is stored in Markdown files with YAML front matter, so I wrote a Symfony console command which gets all the Markdown files in the content folder, parses them to get the titles, and retrieves the path. You could also retrieve other items in front matter such as categories or tags, and the page content, and include that in the index. The data then gets converted to JSON and saved to the index file. As you can see, there’s nothing special about this JSON - these two fields happen to be the ones I’ve chosen.</p><p>Now we can load the JSON file via AJAX, and pass it to a new Fuse instance. You can search the index using the <code>.search()</code> method, as shown below:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> Fuse <span class="hljs-keyword">from</span> <span class="hljs-string">'fuse.js'</span>;
+<span class="hljs-built_in">window</span>.$ = <span class="hljs-built_in">window</span>.jQuery = <span class="hljs-built_in">require</span>(<span class="hljs-string">'jquery'</span>);
+
+$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+  <span class="hljs-built_in">window</span>.$.getJSON(<span class="hljs-string">'/storage/index.json'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">response</span>) </span>{
+    <span class="hljs-keyword">const</span> fuse = <span class="hljs-keyword">new</span> Fuse(response, {
+      <span class="hljs-attr">keys</span>: [<span class="hljs-string">'title'</span>],
+      <span class="hljs-attr">shouldSort</span>: <span class="hljs-literal">true</span>
+    });
+    $(<span class="hljs-string">'#search'</span>).on(<span class="hljs-string">'keyup'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">let</span> result = fuse.search($(<span class="hljs-keyword">this</span>).val());
+
+      <span class="hljs-comment">// Output it</span>
+      <span class="hljs-keyword">let</span> resultdiv = $(<span class="hljs-string">'ul.searchresults'</span>);
+      <span class="hljs-keyword">if</span> (result.length === <span class="hljs-number">0</span>) {
+        <span class="hljs-comment">// Hide results</span>
+        resultdiv.hide();
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// Show results</span>
+        resultdiv.empty();
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> item <span class="hljs-keyword">in</span> result.slice(<span class="hljs-number">0</span>,<span class="hljs-number">4</span>)) {
+          <span class="hljs-keyword">let</span> searchitem = <span class="hljs-string">'&lt;li&gt;&lt;a href="'</span> + result[item].path + <span class="hljs-string">'"&gt;'</span> + result[item].title + <span class="hljs-string">'&lt;/a&gt;&lt;/li&gt;'</span>;
+          resultdiv.append(searchitem);
+        }
+        resultdiv.show();
+      }
+    });
+  });
+});
+</code></pre><p>The really great thing about Fuse.js is that it can search just about any JSON content, making it extremely flexible. For a site with a MySQL database, you could generate the JSON from one or more tables in the database, cache it in Redis or Memcached indefinitely until such time as the content changes again, and only regenerate it then, making for an extremely efficient client-side search that doesn’t need to hit the database during normal operation. Or you could generate it from static files, as in this example. It also means the backend language is not an issue, since you can easily generate the JSON file in PHP, Javascript, Python or any other language.</p><p>As you can see, it’s pretty straightforward to use Fuse.js to create a working search field out of the box, but the website lists a number of options allowing you to customise the search for your particular use case, and I’d recommend looking through these if you’re planning on using it on a project.</p><section><ul class="categories"><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/search/">search</a></li><li><a href="/blog/categories/json/">json</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2019/02/20/searching-content-with-fuse-dot-js/">View the article with comments</a></section><section><a class="postlink" href="/blog/2019/02/16/higher-order-components-in-react/amp/">Higher-order Components in React</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>

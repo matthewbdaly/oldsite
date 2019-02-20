@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id></id>
+    <title>json | Matthew Daly&apos;s Blog</title>
+    <updated>2019-02-20T17:25:34Z</updated>
+    <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
+    <author>
+        <name>Matthew Daly</name>
+        <email>matthew@matthewdaly.co.uk</email>
+        <uri>https://matthewdaly.co.uk</uri>
+    </author>
+    <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/json/"/>
+    <subtitle>json | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
+    <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Searching content with Fuse.js]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/02/20/searching-content-with-fuse-dot-js/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/02/20/searching-content-with-fuse-dot-js/">
+        </link>
+        <updated>2019-02-20T17:25:58Z</updated>
+        <summary type="html"><![CDATA[<p>Search is a problem I’m currently taking a big interest in. The legacy project I maintain has an utterly abominable search facility, one that I’m eager to replace with something like Elasticsearch. But smaller sites that are too small for Elasticsearch to be worth the bother can still benefit from having a decent search implementation. Despite some recent improvements, relational databases aren’t generally that good a fit for search  because they don’t really understand the concept of relevance - you can’t easily order something by how good a match it is, and your database may not deal with fuzzy matching well.</p>
+<p>I’m currently working on a small flat-file CMS as a personal project. It’s built with PHP, but it’s intended to be as simple as possible, with no database, no caching service, and certainly no search service, so it needs something small and simple, but still effective for search.</p>
+<p>In the past I’ve used Lunr.js on my own site, and it works very well for this use case. However, it’s problematic for this case as the index needs to be generated in Javascript on the server side, and adding Node.js to the stack for a flat-file PHP CMS is not really an option. What I needed was something where I could generate the index in any language I chose, load it via AJAX, and search it on the client side. I recently happened to stumble across <a href="https://fusejs.io/">Fuse.js</a>, which was pretty much exactly what I was after.</p>
+<p>Suppose we have the following index:</p>
+<pre><code class="lang-json">[  
+   {  
+      &quot;title&quot;:&quot;About me&quot;,
+      &quot;path&quot;:&quot;about/&quot;
+   },
+   {  
+      &quot;title&quot;:&quot;Meet the team&quot;,
+      &quot;path&quot;:&quot;about/meet-the-team/&quot;
+   },
+   {  
+      &quot;title&quot;:&quot;Alice&quot;,
+      &quot;path&quot;:&quot;about/meet-the-team/alice/&quot;
+   },
+   {  
+      &quot;title&quot;:&quot;Bob&quot;,
+      &quot;path&quot;:&quot;about/meet-the-team/bob/&quot;
+   },
+   {  
+      &quot;title&quot;:&quot;Chris&quot;,
+      &quot;path&quot;:&quot;about/meet-the-team/chris/&quot;
+   },
+   {  
+      &quot;title&quot;:&quot;Home&quot;,
+      &quot;path&quot;:&quot;index/&quot;
+   }
+]
+</code></pre>
+<p>This index can be generated in any way you see fit. In this case, the page content is stored in Markdown files with YAML front matter, so I wrote a Symfony console command which gets all the Markdown files in the content folder, parses them to get the titles, and retrieves the path. You could also retrieve other items in front matter such as categories or tags, and the page content, and include that in the index. The data then gets converted to JSON and saved to the index file. As you can see, there’s nothing special about this JSON - these two fields happen to be the ones I’ve chosen.</p>
+<p>Now we can load the JSON file via AJAX, and pass it to a new Fuse instance. You can search the index using the <code>.search()</code> method, as shown below:</p>
+<pre><code class="lang-javascript">import Fuse from &#39;fuse.js&#39;;
+window.$ = window.jQuery = require(&#39;jquery&#39;);
+
+$(document).ready(function () {
+  window.$.getJSON(&#39;/storage/index.json&#39;, function (response) {
+    const fuse = new Fuse(response, {
+      keys: [&#39;title&#39;],
+      shouldSort: true
+    });
+    $(&#39;#search&#39;).on(&#39;keyup&#39;, function () {
+      let result = fuse.search($(this).val());
+
+      // Output it
+      let resultdiv = $(&#39;ul.searchresults&#39;);
+      if (result.length === 0) {
+        // Hide results
+        resultdiv.hide();
+      } else {
+        // Show results
+        resultdiv.empty();
+        for (let item in result.slice(0,4)) {
+          let searchitem = &#39;&lt;li&gt;&lt;a href=&quot;&#39; + result[item].path + &#39;&quot;&gt;&#39; + result[item].title + &#39;&lt;/a&gt;&lt;/li&gt;&#39;;
+          resultdiv.append(searchitem);
+        }
+        resultdiv.show();
+      }
+    });
+  });
+});
+</code></pre>
+<p>The really great thing about Fuse.js is that it can search just about any JSON content, making it extremely flexible. For a site with a MySQL database, you could generate the JSON from one or more tables in the database, cache it in Redis or Memcached indefinitely until such time as the content changes again, and only regenerate it then, making for an extremely efficient client-side search that doesn’t need to hit the database during normal operation. Or you could generate it from static files, as in this example. It also means the backend language is not an issue, since you can easily generate the JSON file in PHP, Javascript, Python or any other language.</p>
+<p>As you can see, it’s pretty straightforward to use Fuse.js to create a working search field out of the box, but the website lists a number of options allowing you to customise the search for your particular use case, and I’d recommend looking through these if you’re planning on using it on a project.</p>
+]]></summary>
+    </entry>
+</feed>
