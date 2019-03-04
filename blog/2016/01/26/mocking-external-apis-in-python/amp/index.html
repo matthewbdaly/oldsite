@@ -193,22 +193,22 @@
     <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">create</span><span class="hljs-params">(cls, api_key=None, idempotency_key=None,
                stripe_account=None, **params)</span>:</span>
         <span class="hljs-keyword">if</span> params[<span class="hljs-string">'card'</span>][<span class="hljs-string">'number'</span>] != <span class="hljs-string">'4242424242424242'</span>:
-            <span class="hljs-keyword">raise</span> CardError(<span class="hljs-string">'Invalid card number'</span>, <span class="hljs-keyword">None</span>, <span class="hljs-number">402</span>)
+            <span class="hljs-keyword">raise</span> CardError(<span class="hljs-string">'Invalid card number'</span>, <span class="hljs-literal">None</span>, <span class="hljs-number">402</span>)
 
         response = {
             <span class="hljs-string">"card"</span>: {
-              <span class="hljs-string">"address_city"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_country"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_line1"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_line1_check"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_line2"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_state"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_zip"</span>: <span class="hljs-keyword">None</span>,
-              <span class="hljs-string">"address_zip_check"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"address_city"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_country"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_line1"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_line1_check"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_line2"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_state"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_zip"</span>: <span class="hljs-literal">None</span>,
+              <span class="hljs-string">"address_zip_check"</span>: <span class="hljs-literal">None</span>,
               <span class="hljs-string">"brand"</span>: <span class="hljs-string">"Visa"</span>,
               <span class="hljs-string">"country"</span>: <span class="hljs-string">"US"</span>,
               <span class="hljs-string">"cvc_check"</span>: <span class="hljs-string">"unchecked"</span>,
-              <span class="hljs-string">"dynamic_last4"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"dynamic_last4"</span>: <span class="hljs-literal">None</span>,
               <span class="hljs-string">"exp_month"</span>: <span class="hljs-number">12</span>,
               <span class="hljs-string">"exp_year"</span>: <span class="hljs-number">2017</span>,
               <span class="hljs-string">"fingerprint"</span>: <span class="hljs-string">"49gS1c4YhLaGEQbj"</span>,
@@ -216,17 +216,17 @@
               <span class="hljs-string">"id"</span>: <span class="hljs-string">"card_17XXdZGzvyST06Z022EiG1zt"</span>,
               <span class="hljs-string">"last4"</span>: <span class="hljs-string">"4242"</span>,
               <span class="hljs-string">"metadata"</span>: {},
-              <span class="hljs-string">"name"</span>: <span class="hljs-keyword">None</span>,
+              <span class="hljs-string">"name"</span>: <span class="hljs-literal">None</span>,
               <span class="hljs-string">"object"</span>: <span class="hljs-string">"card"</span>,
-              <span class="hljs-string">"tokenization_method"</span>: <span class="hljs-keyword">None</span>
+              <span class="hljs-string">"tokenization_method"</span>: <span class="hljs-literal">None</span>
           },
             <span class="hljs-string">"client_ip"</span>: <span class="hljs-string">"192.168.1.1"</span>,
             <span class="hljs-string">"created"</span>: <span class="hljs-number">1453817861</span>,
             <span class="hljs-string">"id"</span>: <span class="hljs-string">"tok_42XXdZGzvyST06Z0LA6h5gJp"</span>,
-            <span class="hljs-string">"livemode"</span>: <span class="hljs-keyword">False</span>,
+            <span class="hljs-string">"livemode"</span>: <span class="hljs-literal">False</span>,
             <span class="hljs-string">"object"</span>: <span class="hljs-string">"token"</span>,
             <span class="hljs-string">"type"</span>: <span class="hljs-string">"card"</span>,
-            <span class="hljs-string">"used"</span>: <span class="hljs-keyword">False</span>
+            <span class="hljs-string">"used"</span>: <span class="hljs-literal">False</span>
         }
         <span class="hljs-keyword">return</span> convert_to_stripe_object(response, api_key, stripe_account)
 </code></pre><p>Much of this was lifted straight from the source code for the library. I then wrote a test for the payment endpoint and patched the <code>Token</code> class:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PaymentTest</span><span class="hljs-params">(TestCase)</span>:</span>
