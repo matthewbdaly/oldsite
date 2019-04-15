@@ -127,4 +127,4 @@ return '<a href="'.$item->getUrl().'" class="'.$item->getType().'" data-duration
 
 Because we can use the exact same methods and get consistent responses, yet also allow for the different implementations within the objects, this approach allows for much more elegant and readable code. Different objects can be treated in the same way without the need for writing extensive if or switch statements.
 
-I haven't had the occasion to do so, but in theory this approach is applicable in other languages, such as Javascript or Python (although these languages don't have the concept of interfaces). Since discovering the swtch statement antipattern and how to replace it with polymorphism, I've been able to remove a lot of overly complex code.
+I haven't had the occasion to do so, but in theory this approach is applicable in other languages, such as Javascript or Python (although these languages don't have the concept of interfaces). Since discovering the switch statement antipattern and how to replace it with polymorphism, I've been able to remove a lot of overly complex code.
