@@ -145,7 +145,7 @@ class APITest(TestCase):
         assert responses.calls[0].request.url == settings.API_URL
 ```
 
-Note the use of the `@responses.activate` decorator. We use `responses.add()` to set up each URL we want to be able to mock, and pass through details of the response we want to return. We then make the request, and check that it was made as expected.
+Note the use of the <code>@responses.activate</code> decorator. We use `responses.add()` to set up each URL we want to be able to mock, and pass through details of the response we want to return. We then make the request, and check that it was made as expected.
 
 You can find more details of the `responses` module [here](https://github.com/getsentry/responses).
 
