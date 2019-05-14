@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>laravel | Matthew Daly&apos;s Blog</title>
-    <updated>2019-05-12T15:30:09Z</updated>
+    <updated>2019-05-14T11:18:10Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,200 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/laravel/"/>
     <subtitle>laravel | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Writing golden master tests for Laravel applications]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/">
+        </link>
+        <updated>2019-05-14T11:15:17Z</updated>
+        <summary type="html"><![CDATA[<p>Last year I wrote <a href="https://matthewdaly.co.uk/blog/2018/10/08/an-approach-to-writing-golden-master-tests-for-php-web-applications/">a post illustrating how to write golden master tests for PHP applications in general</a>. This approach works, but has a number of issues:</p>
+<ul>
+<li>Because it uses a headless browser such as Goutte, it’s inevitably slow (a typical test run for the legacy application I wrote those tests for is 3-4 minutes)</li>
+<li>It can’t allow for differing content, so any changes to the content will break the tests</li>
+</ul>
+<p>These factors limit its utility for many PHP applications. However, for a Laravel application you’re in a much better position:</p>
+<ul>
+<li>You can use Browserkit rather than a headless browser, resulting in much faster response times</li>
+<li>You can set up a testing database, and populate it with the same data each time, ensuring that the only thing that can change is how that data is processed to create the required HTML</li>
+</ul>
+<p>Here I’ll show you how to adapt that approach to work with a Laravel application.</p>
+<p>We rely on Browserkit testing for this approach, so you need to install that:</p>
+<pre><code class="lang-bash">$ composer require --dev laravel/browser-kit-testing
+</code></pre>
+<p>Next, we need to create our base golden master test case:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests;
+
+use Tests\BrowserTestCase;
+
+class GoldenMasterTestCase extends BrowserTestCase
+{
+    use CreatesApplication;
+
+    public $baseUrl = &#39;http://localhost&#39;;
+
+    protected $snapshotDir = &quot;tests/snapshots/&quot;;
+
+    protected $response;
+
+    protected $path;
+
+    public function goto($path)
+    {
+        $this-&gt;path = $path;
+        $this-&gt;response = $this-&gt;call(&#39;GET&#39;, $path);
+        $this-&gt;assertNotEquals(404, $this-&gt;response-&gt;status());
+        return $this;
+    }
+
+    public function saveHtml()
+    {
+        if (!$this-&gt;snapshotExists()) {
+            $this-&gt;saveSnapshot();
+        }
+        return $this;
+    }
+
+    public function assertSnapshotsMatch()
+    {
+        $path = $this-&gt;getPath();
+        $newHtml = $this-&gt;processHtml($this-&gt;getHtml());
+        $oldHtml = $this-&gt;getOldHtml();
+        $diff = &quot;&quot;;
+        if (function_exists(&#39;xdiff_string_diff&#39;)) {
+            $diff = xdiff_string_diff($oldHtml, $newHtml);
+        }
+        $message = &quot;The path $path does not match the snapshot\n$diff&quot;;
+        self::assertThat($newHtml == $oldHtml, self::isTrue(), $message);
+    }
+
+    protected function getHtml()
+    {
+        return $this-&gt;response-&gt;getContent();
+    }
+
+    protected function getPath()
+    {
+        return $this-&gt;path;
+    }
+
+    protected function getEscapedPath()
+    {
+        return $this-&gt;snapshotDir.str_replace(&#39;/&#39;, &#39;_&#39;, $this-&gt;getPath()).&#39;.snap&#39;;
+    }
+
+    protected function snapshotExists()
+    {
+        return file_exists($this-&gt;getEscapedPath());
+    }
+
+    protected function processHtml($html)
+    {
+        return preg_replace(&#39;/(&lt;input type=&quot;hidden&quot;[^&gt;]+\&gt;|&lt;meta name=&quot;csrf-token&quot; content=&quot;([a-zA-Z0-9]+)&quot;&gt;)/i&#39;, &#39;&#39;, $html);
+    }
+
+    protected function saveSnapshot()
+    {
+        $html = $this-&gt;processHtml($this-&gt;getHtml());
+        file_put_contents($this-&gt;getEscapedPath(), $html);
+    }
+
+    protected function getOldHtml()
+    {
+        return file_get_contents($this-&gt;getEscapedPath());
+    }
+}
+</code></pre>
+<p>The <code>goto()</code> method sets the current path on the object, then fetches the page. It verifies the page was found, and then returns an instance of the object, to allow for method chaining.</p>
+<p>Another method of note is the <code>saveHtml()</code> method. This checks to see if the snapshot exists - if not, it saves it. The snapshot is essentially just the HTML returned from that route, but certain content may need to be stripped out, which is done in the <code>processHtml()</code> method. In this case we’ve stripped out hidden fields and the CSRF token meta tag, as CSRF tokens are generated anew each time and will break the snapshots.</p>
+<p>The last method we’ll look at is the <code>assertSnapshotsMatch()</code> method. This will get the current HTML, and that for any snapshot for that route, and then compare them. If they differ, it will fail the assertion. In addition, if <code>xdiff_string_diff</code> is available, it will show a diff of the two files - be warned, these can sometimes be large, but they can be helpful in debugging.</p>
+<p>Also, note our snapshots directory - <code>tests/snapshots</code>. If you do make a breaking change and want to delete a snapshot, then you can find it in there - the format replaces forward slashes with underscores, and appends a file extension of <code>.snap</code>,  but feel free to customise this to your needs.</p>
+<p>Next, we’ll create a test for routes that don’t require authentication, at <code>tests/GoldenMaster/ExampleTest.php</code>:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests\GoldenMaster;
+
+use Tests\GoldenMasterTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\User;
+
+class ExampleTest extends GoldenMasterTestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @dataProvider nonAuthDataProvider
+     */
+    public function testNonAuthPages($data)
+    {
+        $this-&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    public function nonAuthDataProvider()
+    {
+        return [
+            [&#39;/register&#39;],
+            [&#39;/login&#39;],
+        ];
+    }
+}
+</code></pre>
+<p>Note the use of the data provider. We want to be able to step through a list of routes, and verify each in turn, so it makes sense to set up a data provider method as <code>nonAuthDataProvider()</code>, which will return an array of routes. If you haven’t used data providers before, they are an easy way to reduce boilerplate in your tests when you need to test the same thing over and over with different data, and you can learn more <a href="https://tighten.co/blog/tidying-up-your-phpunit-tests-with-data-providers">here</a>.</p>
+<p>Now, having seen the methods used, it should be easy to understand <code>testNonAuthPages()</code>. It goes through the following steps:</p>
+<ul>
+<li>Visit the route passed through, eg <code>/register</code></li>
+<li>Save the HTML to a snapshot, if not already saved</li>
+<li>Assert that the current content matches the snapshot</li>
+</ul>
+<p>Using this method, you can test a lot of routes for unexpected changes quite easily. If you’ve used snapshot tests with something like Jest, this is a similar approach.</p>
+<h2 id="authenticated-routes">Authenticated routes</h2>
+<p>This won’t quite work with authenticated routes, so a few more changes are required. You’ll get a response, but if you look at the HTML it will clearly show the user is being redirected for all of them, so there’s not much point in testing them.</p>
+<p>If your content does not differ between users, you can add the trai <code>Illuminate\Foundation\Testing\WithoutMiddleware</code> to your test to disable the authentication and allow the test to get the content without being redirected.</p>
+<p>If, however, your content does differ between users, you need to instead create a user object, and use the <code>actingAs()</code> method already available in Laravel tests to set the user, as follows:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests\GoldenMaster;
+
+use Tests\GoldenMasterTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\User;
+
+class ExampleTest extends GoldenMasterTestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @dataProvider authDataProvider
+     */
+    public function testAuthPages($data)
+    {
+        $user = factory(User::class)-&gt;create([
+            &#39;email&#39; =&gt; &#39;eric@example.com&#39;,
+            &#39;name&#39; =&gt; &#39;Eric Smith&#39;,
+            &#39;password&#39; =&gt; &#39;password&#39;
+        ]);
+        $this-&gt;actingAs($user)
+            -&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    public function authDataProvider()
+    {
+        return [
+            [&#39;/&#39;],
+        ];
+    }
+}
+</code></pre>
+<p>This will allow us to visit a specific page as a user, without being redirected.</p>
+<h2 id="summary">Summary</h2>
+<p>This can be a useful technique to catch unexpected breakages in applications, particularly ones which have little or no conventional test coverage. While I originated this technique on a Zend 1 legacy code base, leveraging the tools available in Laravel makes this technique much faster and more useful. If your existing Laravel application is not as well tested as you’d like, and you have some substantial changes to make that risk breaking some of the functionality, having these sorts of golden master tests set up can be a quick and easy way of catching any problems as soon as possible.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Logging to the ELK stack with Laravel]]></title>
         <id>https://matthewdaly.co.uk/blog/2018/06/03/logging-to-the-elk-stack-with-laravel/</id>

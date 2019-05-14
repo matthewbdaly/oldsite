@@ -4,10 +4,203 @@
         <title>Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk</link>
         <description>I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sun, 12 May 2019 15:30:08 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 14 May 2019 11:18:10 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
+        <item>
+            <title><![CDATA[Writing golden master tests for Laravel applications]]></title>
+            <link>https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/</link>
+            <guid>https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/</guid>
+            <pubDate>Tue, 14 May 2019 11:15:17 GMT</pubDate>
+            <description><![CDATA[<p>Last year I wrote <a href="https://matthewdaly.co.uk/blog/2018/10/08/an-approach-to-writing-golden-master-tests-for-php-web-applications/">a post illustrating how to write golden master tests for PHP applications in general</a>. This approach works, but has a number of issues:</p>
+<ul>
+<li>Because it uses a headless browser such as Goutte, it’s inevitably slow (a typical test run for the legacy application I wrote those tests for is 3-4 minutes)</li>
+<li>It can’t allow for differing content, so any changes to the content will break the tests</li>
+</ul>
+<p>These factors limit its utility for many PHP applications. However, for a Laravel application you’re in a much better position:</p>
+<ul>
+<li>You can use Browserkit rather than a headless browser, resulting in much faster response times</li>
+<li>You can set up a testing database, and populate it with the same data each time, ensuring that the only thing that can change is how that data is processed to create the required HTML</li>
+</ul>
+<p>Here I’ll show you how to adapt that approach to work with a Laravel application.</p>
+<p>We rely on Browserkit testing for this approach, so you need to install that:</p>
+<pre><code class="lang-bash">$ composer require --dev laravel/browser-kit-testing
+</code></pre>
+<p>Next, we need to create our base golden master test case:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests;
+
+use Tests\BrowserTestCase;
+
+class GoldenMasterTestCase extends BrowserTestCase
+{
+    use CreatesApplication;
+
+    public $baseUrl = &#39;http://localhost&#39;;
+
+    protected $snapshotDir = &quot;tests/snapshots/&quot;;
+
+    protected $response;
+
+    protected $path;
+
+    public function goto($path)
+    {
+        $this-&gt;path = $path;
+        $this-&gt;response = $this-&gt;call(&#39;GET&#39;, $path);
+        $this-&gt;assertNotEquals(404, $this-&gt;response-&gt;status());
+        return $this;
+    }
+
+    public function saveHtml()
+    {
+        if (!$this-&gt;snapshotExists()) {
+            $this-&gt;saveSnapshot();
+        }
+        return $this;
+    }
+
+    public function assertSnapshotsMatch()
+    {
+        $path = $this-&gt;getPath();
+        $newHtml = $this-&gt;processHtml($this-&gt;getHtml());
+        $oldHtml = $this-&gt;getOldHtml();
+        $diff = &quot;&quot;;
+        if (function_exists(&#39;xdiff_string_diff&#39;)) {
+            $diff = xdiff_string_diff($oldHtml, $newHtml);
+        }
+        $message = &quot;The path $path does not match the snapshot\n$diff&quot;;
+        self::assertThat($newHtml == $oldHtml, self::isTrue(), $message);
+    }
+
+    protected function getHtml()
+    {
+        return $this-&gt;response-&gt;getContent();
+    }
+
+    protected function getPath()
+    {
+        return $this-&gt;path;
+    }
+
+    protected function getEscapedPath()
+    {
+        return $this-&gt;snapshotDir.str_replace(&#39;/&#39;, &#39;_&#39;, $this-&gt;getPath()).&#39;.snap&#39;;
+    }
+
+    protected function snapshotExists()
+    {
+        return file_exists($this-&gt;getEscapedPath());
+    }
+
+    protected function processHtml($html)
+    {
+        return preg_replace(&#39;/(&lt;input type=&quot;hidden&quot;[^&gt;]+\&gt;|&lt;meta name=&quot;csrf-token&quot; content=&quot;([a-zA-Z0-9]+)&quot;&gt;)/i&#39;, &#39;&#39;, $html);
+    }
+
+    protected function saveSnapshot()
+    {
+        $html = $this-&gt;processHtml($this-&gt;getHtml());
+        file_put_contents($this-&gt;getEscapedPath(), $html);
+    }
+
+    protected function getOldHtml()
+    {
+        return file_get_contents($this-&gt;getEscapedPath());
+    }
+}
+</code></pre>
+<p>The <code>goto()</code> method sets the current path on the object, then fetches the page. It verifies the page was found, and then returns an instance of the object, to allow for method chaining.</p>
+<p>Another method of note is the <code>saveHtml()</code> method. This checks to see if the snapshot exists - if not, it saves it. The snapshot is essentially just the HTML returned from that route, but certain content may need to be stripped out, which is done in the <code>processHtml()</code> method. In this case we’ve stripped out hidden fields and the CSRF token meta tag, as CSRF tokens are generated anew each time and will break the snapshots.</p>
+<p>The last method we’ll look at is the <code>assertSnapshotsMatch()</code> method. This will get the current HTML, and that for any snapshot for that route, and then compare them. If they differ, it will fail the assertion. In addition, if <code>xdiff_string_diff</code> is available, it will show a diff of the two files - be warned, these can sometimes be large, but they can be helpful in debugging.</p>
+<p>Also, note our snapshots directory - <code>tests/snapshots</code>. If you do make a breaking change and want to delete a snapshot, then you can find it in there - the format replaces forward slashes with underscores, and appends a file extension of <code>.snap</code>,  but feel free to customise this to your needs.</p>
+<p>Next, we’ll create a test for routes that don’t require authentication, at <code>tests/GoldenMaster/ExampleTest.php</code>:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests\GoldenMaster;
+
+use Tests\GoldenMasterTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\User;
+
+class ExampleTest extends GoldenMasterTestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @dataProvider nonAuthDataProvider
+     */
+    public function testNonAuthPages($data)
+    {
+        $this-&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    public function nonAuthDataProvider()
+    {
+        return [
+            [&#39;/register&#39;],
+            [&#39;/login&#39;],
+        ];
+    }
+}
+</code></pre>
+<p>Note the use of the data provider. We want to be able to step through a list of routes, and verify each in turn, so it makes sense to set up a data provider method as <code>nonAuthDataProvider()</code>, which will return an array of routes. If you haven’t used data providers before, they are an easy way to reduce boilerplate in your tests when you need to test the same thing over and over with different data, and you can learn more <a href="https://tighten.co/blog/tidying-up-your-phpunit-tests-with-data-providers">here</a>.</p>
+<p>Now, having seen the methods used, it should be easy to understand <code>testNonAuthPages()</code>. It goes through the following steps:</p>
+<ul>
+<li>Visit the route passed through, eg <code>/register</code></li>
+<li>Save the HTML to a snapshot, if not already saved</li>
+<li>Assert that the current content matches the snapshot</li>
+</ul>
+<p>Using this method, you can test a lot of routes for unexpected changes quite easily. If you’ve used snapshot tests with something like Jest, this is a similar approach.</p>
+<h2 id="authenticated-routes">Authenticated routes</h2>
+<p>This won’t quite work with authenticated routes, so a few more changes are required. You’ll get a response, but if you look at the HTML it will clearly show the user is being redirected for all of them, so there’s not much point in testing them.</p>
+<p>If your content does not differ between users, you can add the trai <code>Illuminate\Foundation\Testing\WithoutMiddleware</code> to your test to disable the authentication and allow the test to get the content without being redirected.</p>
+<p>If, however, your content does differ between users, you need to instead create a user object, and use the <code>actingAs()</code> method already available in Laravel tests to set the user, as follows:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace Tests\GoldenMaster;
+
+use Tests\GoldenMasterTestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\User;
+
+class ExampleTest extends GoldenMasterTestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @dataProvider authDataProvider
+     */
+    public function testAuthPages($data)
+    {
+        $user = factory(User::class)-&gt;create([
+            &#39;email&#39; =&gt; &#39;eric@example.com&#39;,
+            &#39;name&#39; =&gt; &#39;Eric Smith&#39;,
+            &#39;password&#39; =&gt; &#39;password&#39;
+        ]);
+        $this-&gt;actingAs($user)
+            -&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    public function authDataProvider()
+    {
+        return [
+            [&#39;/&#39;],
+        ];
+    }
+}
+</code></pre>
+<p>This will allow us to visit a specific page as a user, without being redirected.</p>
+<h2 id="summary">Summary</h2>
+<p>This can be a useful technique to catch unexpected breakages in applications, particularly ones which have little or no conventional test coverage. While I originated this technique on a Zend 1 legacy code base, leveraging the tools available in Laravel makes this technique much faster and more useful. If your existing Laravel application is not as well tested as you’d like, and you have some substantial changes to make that risk breaking some of the functionality, having these sorts of golden master tests set up can be a quick and easy way of catching any problems as soon as possible.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[How much difference does adding an index to a database table make?]]></title>
             <link>https://matthewdaly.co.uk/blog/2019/03/04/how-much-difference-does-adding-an-index-to-a-database-table-make/</link>
@@ -2369,149 +2562,6 @@ Please note that some mutants will inevitably be harmless (i.e. false positives)
 Time: 19s. Memory: 12.00MB
 </code></pre>
 <p>Code coverage only tells you what lines of code are actually executed - it doesn’t tell you much about how effectively that line of code is tested. Infection gives you a different insight into the quality of your tests, helping to write better ones. I’ve so far found it very useful for getting feedback on the quality of my tests. It’s interesting that PHPSpec tests seem to have a consistently lower proportion of escaped mutants than PHPUnit ones - perhaps the more natural workflow when writing specs with PHPSpec makes it easier to write good tests.</p>
-]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Switching from Vim to Neovim]]></title>
-            <link>https://matthewdaly.co.uk/blog/2018/09/09/switching-from-vim-to-neovim/</link>
-            <guid>https://matthewdaly.co.uk/blog/2018/09/09/switching-from-vim-to-neovim/</guid>
-            <pubDate>Sun, 09 Sep 2018 12:40:35 GMT</pubDate>
-            <description><![CDATA[<p>I honestly thought it would never happen. I’ve been using Vim since 2008, and every other editor I’ve tried (including VSCode, Emacs, Sublime Text and Atom) hasn’t come up to scratch. There were a few useful features in PHPStorm, to be fair, but nothing that justified the bother of moving. Also, I suffer from a degree of RSI from my prior career as an insurance clerk (years of using crap keyboards and mice on Windows XP took its toll…), and Vim has always been the most RSI-friendly editor I found.</p>
-<p>Yet I have actually gone ahead and migrated away… to Neovim. Of course, the fact that the workflow is essentially identical helps in the migration process, as does the fact that it supports most of the same plugins.</p>
-<p>My workflow has always been strongly CLI-based. I use GNU Screen and Byobu together to run multiple “tabs” in the terminal, so the lack of GUI support in Neovim doesn’t bother me in the slightest. The only change I really made was to my <code>.bash_aliases</code> so that the Vim command ran <code>screen -t Vim nvim</code>, so that it would open up Neovim rather than Vim in a new Screen tab.</p>
-<p>Initially I switched straight over to using the same settings and plugins I had with Vim, and they worked seamlessly. However, after a while I decided to use the opportunity to completely overhaul the plugins and settings I used and largely start over - cull the ones I no longer needed, add some new ones, and comment it properly.</p>
-<h2 id="loading-plugins">Loading plugins</h2>
-<p>I used to use Pathogen to manage my Vim plugins, but it didn’t actually import the plugins itself, and just provided a structure for them. This meant that the only practical way I found to pull in third-party plugins was to set them up as Git submodules, meaning I had to store my configuration in version control and clone it recursively onto a new machine. It also made updating cumbersome.</p>
-<p>Now I’ve switched to <a href="https://github.com/junegunn/vim-plug">vim-plug</a>, which makes things much easier. I can define my dependencies in my <code>.config/nvim/init.vim</code> and pull them in with <code>PlugInstall</code>. If I want to update them, I run <code>PlugUpdate</code>, or if I need to add something else, I merely add it in the file and run <code>PlugInstall</code> again. Nice and easy.</p>
-<p>The first section of my configuration file loads the dependencies:</p>
-<pre><code class="lang-vim">call plug#begin()
-
-&quot; NERDTree
-Plug &#39;scrooloose/nerdtree&#39;
-
-&quot; Git integration
-Plug &#39;tpope/vim-fugitive&#39;
-Plug &#39;airblade/vim-gitgutter&#39;
-
-&quot; Linting
-Plug &#39;neomake/neomake&#39;
-Plug &#39;w0rp/ale&#39;
-
-&quot; PHP-specific integration
-Plug &#39;phpactor/phpactor&#39; ,  {&#39;do&#39;: &#39;composer install&#39;, &#39;for&#39;: &#39;php&#39;}
-Plug &#39;ncm2/ncm2&#39;
-Plug &#39;roxma/nvim-yarp&#39;
-Plug &#39;phpactor/ncm2-phpactor&#39;
-
-&quot; Snippets
-Plug &#39;SirVer/ultisnips&#39;
-Plug &#39;honza/vim-snippets&#39;
-
-&quot; Comments
-Plug &#39;tpope/vim-commentary&#39;
-
-&quot; Search
-Plug &#39;ctrlpvim/ctrlp.vim&#39;
-
-&quot; Syntax
-Plug &#39;sheerun/vim-polyglot&#39;
-Plug &#39;matthewbdaly/vim-filetype-settings&#39;
-
-&quot; Themes
-Plug &#39;nanotech/jellybeans.vim&#39; , {&#39;as&#39;: &#39;jellybeans&#39;}
-
-call plug#end()
-</code></pre>
-<p>As always, it’s a good idea to comment your config and try to group things logically. Note that I have one plugin of my own listed here - this is just a collection of settings for different filetypes, such as making Javascript files use 2 spaces for indentation, and it’s easier to keep that in a repository and pull it in as a dependency.</p>
-<h2 id="completion">Completion</h2>
-<p>The next part of the config deals with configuration. Most of the time the default omnicompletion is pretty good, but in the process of building out this config, I discovered PHPActor, which has massively improved my development experience with PHP - it finally provides completion as good as most IDE’s, and also provides similar refactoring tools. My config for completion currently looks like this:</p>
-<pre><code class="lang-vim">&quot;Completion
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-set ofu=syntaxcomplete#Complete
-autocmd FileType php setlocal omnifunc=phpactor#Complete
-let g:phpactorOmniError = v:true
-autocmd BufEnter * call ncm2#enable_for_buffer()
-set completeopt=noinsert,menuone,noselect
-</code></pre>
-<h2 id="general-config">General config</h2>
-<p>This is a set of standard settings for the general behaviour of the application, such as setting the colorscheme and default indentation levels. I also routinely disable the mouse because it bugs me.</p>
-<pre><code class="lang-vim">&quot;General
-syntax on
-colorscheme jellybeans
-set nu
-filetype plugin indent on
-set nocp
-set ruler
-set wildmenu
-set mouse-=a
-set t_Co=256
-
-&quot;Code folding
-set foldmethod=manual
-
-&quot;Tabs and spacing
-set autoindent
-set cindent
-set tabstop=4
-set expandtab
-set shiftwidth=4
-set smarttab
-
-&quot;Search
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
-set diffopt +=iwhite
-</code></pre>
-<h2 id="markdown-configuration">Markdown configuration</h2>
-<p>This section sets the file type for Markdown. It disables the Markdown plugin included in <code>vim-polyglot</code> as I had problems with it, and sets the languages that will be highlighted in fenced code blocks. I may at some point migrate this to the filetype repository.</p>
-<pre><code class="lang-vim">&quot;Syntax highlighting in Markdown
-au BufNewFile,BufReadPost *.md set filetype=markdown
-let g:polyglot_disabled = [&#39;markdown&#39;]
-let g:markdown_fenced_languages = [&#39;bash=sh&#39;, &#39;css&#39;, &#39;django&#39;, &#39;javascript&#39;, &#39;js=javascript&#39;, &#39;json=javascript&#39;, &#39;perl&#39;, &#39;php&#39;, &#39;python&#39;, &#39;ruby&#39;, &#39;sass&#39;, &#39;xml&#39;, &#39;html&#39;, &#39;vim&#39;]
-</code></pre>
-<h2 id="neomake">Neomake</h2>
-<p>I used to use Syntastic for checking my code for errors, but I’ve always found it problematic - it was slow and would often block the editor for some time. Neovim does have support for asynchronous jobs (as does Vim 8), but Syntastic doesn’t use it, so I decided to look elsewhere.</p>
-<p>Neomake seemed a lot better, so I migrated over to it. It doesn’t require much configuration, and it’s really fast - unlike Syntastic, it supports asynchronous jobs. This part of the config sets it up to run on changes with no delay in writing, so I get near-instant feedback if a syntax error creeps in, and it doesn’t block the editor the way Syntastic used to.</p>
-<pre><code class="lang-vim">&quot; Neomake config
-&quot; Full config: when writing or reading a buffer, and on changes in insert and
-&quot; normal mode (after 1s; no delay when writing).
-call neomake#configure#automake(&#39;nrwi&#39;, 500)
-</code></pre>
-<h2 id="phpactor">PHPActor</h2>
-<p>As mentioned above, PHPActor has dramatically improved my experience when coding in PHP by providing access to features normally found only in full IDE’s. Here’s the fairly standard config I use for the refactoring functionality:</p>
-<pre><code class="lang-vim">&quot; PHPActor config
-&quot; Include use statement
-nmap &lt;Leader&gt;u :call phpactor#UseAdd()&lt;CR&gt;
-
-&quot; Invoke the context menu
-nmap &lt;Leader&gt;mm :call phpactor#ContextMenu()&lt;CR&gt;
-
-&quot; Invoke the navigation menu
-nmap &lt;Leader&gt;nn :call phpactor#Navigate()&lt;CR&gt;
-
-&quot; Goto definition of class or class member under the cursor
-nmap &lt;Leader&gt;o :call phpactor#GotoDefinition()&lt;CR&gt;
-
-&quot; Transform the classes in the current file
-nmap &lt;Leader&gt;tt :call phpactor#Transform()&lt;CR&gt;
-
-&quot; Generate a new class (replacing the current file)
-nmap &lt;Leader&gt;cc :call phpactor#ClassNew()&lt;CR&gt;
-
-&quot; Extract expression (normal mode)
-nmap &lt;silent&gt;&lt;Leader&gt;ee :call phpactor#ExtractExpression(v:false)&lt;CR&gt;
-
-&quot; Extract expression from selection
-vmap &lt;silent&gt;&lt;Leader&gt;ee :&lt;C-U&gt;call phpactor#ExtractExpression(v:true)&lt;CR&gt;
-
-&quot; Extract method from selection
-vmap &lt;silent&gt;&lt;Leader&gt;em :&lt;C-U&gt;call phpactor#ExtractMethod()&lt;CR&gt;
-</code></pre>
-<h2 id="summary">Summary</h2>
-<p>Vim or Neovim configuration files are never static. Your needs are always changing, and you’re constantly discovering new plugins and new settings to try out, and keeping ones that prove useful. It’s been helpful to start over and ditch some plugins I no longer needed, pull in some new ones, and organise my configuration a bit better.</p>
-<p>Now that I can set the dependencies in a text file rather than pulling them in as Git submodules, it makes more sense to keep my config in a <a href="https://gist.github.com/matthewbdaly/80b777ad3db885ebeecd27687fb121cd">Github Gist</a> rather than a Git repository, and that’s where I plan to retain it for now. Feel free to fork or cannibalize it for your own purposes if you wish.</p>
 ]]></description>
         </item>
     </channel>

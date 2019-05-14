@@ -1,0 +1,345 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Writing Golden Master Tests for Laravel Applications - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/",
+         "headline": "Writing Golden Master Tests for Laravel Applications",
+         "datePublished": "2019-05-14T11:15:17.000Z",
+         "dateModified": "2019-05-14T11:15:17.000Z",
+         "description": "&lt;p&gt;Last year I wrote &lt;a href&#x3D;&quot;https://matthewdaly.co.uk/blog/2018/10/08/an-approach-to-writing-golden-master-tests-for-php-web-applications/...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">14th May 2019 12:15 pm</p><h1>Writing Golden Master Tests for Laravel Applications</h1><p>Last year I wrote <a href="https://matthewdaly.co.uk/blog/2018/10/08/an-approach-to-writing-golden-master-tests-for-php-web-applications/">a post illustrating how to write golden master tests for PHP applications in general</a>. This approach works, but has a number of issues:</p><ul><li>Because it uses a headless browser such as Goutte, it’s inevitably slow (a typical test run for the legacy application I wrote those tests for is 3-4 minutes)</li><li>It can’t allow for differing content, so any changes to the content will break the tests</li></ul><p>These factors limit its utility for many PHP applications. However, for a Laravel application you’re in a much better position:</p><ul><li>You can use Browserkit rather than a headless browser, resulting in much faster response times</li><li>You can set up a testing database, and populate it with the same data each time, ensuring that the only thing that can change is how that data is processed to create the required HTML</li></ul><p>Here I’ll show you how to adapt that approach to work with a Laravel application.</p><p>We rely on Browserkit testing for this approach, so you need to install that:</p><pre><code class="hljs lang-bash">$ composer require --dev laravel/browser-kit-testing
+</code></pre><p>Next, we need to create our base golden master test case:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Tests</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">BrowserTestCase</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoldenMasterTestCase</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BrowserTestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">CreatesApplication</span>;
+
+    <span class="hljs-keyword">public</span> $baseUrl = <span class="hljs-string">'http://localhost'</span>;
+
+    <span class="hljs-keyword">protected</span> $snapshotDir = <span class="hljs-string">"tests/snapshots/"</span>;
+
+    <span class="hljs-keyword">protected</span> $response;
+
+    <span class="hljs-keyword">protected</span> $path;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">goto</span><span class="hljs-params">($path)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;path = $path;
+        <span class="hljs-keyword">$this</span>-&gt;response = <span class="hljs-keyword">$this</span>-&gt;call(<span class="hljs-string">'GET'</span>, $path);
+        <span class="hljs-keyword">$this</span>-&gt;assertNotEquals(<span class="hljs-number">404</span>, <span class="hljs-keyword">$this</span>-&gt;response-&gt;status());
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">saveHtml</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">$this</span>-&gt;snapshotExists()) {
+            <span class="hljs-keyword">$this</span>-&gt;saveSnapshot();
+        }
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">assertSnapshotsMatch</span><span class="hljs-params">()</span>
+    </span>{
+        $path = <span class="hljs-keyword">$this</span>-&gt;getPath();
+        $newHtml = <span class="hljs-keyword">$this</span>-&gt;processHtml(<span class="hljs-keyword">$this</span>-&gt;getHtml());
+        $oldHtml = <span class="hljs-keyword">$this</span>-&gt;getOldHtml();
+        $diff = <span class="hljs-string">""</span>;
+        <span class="hljs-keyword">if</span> (function_exists(<span class="hljs-string">'xdiff_string_diff'</span>)) {
+            $diff = xdiff_string_diff($oldHtml, $newHtml);
+        }
+        $message = <span class="hljs-string">"The path $path does not match the snapshot\n$diff"</span>;
+        <span class="hljs-keyword">self</span>::assertThat($newHtml == $oldHtml, <span class="hljs-keyword">self</span>::isTrue(), $message);
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getHtml</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;response-&gt;getContent();
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getPath</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;path;
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getEscapedPath</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">$this</span>-&gt;snapshotDir.str_replace(<span class="hljs-string">'/'</span>, <span class="hljs-string">'_'</span>, <span class="hljs-keyword">$this</span>-&gt;getPath()).<span class="hljs-string">'.snap'</span>;
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">snapshotExists</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> file_exists(<span class="hljs-keyword">$this</span>-&gt;getEscapedPath());
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">processHtml</span><span class="hljs-params">($html)</span>
+    </span>{
+        <span class="hljs-keyword">return</span> preg_replace(<span class="hljs-string">'/(&lt;input type="hidden"[^&gt;]+\&gt;|&lt;meta name="csrf-token" content="([a-zA-Z0-9]+)"&gt;)/i'</span>, <span class="hljs-string">''</span>, $html);
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">saveSnapshot</span><span class="hljs-params">()</span>
+    </span>{
+        $html = <span class="hljs-keyword">$this</span>-&gt;processHtml(<span class="hljs-keyword">$this</span>-&gt;getHtml());
+        file_put_contents(<span class="hljs-keyword">$this</span>-&gt;getEscapedPath(), $html);
+    }
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getOldHtml</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> file_get_contents(<span class="hljs-keyword">$this</span>-&gt;getEscapedPath());
+    }
+}
+</code></pre><p>The <code>goto()</code> method sets the current path on the object, then fetches the page. It verifies the page was found, and then returns an instance of the object, to allow for method chaining.</p><p>Another method of note is the <code>saveHtml()</code> method. This checks to see if the snapshot exists - if not, it saves it. The snapshot is essentially just the HTML returned from that route, but certain content may need to be stripped out, which is done in the <code>processHtml()</code> method. In this case we’ve stripped out hidden fields and the CSRF token meta tag, as CSRF tokens are generated anew each time and will break the snapshots.</p><p>The last method we’ll look at is the <code>assertSnapshotsMatch()</code> method. This will get the current HTML, and that for any snapshot for that route, and then compare them. If they differ, it will fail the assertion. In addition, if <code>xdiff_string_diff</code> is available, it will show a diff of the two files - be warned, these can sometimes be large, but they can be helpful in debugging.</p><p>Also, note our snapshots directory - <code>tests/snapshots</code>. If you do make a breaking change and want to delete a snapshot, then you can find it in there - the format replaces forward slashes with underscores, and appends a file extension of <code>.snap</code>, but feel free to customise this to your needs.</p><p>Next, we’ll create a test for routes that don’t require authentication, at <code>tests/GoldenMaster/ExampleTest.php</code>:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">GoldenMaster</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">GoldenMasterTestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">RefreshDatabase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">User</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExampleTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">GoldenMasterTestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">RefreshDatabase</span>;
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@dataProvider</span> nonAuthDataProvider
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testNonAuthPages</span><span class="hljs-params">($data)</span>
+    </span>{
+        <span class="hljs-keyword">$this</span>-&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">nonAuthDataProvider</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            [<span class="hljs-string">'/register'</span>],
+            [<span class="hljs-string">'/login'</span>],
+        ];
+    }
+}
+</code></pre><p>Note the use of the data provider. We want to be able to step through a list of routes, and verify each in turn, so it makes sense to set up a data provider method as <code>nonAuthDataProvider()</code>, which will return an array of routes. If you haven’t used data providers before, they are an easy way to reduce boilerplate in your tests when you need to test the same thing over and over with different data, and you can learn more <a href="https://tighten.co/blog/tidying-up-your-phpunit-tests-with-data-providers">here</a>.</p><p>Now, having seen the methods used, it should be easy to understand <code>testNonAuthPages()</code>. It goes through the following steps:</p><ul><li>Visit the route passed through, eg <code>/register</code></li><li>Save the HTML to a snapshot, if not already saved</li><li>Assert that the current content matches the snapshot</li></ul><p>Using this method, you can test a lot of routes for unexpected changes quite easily. If you’ve used snapshot tests with something like Jest, this is a similar approach.</p><h2 id="authenticated-routes">Authenticated routes</h2><p>This won’t quite work with authenticated routes, so a few more changes are required. You’ll get a response, but if you look at the HTML it will clearly show the user is being redirected for all of them, so there’s not much point in testing them.</p><p>If your content does not differ between users, you can add the trai <code>Illuminate\Foundation\Testing\WithoutMiddleware</code> to your test to disable the authentication and allow the test to get the content without being redirected.</p><p>If, however, your content does differ between users, you need to instead create a user object, and use the <code>actingAs()</code> method already available in Laravel tests to set the user, as follows:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span>
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">GoldenMaster</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Tests</span>\<span class="hljs-title">GoldenMasterTestCase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Illuminate</span>\<span class="hljs-title">Foundation</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">RefreshDatabase</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">App</span>\<span class="hljs-title">User</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ExampleTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">GoldenMasterTestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">RefreshDatabase</span>;
+
+    <span class="hljs-comment">/**
+     * <span class="hljs-doctag">@dataProvider</span> authDataProvider
+     */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testAuthPages</span><span class="hljs-params">($data)</span>
+    </span>{
+        $user = factory(User::class)-&gt;create([
+            <span class="hljs-string">'email'</span> =&gt; <span class="hljs-string">'eric@example.com'</span>,
+            <span class="hljs-string">'name'</span> =&gt; <span class="hljs-string">'Eric Smith'</span>,
+            <span class="hljs-string">'password'</span> =&gt; <span class="hljs-string">'password'</span>
+        ]);
+        <span class="hljs-keyword">$this</span>-&gt;actingAs($user)
+            -&gt;goto($data)
+            -&gt;saveHtml()
+            -&gt;assertSnapshotsMatch();
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">authDataProvider</span><span class="hljs-params">()</span>
+    </span>{
+        <span class="hljs-keyword">return</span> [
+            [<span class="hljs-string">'/'</span>],
+        ];
+    }
+}
+</code></pre><p>This will allow us to visit a specific page as a user, without being redirected.</p><h2 id="summary">Summary</h2><p>This can be a useful technique to catch unexpected breakages in applications, particularly ones which have little or no conventional test coverage. While I originated this technique on a Zend 1 legacy code base, leveraging the tools available in Laravel makes this technique much faster and more useful. If your existing Laravel application is not as well tested as you’d like, and you have some substantial changes to make that risk breaking some of the functionality, having these sorts of golden master tests set up can be a quick and easy way of catching any problems as soon as possible.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li><li><a href="/blog/categories/tdd/">tdd</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2019/05/14/writing-golden-master-tests-for-laravel-applications/">View the article with comments</a></section><section><a class="postlink" href="/blog/2019/03/04/how-much-difference-does-adding-an-index-to-a-database-table-make/amp/">How Much Difference Does Adding An Index to a Database Table Make?</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>
