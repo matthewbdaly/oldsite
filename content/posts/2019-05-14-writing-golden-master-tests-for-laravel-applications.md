@@ -172,7 +172,7 @@ Authenticated routes
 
 This won't quite work with authenticated routes, so a few more changes are required. You'll get a response, but if you look at the HTML it will clearly show the user is being redirected for all of them, so there's not much point in testing them.
 
-If your content does not differ between users, you can add the trai `Illuminate\Foundation\Testing\WithoutMiddleware` to your test to disable the authentication and allow the test to get the content without being redirected.
+If your content does not differ between users, you can add the trait `Illuminate\Foundation\Testing\WithoutMiddleware` to your test to disable the authentication and allow the test to get the content without being redirected.
 
 If, however, your content does differ between users, you need to instead create a user object, and use the `actingAs()` method already available in Laravel tests to set the user, as follows:
 
