@@ -28,8 +28,6 @@ So, if you're wanting to build a basic website, and are thinking Dreamweaver mig
 	
     * [Bluefish](http://bluefish.openoffice.nl/)
 	
-    * [Kompozer](http://www.kompozer.net/)
-
     * [Quanta Plus](http://quanta.kdewebdev.org/)
 
 There are many more cheap or free HTML editors around, which make great alternatives to Dreamweaver for inexperienced users.
