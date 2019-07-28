@@ -4,7 +4,7 @@ title: "Testing PHP web applications with Cucumber"
 date: 2012-11-03 16:43
 comments: true
 categories: 
-- PHP
+- php
 - ruby
 - cucumber
 - webdevelopment
