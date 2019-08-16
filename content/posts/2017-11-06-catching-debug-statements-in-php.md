@@ -23,7 +23,7 @@ First, you need to make sure `squizlabs/php_codesniffer` is included in your pro
 	<rule ref="Squiz.Commenting.FunctionComment" />
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag" />
 	<rule ref="Squiz.Commenting.ClassComment" />
-	<rule ref="Squiz.PHP.ForbiddenFunctions">
+	<rule ref="Generic.PHP.ForbiddenFunctions">
 		<properties>
 			<property name="forbiddenFunctions" type="array" value="eval=>NULL,dd=>NULL,die=>NULL,var_dump=>NULL,sizeof=>count,delete=>unset,print=>echo,create_function=>NULL"/>
 		</properties>
