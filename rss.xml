@@ -4,10 +4,89 @@
         <title>Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk</link>
         <description>I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Fri, 16 Aug 2019 20:23:45 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 07 Sep 2019 19:18:04 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
+        <item>
+            <title><![CDATA[Setting private properties in tests]]></title>
+            <link>https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/</link>
+            <guid>https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/</guid>
+            <pubDate>Sat, 07 Sep 2019 19:16:47 GMT</pubDate>
+            <description><![CDATA[<p>Sometimes when writing a test, you come across a situation where you need to set a private field that’s not accessible through any existing route. For instance, I’ve been working with Doctrine a bit lately, and since the ID on an entity is generated automatically, it should not be possible to change it via a setter, but at the same time, we sometimes have the need to set it in a test.</p>
+<p>Fortunately, there is a way to do that. Using PHP’s reflection API, you can temporarily mark a property on an object as accessible, so as to be able to set it without either passing it to the constructor or creating a setter method that will only ever be used by the test. We first create a <code>ReflectionClass</code> instance from the object, then get the property. We mark it as accessible, and then set the value on the instance, as shown below:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use Project\Document;
+use ReflectionClass;
+
+final class DocumentTest extends TestCase
+{
+    public function testGetId()
+    {
+        $doc = new Document();
+        $reflect = new ReflectionClass($doc);
+        $id = $reflect-&gt;getProperty(&#39;id&#39;);
+        $id-&gt;setAccessible(true);
+        $id-&gt;setValue($doc, 1);
+        $this-&gt;assertEquals(1, $doc-&gt;getId());
+    }
+}
+</code></pre>
+<p>If you’re likely to need this in more than one place, you may want to pull this functionality out into a trait for reuse:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Traits;
+
+use ReflectionClass;
+
+trait SetsPrivateProperties
+{
+    /**
+     * Sets a private property
+     *
+     * @param mixed $object
+     * @param string $property
+     * @param mixed $value
+     * @return void
+     */
+    public function setPrivateProperty($object, string $property, $value)
+    {
+        $reflect = new ReflectionClass($object);
+        $prop = $reflect-&gt;getProperty($property);
+        $prop-&gt;setAccessible(true);
+        $prop-&gt;setValue($object, $value);
+        $prop-&gt;setAccessible(false);
+    }
+}
+</code></pre>
+<p>Then your test can be simplified as follows:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use Project\Document;
+use Tests\Traits\SetsPrivateProperties;
+
+final class DocumentTest extends TestCase
+{
+    use SetsPrivateProperties;
+
+    public function testGetId()
+    {
+        $doc = new Document();
+        $this-&gt;setPrivateProperty($doc, &#39;id&#39;, 1);
+        $this-&gt;assertEquals(1, $doc-&gt;getId());
+    }
+}
+</code></pre>
+<p>While this is a slightly contrived and limited example, and this situation is quite rare, I’ve found it to be a useful technique under certain circumstances.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Skipping environment specific PHPUnit tests]]></title>
             <link>https://matthewdaly.co.uk/blog/2019/07/28/skipping-environment-specific-phpunit-tests/</link>
@@ -2272,31 +2351,6 @@ return &#39;&lt;a href=&quot;&#39;.$item-&gt;getUrl().&#39;&quot; class=&quot;&#
 </code></pre>
 <p>Because we can use the exact same methods and get consistent responses, yet also allow for the different implementations within the objects, this approach allows for much more elegant and readable code. Different objects can be treated in the same way without the need for writing extensive if or switch statements.</p>
 <p>I haven’t had the occasion to do so, but in theory this approach is applicable in other languages, such as Javascript or Python (although these languages don’t have the concept of interfaces). Since discovering the switch statement antipattern and how to replace it with polymorphism, I’ve been able to remove a lot of overly complex code.</p>
-]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Career direction after seven years]]></title>
-            <link>https://matthewdaly.co.uk/blog/2018/09/25/career-direction-after-seven-years/</link>
-            <guid>https://matthewdaly.co.uk/blog/2018/09/25/career-direction-after-seven-years/</guid>
-            <pubDate>Tue, 25 Sep 2018 21:03:29 GMT</pubDate>
-            <description><![CDATA[<p>Earlier this month, I passed the seven year anniversary of starting my first web dev job. That job never really worked out, for various reasons, but since then I’ve had an interesting time of it. I’ve diversified into app development via Phonegap, and I’ve worked with frameworks that didn’t exist when I first started. So it seems a good opportunity to take stock and think about where I want to head next.</p>
-<p>Sometimes these posts are where someone announces they’re leaving their current role, but that’s not the case here - I’m pretty happy where I am right now. I am maintaining a legacy project, but I do feel like I’m making a difference and it’s slowly becoming more pleasant to work with, and I’m learning a lot about applying design patterns, so I think where I am right now is a good place for me. However, it’s a useful exercise to think about what I want to do, where I want to concentrate my efforts, and what I want to learn about.</p>
-<p>So, here are my thoughts about where I want to go in future:</p>
-<ul>
-<li>I really enjoy working with React, and I want to do so much more than I have in the past, possibly including React Native. Ditto with Redux.</li>
-<li>Much as I love Django, it’s unlikely I’ll be using it again in the future, as it’s simply not in much demand where I live. In 2015, I was working at a small agency with a dev team of three, including me, and it became apparent that we needed to standardise on a single framework. I’d been using CodeIgniter on and off for several years, but it was tired and dated, yet I couldn’t justify using Django because no-one else was familiar with Python, so we settled on Laravel. Ever since, Laravel has been my go-to framework - Django does some things better (Django REST Framework remains the best way I’ve ever found to create a REST API), but Laravel does enough stuff well enough that I can use it for most things I need, so it’s a good default option.</li>
-<li>I <em>really</em> don’t want to work with Wordpress often, and if I do, I’d feel a lot better about it if I used Bedrock. Just churning out boilerplate sites is anathema to me - I’d much rather do something more interesting, even if it were paid worse.</li>
-<li>PHP is actually pretty nice these days (as long as you’re not dealing with a legacy application), and I generally don’t mind working with it, as long as it’s fairly modern.</li>
-<li>I enjoy mentoring and coaching others, and I’d like to do that a lot more often than I have been doing. Mentoring and coaching is a big part of being a senior developer, since a good mentor can quickly bring inexperienced developers up to a much higher standard, and hugely reduces the amount of horrible legacy code that needs to be maintained. I was without an experienced mentor for much of my career, and in retrospect it held me back - having someone around to teach me about TDD and design patterns earlier would have helped no end. Also, I find it the single most rewarding part of my job.</li>
-<li>I have absolutely no desire whatsoever to go into management, or leave coding behind in any way, shape or form. I’ve heard it said before that Microsoft have two separate career tracks for developers, one through people management, the other into a software architect role, and were I there, I would definitely opt for the latter.</li>
-<li>I’m now less interested in learning new frameworks or languages than I am in picking up and applying new design patterns, and avoiding antipatterns - they’re the best way to improve your code quality. I’ve learned the hard way that the hallmark of a skilled developer’s code is not the complexity, but the simplicity - I can now recognise the convoluted code I wrote earlier in my career as painful to maintain, and can identify it in legacy projects.</li>
-<li>I’ve always used linters and other code quality tools, and I’m eager to evangelise their usage.</li>
-<li>I’ve been a proponent of TDD for several years now, and that’s going to continue - I’ve not only seen how many things it catches when you have tests, but also how painful it is when you have a large legacy project with no tests at all, and I’m absolutely staggered that anyone ever continues to write non-trivial production code without any sort of tests.</li>
-<li>I want to understand the frameworks I use at a deeper level - it’s all too easy to just treat them as magic, when there are huge benefits to understanding how your framework works under the bonnet, and how to swap out the framework’s functionality for alternative implementations.</li>
-<li>I’d like to get involved in more IoT-related projects - guess the 3 Raspberry Pi’s and the Arduino I have gathering dust at home need to get some more use…</li>
-<li>Chat interfaces are interesting - I built an Alexa skill recently, which was fun and useful, and I’d like to do stuff like that more often.</li>
-</ul>
-<p>So, after seven years, that’s where I see myself going in future. I think I’m in a good place to do that right now, and I’ll probably stay where I am for a good long while yet. The first seven years of my web dev career have been interesting, and I’m eager to see what the next seven bring.</p>
 ]]></description>
         </item>
     </channel>

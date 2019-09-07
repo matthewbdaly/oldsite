@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>tdd | Matthew Daly&apos;s Blog</title>
-    <updated>2019-08-16T20:23:46Z</updated>
+    <updated>2019-09-07T19:18:04Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,86 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/tdd/"/>
     <subtitle>tdd | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Setting private properties in tests]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/">
+        </link>
+        <updated>2019-09-07T19:16:47Z</updated>
+        <summary type="html"><![CDATA[<p>Sometimes when writing a test, you come across a situation where you need to set a private field that’s not accessible through any existing route. For instance, I’ve been working with Doctrine a bit lately, and since the ID on an entity is generated automatically, it should not be possible to change it via a setter, but at the same time, we sometimes have the need to set it in a test.</p>
+<p>Fortunately, there is a way to do that. Using PHP’s reflection API, you can temporarily mark a property on an object as accessible, so as to be able to set it without either passing it to the constructor or creating a setter method that will only ever be used by the test. We first create a <code>ReflectionClass</code> instance from the object, then get the property. We mark it as accessible, and then set the value on the instance, as shown below:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use Project\Document;
+use ReflectionClass;
+
+final class DocumentTest extends TestCase
+{
+    public function testGetId()
+    {
+        $doc = new Document();
+        $reflect = new ReflectionClass($doc);
+        $id = $reflect-&gt;getProperty(&#39;id&#39;);
+        $id-&gt;setAccessible(true);
+        $id-&gt;setValue($doc, 1);
+        $this-&gt;assertEquals(1, $doc-&gt;getId());
+    }
+}
+</code></pre>
+<p>If you’re likely to need this in more than one place, you may want to pull this functionality out into a trait for reuse:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Traits;
+
+use ReflectionClass;
+
+trait SetsPrivateProperties
+{
+    /**
+     * Sets a private property
+     *
+     * @param mixed $object
+     * @param string $property
+     * @param mixed $value
+     * @return void
+     */
+    public function setPrivateProperty($object, string $property, $value)
+    {
+        $reflect = new ReflectionClass($object);
+        $prop = $reflect-&gt;getProperty($property);
+        $prop-&gt;setAccessible(true);
+        $prop-&gt;setValue($object, $value);
+        $prop-&gt;setAccessible(false);
+    }
+}
+</code></pre>
+<p>Then your test can be simplified as follows:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types = 1);
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use Project\Document;
+use Tests\Traits\SetsPrivateProperties;
+
+final class DocumentTest extends TestCase
+{
+    use SetsPrivateProperties;
+
+    public function testGetId()
+    {
+        $doc = new Document();
+        $this-&gt;setPrivateProperty($doc, &#39;id&#39;, 1);
+        $this-&gt;assertEquals(1, $doc-&gt;getId());
+    }
+}
+</code></pre>
+<p>While this is a slightly contrived and limited example, and this situation is quite rare, I’ve found it to be a useful technique under certain circumstances.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Skipping environment specific PHPUnit tests]]></title>
         <id>https://matthewdaly.co.uk/blog/2019/07/28/skipping-environment-specific-phpunit-tests/</id>

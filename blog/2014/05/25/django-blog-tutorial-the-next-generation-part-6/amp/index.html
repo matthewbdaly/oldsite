@@ -209,7 +209,7 @@
             <span class="hljs-string">'site'</span>: <span class="hljs-string">'1'</span>,
             <span class="hljs-string">'category'</span>: <span class="hljs-string">'1'</span>
         },
-        follow=<span class="hljs-literal">True</span>
+        follow=<span class="hljs-keyword">True</span>
         )
         self.assertEquals(response.status_code, <span class="hljs-number">200</span>)
 
@@ -225,20 +225,20 @@ $ git commit -m <span class="hljs-string">'Added failing test for posts without 
     title = models.CharField(max_length=<span class="hljs-number">200</span>)
     pub_date = models.DateTimeField()
     text = models.TextField()
-    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-literal">True</span>)
+    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
     author = models.ForeignKey(User)
     site = models.ForeignKey(Site)
-    category = models.ForeignKey(Category, blank=<span class="hljs-literal">True</span>, null=<span class="hljs-literal">True</span>)
+    category = models.ForeignKey(Category, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
     tags = models.ManyToManyField(Tag)
 </code></pre><p>If you compare <code>category</code> and <code>tags</code>, you’ll immediately see that <code>category</code> has the additional parameters <code>blank</code> and <code>null</code> both set to <code>True</code>. So that’s what we need to do for <code>tags</code> as well. Amend the model to look like this:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span><span class="hljs-params">(models.Model)</span>:</span>
     title = models.CharField(max_length=<span class="hljs-number">200</span>)
     pub_date = models.DateTimeField()
     text = models.TextField()
-    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-literal">True</span>)
+    slug = models.SlugField(max_length=<span class="hljs-number">40</span>, unique=<span class="hljs-keyword">True</span>)
     author = models.ForeignKey(User)
     site = models.ForeignKey(Site)
-    category = models.ForeignKey(Category, blank=<span class="hljs-literal">True</span>, null=<span class="hljs-literal">True</span>)
-    tags = models.ManyToManyField(Tag, blank=<span class="hljs-literal">True</span>, null=<span class="hljs-literal">True</span>)
+    category = models.ForeignKey(Category, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
+    tags = models.ManyToManyField(Tag, blank=<span class="hljs-keyword">True</span>, null=<span class="hljs-keyword">True</span>)
 </code></pre><p>You shouldn’t have to create a migration for this. Let’s run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins --coverage-html-report=htmlcov
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .......................
