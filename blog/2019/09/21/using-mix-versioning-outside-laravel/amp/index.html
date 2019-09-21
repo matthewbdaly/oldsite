@@ -1,0 +1,257 @@
+<!doctype html><html amp lang="en"><head><meta charset="utf-8"><title>Using Mix Versioning Outside Laravel - Matthew Daly&#x27;s Blog</title><link rel="canonical" href="https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/"><link rel="alternate" type="application/rss+xml" title="Matthew Daly&#x27;s Blog - feed" href="/rss.xml"><link href="/favicon.ico" rel="icon"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/manifest.json"><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/ms-icon-144x144.png"><meta name="theme-color" content="#252525"><script type="application/ld+json">{
+         "@context": "http://schema.org",
+         "@type": "BlogPosting",
+         "mainEntityOfPage": "https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/",
+         "headline": "Using Mix Versioning Outside Laravel",
+         "datePublished": "2019-09-21T10:30:50.000Z",
+         "dateModified": "2019-09-21T10:30:50.000Z",
+         "description": "&lt;p&gt;Laravel Mix is a really convenient front end scaffold, and not just in the context of a Laravel a...",
+         "author": {
+              "@type": "Person",
+              "name": "Matthew Daly"
+         },
+         "publisher": {
+            "@type": "Organization",
+            "name": "Matthew Daly&#x27;s Blog",
+            "logo": {
+               "@type": "ImageObject",
+               "url": "https://matthewdaly.co.uk/favicon.ico",
+               "height": 16,
+               "width": 16
+            }
+         },
+         "image": {
+            "@type": "ImageObject",
+            "url": "https://matthewdaly.co.uk/logo.png",
+            "height": 120,
+            "width": 1200
+         }
+      }</script><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet" type="text/css"><style amp-custom>body {
+   background-color: #252525;
+}
+      div.container {
+         background-color: #f8f8f8;
+         width: 100%;
+      }
+      p, h1, h2, h3, h4, h5, h6, li, nav a {
+         font-family: "PT Serif","Georgia","Helvetica Neue",Arial,sans-serif;
+         text-rendering: optimizelegibility;
+      }
+      p, li {
+         font-size: 1.4em;
+         line-height: 1.5em;
+      }
+      header {
+         padding: 20px;
+         color: #505050;
+      }
+      header h1 {
+         font-size: 3em;
+         line-height: 1.2em;
+         color: #7f7f7f;
+      }
+      header h2 {
+         font-size: 1.5em;
+         color: #7f7f7f;
+      }
+      h1 a {
+         text-decoration: none;
+         color: #7f7f7f;
+      }
+      code {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+         font-family: Menlo, Monaco, "Andale Mono", "Ubuntu Mono", "lucida console", monospace;
+         background-color: #cfcfcf;
+         padding: 5px;
+         border-radius: 3px;
+      }
+      pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+      pre code {
+         display: block;
+         overflow-wrap: normal;
+         word-wrap: normal;
+         white-space: pre;
+         font-size: 1.2em;
+      }
+      article {
+         padding: 20px;
+      }
+      section {
+         margin-top: 10px;
+         margin-bottom: 10px;
+      }
+      amp-img {
+         background-color: gray;
+         border: 1px solid black;
+      }
+      .hljs {
+         display: block;
+         overflow-x: auto;
+         padding: 0.5em;
+         background: #474949;
+         color: #d1d9e1;
+      }
+      .hljs-comment,
+      .hljs-quote {
+         color: #969896;
+         font-style: italic;
+      }
+      .hljs-keyword,
+      .hljs-selector-tag,
+      .hljs-literal,
+      .hljs-type,
+      .hljs-addition {
+         color: #cc99cc;
+      }
+      .hljs-number,
+      .hljs-selector-attr,
+      .hljs-selector-pseudo {
+         color: #f99157;
+      }
+      .hljs-string,
+      .hljs-doctag,
+      .hljs-regexp {
+         color: #8abeb7;
+      }
+      .hljs-title,
+      .hljs-name,
+      .hljs-section,
+      .hljs-built_in {
+         color: #b5bd68;
+      }
+      .hljs-variable,
+      .hljs-template-variable,
+      .hljs-selector-id,
+      .hljs-class .hljs-title {
+         color: #ffcc66;
+      }
+      .hljs-section,
+      .hljs-name,
+      .hljs-strong {
+         font-weight: bold;
+      }
+      .hljs-symbol,
+      .hljs-bullet,
+      .hljs-subst,
+      .hljs-meta,
+      .hljs-link {
+         color: #f99157;
+      }
+      .hljs-deletion {
+         color: #dc322f;
+      }
+      .hljs-formula {
+         background: #eee8d5;
+      }
+      .hljs-attr,
+      .hljs-attribute {
+         color: #81a2be;
+      }
+      .hljs-emphasis {
+         font-style: italic;
+      }
+      ul.categories {
+         padding-left: 0px;
+         margin-bottom: 20px;
+      }
+      ul.categories li {
+         list-style-type: none;
+         display: inline-block;
+         margin-right: 20px;
+      }
+      ul.categories li a {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      a.commentlink, a.postlink {
+         background-color: #303030;
+         border-radius: 3px;
+         padding: 3px;
+         color: #fff;
+         text-decoration: none;
+      }
+      blockquote {
+         font-style: italic;
+         border-left: 2px solid #cfcfcf;
+      }
+      blockquote p {
+         font-size: 2.2em;
+      }</style><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></head><body><header><h1><a href="/">Matthew Daly&#x27;s Blog</a></h1><h2>I&#x27;m a web developer in Norfolk. This is my blog...</h2></header><div class="container"><div class="row"><div class="col-md-8"><article class="post"><p class="date">21st September 2019 11:30 am</p><h1>Using Mix Versioning Outside Laravel</h1><p>Laravel Mix is a really convenient front end scaffold, and not just in the context of a Laravel application. Last year, I added it to a legacy application I maintain, with positive results, and I’m including it in a CMS I’m working on.</p><p>However, I’ve always had issues trying to implement versioning outside a Laravel application. I’ve used the timestamp technique described <a href="https://matthewdaly.co.uk/blog/2016/11/26/easy-static-asset-versioning-in-php/">here</a> a lot in the past, but nowadays I do most of my work in a Lando container, and I’ve had a lot of issues with timestamp changes not being picked up, forcing me to restart my container regularly when working on front-end assets. Switching to using Mix versioning seemed like a good way to resolve that issue, but of course the <code>mix()</code> helper isn’t available elsewhere.</p><p>Fortunately, its not all that hard to implement your own solution. Under the bonnet, Mix versioning works as follows:</p><ul><li>The build generates an array of compiled static assets, with the key being the path to the asset, and the value being the path with a query string appended, and then saves it as <code>mix-manifest.json</code></li><li>The <code>mix()</code> helper loads the <code>mix-manifest.json</code> file, converts it to JSON, fetches the array entry by path, and then returns the appropriate value for passing back from the helper</li></ul><p>With that in mind, I wrote the following Twig filter to handle assets versioned with Mix:</p><pre><code class="hljs lang-php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-keyword">declare</span>(strict_types=<span class="hljs-number">1</span>);
+
+<span class="hljs-keyword">namespace</span> <span class="hljs-title">Project</span>\<span class="hljs-title">Core</span>\<span class="hljs-title">Views</span>\<span class="hljs-title">Filters</span>;
+
+<span class="hljs-keyword">use</span> <span class="hljs-title">Exception</span>;
+
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Mix</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__invoke</span><span class="hljs-params">(string $path)</span>: <span class="hljs-title">string</span>
+    </span>{
+        $manifest = json_decode(file_get_contents(<span class="hljs-string">'mix-manifest.json'</span>), <span class="hljs-keyword">true</span>);
+        <span class="hljs-keyword">if</span> (! array_key_exists(<span class="hljs-string">"/"</span> . $path, $manifest)) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">Exception</span>(
+                <span class="hljs-string">"Unable to locate Mix file: {$path}"</span>
+            );
+        }
+        <span class="hljs-keyword">if</span> (!file_exists($path)) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-keyword">Exception</span>(<span class="hljs-string">'Included file does not exist'</span>);
+        }
+        <span class="hljs-keyword">return</span> $manifest[<span class="hljs-string">"/"</span> . $path];
+    }
+}
+</code></pre><p>This works on the basis that the web root is set in the <code>public/</code> folder, and that the compiled CSS and Javascript files are placed there - if that’s not the case you may need to adapt this accordingly.</p><p>You also need to add the <code>version()</code> call to your <code>webpack.mix.js</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">const</span> mix = <span class="hljs-built_in">require</span>(<span class="hljs-string">'laravel-mix'</span>);
+
+<span class="hljs-comment">/*
+ |--------------------------------------------------------------------------
+ | Mix Asset Management
+ |--------------------------------------------------------------------------
+ |
+ | Mix provides a clean, fluent API for defining some Webpack build steps
+ | for your Laravel application. By default, we are compiling the Sass
+ | file for the application as well as bundling up all the JS files.
+ |
+ */</span>
+
+mix
+  .setPublicPath(<span class="hljs-string">'public/'</span>)
+  .js(<span class="hljs-string">'resources/js/app.js'</span>, <span class="hljs-string">'public/js'</span>)
+  .sass(<span class="hljs-string">'resources/sass/app.scss'</span>, <span class="hljs-string">'public/css'</span>)
+  .version();
+</code></pre><p>Then, when you instantiate Twig, you can add the new filter using something like this:</p><pre><code class="hljs lang-php">$twig = <span class="hljs-keyword">new</span> Environment($container-&gt;get(<span class="hljs-string">'Twig\Loader\FilesystemLoader'</span>), $config);
+$mix = $container-&gt;get(<span class="hljs-string">'Project\Core\Views\Filters\Mix'</span>);
+$twig-&gt;addFilter(<span class="hljs-keyword">new</span> TwigFilter(<span class="hljs-string">'mix'</span>, $mix));
+</code></pre><p>Now, the filter should be usable in your Twig views as shown:</p><pre><code class="hljs lang-twig"><span class="xml"><span class="hljs-meta">&lt;!doctype html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">"en"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width, initial-scale=1, shrink-to-fit=no"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ 'css/app.css'| mix }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span></span><span class="hljs-template-variable">{{ title }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">include</span></span> 'header.html' %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">block</span></span> body %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-keyword">endblock</span></span> %}</span><span class="xml">
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{{ 'js/app.js'| mix }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
+</code></pre><p>If you’re using a different framework or templating system, there should be a way to create helpers, and it should be possible to implement this technique fairly easily. I was able to do so in the context of a legacy Zend application, so it should be possible with other legacy frameworks like CodeIgniter.</p><section><ul class="categories"><li><a href="/blog/categories/php/">php</a></li><li><a href="/blog/categories/laravel/">laravel</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/">View the article with comments</a></section><section><a class="postlink" href="/blog/2019/09/07/setting-private-properties-in-tests/amp/">Setting Private Properties in Tests</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
+					"vars": {
+						"account": "UA-17043630-1"
+					},
+					"triggers": {
+						"trackPageview": {
+							"on": "visible",
+							"request": "pageview"
+						}
+					}
+				}</script></amp-analytics></body></html>

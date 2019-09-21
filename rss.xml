@@ -4,10 +4,95 @@
         <title>Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk</link>
         <description>I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sat, 07 Sep 2019 19:18:04 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 21 Sep 2019 10:30:01 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2019</copyright>
+        <item>
+            <title><![CDATA[Using Mix versioning outside Laravel]]></title>
+            <link>https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/</link>
+            <guid>https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/</guid>
+            <pubDate>Sat, 21 Sep 2019 10:30:50 GMT</pubDate>
+            <description><![CDATA[<p>Laravel Mix is a really convenient front end scaffold, and not just in the context of a Laravel application. Last year, I added it to a legacy application I maintain, with positive results, and I’m including it in a CMS I’m working on.</p>
+<p>However, I’ve always had issues trying to implement versioning outside a Laravel application. I’ve used the timestamp technique described <a href="https://matthewdaly.co.uk/blog/2016/11/26/easy-static-asset-versioning-in-php/">here</a> a lot in the past, but nowadays I do most of my work in a Lando container, and I’ve had a lot of issues with timestamp changes not being picked up, forcing me to restart my container regularly when working on front-end assets. Switching to using Mix versioning seemed like a good way to resolve that issue, but of course the <code>mix()</code> helper isn’t available elsewhere.</p>
+<p>Fortunately, its not all that hard to implement your own solution. Under the bonnet, Mix versioning works as follows:</p>
+<ul>
+<li>The build generates an array of compiled static assets, with the key being the path to the asset, and the value being the path with a query string appended, and then saves it as <code>mix-manifest.json</code></li>
+<li>The <code>mix()</code> helper loads the <code>mix-manifest.json</code> file, converts it to JSON, fetches the array entry by path, and then returns the appropriate value for passing back from the helper</li>
+</ul>
+<p>With that in mind, I wrote the following Twig filter to handle assets versioned with Mix:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types=1);
+
+namespace Project\Core\Views\Filters;
+
+use Exception;
+
+final class Mix
+{
+    public function __invoke(string $path): string
+    {
+        $manifest = json_decode(file_get_contents(&#39;mix-manifest.json&#39;), true);
+        if (! array_key_exists(&quot;/&quot; . $path, $manifest)) {
+            throw new Exception(
+                &quot;Unable to locate Mix file: {$path}&quot;
+            );
+        }
+        if (!file_exists($path)) {
+            throw new Exception(&#39;Included file does not exist&#39;);
+        }
+        return $manifest[&quot;/&quot; . $path];
+    }
+}
+</code></pre>
+<p>This works on the basis that the web root is set in the <code>public/</code> folder, and that the compiled CSS and Javascript files are placed there - if that’s not the case you may need to adapt this accordingly.</p>
+<p>You also need to add the <code>version()</code> call to your <code>webpack.mix.js</code>:</p>
+<pre><code class="lang-javascript">const mix = require(&#39;laravel-mix&#39;);
+
+/*
+ |--------------------------------------------------------------------------
+ | Mix Asset Management
+ |--------------------------------------------------------------------------
+ |
+ | Mix provides a clean, fluent API for defining some Webpack build steps
+ | for your Laravel application. By default, we are compiling the Sass
+ | file for the application as well as bundling up all the JS files.
+ |
+ */
+
+mix
+  .setPublicPath(&#39;public/&#39;)
+  .js(&#39;resources/js/app.js&#39;, &#39;public/js&#39;)
+  .sass(&#39;resources/sass/app.scss&#39;, &#39;public/css&#39;)
+  .version();
+</code></pre>
+<p>Then, when you instantiate Twig, you can add the new filter using something like this:</p>
+<pre><code class="lang-php">$twig = new Environment($container-&gt;get(&#39;Twig\Loader\FilesystemLoader&#39;), $config);
+$mix = $container-&gt;get(&#39;Project\Core\Views\Filters\Mix&#39;);
+$twig-&gt;addFilter(new TwigFilter(&#39;mix&#39;, $mix));
+</code></pre>
+<p>Now, the filter should be usable in your Twig views as shown:</p>
+<pre><code class="lang-twig">&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, shrink-to-fit=no&quot;&gt;
+
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ &#39;css/app.css&#39;| mix }}&quot; /&gt;
+
+    &lt;title&gt;{{ title }}&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    {% include &#39;header.html&#39; %}
+    {% block body %}
+    {% endblock %}
+
+    &lt;script src=&quot;{{ &#39;js/app.js&#39;| mix }}&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>If you’re using a different framework or templating system, there should be a way to create helpers, and it should be possible to implement this technique fairly easily. I was able to do so in the context of a legacy Zend application, so it should be possible with other legacy frameworks like CodeIgniter.</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[Setting private properties in tests]]></title>
             <link>https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/</link>
@@ -2242,115 +2327,6 @@ $pipeline = $builder-&gt;build();
 $pipeline-&gt;process($data);
 </code></pre>
 <p>The pipeline pattern isn’t appropriate for every situation, but for anything that involves a set of operations on the same data, it makes a lot of sense, and can make it easy to break larger operations into smaller steps that are easier to understand, test, and re-use.</p>
-]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Replacing switch statements with polymorphism in PHP]]></title>
-            <link>https://matthewdaly.co.uk/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/</link>
-            <guid>https://matthewdaly.co.uk/blog/2018/10/03/replacing-switch-statements-with-polymorphism-in-php/</guid>
-            <pubDate>Wed, 03 Oct 2018 22:07:33 GMT</pubDate>
-            <description><![CDATA[<p>For the last few months, I’ve been making a point of picking up on certain antipatterns, and ways to avoid or remove them. One I’ve seen a lot recently is unnecessary large switch-case or if-else statements. For instance, here is a simplified example of one of these, which renders links to different objects:</p>
-<pre><code class="lang-php">&lt;?php
-
-switch ($item-&gt;getType()) {
-    case &#39;audio&#39;:
-        $media = new stdClass;
-        $media-&gt;type = &#39;audio&#39;;
-        $media-&gt;duration = $item-&gt;getLength();
-        $media-&gt;name = $item-&gt;getName();
-        $media-&gt;url = $item-&gt;getUrl();
-    case &#39;video&#39;:
-        $media = new stdClass;
-        $media-&gt;type = &#39;video&#39;;
-        $media-&gt;duration = $item-&gt;getVideoLength();
-        $media-&gt;name = $item-&gt;getTitle();
-        $media-&gt;url = $item-&gt;getUrl();
-}
-return &#39;&lt;a href=&quot;&#39;.$media-&gt;url.&#39;&quot; class=&quot;&#39;.$media-&gt;type.&#39;&quot; data-duration=&quot;&#39;.$media-&gt;duration.&#39;&quot;&gt;&#39;.$media-&gt;name.&#39;&lt;/a&gt;&#39;;
-</code></pre>
-<p>There are a number of problems with this, most notably the fact that it’s doing a lot of work to try and create a new set of objects that behave consistently. Instead, your objects should be polymorphic - in other words, you should be able to treat the original objects the same.</p>
-<p>While strictly speaking you don’t need one, it’s a good idea to create an interface that defines the required methods. That way, you can have those objects implement that interface, and be certain that they have all the required methods:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Contracts;
-
-interface MediaItem
-{
-    public function getLength(): int;
-
-    public function getName(): string;
-
-    public function getType(): string;
-
-    public function getUrl(): string;
-}
-</code></pre>
-<p>Then, you need to implement that interface in your objects. It doesn’t matter if the implementations are different, as long as the methods exist. That way, objects can define how they return a particular value, which is simpler and more logical than defining it in a large switch-case statement elsewhere. It also helps to prevent duplication. Here’s what the audio object might look like:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Models;
-
-use App\Contracts\MediaItem;
-
-class Audio implements MediaItem
-{
-    public function getLength(): int
-    {
-        return $this-&gt;length;
-    }
-
-    public function getName(): string
-    {
-        return $this-&gt;name;
-    }
-
-    public function getType(): string
-    {
-        return $this-&gt;type;
-    }
-
-    public function getUrl(): string
-    {
-        return $this-&gt;url;
-    }
-}
-</code></pre>
-<p>And here’s a similar example of the video object:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Models;
-
-use App\Contracts\MediaItem;
-
-class Video implements MediaItem
-{
-    public function getLength(): int
-    {
-        return $this-&gt;getVideoLength();
-    }
-
-    public function getName(): string
-    {
-        return $this-&gt;getTitle();
-    }
-
-    public function getType(): string
-    {
-        return $this-&gt;type;
-    }
-
-    public function getUrl(): string
-    {
-        return $this-&gt;url;
-    }
-}
-</code></pre>
-<p>With that done, the code to render the links can be greatly simplified:</p>
-<pre><code class="lang-php">&lt;?php
-return &#39;&lt;a href=&quot;&#39;.$item-&gt;getUrl().&#39;&quot; class=&quot;&#39;.$item-&gt;getType().&#39;&quot; data-duration=&quot;&#39;.$item-&gt;getLength().&#39;&quot;&gt;&#39;.$media-&gt;getName().&#39;&lt;/a&gt;&#39;;
-</code></pre>
-<p>Because we can use the exact same methods and get consistent responses, yet also allow for the different implementations within the objects, this approach allows for much more elegant and readable code. Different objects can be treated in the same way without the need for writing extensive if or switch statements.</p>
-<p>I haven’t had the occasion to do so, but in theory this approach is applicable in other languages, such as Javascript or Python (although these languages don’t have the concept of interfaces). Since discovering the switch statement antipattern and how to replace it with polymorphism, I’ve been able to remove a lot of overly complex code.</p>
 ]]></description>
         </item>
     </channel>

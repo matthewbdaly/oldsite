@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>php | Matthew Daly&apos;s Blog</title>
-    <updated>2019-09-07T19:18:04Z</updated>
+    <updated>2019-09-21T10:30:01Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,92 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/php/"/>
     <subtitle>php | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Using Mix versioning outside Laravel]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/">
+        </link>
+        <updated>2019-09-21T10:30:50Z</updated>
+        <summary type="html"><![CDATA[<p>Laravel Mix is a really convenient front end scaffold, and not just in the context of a Laravel application. Last year, I added it to a legacy application I maintain, with positive results, and I’m including it in a CMS I’m working on.</p>
+<p>However, I’ve always had issues trying to implement versioning outside a Laravel application. I’ve used the timestamp technique described <a href="https://matthewdaly.co.uk/blog/2016/11/26/easy-static-asset-versioning-in-php/">here</a> a lot in the past, but nowadays I do most of my work in a Lando container, and I’ve had a lot of issues with timestamp changes not being picked up, forcing me to restart my container regularly when working on front-end assets. Switching to using Mix versioning seemed like a good way to resolve that issue, but of course the <code>mix()</code> helper isn’t available elsewhere.</p>
+<p>Fortunately, its not all that hard to implement your own solution. Under the bonnet, Mix versioning works as follows:</p>
+<ul>
+<li>The build generates an array of compiled static assets, with the key being the path to the asset, and the value being the path with a query string appended, and then saves it as <code>mix-manifest.json</code></li>
+<li>The <code>mix()</code> helper loads the <code>mix-manifest.json</code> file, converts it to JSON, fetches the array entry by path, and then returns the appropriate value for passing back from the helper</li>
+</ul>
+<p>With that in mind, I wrote the following Twig filter to handle assets versioned with Mix:</p>
+<pre><code class="lang-php">&lt;?php declare(strict_types=1);
+
+namespace Project\Core\Views\Filters;
+
+use Exception;
+
+final class Mix
+{
+    public function __invoke(string $path): string
+    {
+        $manifest = json_decode(file_get_contents(&#39;mix-manifest.json&#39;), true);
+        if (! array_key_exists(&quot;/&quot; . $path, $manifest)) {
+            throw new Exception(
+                &quot;Unable to locate Mix file: {$path}&quot;
+            );
+        }
+        if (!file_exists($path)) {
+            throw new Exception(&#39;Included file does not exist&#39;);
+        }
+        return $manifest[&quot;/&quot; . $path];
+    }
+}
+</code></pre>
+<p>This works on the basis that the web root is set in the <code>public/</code> folder, and that the compiled CSS and Javascript files are placed there - if that’s not the case you may need to adapt this accordingly.</p>
+<p>You also need to add the <code>version()</code> call to your <code>webpack.mix.js</code>:</p>
+<pre><code class="lang-javascript">const mix = require(&#39;laravel-mix&#39;);
+
+/*
+ |--------------------------------------------------------------------------
+ | Mix Asset Management
+ |--------------------------------------------------------------------------
+ |
+ | Mix provides a clean, fluent API for defining some Webpack build steps
+ | for your Laravel application. By default, we are compiling the Sass
+ | file for the application as well as bundling up all the JS files.
+ |
+ */
+
+mix
+  .setPublicPath(&#39;public/&#39;)
+  .js(&#39;resources/js/app.js&#39;, &#39;public/js&#39;)
+  .sass(&#39;resources/sass/app.scss&#39;, &#39;public/css&#39;)
+  .version();
+</code></pre>
+<p>Then, when you instantiate Twig, you can add the new filter using something like this:</p>
+<pre><code class="lang-php">$twig = new Environment($container-&gt;get(&#39;Twig\Loader\FilesystemLoader&#39;), $config);
+$mix = $container-&gt;get(&#39;Project\Core\Views\Filters\Mix&#39;);
+$twig-&gt;addFilter(new TwigFilter(&#39;mix&#39;, $mix));
+</code></pre>
+<p>Now, the filter should be usable in your Twig views as shown:</p>
+<pre><code class="lang-twig">&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, shrink-to-fit=no&quot;&gt;
+
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ &#39;css/app.css&#39;| mix }}&quot; /&gt;
+
+    &lt;title&gt;{{ title }}&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    {% include &#39;header.html&#39; %}
+    {% block body %}
+    {% endblock %}
+
+    &lt;script src=&quot;{{ &#39;js/app.js&#39;| mix }}&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>If you’re using a different framework or templating system, there should be a way to create helpers, and it should be possible to implement this technique fairly easily. I was able to do so in the context of a legacy Zend application, so it should be possible with other legacy frameworks like CodeIgniter.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Setting private properties in tests]]></title>
         <id>https://matthewdaly.co.uk/blog/2019/09/07/setting-private-properties-in-tests/</id>
