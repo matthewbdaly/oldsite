@@ -100,11 +100,11 @@ SetEnv WP_DEBUG true
 For Nginx, assuming you're using FastCGI, you need to set it in the server configuration for that site using the `fastcgi_param` directive, as shown below:
 
 ```nginx
-fastcgi_param DB_NAME wordpress
-fastcgi_param DB_USER wordpress
-fastcgi_param DB_PASSWORD wordpress
-fastcgi_param DB_HOST database
-fastcgi_param WP_DEBUG true
+fastcgi_param DB_NAME wordpress;
+fastcgi_param DB_USER wordpress;
+fastcgi_param DB_PASSWORD wordpress;
+fastcgi_param DB_HOST database;
+fastcgi_param WP_DEBUG true;
 ```
 
 Since Wordpress doesn't ship with any kind of command-line task runner, this should be sufficient for most installs. However, if you're using WP CLI, that will break it as it won't have access to environment variables set by Apache or Nginx, so you'll also need to set them for the user that runs WP CLI by adding them to their Bash config in the usual way.
