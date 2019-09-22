@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>wordpress | Matthew Daly&apos;s Blog</title>
-    <updated>2019-09-21T10:30:02Z</updated>
+    <updated>2019-09-22T18:00:44Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,98 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/wordpress/"/>
     <subtitle>wordpress | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Storing Wordpress configuration in environment variables]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/09/22/storing-wordpress-configuration-in-environment-variables/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/09/22/storing-wordpress-configuration-in-environment-variables/">
+        </link>
+        <updated>2019-09-22T18:00:34Z</updated>
+        <summary type="html"><![CDATA[<p>Wordpress configuration can be a serious pain in the proverbial. Hard-coding configuration details in a PHP file is not a terribly safe way of storing the details for your database, as if the server is misconfigured they can be exposed. In addition, it can be a chore to copy and populate the <code>wp-config.php</code> file to a new deploy.</p>
+<p>A fundamental principle of <a href="https://12factor.net/">The Twelve-Factor App</a> is that config should be stored in the environment. While Wordpress does predate this, there’s no reason why we can’t abide by this. Storing Wordpress configuration in environment variables rather than the <code>wp-config.php</code> file has the following advantages:</p>
+<ul>
+<li>It’s more secure since the config is not stored in a file in the web root, but in the web server config</li>
+<li>It makes managing the <code>wp-config.php</code> file less of a chore - it can be safely committed to version control, and you won’t need to change it to match your local configuration, running the risk of accidentally committing and pushing to production with broken config</li>
+<li>Deployment to new servers is simpler because there’s no need to update the <code>wp-config.php</code></li>
+<li>The risk of neglecting to change the database details and accidentally messing up the production database when working locally is virtually eliminated</li>
+</ul>
+<p>I’ve seen solutions for this that use DotEnv, but you don’t actually need to install that to be able to use environment variables with Wordpress. In fact, in some way it’s better if you don’t as too many developers use <code>.env</code> files in production. PHP natively has the ability to get data from environment variables using the <code>getenv()</code> function, so it’s easier to use that than to pull in a third-party library.</p>
+<p>Here’s an abbreviated example of a <code>wp-config.php</code> file that’s been updated to pull the settings from environment variables:</p>
+<pre><code class="lang-php">&lt;?php
+// ** MySQL settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( &#39;DB_NAME&#39;, getenv(&#39;DB_NAME&#39;) );
+
+/** MySQL database username */
+define( &#39;DB_USER&#39;, getenv(&#39;DB_USER&#39;) );
+
+/** MySQL database password */
+define( &#39;DB_PASSWORD&#39;, getenv(&#39;DB_PASSWORD&#39;) );
+
+/** MySQL hostname */
+define( &#39;DB_HOST&#39;, getenv(&#39;DB_HOST&#39;) );
+
+/** Database Charset to use in creating database tables. */
+define( &#39;DB_CHARSET&#39;, &#39;utf8&#39; );
+
+/** The Database Collate type. Don&#39;t change this if in doubt. */
+define( &#39;DB_COLLATE&#39;, &#39;&#39; );
+
+define( &#39;AUTH_KEY&#39;,         getenv(&#39;AUTH_KEY&#39;) );
+define( &#39;SECURE_AUTH_KEY&#39;,  getenv(&#39;SECURE_AUTH_KEY&#39;) );
+define( &#39;LOGGED_IN_KEY&#39;,    getenv(&#39;LOGGED_IN_KEY&#39;) );
+define( &#39;NONCE_KEY&#39;,        getenv(&#39;NONCE_KEY&#39;) );
+define( &#39;AUTH_SALT&#39;,        getenv(&#39;AUTH_SALT&#39;) );
+define( &#39;SECURE_AUTH_SALT&#39;, getenv(&#39;SECURE_AUTH_SALT&#39;) );
+define( &#39;LOGGED_IN_SALT&#39;,   getenv(&#39;LOGGED_IN_SALT&#39;) );
+define( &#39;NONCE_SALT&#39;,       getenv(&#39;NONCE_SALT&#39;) );
+
+$table_prefix = &#39;wp_&#39;;
+
+define( &#39;WP_DEBUG&#39;, getenv(&#39;WP_DEBUG&#39;) );
+
+/* That&#39;s all, stop editing! Happy publishing. */
+
+/** Absolute path to the WordPress directory. */
+if ( ! defined( &#39;ABSPATH&#39; ) ) {
+    define( &#39;ABSPATH&#39;, dirname( __FILE__ ) . &#39;/&#39; );
+}
+
+/** Sets up WordPress vars and included files. */
+require_once( ABSPATH . &#39;wp-settings.php&#39; );
+</code></pre>
+<p>If you’re using Lando for local development, you will need to specify a file to include that contains the environment variables you wish to set, as in this example:</p>
+<pre><code class="lang-yaml">name: wordpress
+recipe: wordpress
+config:
+  webroot: .
+env_file:
+  - .env
+</code></pre>
+<p>This filename can be any arbitrarily chosen name. Then, you define the values for those variables in the same way you normally would in a <code>.env</code> file. Here’s an abbreviated example that excludes the crypto settings (though those should be placed here too):</p>
+<pre><code class="lang-env">DB_NAME=wordpress
+DB_USER=wordpress
+DB_PASSWORD=wordpress
+DB_HOST=database
+WP_DEBUG=true
+...
+</code></pre>
+<p>This will work fine during local development, but in production, or if you’re using something like Vagrant for local development, you’ll want to set the environment variables in the server configuration. For Apache, this is best set in the Virtualhost configuration, although you should be able to set it in an <code>.htaccess</code> file if all else fails. You need to use the <code>SetEnv</code> directive, as in this example:</p>
+<pre><code class="lang-apache">SetEnv DB_NAME wordpress
+SetEnv DB_USER wordpress
+SetEnv DB_PASSWORD wordpress
+SetEnv DB_HOST database
+SetEnv WP_DEBUG true
+</code></pre>
+<p>For Nginx, assuming you’re using FastCGI, you need to set it in the server configuration for that site using the <code>fastcgi_param</code> directive, as shown below:</p>
+<pre><code class="lang-nginx">fastcgi_param DB_NAME wordpress
+fastcgi_param DB_USER wordpress
+fastcgi_param DB_PASSWORD wordpress
+fastcgi_param DB_HOST database
+fastcgi_param WP_DEBUG true
+</code></pre>
+<p>Since Wordpress doesn’t ship with any kind of command-line task runner, this should be sufficient for most installs. However, if you’re using WP CLI, that will break it as it won’t have access to environment variables set by Apache or Nginx, so you’ll also need to set them for the user that runs WP CLI by adding them to their Bash config in the usual way.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Making Wordpress less shit]]></title>
         <id>https://matthewdaly.co.uk/blog/2018/04/12/making-wordpress-less-shit/</id>

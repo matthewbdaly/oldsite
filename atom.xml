@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>Matthew Daly&apos;s Blog</title>
-    <updated>2019-09-21T10:30:01Z</updated>
+    <updated>2019-09-22T18:00:42Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,98 @@
     <link rel="alternate" href="https://matthewdaly.co.uk"/>
     <subtitle>I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Storing Wordpress configuration in environment variables]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/09/22/storing-wordpress-configuration-in-environment-variables/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/09/22/storing-wordpress-configuration-in-environment-variables/">
+        </link>
+        <updated>2019-09-22T18:00:34Z</updated>
+        <summary type="html"><![CDATA[<p>Wordpress configuration can be a serious pain in the proverbial. Hard-coding configuration details in a PHP file is not a terribly safe way of storing the details for your database, as if the server is misconfigured they can be exposed. In addition, it can be a chore to copy and populate the <code>wp-config.php</code> file to a new deploy.</p>
+<p>A fundamental principle of <a href="https://12factor.net/">The Twelve-Factor App</a> is that config should be stored in the environment. While Wordpress does predate this, there’s no reason why we can’t abide by this. Storing Wordpress configuration in environment variables rather than the <code>wp-config.php</code> file has the following advantages:</p>
+<ul>
+<li>It’s more secure since the config is not stored in a file in the web root, but in the web server config</li>
+<li>It makes managing the <code>wp-config.php</code> file less of a chore - it can be safely committed to version control, and you won’t need to change it to match your local configuration, running the risk of accidentally committing and pushing to production with broken config</li>
+<li>Deployment to new servers is simpler because there’s no need to update the <code>wp-config.php</code></li>
+<li>The risk of neglecting to change the database details and accidentally messing up the production database when working locally is virtually eliminated</li>
+</ul>
+<p>I’ve seen solutions for this that use DotEnv, but you don’t actually need to install that to be able to use environment variables with Wordpress. In fact, in some way it’s better if you don’t as too many developers use <code>.env</code> files in production. PHP natively has the ability to get data from environment variables using the <code>getenv()</code> function, so it’s easier to use that than to pull in a third-party library.</p>
+<p>Here’s an abbreviated example of a <code>wp-config.php</code> file that’s been updated to pull the settings from environment variables:</p>
+<pre><code class="lang-php">&lt;?php
+// ** MySQL settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( &#39;DB_NAME&#39;, getenv(&#39;DB_NAME&#39;) );
+
+/** MySQL database username */
+define( &#39;DB_USER&#39;, getenv(&#39;DB_USER&#39;) );
+
+/** MySQL database password */
+define( &#39;DB_PASSWORD&#39;, getenv(&#39;DB_PASSWORD&#39;) );
+
+/** MySQL hostname */
+define( &#39;DB_HOST&#39;, getenv(&#39;DB_HOST&#39;) );
+
+/** Database Charset to use in creating database tables. */
+define( &#39;DB_CHARSET&#39;, &#39;utf8&#39; );
+
+/** The Database Collate type. Don&#39;t change this if in doubt. */
+define( &#39;DB_COLLATE&#39;, &#39;&#39; );
+
+define( &#39;AUTH_KEY&#39;,         getenv(&#39;AUTH_KEY&#39;) );
+define( &#39;SECURE_AUTH_KEY&#39;,  getenv(&#39;SECURE_AUTH_KEY&#39;) );
+define( &#39;LOGGED_IN_KEY&#39;,    getenv(&#39;LOGGED_IN_KEY&#39;) );
+define( &#39;NONCE_KEY&#39;,        getenv(&#39;NONCE_KEY&#39;) );
+define( &#39;AUTH_SALT&#39;,        getenv(&#39;AUTH_SALT&#39;) );
+define( &#39;SECURE_AUTH_SALT&#39;, getenv(&#39;SECURE_AUTH_SALT&#39;) );
+define( &#39;LOGGED_IN_SALT&#39;,   getenv(&#39;LOGGED_IN_SALT&#39;) );
+define( &#39;NONCE_SALT&#39;,       getenv(&#39;NONCE_SALT&#39;) );
+
+$table_prefix = &#39;wp_&#39;;
+
+define( &#39;WP_DEBUG&#39;, getenv(&#39;WP_DEBUG&#39;) );
+
+/* That&#39;s all, stop editing! Happy publishing. */
+
+/** Absolute path to the WordPress directory. */
+if ( ! defined( &#39;ABSPATH&#39; ) ) {
+    define( &#39;ABSPATH&#39;, dirname( __FILE__ ) . &#39;/&#39; );
+}
+
+/** Sets up WordPress vars and included files. */
+require_once( ABSPATH . &#39;wp-settings.php&#39; );
+</code></pre>
+<p>If you’re using Lando for local development, you will need to specify a file to include that contains the environment variables you wish to set, as in this example:</p>
+<pre><code class="lang-yaml">name: wordpress
+recipe: wordpress
+config:
+  webroot: .
+env_file:
+  - .env
+</code></pre>
+<p>This filename can be any arbitrarily chosen name. Then, you define the values for those variables in the same way you normally would in a <code>.env</code> file. Here’s an abbreviated example that excludes the crypto settings (though those should be placed here too):</p>
+<pre><code class="lang-env">DB_NAME=wordpress
+DB_USER=wordpress
+DB_PASSWORD=wordpress
+DB_HOST=database
+WP_DEBUG=true
+...
+</code></pre>
+<p>This will work fine during local development, but in production, or if you’re using something like Vagrant for local development, you’ll want to set the environment variables in the server configuration. For Apache, this is best set in the Virtualhost configuration, although you should be able to set it in an <code>.htaccess</code> file if all else fails. You need to use the <code>SetEnv</code> directive, as in this example:</p>
+<pre><code class="lang-apache">SetEnv DB_NAME wordpress
+SetEnv DB_USER wordpress
+SetEnv DB_PASSWORD wordpress
+SetEnv DB_HOST database
+SetEnv WP_DEBUG true
+</code></pre>
+<p>For Nginx, assuming you’re using FastCGI, you need to set it in the server configuration for that site using the <code>fastcgi_param</code> directive, as shown below:</p>
+<pre><code class="lang-nginx">fastcgi_param DB_NAME wordpress
+fastcgi_param DB_USER wordpress
+fastcgi_param DB_PASSWORD wordpress
+fastcgi_param DB_HOST database
+fastcgi_param WP_DEBUG true
+</code></pre>
+<p>Since Wordpress doesn’t ship with any kind of command-line task runner, this should be sufficient for most installs. However, if you’re using WP CLI, that will break it as it won’t have access to environment variables set by Apache or Nginx, so you’ll also need to set them for the user that runs WP CLI by adding them to their Bash config in the usual way.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Using Mix versioning outside Laravel]]></title>
         <id>https://matthewdaly.co.uk/blog/2019/09/21/using-mix-versioning-outside-laravel/</id>
@@ -2204,153 +2296,6 @@ class GoldenMasterTest extends GoldenMasterTestCase
 }
 </code></pre>
 <p>Be warned, this is <em>not</em> an approach I would advocate as a matter of course, and it should only ever be a last resort as an alternative to onerous manual testing for things that can’t be tested in their current form. It’s extremely brittle, and I’ve had to deal with a lot of false positives, although that would be easier if I could populate a testing database beforehand and use that as the basis of the tests. It’s also very slow, with each test taking three or four seconds to run, although again this would be less of an issue if I could pass through a request object and get the response HTML directly. Nonetheless, I’ve found it to be a useful technique as a test of last resort for legacy applications.</p>
-]]></summary>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Understanding the pipeline pattern]]></title>
-        <id>https://matthewdaly.co.uk/blog/2018/10/05/understanding-the-pipeline-pattern/</id>
-        <link href="https://matthewdaly.co.uk/blog/2018/10/05/understanding-the-pipeline-pattern/">
-        </link>
-        <updated>2018-10-05T18:36:16Z</updated>
-        <summary type="html"><![CDATA[<p>In a previous post, I used the pipeline pattern to demonstrate processing letters using optical recognition and machine learning. The pipeline pattern is something I’ve found very useful in recent months. For a sequential series of tasks, this approach can make your code easier to understand by allowing you to break it up into simple, logical steps which are easy to test and understand individually. If you’re familiar with pipes and redirection in Unix, you’ll be aware of how you can chain together multiple, relatively simple commands to carry out some very complex transformations on data.</p>
-<p>A few months back, I was asked to build a webhook for a Facebook lead form at work. One of my colleagues was having to manually export CSV data from Facebook for the data, and then import it into a MySQL database and a Campaign Monitor mailing list, which was an onerous task, so they asked me to look at more automated solutions. I wound up building a webhook with Lumen that would go through the following steps:</p>
-<ul>
-<li>Get the lead ID’s from the webhook</li>
-<li>Pull the leads from the Facebook API using those ID’s</li>
-<li>Process the raw data into a more suitable format</li>
-<li>Save the data to the database</li>
-<li>Push the data to Campaign Monitor</li>
-</ul>
-<p>Since this involved a number of discrete steps, I chose to implement each step as a separate stage. That way, each step was easy to test in isolation, and it was easily reusable. As it turned out, this approach saved us because Facebook needed to approve this app (and ended up rejecting it - their documentation at the time wasn’t clear on implementing server-to-server apps, making it hard to meet their guidelines), so we needed an interim solution. I instead wrote an Artisan task for importing the file from a CSV, which involved the following steps:</p>
-<ul>
-<li>Read the rows from the CSV file</li>
-<li>Format the CSV data into the desired format</li>
-<li>Save the data to the database</li>
-<li>Push the data to Campaign Monitor</li>
-</ul>
-<p>This meant that two of the existing steps could be reused, as is, without touching the code or tests. I just added two new classes to read the data and format the data, and the Artisan command, which simply called the various pipeline stages, <em>and that was all</em>. In this post, I’ll demonstrate how I implemented this.</p>
-<p>While there is more than one implementation of this available, and it wouldn’t be hard to roll your own, I generally use the PHP League’s <a href="https://pipeline.thephpleague.com/">Pipeline package</a>, since it’s simple, solid and well-tested. Let’s say our application has three steps:</p>
-<ul>
-<li>Format the request data</li>
-<li>Save the data</li>
-<li>Push it to a third party service.</li>
-</ul>
-<p>We therefore need to write a stage for each step in the process. Each one must be a callable, such as a closure, a callback, or a class that implements the <code>__invoke()</code> magic method. I usually go for the latter as it allows you to more easily inject dependencies into the stage via its constructor, making it easier to use and test. Here’s what our first stage might look like:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Stages;
-
-use Illuminate\Support\Collection;
-
-class FormatData
-{
-    public function __invoke(Collection $data): Collection
-    {
-        return $data-&gt;map(function ($item) {
-            return [
-                &#39;name&#39; =&gt; $item-&gt;fullname,
-                &#39;email&#39; =&gt; $item-&gt;email
-            ];
-        });
-    }
-}
-</code></pre>
-<p>This class does nothing more than receive a collection, and format the data as expected. We could have it accept a request object instead, but I opted not to because I felt it made more sense to pass the data in as a collection so it’s not tied to an HTTP request. That way, it can also handle data passed through from a CSV file using an Artisan task, and the details of how it receives the data in the first place are deferred to the class that calls the pipeline in the first place. Note this stage also returns a collection, for handling by the next step:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Stages;
-
-use App\Lead;
-use Illuminate\Support\Collection;
-
-class SaveData
-{
-    public function __invoke(Collection $data): Collection
-    {
-        return $data-&gt;map(function ($item) {
-            $lead = new Lead;
-            $lead-&gt;name = $item-&gt;name;
-            $lead-&gt;email = $item-&gt;email;
-            $lead-&gt;save();
-            return $lead;
-        }
-    }
-}
-</code></pre>
-<p>This step saves each lead as an Eloquent model, and returns a collection of the saved models, which are passed to the final step:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Stages;
-
-use App\Contracts\Services\MailingList;
-use Illuminate\Support\Collection;
-
-class AddDataToList
-{
-    protected $list;
-
-    public function __construct(MailingList $list)
-    {
-        $this-&gt;list = $list;
-    }
-
-    public function __invoke(Collection $data)
-    {
-        return $data-&gt;each(function ($item) {
-            $this-&gt;list-&gt;add([
-                &#39;name&#39; =&gt; $item-&gt;name,
-                &#39;email&#39; =&gt; $item-&gt;email
-            ]);
-        });
-    }
-}
-</code></pre>
-<p>This step uses a wrapper class for a mailing service, which is passed through as a dependency in the constructor. The <code>__invoke()</code> method then loops through each Eloquent model and uses it to fetch the data, which is then added to the list. With our stages complete, we can now put them together in our controller:</p>
-<pre><code class="lang-php">&lt;?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Stages\FormatData;
-use App\Stages\SaveData;
-use App\Stages\AddDataToList;
-use League\Pipeline\Pipeline;
-use Illuminate\Support\Collection;
-
-class WebhookController extends Controller
-{
-    public function store(Request $request, Pipeline $pipeline, FormatData $formatData, SaveData $savedata, AddDataToList $addData)
-    {
-        try {
-            $data = Collection::make($request-&gt;get(&#39;data&#39;));
-            $pipe = $pipeline-&gt;pipe($formatData)
-                -&gt;pipe($saveData)
-                -&gt;pipe($addData);
-            $pipe-&gt;process($data);
-        } catch (\Exception $e) {
-            // Handle exception
-        }
-    }
-}
-</code></pre>
-<p>As mentioned above, we extract the request data (assumed to be an array of data for a webhook), and convert it into a collection. Then, we put together our pipeline. Note that we use dependency injection to fetch the steps - feel free to use method or constructor injection as appropriate. We instantiate our pipeline, and call the <code>pipe()</code> method multiple times to add new stages.</p>
-<p>Finally we pass the data through to our pipe for processing by calling the <code>process()</code> method, passing in the initial data. Note that we can wrap the whole thing in a <code>try...catch</code> statement to handle exceptions, so if something happens that would mean we would want to cease processing at that point, we can throw an exception in the stage and handle it outside the pipeline.</p>
-<p>This means that our controller is kept very simple. It just gets the data as a collection, then puts the pipeline together and passes the data through. If we subsequently had to write an Artisan task to do something similar from the command line, we could fetch the data via a CSV reader class, and then pass it to the same pipeline. If we needed to change the format of the initial data, we could replace the <code>FormatData</code> class with a single separate class with very little trouble.</p>
-<p>Another thing you can do with the League pipeline package, but I haven’t yet had the occasion to try, is use <code>League\Pipeline\PipelineBuilder</code> to build pipelines in a more dynamic fashion. You can make steps conditional, as in this example:</p>
-<pre><code class="lang-php">&lt;?php
-
-use League\Pipeline\PipelineBuilder;
-
-$builder = (new PipelineBuilder)
-    -&gt;add(new FormatData);
-if ($data[&#39;type&#39;] = &#39;foo&#39;) {
-    $builder-&gt;add(new HandleFooType);
-}
-$builder-&gt;add(new SaveData);
-$pipeline = $builder-&gt;build();
-$pipeline-&gt;process($data);
-</code></pre>
-<p>The pipeline pattern isn’t appropriate for every situation, but for anything that involves a set of operations on the same data, it makes a lot of sense, and can make it easy to break larger operations into smaller steps that are easier to understand, test, and re-use.</p>
 ]]></summary>
     </entry>
 </feed>
