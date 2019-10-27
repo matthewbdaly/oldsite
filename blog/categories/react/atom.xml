@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>react | Matthew Daly&apos;s Blog</title>
-    <updated>2019-10-13T22:10:43Z</updated>
+    <updated>2019-10-27T21:21:06Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,104 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/react/"/>
     <subtitle>react | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2019</rights>
+    <entry>
+        <title type="html"><![CDATA[Input components with the useState and useEffect hooks in React]]></title>
+        <id>https://matthewdaly.co.uk/blog/2019/10/27/input-components-with-the-usestate-and-useeffect-hooks-in-react/</id>
+        <link href="https://matthewdaly.co.uk/blog/2019/10/27/input-components-with-the-usestate-and-useeffect-hooks-in-react/">
+        </link>
+        <updated>2019-10-27T21:20:00Z</updated>
+        <summary type="html"><![CDATA[<p>Like many developers who use React.js, I’ve been eager to explore the Hooks API in the last year or so. They allow for easier ways to share functionality between components, and can allow for a more expressive syntax that’s a better fit for Javascript than class-based components. Unfortunately, they became production ready around the time I rolled out a new React-based home page, so I didn’t want to jump on them immediately in the context of a legacy application. I’m now finding myself with a bit of breathing space, so I’ve begun refactoring these components, and converting some to use hooks, in order to more easily reuse some code that currently resides in a big higher-order component.</p>
+<p>The <code>useState</code> and <code>useEffect</code> hooks are by far the most common hooks in most applications. However, I’ve found that the React documentation, while OK at explaining how to use these individually, is not so good at explaining how to use them together, particularly in the case of an input component, which is a common use case when looking to convert existing components. For that reason, I’m going to provide a short example of how you might use them together for that use case.</p>
+<h2 id="a-simple-function-component">A simple function component</h2>
+<p>A basic component for an input might look like this:</p>
+<pre><code class="lang-jsx">//@flow
+import React from &#39;react&#39;;
+
+type Props = {
+  name: string,
+  id: string,
+  value: string,
+  placeholder: string
+};
+
+const Input = (props: Props) =&gt; {
+  return (
+    &lt;input type=&quot;text&quot; name={props.name} id={props.id} value={props.value} placeholder={props.placeholder} /&gt;
+  );
+}
+
+export default Input;
+</code></pre>
+<p>Note I’m using Flow annotations to type the arguments passed to my components. If you prefer Typescript it should be straightforward to convert to that.</p>
+<p>As you can see, this component accepts a name, ID, value and placeholder as props. If you add this to an existing React app, or use <code>create-react-app</code> to create one and add this to it, you can include it in another component as follows:</p>
+<pre><code class="lang-jsx">&lt;Input name=&quot;foo&quot; id=&quot;foo&quot; value=&quot;foo&quot; placeholder=&quot;foo&quot; /&gt;
+</code></pre>
+<h2 id="adding-state">Adding state</h2>
+<p>This will render, but as the value will never change it’s not actually of any use in a form. If you’ve written class-based React components before, you’ll know that the usual way to handle this is to move the value of the input from props to state. Prior to the introduction of the Hooks API, while you could create a function component, you couldn’t use state with it, making situations like this difficult to handle. Fortunately, the <code>useState</code> hook now allows you to add state to a function component as follows:</p>
+<pre><code class="lang-jsx">//@flow
+import React, { useState } from &#39;react&#39;;
+
+type Props = {
+  name: string,
+  id: string,
+  value: string,
+  placeholder: string
+};
+
+const Input = (props: Props) =&gt; {
+  const [value, setValue] = useState(props.value);
+
+  return (
+    &lt;input type=&quot;text&quot; name={props.name} id={props.id} value={value} placeholder={props.placeholder} onChange={(e) =&gt; setValue(e.target.value)} /&gt;
+  );
+}
+
+export default Input;
+</code></pre>
+<p>We import the <code>useState</code> hook at the top, as usual. Then, within the body of the component, we call <code>useState()</code>, passing in the initial value of <code>props.value</code>, and get back two variables in response:</p>
+<ul>
+<li><code>value</code> is the value of the state variable, and can be thought of as equivalent to what <code>this.state.value</code> would be in a class-based component</li>
+<li><code>setValue</code> is a function for updating <code>value</code> - rather than explicitly defining a function for this, we can just get one back from <code>useState()</code></li>
+</ul>
+<p>Now we can set the value with <code>value={value}</code>. We also need to handle changes in the state, so we add <code>onChange={(e) =&gt; setValue(e.target.value)}</code> to call <code>setValue()</code> on a change event on the input.</p>
+<h2 id="handling-effects">Handling effects</h2>
+<p>The component will now allow you to edit the value. However, one problem remains. If you open the React dev tools, go to the props for this component, and set <code>value</code> manually, it won’t be reflected in the input’s value, because the state has diverged from the initial value passed in as a prop. We need to be able to pick up on changes in the props and pass them through as state.</p>
+<p>In class-based components, there are lifecycle methods that fire at certain times, such as <code>componentDidMount()</code> and <code>componentDidUpdate()</code>, and we would use those to handle that situation. Hooks condense these into a single <code>useEffect</code> hook that is more widely useful. Here’s how we might overcome this problem in our component:</p>
+<pre><code class="lang-jsx">//@flow
+import React, { useState, useEffect } from &#39;react&#39;;
+
+type Props = {
+  name: string,
+  id: string,
+  value: string,
+  placeholder: string
+};
+
+const Input = (props: Props) =&gt; {
+  const [value, setValue] = useState(props.value);
+
+  useEffect(() =&gt; {
+    setValue(props.value);
+  }, [props.value]);
+
+  return (
+    &lt;input type=&quot;text&quot; name={props.name} id={props.id} value={value} placeholder={props.placeholder} onChange={(e) =&gt; setValue(e.target.value)}/&gt;
+  );
+}
+
+export default Input;
+</code></pre>
+<p><code>useEffect</code> takes one compulsory argument, in the form of a callback. Here we’re using that callback to set our state variable back to the value of the prop passed through.</p>
+<p>Note the second argument, which is an array of variables that should be watched for changes. If we had used the following code instead:</p>
+<pre><code class="lang-jsx">  useEffect(() =&gt; {
+    setValue(props.value);
+  });
+</code></pre>
+<p>Then the callback would fire after every render, reverting the value back and possibly causing an infinite loop. For that reason, we pass through the second argument, which tells React to only fire the callback if one of the specified variables has changed. Here we only want to override the state when the value props passed down to the component changes, so we pass that prop in as an argument.</p>
+<h2 id="summary">Summary</h2>
+<p>This is only a simple example, but it does show how simple and expressive hooks can make your React components, and how to use the <code>useEffect</code> and <code>useState</code> hooks together, which was something I found the documentation didn’t make clear. These two hooks cover a large chunk of the functionality of React, and knowledge of them is essential to using React effectively.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Higher-order components in React]]></title>
         <id>https://matthewdaly.co.uk/blog/2019/02/16/higher-order-components-in-react/</id>
