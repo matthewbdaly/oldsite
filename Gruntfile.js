@@ -27,6 +27,7 @@ module.exports = function (grunt) {
                 googleanalytics: "UA-17043630-1",
                 disqus: "matthewdaly",
                 github: "matthewbdaly",
+                devto: "matthewbdaly",
                 twitter: "MattBD",
                 stackoverflow: "63717/matthew-daly",
                 title: "Matthew Daly's Blog",
