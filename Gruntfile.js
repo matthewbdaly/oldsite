@@ -274,7 +274,7 @@ module.exports = function (grunt) {
             options: {
                 hostname: 'localhost',
                 livereload: 35729,
-                open: 'http://localhost:8000/',
+                open: 'http://localhost:8080/',
                 debug: true,
                 base: 'www'
             },
