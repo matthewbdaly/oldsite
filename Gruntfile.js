@@ -276,7 +276,8 @@ module.exports = function (grunt) {
                 livereload: 35729,
                 open: 'http://localhost:8080/',
                 debug: true,
-                base: 'www'
+                base: 'www',
+                port: 8080
             },
             www: {
                 directory: 'www',
@@ -284,6 +285,9 @@ module.exports = function (grunt) {
             }
         },
         sass: {
+            options: {
+              implementation: require('node-sass')
+            },
             dist: {
                 files: {
                    'build/css/style.css': 'app/sass/style.scss'
@@ -398,7 +402,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
