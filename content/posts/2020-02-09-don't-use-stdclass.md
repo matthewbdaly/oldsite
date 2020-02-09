@@ -25,7 +25,9 @@ Of course, just giving something a generic name like `Container` isn't much of a
 Type hinting
 ------------
 
-A related argument is that it makes type hinting more useful. You *can* type hint `stdClass`, but as noted above it tells someone working on the code receiving it very little about where it's come from, or what it represents. By using a named class, such as `App\Api\Response\Item`, you're making it much clearer that that object represents an individual item returned from an API, and others developers working on the same code base (including your future self, who may not necessarily remember all of the details of how you're implementing it now), will have less trouble understanding what is going on.
+A related argument is that it makes type hinting more useful. You *can* type hint `stdClass`, but as noted above it tells someone working on the code receiving it very little about where it's come from, or what it represents, and it doesn't offer much value since an `stdClass` could mean anything, and could be created anywhere in the appication.
+
+By contrast, named classes provides much more information about what the type hinted parameter represents. For instance, naming your class something such as `App\Api\Response\Item`, makes it much clearer that that object represents an individual item returned from an API, and others developers working on the same code base (including your future self, who may not necessarily remember all of the details of how you're implementing it now), will have less trouble understanding what is going on. There's also a much-reduced likelihood of the same class being used to represent completely different types of data.
 
 New functionality
 -----------------
