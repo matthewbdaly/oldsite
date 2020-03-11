@@ -149,6 +149,6 @@ Finally, set up the config to use the caching provider:
     ],
 ```
 
-This is pretty rough and ready, and could possibly be improved upon by allowing you to specify a particular provider to wrap in the config, as well as caching more of the methods, but it demonstrates the principle effectively
+This is pretty rough and ready, and could possibly be improved upon by allowing you to specify a particular provider to wrap in the config, as well as caching more of the methods, but it demonstrates the principle effectively.
 
 By wrapping the existing providers, you can change the behaviour of the user provider without touching the existing implementation, which is in line with the idea of composition over inheritance. Arguably it's more complex, but it's also more flexible - if need be you can swap out the wrapped user provider easily, and still retain the same caching functionality.
