@@ -4,8 +4,8 @@ layout: page
 ---
 ## Editor
 
-* [Neovim]()
-* [Jellybeans theme]()
+* [Neovim](https://neovim.io/)
+* [Jellybeans theme](https://github.com/nanotech/jellybeans.vim)
 * [PHPActor](https://phpactor.github.io/phpactor/) - I swear, this plugin is amazing. It gives Neovim and Vim the sort of powerful completion and refactoring tools that used to be the preserve of full IDE's, and it's incredibly useful for legacy code bases in particular
 * [Vim Ale](https://github.com/dense-analysis/ale) - Extremely fast in-editor linter. Works pretty much out of the box with most linting and static analysis tools. Have used it with ESLint, Flow, Psalm, PHP and CodeSniffer, among others
 * [FZF and Ripgrep](https://github.com/junegunn/fzf.vim) - I used to just rely on `git grep`, but I've had to work on a few projects that are still in SVN in the last couple of years, and I needed a good search solution. Found these and they're extremely powerful and fast
