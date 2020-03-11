@@ -8,6 +8,8 @@ categories:
 comments: true
 ---
 
+EDIT: I no longer recommend this approach - please refer [here](https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/) for an alternative approach to this.
+
 If you have a Laravel application that requires users to log in and you use Clockwork or Laravel DebugBar to examine the queries that take place, you'll probably notice a query that fetches the user model occurs quite a lot. This is because the user's ID gets stored in the session, and is then used to retrieve the model.
 
 This query is a good candidate for caching because not only is that query being made often, but it's also not something that changes all that often. If you're careful, it's quite easy to set your application up to cache the user without having to worry about invalidating the cache.
