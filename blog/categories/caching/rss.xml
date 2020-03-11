@@ -4,7 +4,7 @@
         <title>caching | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/caching/</link>
         <description>caching | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Wed, 12 Feb 2020 23:40:25 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 11 Mar 2020 21:20:41 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2020</copyright>
@@ -13,7 +13,8 @@
             <link>https://matthewdaly.co.uk/blog/2018/01/12/creating-a-caching-user-provider-for-laravel/</link>
             <guid>https://matthewdaly.co.uk/blog/2018/01/12/creating-a-caching-user-provider-for-laravel/</guid>
             <pubDate>Fri, 12 Jan 2018 13:16:51 GMT</pubDate>
-            <description><![CDATA[<p>If you have a Laravel application that requires users to log in and you use Clockwork or Laravel DebugBar to examine the queries that take place, you’ll probably notice a query that fetches the user model occurs quite a lot. This is because the user’s ID gets stored in the session, and is then used to retrieve the model.</p>
+            <description><![CDATA[<p>EDIT: I no longer recommend this approach - please refer <a href="https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/">here</a> for an alternative approach to this.</p>
+<p>If you have a Laravel application that requires users to log in and you use Clockwork or Laravel DebugBar to examine the queries that take place, you’ll probably notice a query that fetches the user model occurs quite a lot. This is because the user’s ID gets stored in the session, and is then used to retrieve the model.</p>
 <p>This query is a good candidate for caching because not only is that query being made often, but it’s also not something that changes all that often. If you’re careful, it’s quite easy to set your application up to cache the user without having to worry about invalidating the cache.</p>
 <p>Laravel allows you to define your own user providers in order to fetch the user’s details. These must implement <code>Illuminate\Contracts\Auth\UserProvider</code> and must return a user model from the identifier provided. Out of the box it comes with two implementations, <code>Illuminate\Auth\EloquentUserProvider</code> and <code>Illuminate\Auth\DatabaseUserProvider</code>, with the former being the default. Our caching user provider can extend the Eloquent one as follows:</p>
 <pre><code class="lang-php">&lt;?php

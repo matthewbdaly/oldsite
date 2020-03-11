@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>Matthew Daly&apos;s Blog</title>
-    <updated>2020-02-12T23:40:24Z</updated>
+    <updated>2020-03-11T21:20:41Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,147 @@
     <link rel="alternate" href="https://matthewdaly.co.uk"/>
     <subtitle>I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2020</rights>
+    <entry>
+        <title type="html"><![CDATA[Caching the Laravel user provider with a decorator]]></title>
+        <id>https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/</id>
+        <link href="https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/">
+        </link>
+        <updated>2020-03-11T21:20:14Z</updated>
+        <summary type="html"><![CDATA[<p>A couple of years ago I posted <a href="https://matthewdaly.co.uk/blog/2018/01/12/creating-a-caching-user-provider-for-laravel/">this article</a> about constructing a caching user provider for Laravel. It worked, but with the benefit of hindsight I can now see that there were a number of issues with this solution:</p>
+<ul>
+<li>Because it extended the existing Eloquent user provider, it was dependent on the internals of that remaining largely the same - any change in how that worked could potentially break it</li>
+<li>For the same reason, if you wanted to switch to a different user provider, you’d need to add the same functionality to that provider, either by writing a new provider from scratch or extending an existing one</li>
+</ul>
+<p>I’ve used the decorator pattern a few times in the past, and it’s a good fit for situations like this where you want to add functionality to something that implements an interface. It allows you to separate out one part of the functionality (in this case, caching) into its own layer, so it’s not dependent on any one implementation and can wrap any other implementation of that same interface you wish. Also, as long as the interface remains the same, there likely won’t be any need to change it when the implementation that is wrapped changes. Here I’ll demonstrate how to create a decorator to wrap the existing user providers.</p>
+<p>If we only want to cache the <code>retrieveById()</code> method, like the previous implementation, the decorator class might look something like this:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Auth;
+
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Contracts\Cache\Repository;
+
+final class UserProviderDecorator implements UserProvider
+{
+    /**
+     * @var UserProvider
+     */
+    private $provider;
+
+    /**
+     * @var Repository
+     */
+    private $cache;
+
+    public function __construct(UserProvider $provider, Repository $cache)
+    {
+        $this-&gt;provider = $provider;
+        $this-&gt;cache = $cache;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveById($identifier)
+    {
+        return $this-&gt;cache-&gt;remember(&#39;id-&#39; . $identifier, 60, function () use ($identifier) {
+            return $this-&gt;provider-&gt;retrieveById($identifier);
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveByToken($identifier, $token)
+    {
+        return $this-&gt;provider-&gt;retrieveById($identifier, $token);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateRememberToken(Authenticatable $user, $token)
+    {
+        return $this-&gt;provider-&gt;updateRememberToken($user, $token);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveByCredentials(array $credentials)
+    {
+        return $this-&gt;provider-&gt;retrieveByCredentials($credentials);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function validateCredentials(Authenticatable $user, array $credentials)
+    {
+        return $this-&gt;provider-&gt;validateCredentials($user, $credentials);
+    }
+}
+</code></pre>
+<p>It implements the same interface as the user providers, but accepts two arguments in the constructor, which are injected and stored as properties:</p>
+<ul>
+<li>Another instance of <code>Illuminate\Contracts\Auth\UserProvider</code></li>
+<li>An instance of the cache repository <code>Illuminate\Contracts\Cache\Repository</code></li>
+</ul>
+<p>Most of the methods just defer to their counterparts on the wrapped instance - in this example I have cached the response to <code>retrieveById()</code> only, but you can add caching to the other methods easily enough if need be. You do of course still need to flush the cache at appropriate times, which is out of scope for this example, but can be handled by model events as appropriate, as described in the prior article.</p>
+<p>Then you add the new decorator as a custom user provider, but crucially, you need to first resolve the provider you’re going to use, then wrap it in the decorator:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Contracts\Auth\UserProvider;
+use Auth;
+use Illuminate\Auth\EloquentUserProvider;
+use Illuminate\Contracts\Cache\Repository;
+use App\Auth\UserProviderDecorator;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array
+     */
+    protected $policies = [
+        &#39;App\Model&#39; =&gt; &#39;App\Policies\ModelPolicy&#39;,
+    ];
+
+    /**
+     * Register any authentication / authorization services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this-&gt;registerPolicies();
+
+        Auth::provider(&#39;cached&#39;, function ($app, array $config) {
+            $provider = new EloquentUserProvider($app[&#39;hash&#39;], $config[&#39;model&#39;]);
+            $cache = $app-&gt;make(Repository::class);
+            return new UserProviderDecorator($provider, $cache);
+        });
+    }
+}
+</code></pre>
+<p>Finally, set up the config to use the caching provider:</p>
+<pre><code class="lang-php">    &#39;providers&#39; =&gt; [
+        &#39;users&#39; =&gt; [
+            &#39;driver&#39; =&gt; &#39;cached&#39;,
+            &#39;model&#39; =&gt; App\Eloquent\Models\User::class,
+        ],
+    ],
+</code></pre>
+<p>This is pretty rough and ready, and could possibly be improved upon by allowing you to specify a particular provider to wrap in the config, as well as caching more of the methods, but it demonstrates the principle effectively</p>
+<p>By wrapping the existing providers, you can change the behaviour of the user provider without touching the existing implementation, which is in line with the idea of composition over inheritance. Arguably it’s more complex, but it’s also more flexible - if need be you can swap out the wrapped user provider easily, and still retain the same caching functionality.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[The trouble with integrated static analysis]]></title>
         <id>https://matthewdaly.co.uk/blog/2020/02/12/the-trouble-with-integrated-static-analysis/</id>
@@ -2111,31 +2252,6 @@ final class AbstractOrFinalSniff implements Sniff
 <p>It’s all too easy to focus solely on delivering a working product and not worry about the quality of the code base when time spent cleaning it up doesn’t pay the bills, and it can be hard to justify the cost of cleaning it up later to clients.</p>
 <p>There are tools you can use to help keep up code quality, such as linters and static analysers, and it’s never a bad idea to investigate the ones available for the language(s) you work in. For best results they should form part of your continuous integration pipeline, so you can monitor changes over time and prompt developers who check in problematic code to fix the issues. Code reviews are another good way to avoid bad code, since they allow developers to find problematic code and offer more elegant solutions.</p>
 <p>I’m not suggesting that a code base that has a few warts has no value, or that you should sink huge amounts of developer time into refactoring messy code when money is tight, as commercial concerns do have to come first. But a bad code base does cause serious issues that have financial implications, and it’s prudent to recognise the problems it could cause, and take action to resolve them, or better yet, prevent them occurring in the first place.</p>
-]]></summary>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Improving search in Vim and Neovim with FZF and Ripgrep]]></title>
-        <id>https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/</id>
-        <link href="https://matthewdaly.co.uk/blog/2018/12/27/improving-search-in-vim-and-neovim-with-fzf-and-ripgrep/">
-        </link>
-        <updated>2018-12-27T18:37:09Z</updated>
-        <summary type="html"><![CDATA[<p>A while back I was asked to make some changes to a legacy project that was still using Subversion. This was troublesome because my usual method of searching in files is to use Tim Pope’s Fugitive Vim plugin as a frontend for <code>git grep</code>, and so it would be harder than usual to navigate the project. I therefore started looking around for alternative search systems, and one combination that kept on coming up was FZF and Ripgrep, so I decided to give them a try. FZF is a fuzzy file finder, written in Go, while Ripgrep is an extremely fast grep, written in Rust, that respects gitignore rules by default. Both have proven so useful they’re now a permanent part of my setup.</p>
-<p>On Mac OS X, both are available via Homebrew, so they’re easy to install. On Ubuntu, Ripgrep is in the repositories, but FZF isn’t, so it was necessary to install it in my home directory. There’s a <a href="https://github.com/junegunn/fzf.vim">Vim plugin for FZF and Ripgrep integration</a>, which, since I use vim-plugged, I could install by adding the following to my <code>init.vim</code>, then running <code>PlugUpdate</code> from Neovim:</p>
-<pre><code class="lang-viml">&quot; Search
-Plug &#39;~/.fzf&#39;
-Plug &#39;junegunn/fzf.vim&#39;
-</code></pre>
-<p>The plugin exposes a number of commands that are very useful, and I’ll go through the ones I use most often:</p>
-<ul>
-<li><code>:Files</code> is for finding files by name. I used to use Ctrl-P for this, but FZF is so much better and quicker that I ditched Ctrl-P almost immediately (though you can map <code>:Files</code> to it if you want to use the same key).</li>
-<li><code>:Rg</code> uses Ripgrep to search for content in files, so you can search for a specific string. This makes it an excellent replacement for the <code>Ggrep</code> command from Fugitive.</li>
-<li><code>:Snippets</code> works with Ultisnips to provide a filterable list of available snippets you can insert, making it much more useful</li>
-<li><code>:Tags</code> allows you to filter and search tags in the project as a whole</li>
-<li><code>:BTags</code> does the same, but solely in the current buffer</li>
-<li><code>:Lines</code> allows you to find lines in the project and navigate to them.</li>
-<li><code>:BLines</code> does the same, but solely in the current buffer.</li>
-</ul>
-<p>In addition to being useful in Neovim, FZF can also be helpful in Bash. You can use <code>Ctrl-T</code> to find file paths, and it enhances the standard <code>Ctrl-R</code> history search, making it faster and more easily navigable. The performance of both is also excellent - they work very fast, even on the very large legacy project I maintain, or on slower machines, and I never find myself waiting for them to finish. Both tools have quickly become an indispensible part of my workflow.</p>
 ]]></summary>
     </entry>
 </feed>
