@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>Matthew Daly&apos;s Blog</title>
-    <updated>2020-03-11T22:14:34Z</updated>
+    <updated>2020-06-13T12:47:19Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,204 @@
     <link rel="alternate" href="https://matthewdaly.co.uk"/>
     <subtitle>I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2020</rights>
+    <entry>
+        <title type="html"><![CDATA[Flow typed AJAX responses with React Hooks]]></title>
+        <id>https://matthewdaly.co.uk/blog/2020/06/13/flow-typed-ajax-responses-with-react-hooks/</id>
+        <link href="https://matthewdaly.co.uk/blog/2020/06/13/flow-typed-ajax-responses-with-react-hooks/">
+        </link>
+        <updated>2020-06-13T12:50:41Z</updated>
+        <summary type="html"><![CDATA[<p>I’m a big fan of type systems in general. Using Psalm to find missing type declarations and incorrect calls in PHP has helped me out tremendously. However, I’m not a big fan of Typescript. The idea of creating a whole new language, primarily just to add types to Javascript, strikes me as a fundamentally bad idea given how many languages that compile to Javascript have fallen by the wayside. Flow seems like a much better approach since it adds types to the language rather than creating a new language, and I’ve been using it on my React components for a good while now. However, there are a few edge cases that can be difficult to figure out, and one of those is any generic AJAX component that may be reused for different requests.</p>
+<p>A while back I wrote the following custom hook, loosely inspired by axios-hooks (but using the Fetch API) to make a query to a GraphQL endpoint:</p>
+<pre><code class="lang-javascript">import { useCallback, useState, useEffect } from &quot;react&quot;;
+
+function useFetch(url, query) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false)
+
+  const fetchData = useCallback(() =&gt; {
+    setLoading(true);
+    fetch(url, {
+      method: &#39;POST&#39;,
+      headers: {
+        &#39;Content-Type&#39;: &#39;application/json&#39;,
+        &#39;Accept&#39;: &#39;application/json&#39;,
+      },
+      body: JSON.stringify({query: query})
+    }).then(r =&gt; r.json())
+      .then((data) =&gt; {
+        setData(data.data);
+        setLoading(false);
+        setError(false);
+      });
+  }, [url, query]);
+
+  useEffect(() =&gt; {
+    fetchData();
+  }, [url, query, fetchData]);
+
+  return [{
+    data: data,
+    loading: loading,
+    error: error
+  }, fetchData];
+};
+
+export default useFetch;
+</code></pre>
+<p>When called, the hook receives two parameters, the URL to hit, and the query to make, and returns an array that contains a function for reloading, and an object containing the following values:</p>
+<ul>
+<li><code>loading</code> - a boolean that specifies if the hook is loading right now</li>
+<li><code>error</code> - a boolean that specifies if an error has occurred</li>
+<li><code>data</code> - the response data from the endpoint, or null</li>
+</ul>
+<p>Using this hook, it was then possible to make an AJAX request when a component was loaded to populate the data, as in this example:</p>
+<pre><code class="lang-javascript">import React from &#39;react&#39;;
+import useFetch from &#39;./Hooks/useFetch&#39;;
+import marked from &#39;marked&#39;;
+import &#39;./App.css&#39;;
+
+function App() {
+  const url = `/graphql`;
+  const query = `query {
+    posts {
+      title
+      slug
+      content
+      tags {
+        name
+      }
+    }
+  }`;
+
+  const [{data, loading, error}] = useFetch(url, query);
+
+  if (loading) {
+    return (&lt;h1&gt;Loading...&lt;/h1&gt;);
+  }
+
+  if (error) {
+    return (&lt;h1&gt;Error!&lt;/h1&gt;);
+  }
+
+  const posts = data ? data.posts.map((item) =&gt; (
+    &lt;div key={item.slug}&gt;
+      &lt;h2&gt;{item.title}&lt;/h2&gt;
+      &lt;div dangerouslySetInnerHTML={{__html: marked(item.content)}} /&gt;
+    &lt;/div&gt;
+  )) : [];
+  return (
+    &lt;div className=&quot;App&quot;&gt;
+      {posts}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>This hook is simple, and easy to reuse. However, it’s difficult to type the value of <code>data</code> correctly, since it will be different for different endpoints, and given that it may be reused for almost any endpoint, you can’t cover <em>all</em> the acceptable response types. We need to be able to specify the response that is acceptable in that particular context.</p>
+<h2 id="generics-to-the-rescue">Generics to the rescue</h2>
+<p>Flow provides a solution for this in the shape of <a href="https://flow.org/en/docs/types/generics/">generic types</a>. By passing in a polymorphic type using <code>&lt;T&gt;</code> in the function declaration, we can then refer to that type when specifying what <code>data</code> should look like:</p>
+<pre><code class="lang-flow">//@flow
+import { useCallback, useState, useEffect } from &quot;react&quot;;
+
+function useFetch&lt;T&gt;(url: string, query: string): [{
+  data: ?T,
+  loading: boolean,
+  error: boolean
+}, () =&gt; void] {
+  const [data, setData]: [?T, ((?T =&gt; ?T) | ?T) =&gt; void] = useState(null);
+  const [loading, setLoading]: [boolean, ((boolean =&gt; boolean) | boolean) =&gt; void] = useState(false);
+  const [error, setError]: [boolean, ((boolean =&gt; boolean) | boolean) =&gt; void] = useState(false)
+
+  const fetchData = useCallback(() =&gt; {
+    setLoading(true);
+    fetch(url, {
+      method: &#39;POST&#39;,
+      headers: {
+        &#39;Content-Type&#39;: &#39;application/json&#39;,
+        &#39;Accept&#39;: &#39;application/json&#39;,
+      },
+      body: JSON.stringify({query: query})
+    }).then(r =&gt; r.json())
+      .then((data) =&gt; {
+        setData(data.data);
+        setLoading(false);
+        setError(false);
+      });
+  }, [url, query]);
+
+  useEffect(() =&gt; {
+    fetchData();
+  }, [url, query, fetchData]);
+
+  return [{
+    data: data,
+    loading: loading,
+    error: error
+  }, fetchData];
+};
+
+export default useFetch;
+</code></pre>
+<p>Then, when calling the hook, we can define a type that represents the expected shape of the data (here called <code>&lt;Data&gt;</code>, and specify that type when calling the hook, as in this example:</p>
+<pre><code class="lang-javascript">//@flow
+import React from &#39;react&#39;;
+import useFetch from &#39;./Hooks/useFetch&#39;;
+import marked from &#39;marked&#39;;
+import &#39;./App.css&#39;;
+
+type Data = {
+  posts: Array&lt;{
+    title: string,
+    slug: string,
+    content: string,
+    name: Array&lt;string&gt;
+  }&gt;
+};
+
+function App() {
+  const url = `/graphql`;
+  const query = `query {
+    posts {
+      title
+      slug
+      content
+      tags {
+        name
+      }
+    }
+  }`;
+
+  const [{data, loading, error}] = useFetch&lt;Data&gt;(url, query);
+
+  if (loading) {
+    return (&lt;h1&gt;Loading...&lt;/h1&gt;);
+  }
+
+  if (error) {
+    return (&lt;h1&gt;Error!&lt;/h1&gt;);
+  }
+
+  const posts = data ? data.posts.map((item) =&gt; (
+    &lt;div key={item.slug}&gt;
+      &lt;h2&gt;{item.title}&lt;/h2&gt;
+      &lt;div dangerouslySetInnerHTML={{__html: marked(item.content)}} /&gt;
+    &lt;/div&gt;
+  )) : [];
+  return (
+    &lt;div className=&quot;App&quot;&gt;
+      {posts}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>That way, we can specify a completely different shape for our response data every time we call a different endpoint, without creating a different hook for every different endpoint, and still enjoy properly typed responses from our hook.</p>
+<p>Generics can be useful for many other purposes, such as specifying the contents of collections. For instance, if you had a <code>Collection</code> object, you could use a generic type to specify that any one instance must consist of instances of a given type. Flow would then flag it as an error if you assigned an item of the wrong type to that collection, thus making some unit tests redundant.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Caching the Laravel user provider with a decorator]]></title>
         <id>https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/</id>
@@ -2217,41 +2415,6 @@ final class AbstractOrFinalSniff implements Sniff
 <p>The above approach works particularly well in the initial stages of a project, when you may need to jump around a lot to edit different parts of the project. However, later on, once many parts of the project have stabilised, it may make more sense to pull the modules out into separate repositories and use Composer to pull them in as dependencies, using its support for private repositories. I’ve also often taken this approach right from the start without issue.</p>
 <p>This approach has a number of advantages. It makes it easier to reuse parts of the project in other projects if need be. Also, if you put your tests in the packages containing the components they test, it means that rather than running one monolithic test suite for the whole project, you can instead run each module’s tests each time you change it, and limit the test suite of the main project to those integration and acceptance tests that verify the whole thing, along with any unit tests for code that remains in the main repository, resulting in quicker test runs.</p>
 <p>Don’t get me wrong, making your code more modular is definitely a good thing and I’m wholly in favour of it. However, it only takes a little knowledge of Composer to be able to achieve this without any third party package at all, which is good because you’re no longer dependent on a package that may at any time fall behind the curve or be abandoned.</p>
-]]></summary>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Why bad code is bad]]></title>
-        <id>https://matthewdaly.co.uk/blog/2019/01/02/why-bad-code-is-bad/</id>
-        <link href="https://matthewdaly.co.uk/blog/2019/01/02/why-bad-code-is-bad/">
-        </link>
-        <updated>2019-01-02T23:00:50Z</updated>
-        <summary type="html"><![CDATA[<p>This may sound a little trite, but why is it bad to write bad code?</p>
-<p>Suppose you’re a client, or a line manager for a team of developers. You work with developers regularly, but when they say that a code base is bad, what are the consequences of that, and how can you justify spending time and money to fix it? I’ve often heard the refrain “If it works, it doesn’t matter”, which may have a grain of truth, but is somewhat disingenuous. In this post, I’ll explain some of the consequences when your code base is bad. It can be hard to put a definitive price tag on the costs associated with delivering bad code, but this should give some idea of the sort of issues you should take into account.</p>
-<h1 id="bad-code-kills-developer-productivity">Bad code kills developer productivity</h1>
-<p>Bad code is harder to understand, navigate and reason about than good code. Developers are not superhuman, and we can only hold so much in our heads at one time, which is why many of the principles behind a clean and maintainable code base can essentially be boiled down to “break it into bite-sized chunks so developers can understand each one in isolation before seeing how they fit together”.</p>
-<p>If one particular class or function gets too big and starts doing too much, it quickly becomes very, very hard to get your head around what that code does. Developers typically have to build a mental model of how a class or function works before they can use it effectively, and the smaller and simpler you can keep each unit of code, the less time and effort it takes to do so. The mark of a skilled developer is not the complexity of their code bases, but their simplicity - they’ve learned to make their code as small, simple, and readable as possible. A clean and well laid-out code base makes it easy for developers to get into the mental state called “flow” that is significantly more productive.</p>
-<p>In addition, if an application doesn’t conform to accepted conventions in some way, such as using inappropriate HTTP verbs (eg <code>GET</code> to change the state of something), then quite apart from the fact that it won’t play well with proxy servers, it imposes an additional mental load on developers by forcing them to drop a reasonable set of assumptions about how the application works. If the application used the correct HTTP verbs, experienced developers would know without being told that to create a new report, you’d send a <code>POST</code> request to the <code>reports</code> API endpoint.</p>
-<p>During the initial stages of a project, functionality can be delivered quite quickly, but if the code quality is poor, then over time developer velocity can decrease. Ensuring a higher quality code base helps to maintain velocity at a consistent level as it gets bigger. This also means estimates will be more accurate, so if you quote a given number of hours for a feature, you’re more likely to deliver inside that number of hours.</p>
-<h1 id="bad-code-is-bad-for-developer-welfare">Bad code is bad for developer welfare</h1>
-<p>A code base that’s repetitive, badly organised, overly complex and hard to read is a recipe for stressed developers, making burnout more likely. If a developer suffers burnout, their productivity will drop substantially.</p>
-<p>In the longer term, if developer burnout isn’t managed correctly, it could easily increase developer turnover as stressed developers quit. It’s also harder to recruit new developers if they’re faced with the prospect of dealing with a messy, stressful code base.</p>
-<h1 id="bad-code-hampers-your-ability-to-pivot">Bad code hampers your ability to pivot</h1>
-<p>If the quality of your code base is poor, it can mean that if functionality needs to be changed or added, then more work is involved. Repetitive code can mean something has to be updated in more than one place, and if it becomes too onerous, it can make it too time-consuming or expensive to justify the changes.</p>
-<h1 id="bad-code-may-threaten-the-long-term-viability-of-your-project">Bad code may threaten the long-term viability of your project</h1>
-<p>One thing that is certain in our industry is that things change. Libraries, languages and frameworks are constantly being updated, and sometimes there will be potentially breaking changes to some of these. On occasion, a library or framework will be discontinued, making it necessary to migrate to a replacement.</p>
-<p>Bad code is often tightly coupled to a particular framework or library, and sometimes even to a particular version, making it harder to migrate if it becomes necessary. If a project was written with a language or framework version that had a serious issue, and was too tightly coupled to migrate to a newer version, it might be too risky to keep it running, or it might be necessary to run an insecure application in spite of the risks it posed.</p>
-<h1 id="bad-code-is-more-brittle">Bad code is more brittle</h1>
-<p>A poor code base will break, a lot, and often in ways that are clearly visible to end users. Duplicate code makes it easy to miss cases where something needs to be updated in more than one place, and if the code base lacks tests, a serious error may not be noticed for a long time, especially if it’s something comparatively subtle.</p>
-<h1 id="bad-code-is-hard-if-not-impossible-to-write-automated-tests-for">Bad code is hard, if not impossible, to write automated tests for</h1>
-<p>If a particular class or function does too much, it becomes <em>much</em> harder to write automated tests for it because there are more variables going in and more expected outcomes. A sufficiently messy code base may only really be testable by automating the browser, which tends to be very slow and brittle, making test-driven development impractical. Manual testing is no substitute for a proper suite of automated tests, since it’s slower, less consistent and not repeatable in the same way, and it’s only sufficient by itself for the most trivial of web apps.</p>
-<h1 id="bad-code-is-often-insecure">Bad code is often insecure</h1>
-<p>A bad code base may inadvertently expose user’s data, or be at risk from all kinds of attacks such as cross-site scripting and SQL injection attacks that can also potentially expose too much data.</p>
-<p>For any business with EU-based users, the risks of exposing user’s data are very serious. Under the GDPR, there’s a potential fine of up to &euro;20 million, or 4% of turnover. That’s potentially an existential risk for many companies.</p>
-<p>In addition, a bad code base is often more vulnerable to denial-of-service attacks. If it has poor or no caching, excessive queries, or inefficient queries, then every time a page loads it will carry out more queries than a more optimised site would. Given the same server specs, the inefficient site will be overwhelmed quicker than the efficient one.</p>
-<h1 id="summary">Summary</h1>
-<p>It’s all too easy to focus solely on delivering a working product and not worry about the quality of the code base when time spent cleaning it up doesn’t pay the bills, and it can be hard to justify the cost of cleaning it up later to clients.</p>
-<p>There are tools you can use to help keep up code quality, such as linters and static analysers, and it’s never a bad idea to investigate the ones available for the language(s) you work in. For best results they should form part of your continuous integration pipeline, so you can monitor changes over time and prompt developers who check in problematic code to fix the issues. Code reviews are another good way to avoid bad code, since they allow developers to find problematic code and offer more elegant solutions.</p>
-<p>I’m not suggesting that a code base that has a few warts has no value, or that you should sink huge amounts of developer time into refactoring messy code when money is tight, as commercial concerns do have to come first. But a bad code base does cause serious issues that have financial implications, and it’s prudent to recognise the problems it could cause, and take action to resolve them, or better yet, prevent them occurring in the first place.</p>
 ]]></summary>
     </entry>
 </feed>

@@ -986,7 +986,7 @@ Ran 3 tests <span class="hljs-keyword">in</span> 0.409s
 
 FAILED (errors=1)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>We see that the template is not defined. Save the following as <code>gigs/templates/gigs/includes/base.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+</code></pre><p>We see that the template is not defined. Save the following as <code>gigs/templates/gigs/includes/base.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Gig finder<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
@@ -999,14 +999,14 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Gig Finder<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
-                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://code.jquery.com/jquery-2.2.2.min.js"</span> <span class="hljs-attr">integrity</span>=<span class="hljs-string">"sha256-36cp2Co+/62rEAAYHLmRCPIych47CvdM+uTBJwSzWjI="</span> <span class="hljs-attr">crossorigin</span>=<span class="hljs-string">"anonymous"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">language</span>=<span class="hljs-string">"javascript"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></span>
-</code></pre><p>And the following as <code>gigs/templates/gigs/lookup.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
+</code></pre><p>And the following as <code>gigs/templates/gigs/lookup.html</code>:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
 
 </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml">
     <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">role</span>=<span class="hljs-string">"form"</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"/"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"post"</span>&gt;</span></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">csrf_token</span></span> %}</span><span class="xml">
@@ -1028,7 +1028,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
             lon.value = position.coords.longitude;
         });
     </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
 </code></pre><p>Note the JavaScript to populate the latitude and longitude. Now, if we run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ...
@@ -1163,7 +1163,7 @@ Ran 4 tests <span class="hljs-keyword">in</span> 0.506s
 
 FAILED (errors=1)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>So let’s create <code>gigs/templates/gigs/lookupresults.html</code>:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
+</code></pre><p>So let’s create <code>gigs/templates/gigs/lookupresults.html</code>:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "gigs/includes/base.html" %}</span><span class="xml">
 
 </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml">
     <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
@@ -1171,7 +1171,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
     <span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span></span><span class="hljs-template-variable">{{ event.name }}</span><span class="xml"> - </span><span class="hljs-template-variable">{{ event.venue.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endfor</span></span> %}</span><span class="xml">
     <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
-</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
 </code></pre><p>Now, if we run our tests, they should pass:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> gigs
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ....

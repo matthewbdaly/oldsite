@@ -200,12 +200,12 @@
     }
     render() {
       <span class="hljs-keyword">return</span> (
-        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">foo</span>=<span class="hljs-string">{this.state.foo}</span> <span class="hljs-attr">doStuff</span>=<span class="hljs-string">{this.doStuff}</span> /&gt;</span>
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> <span class="hljs-attr">foo</span>=<span class="hljs-string">{this.state.foo}</span> <span class="hljs-attr">doStuff</span>=<span class="hljs-string">{this.doStuff}</span> /&gt;</span></span>
       );
     }
   }
-  return hocExample;
-}</span>
+  <span class="hljs-keyword">return</span> hocExample;
+}
 </code></pre><p>If you’ve been working with React for a while, even if you haven’t written a higher-order component, you’ve probably used one. For instance, <code>withRouter()</code> from <code>react-router</code> is a good example of a higher-order component that forms part of an existing library.</p><h1 id="a-real-world-example">A real-world example</h1><p>A very common use case I’ve come across is handling a click outside of a component. For instance, if you have a sidebar or popup component, it’s common to want to close it when the user clicks outside the component. As such, it’s worth taking the time to refactor it to make it reusable.</p><p>In principle you can achieve this on any component as follows:</p><ul><li>The component should accept two props - an <code>active</code> prop that denotes whether the component is active or not, and an <code>onClickOutside()</code> prop method that is called on a click outside</li><li>On mount, an event listener should be added to the document to listen for <code>mousedown</code> events, and it should be removed on unmount</li><li>When the event listener is fired, it should use a ref on the component to determine if the ref contains the event target. If so, and the status is active, the <code>onClickOutside()</code> method should be called</li></ul><p>Moving this to a higher order component makes a couple of issues slightly more complex, but not very. We can’t easily get a ref of the wrapped component, so I had to resort to using <code>ReactDOM.findDOMNode()</code> instead, which is potentially a bit dodgy as they’re talking about deprecating that.</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> { findDOMNode } <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
 
@@ -236,12 +236,12 @@
     }
     render() {
       <span class="hljs-keyword">return</span> (
-        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> {<span class="hljs-attr">...this.props</span>} <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.setWrapperRef}</span> /&gt;</span>
+        <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">WrappedComponent</span> {<span class="hljs-attr">...this.props</span>} <span class="hljs-attr">ref</span>=<span class="hljs-string">{this.setWrapperRef}</span> /&gt;</span></span>
       );
     }
   };
-  return clicksOutside;
-}</span>
+  <span class="hljs-keyword">return</span> clicksOutside;
+}
 </code></pre><p>Now we can use this as follows:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React, { Component } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
 <span class="hljs-keyword">import</span> Sidebar <span class="hljs-keyword">from</span> <span class="hljs-string">'./src/Components/Sidebar'</span>;
@@ -258,9 +258,9 @@ ReactDOM.render(
     <span class="hljs-attr">links</span>=<span class="hljs-string">{links}</span> 
     <span class="hljs-attr">active</span>=<span class="hljs-string">{true}</span> 
     <span class="hljs-attr">onClickOutside</span>=<span class="hljs-string">{handleClickOutside}</span> 
-  /&gt;</span>,
-  document.getElementById('root')
-);</span>
+  /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
 </code></pre><p>Higher order components sound a lot harder than they actually are. In reality, they’re actually quite simple to implement, but I’m not sure the <a href="https://reactjs.org/docs/higher-order-components.html">documentation</a> is necessarily the best example to use since it’s a bit on the complex side.</p><section><ul class="categories"><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/react/">react</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2019/02/16/higher-order-components-in-react/">View the article with comments</a></section><section><a class="postlink" href="/blog/2019/02/20/searching-content-with-fuse-dot-js/amp/">Searching Content With Fuse.js</a> <a class="postlink" href="/blog/2019/02/02/creating-your-own-dependency-injection-container-in-php/amp/">Creating Your Own Dependency Injection Container in PHP</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

@@ -203,7 +203,7 @@
 </code></pre><p>Note in particular that we set our test command to <code>grunt test</code>.</p><p>Next, we install our required Node.js modules. First, install, the normal dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save body-parser express redis hiredis jade shortid
 </code></pre><p>Next, install the development dependencies:</p><pre><code class="hljs lang-bash">$ npm install --save-dev grunt grunt-contrib-jshint grunt-mocha-istanbul istanbul mocha chai request
 </code></pre><p>Now, we’re going to use Grunt to run our tests, so that we can easily lint the JavaScript and generate code coverage details. Here’s the Gruntfile:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">grunt</span>) </span>{
-<span class="hljs-meta">    'use strict'</span>;
+    <span class="hljs-string">'use strict'</span>;
 
     grunt.initConfig({
         <span class="hljs-attr">jshint</span>: {
@@ -215,7 +215,7 @@
         <span class="hljs-attr">mocha_istanbul</span>: {
             <span class="hljs-attr">coverage</span>: {
                 <span class="hljs-attr">src</span>: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
-                options: {
+                <span class="hljs-attr">options</span>: {
                     <span class="hljs-attr">mask</span>: <span class="hljs-string">'*.js'</span>,
                     <span class="hljs-attr">reportFormats</span>: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>]
                 }
@@ -231,20 +231,20 @@
     grunt.registerTask(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'mocha_istanbul:coverage'</span>]);
 };
 </code></pre><p>We’ll also create a <code>Procfile</code> in anticipation of deploying the app to Heroku:</p><pre><code class="hljs lang-bash">web: node index.js
-</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade">doctype <span class="hljs-selector-tag">html</span>
-<span class="hljs-function"><span class="hljs-title">html</span><span class="hljs-params">(lang=<span class="hljs-string">"en"</span>)</span></span>
+</code></pre><h2 id="creating-the-views">Creating the views</h2><p>For this application we’ll be using the Express framework and the Jade templating system. We need three templates:</p><ul><li>Submission form</li><li>Output form</li><li>404 page</li></ul><p>Create the folder <code>views</code> under the application directory and add the files <code>views/index.jade</code>:</p><pre><code class="hljs lang-jade">doctype html
+html(<span class="hljs-attribute">lang</span>=<span class="hljs-string">"en"</span>)
     head
-        title=<span class="hljs-string">"Shortbread"</span>
+        <span class="hljs-attribute">title</span>=<span class="hljs-string">"Shortbread"</span>
 
-    <span class="hljs-selector-tag">body</span>
-        <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.container</span>
-            <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.row</span>
-                <span class="hljs-selector-tag">h1</span> Shortbread
+    body
+        div.container
+            div.row
+                h1 Shortbread
 
-            <span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.row</span>
-                form(action=<span class="hljs-string">"/"</span>, method=<span class="hljs-string">"POST"</span>)
-                    input(type=<span class="hljs-string">"url"</span>, name=<span class="hljs-string">"url"</span>)
-                    input(type=<span class="hljs-string">"submit"</span>, value=<span class="hljs-string">"Submit"</span>)
+            div.row
+                form(<span class="hljs-attribute">action</span>=<span class="hljs-string">"/"</span>, <span class="hljs-attribute">method</span>=<span class="hljs-string">"POST"</span>)
+                    input(<span class="hljs-attribute">type</span>=<span class="hljs-string">"url"</span>, <span class="hljs-attribute">name</span>=<span class="hljs-string">"url"</span>)
+                    input(<span class="hljs-attribute">type</span>=<span class="hljs-string">"submit"</span>, <span class="hljs-attribute">value</span>=<span class="hljs-string">"Submit"</span>)
 </code></pre><p>Also <code>views/output.jade</code>:</p><pre><code class="hljs lang-jade">doctype html
 html(lang=<span class="hljs-string">"en"</span>)
     head

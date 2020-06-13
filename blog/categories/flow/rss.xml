@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>flow | Matthew Daly&apos;s Blog</title>
+        <link>https://matthewdaly.co.uk/blog/categories/flow/</link>
+        <description>flow | I&apos;m a web developer in Norfolk. This is my blog...</description>
+        <lastBuildDate>Sat, 13 Jun 2020 12:47:19 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
+        <copyright>Matthew Daly 2020</copyright>
+        <item>
+            <title><![CDATA[Flow typed AJAX responses with React Hooks]]></title>
+            <link>https://matthewdaly.co.uk/blog/2020/06/13/flow-typed-ajax-responses-with-react-hooks/</link>
+            <guid>https://matthewdaly.co.uk/blog/2020/06/13/flow-typed-ajax-responses-with-react-hooks/</guid>
+            <pubDate>Sat, 13 Jun 2020 12:50:41 GMT</pubDate>
+            <description><![CDATA[<p>I’m a big fan of type systems in general. Using Psalm to find missing type declarations and incorrect calls in PHP has helped me out tremendously. However, I’m not a big fan of Typescript. The idea of creating a whole new language, primarily just to add types to Javascript, strikes me as a fundamentally bad idea given how many languages that compile to Javascript have fallen by the wayside. Flow seems like a much better approach since it adds types to the language rather than creating a new language, and I’ve been using it on my React components for a good while now. However, there are a few edge cases that can be difficult to figure out, and one of those is any generic AJAX component that may be reused for different requests.</p>
+<p>A while back I wrote the following custom hook, loosely inspired by axios-hooks (but using the Fetch API) to make a query to a GraphQL endpoint:</p>
+<pre><code class="lang-javascript">import { useCallback, useState, useEffect } from &quot;react&quot;;
+
+function useFetch(url, query) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false)
+
+  const fetchData = useCallback(() =&gt; {
+    setLoading(true);
+    fetch(url, {
+      method: &#39;POST&#39;,
+      headers: {
+        &#39;Content-Type&#39;: &#39;application/json&#39;,
+        &#39;Accept&#39;: &#39;application/json&#39;,
+      },
+      body: JSON.stringify({query: query})
+    }).then(r =&gt; r.json())
+      .then((data) =&gt; {
+        setData(data.data);
+        setLoading(false);
+        setError(false);
+      });
+  }, [url, query]);
+
+  useEffect(() =&gt; {
+    fetchData();
+  }, [url, query, fetchData]);
+
+  return [{
+    data: data,
+    loading: loading,
+    error: error
+  }, fetchData];
+};
+
+export default useFetch;
+</code></pre>
+<p>When called, the hook receives two parameters, the URL to hit, and the query to make, and returns an array that contains a function for reloading, and an object containing the following values:</p>
+<ul>
+<li><code>loading</code> - a boolean that specifies if the hook is loading right now</li>
+<li><code>error</code> - a boolean that specifies if an error has occurred</li>
+<li><code>data</code> - the response data from the endpoint, or null</li>
+</ul>
+<p>Using this hook, it was then possible to make an AJAX request when a component was loaded to populate the data, as in this example:</p>
+<pre><code class="lang-javascript">import React from &#39;react&#39;;
+import useFetch from &#39;./Hooks/useFetch&#39;;
+import marked from &#39;marked&#39;;
+import &#39;./App.css&#39;;
+
+function App() {
+  const url = `/graphql`;
+  const query = `query {
+    posts {
+      title
+      slug
+      content
+      tags {
+        name
+      }
+    }
+  }`;
+
+  const [{data, loading, error}] = useFetch(url, query);
+
+  if (loading) {
+    return (&lt;h1&gt;Loading...&lt;/h1&gt;);
+  }
+
+  if (error) {
+    return (&lt;h1&gt;Error!&lt;/h1&gt;);
+  }
+
+  const posts = data ? data.posts.map((item) =&gt; (
+    &lt;div key={item.slug}&gt;
+      &lt;h2&gt;{item.title}&lt;/h2&gt;
+      &lt;div dangerouslySetInnerHTML={{__html: marked(item.content)}} /&gt;
+    &lt;/div&gt;
+  )) : [];
+  return (
+    &lt;div className=&quot;App&quot;&gt;
+      {posts}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>This hook is simple, and easy to reuse. However, it’s difficult to type the value of <code>data</code> correctly, since it will be different for different endpoints, and given that it may be reused for almost any endpoint, you can’t cover <em>all</em> the acceptable response types. We need to be able to specify the response that is acceptable in that particular context.</p>
+<h2 id="generics-to-the-rescue">Generics to the rescue</h2>
+<p>Flow provides a solution for this in the shape of <a href="https://flow.org/en/docs/types/generics/">generic types</a>. By passing in a polymorphic type using <code>&lt;T&gt;</code> in the function declaration, we can then refer to that type when specifying what <code>data</code> should look like:</p>
+<pre><code class="lang-flow">//@flow
+import { useCallback, useState, useEffect } from &quot;react&quot;;
+
+function useFetch&lt;T&gt;(url: string, query: string): [{
+  data: ?T,
+  loading: boolean,
+  error: boolean
+}, () =&gt; void] {
+  const [data, setData]: [?T, ((?T =&gt; ?T) | ?T) =&gt; void] = useState(null);
+  const [loading, setLoading]: [boolean, ((boolean =&gt; boolean) | boolean) =&gt; void] = useState(false);
+  const [error, setError]: [boolean, ((boolean =&gt; boolean) | boolean) =&gt; void] = useState(false)
+
+  const fetchData = useCallback(() =&gt; {
+    setLoading(true);
+    fetch(url, {
+      method: &#39;POST&#39;,
+      headers: {
+        &#39;Content-Type&#39;: &#39;application/json&#39;,
+        &#39;Accept&#39;: &#39;application/json&#39;,
+      },
+      body: JSON.stringify({query: query})
+    }).then(r =&gt; r.json())
+      .then((data) =&gt; {
+        setData(data.data);
+        setLoading(false);
+        setError(false);
+      });
+  }, [url, query]);
+
+  useEffect(() =&gt; {
+    fetchData();
+  }, [url, query, fetchData]);
+
+  return [{
+    data: data,
+    loading: loading,
+    error: error
+  }, fetchData];
+};
+
+export default useFetch;
+</code></pre>
+<p>Then, when calling the hook, we can define a type that represents the expected shape of the data (here called <code>&lt;Data&gt;</code>, and specify that type when calling the hook, as in this example:</p>
+<pre><code class="lang-javascript">//@flow
+import React from &#39;react&#39;;
+import useFetch from &#39;./Hooks/useFetch&#39;;
+import marked from &#39;marked&#39;;
+import &#39;./App.css&#39;;
+
+type Data = {
+  posts: Array&lt;{
+    title: string,
+    slug: string,
+    content: string,
+    name: Array&lt;string&gt;
+  }&gt;
+};
+
+function App() {
+  const url = `/graphql`;
+  const query = `query {
+    posts {
+      title
+      slug
+      content
+      tags {
+        name
+      }
+    }
+  }`;
+
+  const [{data, loading, error}] = useFetch&lt;Data&gt;(url, query);
+
+  if (loading) {
+    return (&lt;h1&gt;Loading...&lt;/h1&gt;);
+  }
+
+  if (error) {
+    return (&lt;h1&gt;Error!&lt;/h1&gt;);
+  }
+
+  const posts = data ? data.posts.map((item) =&gt; (
+    &lt;div key={item.slug}&gt;
+      &lt;h2&gt;{item.title}&lt;/h2&gt;
+      &lt;div dangerouslySetInnerHTML={{__html: marked(item.content)}} /&gt;
+    &lt;/div&gt;
+  )) : [];
+  return (
+    &lt;div className=&quot;App&quot;&gt;
+      {posts}
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</code></pre>
+<p>That way, we can specify a completely different shape for our response data every time we call a different endpoint, without creating a different hook for every different endpoint, and still enjoy properly typed responses from our hook.</p>
+<p>Generics can be useful for many other purposes, such as specifying the contents of collections. For instance, if you had a <code>Collection</code> object, you could use a generic type to specify that any one instance must consist of instances of a given type. Flow would then flag it as an error if you assigned an item of the wrong type to that collection, thus making some unit tests redundant.</p>
+]]></description>
+        </item>
+    </channel>
+</rss>
