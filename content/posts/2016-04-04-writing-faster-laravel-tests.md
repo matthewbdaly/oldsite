@@ -8,7 +8,7 @@ categories:
 comments: true
 ---
 
-Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practicing TDD a lot easier.
+Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practising TDD a lot easier.
 
 Out of the box running Laravel tests can be quite slow, which is a big issue - if your test suite takes several minutes to run, that's a huge disruption. Also, Laravel doesn't create a dedicated test database - instead it runs the tests against the same database you're using normally, which is almost always not what you want. I'll show you how to set up a dedicated test database, and how to use an in-memory SQLite database for faster tests. This results in cleaner and easier-to-maintain tests, since you can be sure the test database is restored to a clean state at the end of every test.
 

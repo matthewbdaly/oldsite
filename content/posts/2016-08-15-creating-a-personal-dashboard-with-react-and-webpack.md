@@ -170,7 +170,7 @@ If you now run `npm start` and navigate to [http://localhost:8080/webpack-dev-se
 Our dashboard component
 -----------------------
 
-Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralized data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we're better off having each widget manage its own data internally, rather than have it be passed down from a single data store.
+Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralised data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we're better off having each widget manage its own data internally, rather than have it be passed down from a single data store.
 
 Save the following as `test/components/dashboard.js`:
 
@@ -730,7 +730,7 @@ export default React.createClass({
 
 This is by far the most complex component, so a little explanation is called for. We include jQuery as a dependency at the top of the file. Then we create a component for rendering an individual feed item, called `FeedItem`. This is very simple, consisting of an anchor tag wrapped around a list item. Note the use of the `const` keyword - in ES6 this denotes a constant.
 
-Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a `componentDidMount()` method that calls `getFeed()` and sets up an interval to call it again, based on the `delay` property. The `getFeed()` method fetches the URL in question and sets `this.state.feed` to an array of the most recent entries in the feed, with the size denoted by the `size` property passed through. We also clear that interval when the component is about to be umounted.
+Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a `componentDidMount()` method that calls `getFeed()` and sets up an interval to call it again, based on the `delay` property. The `getFeed()` method fetches the URL in question and sets `this.state.feed` to an array of the most recent entries in the feed, with the size denoted by the `size` property passed through. We also clear that interval when the component is about to be unmounted.
 
 Note that you may have problems with the `Access-Control-Allow-Origin` HTTP header. It's possible to disable this in your web browser, so if you want to run this as a dashboard you'll probably need to do so. On Chrome there's a useful [plugin](https://www.google.co.uk/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwiw9Mm4r8TOAhVNOMAKHUicCF4QFggcMAA&url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fallow-control-allow-origi%2Fnlfbmbojpeacfghkpbjhddihlkkiljbi%3Fhl%3Den&usg=AFQjCNHSUFqc6ylxfxfbWzmmFJ6L5QUvyg&sig2=fJaf_HKgY8XDsd-JeY_PXg&bvm=bv.129422649,d.d24) that allows you to disable this when needed.
 

@@ -19,7 +19,7 @@ This state of affairs couldn't really continue. I love Python and Django, but I 
 
 I'd also been playing around with Laravel on a few little projects, but I didn't get the chance to use it for a new web app until autumn last year. Around the same time, we hired a third developer, who also had some experience using Laravel. In addition, the presence of Lumen meant that we could use that for smaller apps or services that were too small to use Laravel. We therefore decided to adopt Laravel as our default framework - in future we'd only use something else if there was a particular justification for it. I was rather sad to have to abandon Django for work, but pleased to have something more modern than CodeIgniter for PHP projects.
 
-This also enabled us to standardize our new server builds. Over the last year or so I've been pushing to automate what we can of our server setup using Ansible. We now have two standard stacks that we plan to use for future projects. One is for WordPress sites and consists of:
+This also enabled us to standardise our new server builds. Over the last year or so I've been pushing to automate what we can of our server setup using Ansible. We now have two standard stacks that we plan to use for future projects. One is for WordPress sites and consists of:
 
 * Debian stable
 * Apache

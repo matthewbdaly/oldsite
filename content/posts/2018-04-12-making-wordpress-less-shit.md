@@ -15,13 +15,13 @@ This isn't a post about the obvious things like "Use the most recent version of 
 Use Bedrock
 -----------
 
-[Bedrock](https://roots.io/bedrock/) is still Wordpress, but reorganized so that:
+[Bedrock](https://roots.io/bedrock/) is still Wordpress, but reorganised so that:
 
 * The Wordpress core, plugins and themes can be managed with Composer for easier updates
 * The configuration can be done with a `.env` file that can be kept out of version control, rather than putting it in `wp-config.php`
 * The web root is isolated to limit access to the files
 
-In short, it optimizes Wordpress for how modern developers work. Arguably that's at the expense of site owners, since it makes it harder for non-developers to manage the site, however for any Wordpress site that's sufficiently complex to need development work done that's a trade-off worth making. I've been involved in projects where Wordpress got used alongside an MVC framework for some custom functionality, and in my experience it caused a world of problems when updating plugins and themes because version control would get out of sync, so moving that to use Composer to manage them instead would have been a huge win.
+In short, it optimized Wordpress for how modern developers work. Arguably that's at the expense of site owners, since it makes it harder for non-developers to manage the site, however for any Wordpress site that's sufficiently complex to need development work done that's a trade-off worth making. I've been involved in projects where Wordpress got used alongside an MVC framework for some custom functionality, and in my experience it caused a world of problems when updating plugins and themes because version control would get out of sync, so moving that to use Composer to manage them instead would have been a huge win.
 
 Using Bedrock means that if you have a parent theme you use all the time, or custom plugins of your own, you can install them using Composer by adding the Git repositories to your `composer.json`, making it easier to re-use functionality you've already developed. It also makes recovery easier in the event of the site being compromised, because the files outside the vendor directory will be in version control, and you can delete the vendor directory and re-run `composer install` to replace the rest. By comparison, with a regular Wordpress install, if it's compromised you can't always be certain you've got all of the files that have been changed. Also, keeping Wordpress up to date becomes a simple matter of running `composer update` regularly, verifying it hasn't broken anything, and then deploying it to production.
 

@@ -82,7 +82,7 @@ use App\Events\NewMessage;
 Event::fire(new NewMessage($message));
 ```
 
-Here, `$message` is the saved Eloquent object containing the message. Note the use of `SerializesModels` - this means that the Eloquent model is serialized into JSON when broadcasting the event.
+Here, `$message` is the saved Eloquent object containing the message. Note the use of `SerializesModels` - this means that the Eloquent model is serialised into JSON when broadcasting the event.
 
 We also need to make sure Redis is set as our broadcast driver. Ensure the Composer package `predis/predis` is installed, and set `BROADCAST_DRIVER=redis` in your `.env` file. Also, please note that I found that setting `QUEUE_DRIVER=redis` in `.env` as well broke the broadcasting system, so it looks like you can't use Redis as both a queue and a broadcasting system unless you set up multiple connections.
 

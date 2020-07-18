@@ -74,7 +74,7 @@ Using an ORM also comes with significant benefits to developers:
 
 * It's generally easier to express relations between tables
 * It helps avoid the mental context switch between PHP and SQL
-* It does a lot of the work of sanitizing data for you
+* It does a lot of the work of sanitising data for you
 * It helps make your application portable between different databases (eg so you can run your tests using an in-memory SQLite database but use MySQL in production)
 * Where you have logic that can't be expressed using the ORM, it's generally easy to drop down to writing raw SQL for that part
 
@@ -91,6 +91,6 @@ Writing all your queries as raw queries is a micro-optimisation - it's a lot of 
 Summary
 -------
 
-So to sum it up, if someone tells you you should use framework X because it's faster than framework Y, they might be *somewhat* right, but that misses the point completely. Benchmarks are so artificial as to be almost useless for determining how your production code will perform. Any half-decent framework will give you the tools you need to optimise performance, and your use of those tools will have a far, far more signficant effect on the response time of your application than picking between different frameworks. I've never found a single MVC framework whose core is slow enough that I can't make it fast enough with the capabilities provided.
+So to sum it up, if someone tells you you should use framework X because it's faster than framework Y, they might be *somewhat* right, but that misses the point completely. Benchmarks are so artificial as to be almost useless for determining how your production code will perform. Any half-decent framework will give you the tools you need to optimise performance, and your use of those tools will have a far, far more significant effect on the response time of your application than picking between different frameworks. I've never found a single MVC framework whose core is slow enough that I can't make it fast enough with the capabilities provided.
 
 Also, considering that these days server hardware is dirt cheap (at time of writing US$5 gets you a Digital Ocean droplet with 1GB of RAM for a month), whereas developers are far, far more expensive, it's more cost effective to optimise for the *developer's time*, not server time, so it makes sense to pick a framework that makes *you* productive, not one that makes the *application* productive. That's no excuse for slow, shitty applications, but when all else fails, spinning up additional servers is a far more cost-effective solution than spending days on end rewriting your entire application in a different framework that benchmarks show might perform better by a few milliseconds.

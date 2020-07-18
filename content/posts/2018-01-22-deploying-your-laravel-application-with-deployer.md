@@ -135,7 +135,7 @@ Now, the recipe for deploying a Laravel app will include the following:
 * Pulling from the Git remote
 * Updating any Composer dependencies to match `composer.json`
 * Running the migrations
-* Optimizing the application
+* Optimising the application
 
 In addition, one really great feature Deployer offers is rollbacks. Rather than checking out your application directly into the project root you specify, it numbers each release and deploys it in a separate folder, before symlinking that folder to the project root as `current`. That way, if a release cannot be deployed successfully, rather than leaving your application in an unfinished state, Deployer will symlink the previous version so that you still have a working version of your application.
 
@@ -175,7 +175,7 @@ Connection to linklater.shellshocked.info closed.
 Successfully deployed!
 ```
 
-As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the `.env` file, the `storage/` directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimize our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.
+As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the `.env` file, the `storage/` directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimise our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.
 
 In the event you discover a problem after deploy and need to rollback manually, you can do so with the following command:
 

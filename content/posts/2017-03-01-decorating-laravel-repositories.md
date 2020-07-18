@@ -256,7 +256,7 @@ class UserTest extends TestCase
 }
 ```
 
-As you can see, all we care about is that the underlying repository interface receives the correct method calls and arguments, nothing more. That way our test is fast and repository-agnositc.
+As you can see, all we care about is that the underlying repository interface receives the correct method calls and arguments, nothing more. That way our test is fast and repository-agnostic.
 
 Other applications
 ------------------

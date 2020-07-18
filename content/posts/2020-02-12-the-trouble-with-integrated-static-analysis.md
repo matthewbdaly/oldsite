@@ -31,7 +31,7 @@ Nowadays I use vim-ale in Neovim, and that provides real-time feedback for a num
 
 It's possible that an integrated solution *might* offer a few advantages in terms of tighter integration with autocompletion and other functionality allowing for it, but whether they outweigh the tradeoffs mentioned here is dependent entirely on the implementation and how useful it is for any one team.
 
-Continous integration to the rescue
+Continuous integration to the rescue
 ===================================
 
 There's another issue I have with this sort of tightly integrated static analysis, which is probably the biggest, and that is that the feedback is available only at the level of an individual developer, not the team.

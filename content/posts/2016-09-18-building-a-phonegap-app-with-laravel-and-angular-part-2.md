@@ -778,7 +778,7 @@ angular.module('mynewanimalfriend.controllers', [
 });
 ```
 
-The `LoginCtrl` controller accepts the scope, location, and our two services. When `doLogin()` is alled, it picks up the values in `$scope.credentials`, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the `Auth` service. Otherwise, it raises an error.
+The `LoginCtrl` controller accepts the scope, location, and our two services. When `doLogin()` is called, it picks up the values in `$scope.credentials`, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the `Auth` service. Otherwise, it raises an error.
 
 Check the test now passes before moving onto the logout functionality. Add this to `test/controllers.spec.js`:
 
@@ -1019,7 +1019,7 @@ angular.module('mynewanimalfriend.services', ['ngResource'])
 });
 ```
 
-I'll walk you through these. `sessionInjector` adds the authorization HTTP header to every request to the server if the user is logged in, so that it returns the right user's details. `authInterceptor` catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user's token.
+I'll walk you through these. `sessionInjector` adds the authorisation HTTP header to every request to the server if the user is logged in, so that it returns the right user's details. `authInterceptor` catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user's token.
 
 Now the logic of our app is in place, but that's no use without some content...
 

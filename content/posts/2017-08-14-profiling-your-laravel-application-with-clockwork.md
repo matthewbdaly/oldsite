@@ -117,4 +117,4 @@ Routes
 
 This tab shows all of the routes defined within your application.
 
-Clockwork isn't limited to Laravel - you can also use it with Lumen, Slim 2, and CodeIgniter 2.1, and it's possible to write your own integration for other frameworks. It's still fundamentally browser-based, so it's difficult to use it if your API doesn't have at least some kind of web front end (whether that's a single page web app or Phonegap app that consumes the API, or that the API is itself browseable and returns HTML in a web browser), but I've found it to be superior to Laravel Debugbar for most of what I do.
+Clockwork isn't limited to Laravel - you can also use it with Lumen, Slim 2, and CodeIgniter 2.1, and it's possible to write your own integration for other frameworks. It's still fundamentally browser-based, so it's difficult to use it if your API doesn't have at least some kind of web front end (whether that's a single page web app or Phonegap app that consumes the API, or that the API is itself browsable and returns HTML in a web browser), but I've found it to be superior to Laravel Debugbar for most of what I do.

@@ -545,7 +545,7 @@ class PetTransformer extends Fractal\TransformerAbstract
 }
 ```
 
-The `transform` method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represemt relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.
+The `transform` method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represent relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.
 
 Now let's amend `PetController.php` to use this:
 

@@ -676,7 +676,7 @@ import pdb
 pdb.set_trace()
 ```
 
-Now, whenever that line of code is run, you'll be dropped into an interactive shell that lets you play around to find out what's going wrong. However, it doesn't offer autocompletion, so we'll install `ipdb`, which is an improved version:
+Now, whenever that line of code is run, you'll be dropped into an interactive shell that lets you play around to find out what's going wrong. However, it doesn't offer auto-completion, so we'll install `ipdb`, which is an improved version:
 
 ```bash
 $ pip install ipdb

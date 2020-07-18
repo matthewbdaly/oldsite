@@ -40,7 +40,7 @@ Next we need to create a Bower config. First, create the folder `blogengine/stat
 }
 ```
 
-This tells Bower where it should put downloaded libraries. Next, run the following command to gener Bower:
+This tells Bower where it should put downloaded libraries. Next, run the following command to generate the config for Bower:
 
 ```bash
 $ bower init
@@ -799,7 +799,7 @@ class PostViewTest(LiveServerTestCase):
         self.assertTrue('<a href="http://127.0.0.1:8000/">my first blog post</a>' in response.content)
 ```
 
-What we're doing here is that every time we create a Post object programmatically, we add the `post.slug` atttribute to it. Also, when submitting a post via the admin, we pass the `slug` parameter via HTTP POST, thus emulating how a form would submit this data.
+What we're doing here is that every time we create a Post object programmatically, we add the `post.slug` attribute to it. Also, when submitting a post via the admin, we pass the `slug` parameter via HTTP POST, thus emulating how a form would submit this data.
 
 If you run the tests again, you'll see that `test_post_page` still fails. This is because we haven't yet up the URLs, templates and views to do so. Let's fix that. We'll use another generic view, called a DetailView, to display the posts. Amend `blogengine/urls.py` as follows:
 

@@ -238,7 +238,7 @@ Triggering actions as a result of something
 
 [Events](https://laravel.com/docs/5.6/events) are tailor-made for this use case, and Laravel documents them very well, so I won't repeat it here. Suffice to say, if something needs to happen, but the response sent by the application doesn't necessarily depend on it returning something immediately, then it's probably worth considering making it an event. If it's going to be called from multiple places, it's even more worthwhile.
 
-For instance, if you have a contact form, it's worth taking the time to create an event for when a new contact is received, and handle proessing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you're sending an acknowledgement email for a new user registration, you don't need to wait for that email to be sent before you return the response, so queueing it can improve response times.
+For instance, if you have a contact form, it's worth taking the time to create an event for when a new contact is received, and handle processing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you're sending an acknowledgement email for a new user registration, you don't need to wait for that email to be sent before you return the response, so queuing it can improve response times.
 
 Interacting with third-party services
 -------------------------------------

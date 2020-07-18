@@ -213,7 +213,7 @@ urlpatterns = patterns('',
 
 Now, if you run python manage.py syncdb again, the category system should be up and running.
 
-The next step is to add the facility to handle comments. Again, Django has its own application built in for handling comments, so go into setings.py and enter the following under INSTALLED_APPS:
+The next step is to add the facility to handle comments. Again, Django has its own application built in for handling comments, so go into settings.py and enter the following under INSTALLED_APPS:
 
 ```python
      'django.contrib.comments',

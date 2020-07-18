@@ -8,7 +8,7 @@ comments: true
 
 The `bisect` command in Git can be very useful when trying to catch any regressions. If you know that a bug was not present at some point in the past, and now is, you can often use `bisect` to track it down quickly and easily.
 
-The basic functionality is fairly simple. You start the process by tracking down a known "good" commit in the past, and a known "bad" commmit, which will usually be the head of the branch. Then, you start bisecting:
+The basic functionality is fairly simple. You start the process by tracking down a known "good" commit in the past, and a known "bad" commit, which will usually be the head of the branch. Then, you start bisecting:
 
 ```bash
 $ git bisect start

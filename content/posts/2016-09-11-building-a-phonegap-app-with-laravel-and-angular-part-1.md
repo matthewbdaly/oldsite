@@ -20,7 +20,7 @@ In this series of tutorials I'll show you how I might build a Phonegap app. The 
 * Building a Phonegap app using Angular.js
 * Testing and deploying it
 
-In the process we'll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won't cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.
+In the process we'll cover issues like authentication, authorisation, real-time notifications and working with REST APIs. Note that we won't cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.
 
 The brief
 ---------
@@ -157,7 +157,7 @@ Authenticating our API
 
 We're going to start out with a very limited subset of our API. First, we'll implement the authentication for our app, then we'll add the facility to view a list of pets or an individual pet. Other functionality will come later. This will be sufficient to get the app working.
 
-First, we need to create our user model. As we'll be practicing TDD throughout, we write a test for the user model first. Save the following as `tests/UserModelTest.php`:
+First, we need to create our user model. As we'll be practising TDD throughout, we write a test for the user model first. Save the following as `tests/UserModelTest.php`:
 
 ```php
 <?php

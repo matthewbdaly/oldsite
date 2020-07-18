@@ -183,4 +183,4 @@ Summary
 
 Vim or Neovim configuration files are never static. Your needs are always changing, and you're constantly discovering new plugins and new settings to try out, and keeping ones that prove useful. It's been helpful to start over and ditch some plugins I no longer needed, pull in some new ones, and organise my configuration a bit better.
 
-Now that I can set the dependencies in a text file rather than pulling them in as Git submodules, it makes more sense to keep my config in a [Github Gist](https://gist.github.com/matthewbdaly/80b777ad3db885ebeecd27687fb121cd) rather than a Git repository, and that's where I plan to retain it for now. Feel free to fork or cannibalize it for your own purposes if you wish.
+Now that I can set the dependencies in a text file rather than pulling them in as Git submodules, it makes more sense to keep my config in a [Github Gist](https://gist.github.com/matthewbdaly/80b777ad3db885ebeecd27687fb121cd) rather than a Git repository, and that's where I plan to retain it for now. Feel free to fork or cannibalise it for your own purposes if you wish.

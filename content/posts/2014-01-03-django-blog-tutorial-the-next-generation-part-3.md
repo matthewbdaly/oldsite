@@ -1157,7 +1157,7 @@ class FlatPageViewTest(BaseAcceptanceTest):
         self.assertTrue('All about me' in response.content)
 ```
 
-All we've done here is to add the `site` attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional `site` aparameter to the HTTP POST request with a value of 1. Run the tests and they should fail:
+All we've done here is to add the `site` attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional `site` parameter to the HTTP POST request with a value of 1. Run the tests and they should fail:
 
 ```bash
 Creating test database for alias 'default'...

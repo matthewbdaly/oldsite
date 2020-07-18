@@ -899,7 +899,7 @@ In [7]: Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=
 Out[7]: [<Event: Primal Scream - UEA Norwich>, <Event: Queens of the Stone Age - Wembley Arena>]
 ```
 
-With that in mind, let's write the test for our view. The view should contain a single form that accepts a user's geographical coordinates - for convenience we'll autocomplete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.
+With that in mind, let's write the test for our view. The view should contain a single form that accepts a user's geographical coordinates - for convenience we'll auto-complete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.
 
 First, let's test the GET request. Amend `gigs/tests.py` as follows:
 

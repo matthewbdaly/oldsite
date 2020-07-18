@@ -12,7 +12,7 @@ categories:
 comments: true
 ---
 
-Welcome back! In this installment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.
+Welcome back! In this instalment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.
 
 First of all, our URL structure. The existing structure works fine, but it would be better if we included a representation of the date of publication. If you’re familiar with WordPress, you’ll know it offers several different URL forms, one of which is the post name alone as we’re using here, and another of which is the year, month and name. We’ll use the latter of these URL schemes with our blogging engine.
 

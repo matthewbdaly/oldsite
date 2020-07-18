@@ -222,7 +222,7 @@ app.get('/', function (req, res) {
 });
 ```
 
-Here we use the client to return all messages in the list by using the `LRANGE` command and defining the slice as being from the start to the end of the list. We then loop through the mesages and push each to a list, before passing that list to the view.
+Here we use the client to return all messages in the list by using the `LRANGE` command and defining the slice as being from the start to the end of the list. We then loop through the messages and push each to a list, before passing that list to the view.
 
 Speaking of which, we also need to update `views/index.hbs`:
 

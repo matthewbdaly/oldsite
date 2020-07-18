@@ -1406,7 +1406,7 @@ Next up, let's implement another RSS feed for tags. First, we'll implement our t
           self.assertTrue('This is my <em>second</em> blog post' not in response.content)
 ```
 
-This is virtually identical to the test for the categroy feed, but we adjust it to work with the `Tag` attribute and change the URL. Let's check that our test fails:
+This is virtually identical to the test for the category feed, but we adjust it to work with the `Tag` attribute and change the URL. Let's check that our test fails:
 
 ```bash
 $ python manage.py test blogengine

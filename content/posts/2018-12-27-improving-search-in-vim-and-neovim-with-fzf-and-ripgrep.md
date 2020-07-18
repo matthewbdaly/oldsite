@@ -28,4 +28,4 @@ The plugin exposes a number of commands that are very useful, and I'll go throug
 * `:Lines` allows you to find lines in the project and navigate to them.
 * `:BLines` does the same, but solely in the current buffer.
 
-In addition to being useful in Neovim, FZF can also be helpful in Bash. You can use `Ctrl-T` to find file paths, and it enhances the standard `Ctrl-R` history search, making it faster and more easily navigable. The performance of both is also excellent - they work very fast, even on the very large legacy project I maintain, or on slower machines, and I never find myself waiting for them to finish. Both tools have quickly become an indispensible part of my workflow.
+In addition to being useful in Neovim, FZF can also be helpful in Bash. You can use `Ctrl-T` to find file paths, and it enhances the standard `Ctrl-R` history search, making it faster and more easily navigable. The performance of both is also excellent - they work very fast, even on the very large legacy project I maintain, or on slower machines, and I never find myself waiting for them to finish. Both tools have quickly become an indispensable part of my workflow.

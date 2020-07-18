@@ -7,7 +7,7 @@ categories:
 comments: true
 ---
 
-I've recently been jobhunting, so that has meant having to update my CV. Fortunately, I've got into the habit of keeping it up to date easily by writing it in Markdown and generating it in the required format on demand. That way I can easily convert it to HTML, PDF or Microsoft DocX format as and when I need it. I thought I'd share this method as it works very well for me.
+I've recently been job-hunting, so that has meant having to update my CV. Fortunately, I've got into the habit of keeping it up to date easily by writing it in Markdown and generating it in the required format on demand. That way I can easily convert it to HTML, PDF or Microsoft DocX format as and when I need it. I thought I'd share this method as it works very well for me.
 
 Maintaining your CV in Emacs?
 -----------------------------

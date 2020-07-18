@@ -143,7 +143,7 @@ Next, we come to our Varnish configuration proper, which resides at `/etc/varnis
 
 The default behaviour for Varnish is as follows:
 
-* It does not cache requests that contain cookie or authorization headers
+* It does not cache requests that contain cookie or authorisation headers
 * It does not cache requests which the backend HTTP server indicates should not be cached
 * It will only cache GET and HEAD requests
 

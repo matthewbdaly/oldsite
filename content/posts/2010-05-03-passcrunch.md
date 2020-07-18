@@ -33,7 +33,7 @@ As an exercise to teach myself the basics of regular expressions in JavaScript I
   * Add to the rating if it contains numbers.
 
 	
-  * Add to the rating if it contains nonalphanumeric characters.
+  * Add to the rating if it contains non-alphanumeric characters.
 
 	
   * Finally, convert the result to a percentage score and return it as an integer.
