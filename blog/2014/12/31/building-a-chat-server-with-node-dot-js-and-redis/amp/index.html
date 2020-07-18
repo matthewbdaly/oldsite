@@ -202,7 +202,7 @@
 </code></pre><p>Now let’s install our dependencies:</p><pre><code class="hljs lang-bash">$ npm install express hbs redis hiredis socket.io socket.io-client --save
 $ npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanbul istanbul mocha request --save-dev
 </code></pre><p>These two commands will install our dependencies.</p><p>Now, if you followed on with the URL shortener tutorial, you’ll notice that we aren’t using Jade - instead we’re going to use Handlebars. Jade is quite a nice templating system, but I find it gets in the way for larger projects - you spend too much time looking up the syntax for things you already know in HTML. Handlebars is closer to HTML so we will use that. We’ll also use Socket.IO extensively on this project.</p><h2 id="support-files">Support files</h2><p>As before, we’ll also use Mocha for our unit tests and Istanbul to generate coverage stats. We’ll need a Grunt configuration for that, so here it is:</p><pre><code class="hljs lang-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">grunt</span>) </span>{
-    <span class="hljs-string">'use strict'</span>;
+<span class="hljs-meta">    'use strict'</span>;
 
     grunt.initConfig({
         <span class="hljs-attr">jshint</span>: {
@@ -214,7 +214,7 @@ $ npm install chai grunt grunt-contrib-jshint grunt-coveralls grunt-mocha-istanb
         <span class="hljs-attr">mocha_istanbul</span>: {
             <span class="hljs-attr">coverage</span>: {
                 <span class="hljs-attr">src</span>: <span class="hljs-string">'test'</span>, <span class="hljs-comment">// the folder, not the files,</span>
-                <span class="hljs-attr">options</span>: {
+                options: {
                     <span class="hljs-attr">mask</span>: <span class="hljs-string">'*.js'</span>,
                     <span class="hljs-attr">reportFormats</span>: [<span class="hljs-string">'cobertura'</span>, <span class="hljs-string">'html'</span>, <span class="hljs-string">'lcovonly'</span>]
                 }
@@ -432,7 +432,7 @@ io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socke
             &lt;/<span class="hljs-keyword">div</span>&gt;
         &lt;/<span class="hljs-keyword">div</span>&gt;
 {{&gt; footer }}
-</code></pre><p>Add this to <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-hbs"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+</code></pre><p>Add this to <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-hbs"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -596,7 +596,7 @@ io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-f
     });
 });
 </code></pre><p>We’ll go through this. First, we create a callback for when a new connection is received. Inside the callback, we then subscribe to a Pub/Sub channel in Redis called <code>ChatChannel</code>.</p><p>Then, we define another callback so that on a <code>send</code> event from Socket.IO, we get the message and publish it to <code>ChatChannel</code>. After that, we define another callback to handle receiving messages, and set it to run when a new message is published to <code>ChatChannel</code>. Finally, we set up a callback to handle removing the listener when a user disconnects.</p><p>Note the two different connections to Redis - <code>client</code> and <code>subscribe</code>. As mentioned earlier, you need to use two connections to Redis when using Pub/Sub. This is because a client subscribed to one or more channels should not issue commands, so we use <code>subscribe</code> as a dedicated connection to handle subscriptions, and use <code>client</code> to publish new messages.</p><p>We’ll also need a bit of client-side JavaScript to handle sending and receiving messages. Amend <code>main.js</code> as follows:</p><pre><code class="hljs lang-javascript">$(<span class="hljs-built_in">document</span>).ready(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-    <span class="hljs-string">'use strict'</span>;
+<span class="hljs-meta">    'use strict'</span>;
 
     <span class="hljs-comment">// Set up the connection</span>
     <span class="hljs-keyword">var</span> field, socket, output;

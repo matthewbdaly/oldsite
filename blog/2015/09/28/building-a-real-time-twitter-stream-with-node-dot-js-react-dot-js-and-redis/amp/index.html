@@ -307,20 +307,20 @@ client.stream(<span class="hljs-string">'statuses/filter'</span>, {<span class="
 </code></pre><p>Most of this file should be fairly straightforward. We set up our connection to Twitter (you’ll need to set the various environment variables listed here using the appropriate method for your operating system), and a connection to Redis.</p><p>We then stream the Twitter statuses that match our filter. When we receive a tweet, we log it to the console (feel free to comment this out in production if desired), publish it to a Redis channel called <code>tweets</code>, and push it to the end of a Redis list called <code>stream:tweets</code>. When an error occurs, we output it to the console.</p><p>Let’s use Bootstrap to style the app. Create the following <code>.bowerrc</code> file:</p><pre><code class="hljs lang-bash">{
     <span class="hljs-string">"directory"</span>: <span class="hljs-string">"static/bower_components"</span>
 }
-</code></pre><p>Then run <code>bower init</code> to create your <code>bower.json</code> file, and install Bootstrap with <code>bower install --save sass-bootstrap</code>.</p><p>With that done, create the file <code>src/sass/style.scss</code> and enter the following:</p><pre><code class="hljs lang-scss"><span class="hljs-keyword">@import</span> <span class="hljs-string">"compass/css3/user-interface"</span>;
-<span class="hljs-keyword">@import</span> <span class="hljs-string">"compass/css3"</span>;
-<span class="hljs-keyword">@import</span> <span class="hljs-string">"../../static/bower_components/sass-bootstrap/lib/bootstrap.scss"</span>;
-</code></pre><p>This includes some dependencies from Compass, as well as Bootstrap. We won’t be using any of the Javascript features of Bootstrap, so we don’t need to worry too much about that.</p><p>Next, we need to create our view files. As React will be used to render the main part of the page, these will be very basic, with just the header, footer, and a section where the content can be rendered. First, create <code>views/index.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="hljs-template-variable">{{&gt; header }}</span><span class="xml">
+</code></pre><p>Then run <code>bower init</code> to create your <code>bower.json</code> file, and install Bootstrap with <code>bower install --save sass-bootstrap</code>.</p><p>With that done, create the file <code>src/sass/style.scss</code> and enter the following:</p><pre><code class="hljs lang-scss">@<span class="hljs-keyword">import</span> <span class="hljs-string">"compass/css3/user-interface"</span>;
+@<span class="hljs-keyword">import</span> <span class="hljs-string">"compass/css3"</span>;
+@<span class="hljs-keyword">import</span> <span class="hljs-string">"../../static/bower_components/sass-bootstrap/lib/bootstrap.scss"</span>;
+</code></pre><p>This includes some dependencies from Compass, as well as Bootstrap. We won’t be using any of the Javascript features of Bootstrap, so we don’t need to worry too much about that.</p><p>Next, we need to create our view files. As React will be used to render the main part of the page, these will be very basic, with just the header, footer, and a section where the content can be rendered. First, create <code>views/index.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"></span><span class="hljs-template-variable">{{&gt; header }}</span><span class="xml">
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
                 <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col-md-12"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">'view'</span>&gt;</span></span><span class="hljs-template-variable">{{{ markup }}}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">'view'</span>&gt;</span></span><span class="hljs-template-variable">{{{ markup }}</span><span class="xml">}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
                 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"initial-state"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span>&gt;</span></span><span class="hljs-template-variable">{{{state}}}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-</span><span class="hljs-template-variable">{{&gt; footer }}</span>
-</code></pre><p>As promised, this a very basic layout. Note the <code>markup</code> variable, which is where the markup generated by React will be inserted when rendered on the server, and the <code>state</code> variable, which will contain the JSON representation of the data used to generate that markup. By passing that data through, you can ensure that the instance of React on the client has access to the same raw data as was passed through to the view on the server side, so that when the data needs to be re-rendered, it can be done so correctly.</p><p>We’ll also define partials for the header and footer. The header should be in <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"initial-state"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span>&gt;</span></span><span class="hljs-template-variable">{{{state}}</span><span class="xml">}<span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</span><span class="hljs-template-variable">{{&gt; footer }}</span><span class="xml"></span>
+</code></pre><p>As promised, this a very basic layout. Note the <code>markup</code> variable, which is where the markup generated by React will be inserted when rendered on the server, and the <code>state</code> variable, which will contain the JSON representation of the data used to generate that markup. By passing that data through, you can ensure that the instance of React on the client has access to the same raw data as was passed through to the view on the server side, so that when the data needs to be re-rendered, it can be done so correctly.</p><p>We’ll also define partials for the header and footer. The header should be in <code>views/partials/header.hbs</code>:</p><pre><code class="hljs lang-handlebars"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -539,9 +539,9 @@ io.sockets.on(<span class="hljs-string">'connection'</span>, <span class="hljs-f
 <span class="hljs-keyword">var</span> initialState = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'initial-state'</span>).innerHTML);
 
 React.render(
-  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Tweets</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{initialState}</span> /&gt;</span></span>,
-  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'view'</span>)
-);
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Tweets</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{initialState}</span> /&gt;</span>,
+  document.getElementById('view')
+);</span>
 </code></pre><p>First of all, we include React and the same <code>Tweets</code> component we require on the server side (note that we need to specify the <code>.jsx</code> extension). Then we fetch the initial state from the script tag we created earlier. Finally we render the <code>Tweets</code> components, passing through the initial state, and specify that it should be inserted into the element with an id of <code>view</code>. Note that we store the initial state in <code>data</code> - inside the component, this can be accessed as <code>this.props.data</code>.</p><p>This particular component is only ever used on the client side - when we render on the server side, we don’t need any of this functionality since we insert the markup into the <code>view</code> element anyway, and we don’t need to specify the initial data in the same way.</p><p>Next, we define the <code>Tweets</code> component in <code>components/tweets.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
 <span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>);
 <span class="hljs-keyword">var</span> TweetList = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetlist.jsx'</span>);
@@ -574,12 +574,12 @@ React.render(
       <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Tweets<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">TweetList</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{this.props.data}</span> /&gt;</span>
-      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
     )
   }
 });
 
-<span class="hljs-built_in">module</span>.exports = Tweets;
+module.exports = Tweets;</span>
 </code></pre><p>Let’s work our way through each section in turn:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
 <span class="hljs-keyword">var</span> io = <span class="hljs-built_in">require</span>(<span class="hljs-string">'socket.io-client'</span>);
 <span class="hljs-keyword">var</span> TweetList = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetlist.jsx'</span>);
@@ -612,12 +612,12 @@ React.render(
       <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Tweets<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">TweetList</span> <span class="hljs-attr">data</span>=<span class="hljs-string">{this.props.data}</span> /&gt;</span>
-      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
     )
   }
 });
 
-<span class="hljs-built_in">module</span>.exports = Tweets;
+module.exports = Tweets;</span>
 </code></pre><p>Here we define our <code>render</code> function. This can be thought of as our template. Note that we include <code>TweetList</code> inside our template and pass through the data. Afterwards, we export <code>Tweets</code> so it can be used elsewhere.</p><p>Next, let’s create <code>components/tweetlist.jsx</code>:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">var</span> React = <span class="hljs-built_in">require</span>(<span class="hljs-string">'react'</span>);
 <span class="hljs-keyword">var</span> TweetItem = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./tweetitem.jsx'</span>);
 

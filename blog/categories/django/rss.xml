@@ -4,7 +4,7 @@
         <title>django | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/django/</link>
         <description>django | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sat, 13 Jun 2020 12:47:20 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 18 Jul 2020 22:30:58 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2020</copyright>
@@ -729,7 +729,7 @@ Out[5]: [&lt;Venue: Diss Corn Hall&gt;, &lt;Venue: Waterfront Norwich&gt;, &lt;V
 <pre><code class="lang-python">In [7]: Event.objects.filter(datetime__gte=timezone.now()).filter(datetime__lte=next_week).annotate(distance=Distance(&#39;venue__location&#39;, location)).order_by(&#39;distance&#39;)[0:5]
 Out[7]: [&lt;Event: Primal Scream - UEA Norwich&gt;, &lt;Event: Queens of the Stone Age - Wembley Arena&gt;]
 </code></pre>
-<p>With that in mind, let’s write the test for our view. The view should contain a single form that accepts a user’s geographical coordinates - for convenience we’ll autocomplete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.</p>
+<p>With that in mind, let’s write the test for our view. The view should contain a single form that accepts a user’s geographical coordinates - for convenience we’ll auto-complete this with HTML5 geolocation. On submit, the user should see a list of the five closest events in the next week.</p>
 <p>First, let’s test the GET request. Amend <code>gigs/tests.py</code> as follows:</p>
 <pre><code class="lang-python">from django.test import TestCase
 from gigs.models import Venue, Event
@@ -2777,7 +2777,7 @@ $ git commit -m &#39;Now use named routes&#39;
 <pre><code class="lang-python">import pdb
 pdb.set_trace()
 </code></pre>
-<p>Now, whenever that line of code is run, you’ll be dropped into an interactive shell that lets you play around to find out what’s going wrong. However, it doesn’t offer autocompletion, so we’ll install <code>ipdb</code>, which is an improved version:</p>
+<p>Now, whenever that line of code is run, you’ll be dropped into an interactive shell that lets you play around to find out what’s going wrong. However, it doesn’t offer auto-completion, so we’ll install <code>ipdb</code>, which is an improved version:</p>
 <pre><code class="lang-bash">$ pip install ipdb
 $ pip freeze &gt; requirements.txt
 </code></pre>
@@ -4178,7 +4178,7 @@ $ git commit -m &#39;Added link to RSS feed from category page&#39;
           # Check other post is not in this feed
           self.assertTrue(&#39;This is my &lt;em&gt;second&lt;/em&gt; blog post&#39; not in response.content)
 </code></pre>
-<p>This is virtually identical to the test for the categroy feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p>
+<p>This is virtually identical to the test for the category feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p>
 <pre><code class="lang-bash">$ python manage.py test blogengine
 Creating test database for alias &#39;default&#39;...
 .................F........
@@ -8945,7 +8945,7 @@ class FlatPageViewTest(BaseAcceptanceTest):
         self.assertTrue(&#39;About me&#39; in response.content)
         self.assertTrue(&#39;All about me&#39; in response.content)
 </code></pre>
-<p>All we’ve done here is to add the <code>site</code> attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional <code>site</code> aparameter to the HTTP POST request with a value of 1. Run the tests and they should fail:</p>
+<p>All we’ve done here is to add the <code>site</code> attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional <code>site</code> parameter to the HTTP POST request with a value of 1. Run the tests and they should fail:</p>
 <pre><code class="lang-bash">Creating test database for alias &#39;default&#39;...
 E........
 ======================================================================
@@ -9062,7 +9062,7 @@ $ git commit -m &#39;Implemented Facebook comments&#39;
     &quot;directory&quot;: &quot;blogengine/static/bower_components&quot;
 }
 </code></pre>
-<p>This tells Bower where it should put downloaded libraries. Next, run the following command to gener Bower:</p>
+<p>This tells Bower where it should put downloaded libraries. Next, run the following command to generate the config for Bower:</p>
 <pre><code class="lang-bash">$ bower init
 </code></pre>
 <p>Answer all the questions it asks you - for those with defaults, these should be fine, and everything else should be easy enough. Next, run the following command to install Bootstrap and HTML5 Boilerplate:</p>
@@ -9706,7 +9706,7 @@ Destroying test database for alias &#39;default&#39;...
         # Check the link is marked up properly
         self.assertTrue(&#39;&lt;a href=&quot;http://127.0.0.1:8000/&quot;&gt;my first blog post&lt;/a&gt;&#39; in response.content)
 </code></pre>
-<p>What we’re doing here is that every time we create a Post object programmatically, we add the <code>post.slug</code> atttribute to it. Also, when submitting a post via the admin, we pass the <code>slug</code> parameter via HTTP POST, thus emulating how a form would submit this data.</p>
+<p>What we’re doing here is that every time we create a Post object programmatically, we add the <code>post.slug</code> attribute to it. Also, when submitting a post via the admin, we pass the <code>slug</code> parameter via HTTP POST, thus emulating how a form would submit this data.</p>
 <p>If you run the tests again, you’ll see that <code>test_post_page</code> still fails. This is because we haven’t yet up the URLs, templates and views to do so. Let’s fix that. We’ll use another generic view, called a DetailView, to display the posts. Amend <code>blogengine/urls.py</code> as follows:</p>
 <pre><code class="lang-python">rom django.conf.urls import patterns, url
 from django.views.generic import ListView, DetailView
@@ -11025,7 +11025,7 @@ urlpatterns = patterns(&#39;&#39;,
 )
 </code></pre>
 <p>Now, if you run python manage.py syncdb again, the category system should be up and running.</p>
-<p>The next step is to add the facility to handle comments. Again, Django has its own application built in for handling comments, so go into setings.py and enter the following under INSTALLED_APPS:</p>
+<p>The next step is to add the facility to handle comments. Again, Django has its own application built in for handling comments, so go into settings.py and enter the following under INSTALLED_APPS:</p>
 <pre><code class="lang-python">     &#39;django.contrib.comments&#39;,
 </code></pre>
 <p>Then run python manage.py syncdb again to generate the appropriate database tables. You’ll also need to amend urls.py to provide a dedicated URL for comments:</p>
@@ -11153,7 +11153,7 @@ urlpatterns = patterns(&#39;&#39;,
             <link>https://matthewdaly.co.uk/blog/2012/03/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-3/</link>
             <guid>https://matthewdaly.co.uk/blog/2012/03/24/yet-another-tutorial-for-building-a-blog-using-python-and-django-part-3/</guid>
             <pubDate>Sat, 24 Mar 2012 18:23:25 GMT</pubDate>
-            <description><![CDATA[<p>Welcome back! In this installment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.</p>
+            <description><![CDATA[<p>Welcome back! In this instalment, we’ll make some changes to our URL structure for blog posts, we’ll add support for multiple authors and static pages, and we’ll add some more templates.</p>
 <p>First of all, our URL structure. The existing structure works fine, but it would be better if we included a representation of the date of publication. If you’re familiar with WordPress, you’ll know it offers several different URL forms, one of which is the post name alone as we’re using here, and another of which is the year, month and name. We’ll use the latter of these URL schemes with our blogging engine.</p>
 <p>This seems like a good opportunity to introduce the interactive Python shell that comes with Django. Make sure you have a few dummy posts set up, then in the project directory (DjangoBlog/, not the top-level one but the one inside that), enter the following command:</p>
 <pre><code class="lang-bash">python manage.py shell

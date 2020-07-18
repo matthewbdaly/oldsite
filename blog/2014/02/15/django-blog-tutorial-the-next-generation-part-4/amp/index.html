@@ -1241,7 +1241,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         ordering = [<span class="hljs-string">"-pub_date"</span>]
 </code></pre><p>We’re adding the <code>slug</code> attribute to the <code>Category</code> model here. However, we’re also overriding the <code>save</code> method to detect if the slug is set, and if not, to create a slug using the <code>slugify</code> function, and set it as the category’s slug. We also define an absolute URL for the category.</p><p>Now, if you run the tests, they will fail because we haven’t made the changes to the database. So, we use South again:</p><pre><code class="hljs lang-bash">$ python manage.py schemamigration --auto blogengine
 </code></pre><p>Then run the migration:</p><pre><code class="hljs lang-bash">$ python manage.py migrate
-</code></pre><p>Now, running our tests will show that the tables are in place, but we still have some work to do. The index and post pages don’t show our categories, so we’ll fix that. First, we’ll fix our post list:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Now, running our tests will show that the tables are in place, but we still have some work to do. The index and post pages don’t show our categories, so we’ll fix that. First, we’ll fix our post list:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1262,8 +1262,8 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page_obj.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
         </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
-</code></pre><p>Next, we’ll take care of our post detail page:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</code></pre><p>Next, we’ll take care of our post detail page:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1279,7 +1279,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>Note that in both cases we include a link to the category URL.</p><p>Now, we should only have one failing test outstanding - the category page. For this, generic views aren’t sufficient as we need to limit the queryset to only show those posts with a specific category. Fortunately, we can extend Django’s generic views to add this functionality. First, we edit our URLconfs:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.conf.urls <span class="hljs-keyword">import</span> patterns, url
 <span class="hljs-keyword">from</span> django.views.generic <span class="hljs-keyword">import</span> ListView, DetailView
 <span class="hljs-keyword">from</span> blogengine.models <span class="hljs-keyword">import</span> Post, Category
@@ -2224,7 +2224,7 @@ Ran 19 tests <span class="hljs-keyword">in</span> 5.375s
 
 FAILED (failures=3)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>So, we need to implement the following things:</p><ul><li>Show tags on the index page</li><li>Show tags on the post pages</li><li>Create a page listing the posts with a specific tag</li></ul><p>As we have seen already with the categories, this is actually quite simple. First, we’ll sort out the tags on the index page:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>So, we need to implement the following things:</p><ul><li>Show tags on the index page</li><li>Show tags on the post pages</li><li>Create a page listing the posts with a specific tag</li></ul><p>As we have seen already with the categories, this is actually quite simple. First, we’ll sort out the tags on the index page:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -2248,8 +2248,8 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/</span></span></span><span class="hljs-template-variable">{{ page_obj.next_page_number }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>Next Page<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
         </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
-</code></pre><p>This is quite simple. We retrieve all the tags with <code>post.tags.all</code> and loop through them. We then do basically the same for the individual post pages:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
+</code></pre><p>This is quite simple. We retrieve all the tags with <code>post.tags.all</code> and loop through them. We then do basically the same for the individual post pages:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 

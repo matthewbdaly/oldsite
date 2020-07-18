@@ -251,16 +251,16 @@
     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item.slug}</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>{item.title}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">dangerouslySetInnerHTML</span>=<span class="hljs-string">{{__html:</span> <span class="hljs-attr">marked</span>(<span class="hljs-attr">item.content</span>)}} /&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
   )) : [];
-  <span class="hljs-keyword">return</span> (
-    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"App"</span>&gt;</span>
+  return (
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"App"</span>&gt;</span>
       {posts}
-    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
   );
 }
 
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+export default App;</span>
 </code></pre><p>This hook is simple, and easy to reuse. However, it’s difficult to type the value of <code>data</code> correctly, since it will be different for different endpoints, and given that it may be reused for almost any endpoint, you can’t cover <em>all</em> the acceptable response types. We need to be able to specify the response that is acceptable in that particular context.</p><h2 id="generics-to-the-rescue">Generics to the rescue</h2><p>Flow provides a solution for this in the shape of <a href="https://flow.org/en/docs/types/generics/">generic types</a>. By passing in a polymorphic type using <code>&lt;T&gt;</code> in the function declaration, we can then refer to that type when specifying what <code>data</code> should look like:</p><pre><code class="hljs lang-flow"><span class="hljs-comment">//@flow</span>
 <span class="hljs-keyword">import</span> { useCallback, useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">"react"</span>;
 
@@ -344,16 +344,16 @@ type Data = {
     <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{item.slug}</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>{item.title}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">dangerouslySetInnerHTML</span>=<span class="hljs-string">{{__html:</span> <span class="hljs-attr">marked</span>(<span class="hljs-attr">item.content</span>)}} /&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
   )) : [];
-  <span class="hljs-keyword">return</span> (
-    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"App"</span>&gt;</span>
+  return (
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"App"</span>&gt;</span>
       {posts}
-    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
   );
 }
 
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> App;
+export default App;</span>
 </code></pre><p>That way, we can specify a completely different shape for our response data every time we call a different endpoint, without creating a different hook for every different endpoint, and still enjoy properly typed responses from our hook.</p><p>Generics can be useful for many other purposes, such as specifying the contents of collections. For instance, if you had a <code>Collection</code> object, you could use a generic type to specify that any one instance must consist of instances of a given type. Flow would then flag it as an error if you assigned an item of the wrong type to that collection, thus making some unit tests redundant.</p><section><ul class="categories"><li><a href="/blog/categories/javascript/">javascript</a></li><li><a href="/blog/categories/react/">react</a></li><li><a href="/blog/categories/flow/">flow</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2020/06/13/flow-typed-ajax-responses-with-react-hooks/">View the article with comments</a></section><section><a class="postlink" href="/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/amp/">Caching the Laravel User Provider With a Decorator</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"

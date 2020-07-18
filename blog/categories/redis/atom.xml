@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>redis | Matthew Daly&apos;s Blog</title>
-    <updated>2020-06-13T12:47:19Z</updated>
+    <updated>2020-07-18T22:30:57Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -115,7 +115,7 @@ class NewMessage extends Event implements ShouldBroadcast
 <pre><code class="lang-php">use App\Events\NewMessage;
 Event::fire(new NewMessage($message));
 </code></pre>
-<p>Here, <code>$message</code> is the saved Eloquent object containing the message. Note the use of <code>SerializesModels</code> - this means that the Eloquent model is serialized into JSON when broadcasting the event.</p>
+<p>Here, <code>$message</code> is the saved Eloquent object containing the message. Note the use of <code>SerializesModels</code> - this means that the Eloquent model is serialised into JSON when broadcasting the event.</p>
 <p>We also need to make sure Redis is set as our broadcast driver. Ensure the Composer package <code>predis/predis</code> is installed, and set <code>BROADCAST_DRIVER=redis</code> in your <code>.env</code> file. Also, please note that I found that setting <code>QUEUE_DRIVER=redis</code> in <code>.env</code> as well broke the broadcasting system, so it looks like you can’t use Redis as both a queue and a broadcasting system unless you set up multiple connections.</p>
 <p>Next, we need another server-side script to handle processing the received events and pushing the messages out. In my case, this was complicated by the fact that we were using HTTPS, courtesy of Let’s Encrypt. I installed the required dependencies for the Node.js script as follows:</p>
 <pre><code class="lang-bash">$ npm install socket.io socket.io-client ioredis --save-dev
@@ -1018,7 +1018,7 @@ app.get(&#39;/&#39;, function (req, res) {
     });
 });
 </code></pre>
-<p>Here we use the client to return all messages in the list by using the <code>LRANGE</code> command and defining the slice as being from the start to the end of the list. We then loop through the mesages and push each to a list, before passing that list to the view.</p>
+<p>Here we use the client to return all messages in the list by using the <code>LRANGE</code> command and defining the slice as being from the start to the end of the list. We then loop through the messages and push each to a list, before passing that list to the view.</p>
 <p>Speaking of which, we also need to update <code>views/index.hbs</code>:</p>
 <pre><code class="lang-handlebars">{{&gt; header }}
         &lt;div class=&quot;container&quot;&gt;

@@ -4,7 +4,7 @@
         <title>laravel | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/laravel/</link>
         <description>laravel | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sat, 13 Jun 2020 12:47:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 18 Jul 2020 22:30:57 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2020</copyright>
@@ -979,7 +979,7 @@ class AppServiceProvider extends ServiceProvider
 <p>This approach means that complex logic, such as creating multiple related objects, can be handled in a consistent way, even if it needs to be called from multiple places.</p>
 <h2 id="triggering-actions-as-a-result-of-something">Triggering actions as a result of something</h2>
 <p><a href="https://laravel.com/docs/5.6/events">Events</a> are tailor-made for this use case, and Laravel documents them very well, so I won’t repeat it here. Suffice to say, if something needs to happen, but the response sent by the application doesn’t necessarily depend on it returning something immediately, then it’s probably worth considering making it an event. If it’s going to be called from multiple places, it’s even more worthwhile.</p>
-<p>For instance, if you have a contact form, it’s worth taking the time to create an event for when a new contact is received, and handle proessing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you’re sending an acknowledgement email for a new user registration, you don’t need to wait for that email to be sent before you return the response, so queueing it can improve response times.</p>
+<p>For instance, if you have a contact form, it’s worth taking the time to create an event for when a new contact is received, and handle processing the contact within the listener for that event. Also, doing so means you can queue that event and have it handled outside the context of the application, so that it responds to the user more quickly. If you’re sending an acknowledgement email for a new user registration, you don’t need to wait for that email to be sent before you return the response, so queuing it can improve response times.</p>
 <h2 id="interacting-with-third-party-services">Interacting with third-party services</h2>
 <p>If you have some code that needs to interact with a third-party service or API, it can get quite complex, especially if you need to process the content in some way. It therefore makes sense to pull that functionality out into a separate class.</p>
 <p>For instance, say you have some code in your controller that uses an HTTP client to fetch some data from a third-party API and display it in the view:</p>
@@ -1286,7 +1286,7 @@ after(&#39;deploy:symlink&#39;, &#39;php-fpm:restart&#39;);
 <li>Pulling from the Git remote</li>
 <li>Updating any Composer dependencies to match <code>composer.json</code></li>
 <li>Running the migrations</li>
-<li>Optimizing the application</li>
+<li>Optimising the application</li>
 </ul>
 <p>In addition, one really great feature Deployer offers is rollbacks. Rather than checking out your application directly into the project root you specify, it numbers each release and deploys it in a separate folder, before symlinking that folder to the project root as <code>current</code>. That way, if a release cannot be deployed successfully, rather than leaving your application in an unfinished state, Deployer will symlink the previous version so that you still have a working version of your application.</p>
 <p>If you have configured Deployer for that project, you can deploy using the following command where <code>production</code> is the name of the host you’re deploying to:</p>
@@ -1319,7 +1319,7 @@ Connection to linklater.shellshocked.info closed.
 ✔ Executing task success
 Successfully deployed!
 </code></pre>
-<p>As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the <code>.env</code> file, the <code>storage/</code> directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimize our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.</p>
+<p>As you can see, we first of all lock the application and pull the latest version from the Git remote. Next we copy the files shared between releases (eg the <code>.env</code> file, the <code>storage/</code> directory etc), update the dependencies, and make sure the permissions are correct. Next we link the storage, clear all the cached content, optimise our app, and migrate the database, before we set up the symlink. Finally we restart the web server and unlock the application.</p>
 <p>In the event you discover a problem after deploy and need to rollback manually, you can do so with the following command:</p>
 <pre><code class="lang-bash">$ dep rollback production
 </code></pre>
@@ -2723,7 +2723,7 @@ clock([&#39;hello&#39; =&gt; &#39;world&#39;]); // logs json representation of t
 <h2 id="routes">Routes</h2>
 <p><img src="/static/images/clockwork7.png" alt="Routes tab"></p>
 <p>This tab shows all of the routes defined within your application.</p>
-<p>Clockwork isn’t limited to Laravel - you can also use it with Lumen, Slim 2, and CodeIgniter 2.1, and it’s possible to write your own integration for other frameworks. It’s still fundamentally browser-based, so it’s difficult to use it if your API doesn’t have at least some kind of web front end (whether that’s a single page web app or Phonegap app that consumes the API, or that the API is itself browseable and returns HTML in a web browser), but I’ve found it to be superior to Laravel Debugbar for most of what I do.</p>
+<p>Clockwork isn’t limited to Laravel - you can also use it with Lumen, Slim 2, and CodeIgniter 2.1, and it’s possible to write your own integration for other frameworks. It’s still fundamentally browser-based, so it’s difficult to use it if your API doesn’t have at least some kind of web front end (whether that’s a single page web app or Phonegap app that consumes the API, or that the API is itself browsable and returns HTML in a web browser), but I’ve found it to be superior to Laravel Debugbar for most of what I do.</p>
 ]]></description>
         </item>
         <item>
@@ -2956,7 +2956,7 @@ class UserTest extends TestCase
     }
 }
 </code></pre>
-<p>As you can see, all we care about is that the underlying repository interface receives the correct method calls and arguments, nothing more. That way our test is fast and repository-agnositc.</p>
+<p>As you can see, all we care about is that the underlying repository interface receives the correct method calls and arguments, nothing more. That way our test is fast and repository-agnostic.</p>
 <h2 id="other-applications">Other applications</h2>
 <p>Here I’ve used this technique to cache the queries, but that’s not the only use case for decorating a repository. For instance, you could decorate a repository to fire events when certain methods are called, and write different decorators when reusing these repositories for different applications. You could create one to log interactions with the repository, or you could use an external library to cache your queries, all without touching your existing repository. Should we need to switch back to our base repository, it’s just a matter of amending the service provider accordingly as both the decorator and the repository implement the same interface.</p>
 <p>Creating decorators does mean you have to implement all of the interface’s methods again, but if you have a base repository that your other ones inherit from, you can easily create a base decorator in a similar fashion that wraps methods common to all the repositories, and then just implement the additional methods for each decorator as required. Also, each method is likely to be fairly limited in scope so it’s not generally too onerous.</p>
@@ -3788,7 +3788,7 @@ class PetTransformer extends Fractal\TransformerAbstract
     }
 }
 </code></pre>
-<p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represemt relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p>
+<p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represent relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p>
 <p>Now let’s amend <code>PetController.php</code> to use this:</p>
 <pre><code class="lang-php">&lt;?php
 
@@ -5428,7 +5428,7 @@ angular.module(&#39;mynewanimalfriend.controllers&#39;, [
   };
 });
 </code></pre>
-<p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is alled, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p>
+<p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is called, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p>
 <p>Check the test now passes before moving onto the logout functionality. Add this to <code>test/controllers.spec.js</code>:</p>
 <pre><code class="lang-javascript">  describe(&#39;Logout Controller&#39;, function () {
     var scope;
@@ -5649,7 +5649,7 @@ angular.module(&#39;mynewanimalfriend.services&#39;, [&#39;ngResource&#39;])
   };
 });
 </code></pre>
-<p>I’ll walk you through these. <code>sessionInjector</code> adds the authorization HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p>
+<p>I’ll walk you through these. <code>sessionInjector</code> adds the authorisation HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p>
 <p>Now the logic of our app is in place, but that’s no use without some content…</p>
 <h2 id="angular-templating">Angular templating</h2>
 <p>We have one very basic HTML template, but that’s just a boilerplate for inserting the rest of our content. For the rest of the HTML we’ll need to load templates dynamically, and we’ll use Angular Material to help us build a nice UI quickly. Run the following commands to create the files:</p>
@@ -5807,7 +5807,7 @@ angular.module(&#39;mynewanimalfriend&#39;, [
 <li>Building a Phonegap app using Angular.js</li>
 <li>Testing and deploying it</li>
 </ul>
-<p>In the process we’ll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p>
+<p>In the process we’ll cover issues like authentication, authorisation, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p>
 <h2 id="the-brief">The brief</h2>
 <p>Let’s say our new client is an animal shelter. The brief for the app is as follows:</p>
 <blockquote>
@@ -5898,7 +5898,7 @@ abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
 <p>With that in place, we can start work on our API proper.</p>
 <h2 id="authenticating-our-api">Authenticating our API</h2>
 <p>We’re going to start out with a very limited subset of our API. First, we’ll implement the authentication for our app, then we’ll add the facility to view a list of pets or an individual pet. Other functionality will come later. This will be sufficient to get the app working.</p>
-<p>First, we need to create our user model. As we’ll be practicing TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p>
+<p>First, we need to create our user model. As we’ll be practising TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p>
 <pre><code class="lang-php">&lt;?php
 
 use AnimalFriend\User;
@@ -7608,7 +7608,7 @@ class NewMessage extends Event implements ShouldBroadcast
 <pre><code class="lang-php">use App\Events\NewMessage;
 Event::fire(new NewMessage($message));
 </code></pre>
-<p>Here, <code>$message</code> is the saved Eloquent object containing the message. Note the use of <code>SerializesModels</code> - this means that the Eloquent model is serialized into JSON when broadcasting the event.</p>
+<p>Here, <code>$message</code> is the saved Eloquent object containing the message. Note the use of <code>SerializesModels</code> - this means that the Eloquent model is serialised into JSON when broadcasting the event.</p>
 <p>We also need to make sure Redis is set as our broadcast driver. Ensure the Composer package <code>predis/predis</code> is installed, and set <code>BROADCAST_DRIVER=redis</code> in your <code>.env</code> file. Also, please note that I found that setting <code>QUEUE_DRIVER=redis</code> in <code>.env</code> as well broke the broadcasting system, so it looks like you can’t use Redis as both a queue and a broadcasting system unless you set up multiple connections.</p>
 <p>Next, we need another server-side script to handle processing the received events and pushing the messages out. In my case, this was complicated by the fact that we were using HTTPS, courtesy of Let’s Encrypt. I installed the required dependencies for the Node.js script as follows:</p>
 <pre><code class="lang-bash">$ npm install socket.io socket.io-client ioredis --save-dev
@@ -7744,7 +7744,7 @@ server {
             <link>https://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/</link>
             <guid>https://matthewdaly.co.uk/blog/2016/04/04/writing-faster-laravel-tests/</guid>
             <pubDate>Mon, 04 Apr 2016 19:55:15 GMT</pubDate>
-            <description><![CDATA[<p>Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practicing TDD a lot easier.</p>
+            <description><![CDATA[<p>Nowadays, Laravel tends to be my go-to PHP framework, to the point that we use it as our default framework at work. A big part of this is that Laravel is relatively easy to test, making practising TDD a lot easier.</p>
 <p>Out of the box running Laravel tests can be quite slow, which is a big issue - if your test suite takes several minutes to run, that’s a huge disruption. Also, Laravel doesn’t create a dedicated test database - instead it runs the tests against the same database you’re using normally, which is almost always not what you want. I’ll show you how to set up a dedicated test database, and how to use an in-memory SQLite database for faster tests. This results in cleaner and easier-to-maintain tests, since you can be sure the test database is restored to a clean state at the end of every test.</p>
 <h2 id="setup">Setup</h2>
 <p>Our first step is to make sure that when a new test begins, the following should happen:</p>
@@ -7817,7 +7817,7 @@ class TestCase extends Illuminate\Foundation\Testing\TestCase
 <p>We’ve never really had a fixed stack that we work with at work before until recently - it was largely based on personal preferences and experience. For many jobs, especially content-based sites, we generally used WordPress - it has its issues, but it does fine for a lot of work. For more complex websites, I tended to use CodeIgniter because I’d learned it during my previous job and knew it fairly well, but I was not terribly happy with it - it’s a bit too basic and simplistic, as well as being somewhat behind the times, and I only really kept using it through inertia. For mobile app backends, I tended to use Django, partly for the admin interface, and partly because Django REST Framework makes it easy to build a REST API quickly and easily in a way that wasn’t viable with CodeIgniter.</p>
 <p>This state of affairs couldn’t really continue. I love Python and Django, but I was the only one at work who had ever used Python, so in the event I got hit by a bus there would have been no-one who could have taken over from me. As for CodeIgniter, it was clearly falling further and further behind the curve, and I was sick of it and looking to replace it. Ideally we needed a PHP framework as both myself and my colleague knew it.</p>
 <p>I’d also been playing around with Laravel on a few little projects, but I didn’t get the chance to use it for a new web app until autumn last year. Around the same time, we hired a third developer, who also had some experience using Laravel. In addition, the presence of Lumen meant that we could use that for smaller apps or services that were too small to use Laravel. We therefore decided to adopt Laravel as our default framework - in future we’d only use something else if there was a particular justification for it. I was rather sad to have to abandon Django for work, but pleased to have something more modern than CodeIgniter for PHP projects.</p>
-<p>This also enabled us to standardize our new server builds. Over the last year or so I’ve been pushing to automate what we can of our server setup using Ansible. We now have two standard stacks that we plan to use for future projects. One is for WordPress sites and consists of:</p>
+<p>This also enabled us to standardise our new server builds. Over the last year or so I’ve been pushing to automate what we can of our server setup using Ansible. We now have two standard stacks that we plan to use for future projects. One is for WordPress sites and consists of:</p>
 <ul>
 <li>Debian stable</li>
 <li>Apache</li>

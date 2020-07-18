@@ -365,7 +365,7 @@ Ran 9 tests <span class="hljs-keyword">in</span> 3.557s
 
 FAILED (errors=1)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>Our test still fails, but we can easily see why - the template <code>flatpages/default.html</code> doesn’t exist. So we create it:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Our test still fails, but we can easily see why - the template <code>flatpages/default.html</code> doesn’t exist. So we create it:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -375,7 +375,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         </span><span class="hljs-template-variable">{{ flatpage.content|custom_markdown }}</span><span class="xml">
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>This template is based on the blog post one, and just changes a handful of variable names. Note that it can still inherit from the blogengine base template, and in this case we’re using that for the sake of consistency.</p><p>If you run your tests, you should now see that they pass, so we’ll commit our changes:</p><pre><code class="hljs lang-bash">$ git add templates/ django_tutorial_blog_ng/ blogengine/
 $ git commit -m <span class="hljs-string">'Implemented flat page support'</span>
 </code></pre><h2 id="multiple-authors">Multiple authors</h2><p>Next we’ll add support for multiple authors. Now, Django already has a User model, and we’ll leverage that to represent the authors. But first we’ll write our test:</p><pre><code class="hljs lang-python"><span class="hljs-keyword">from</span> django.test <span class="hljs-keyword">import</span> TestCase, LiveServerTestCase, Client
@@ -1144,7 +1144,7 @@ $ git commit -m <span class="hljs-string">'Added author field'</span>
         <span class="hljs-comment"># Check title and content in response</span>
         self.assertTrue(<span class="hljs-string">'About me'</span> <span class="hljs-keyword">in</span> response.content)
         self.assertTrue(<span class="hljs-string">'All about me'</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre><p>All we’ve done here is to add the <code>site</code> attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional <code>site</code> aparameter to the HTTP POST request with a value of 1. Run the tests and they should fail:</p><pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
+</code></pre><p>All we’ve done here is to add the <code>site</code> attribute when creating a new post using the Django database API, and when we create one via the admin, we add an additional <code>site</code> parameter to the HTTP POST request with a value of 1. Run the tests and they should fail:</p><pre><code class="hljs lang-bash">Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 E........
 ======================================================================
 ERROR: test_create_post (blogengine.tests.PostTest)
@@ -1206,7 +1206,7 @@ Ran 9 tests <span class="hljs-keyword">in</span> 4.261s
 
 OK
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>Now we can include our full page URL on the post detail page:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Now we can include our full page URL on the post detail page:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1221,7 +1221,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>If you want to customise the comments, take a look at <a href="https://developers.facebook.com/docs/plugins/comments/">the documentation for Facebook Comments</a>.</p><p>With that done, we can commit our changes:</p><pre><code class="hljs lang-bash">$ git add blogengine/ templates/
 $ git commit -m <span class="hljs-string">'Implemented Facebook comments'</span>
 </code></pre><p>And that wraps up this lesson. As usual, you can easily switch to today’s lesson with <code>git checkout lesson-3</code>. Next time we’ll implement categories and tags, and create an RSS feed for our blog posts.</p><section><ul class="categories"><li><a href="/blog/categories/python/">python</a></li><li><a href="/blog/categories/django/">django</a></li><li><a href="/blog/categories/tdd/">tdd</a></li><li><a href="/blog/categories/django-blog-tutorial/">django-blog-tutorial</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2014/01/03/django-blog-tutorial-the-next-generation-part-3/">View the article with comments</a></section><section><a class="postlink" href="/blog/2014/01/25/my-first-yeoman-generator/amp/">My First Yeoman Generator</a> <a class="postlink" href="/blog/2014/01/02/django-blog-tutorial-the-next-generation-part-2/amp/">Django Blog Tutorial - the Next Generation - Part 2</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{

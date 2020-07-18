@@ -4,7 +4,7 @@
         <title>javascript | Matthew Daly&apos;s Blog</title>
         <link>https://matthewdaly.co.uk/blog/categories/javascript/</link>
         <description>javascript | I&apos;m a web developer in Norfolk. This is my blog...</description>
-        <lastBuildDate>Sat, 13 Jun 2020 12:47:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 18 Jul 2020 22:30:57 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
         <copyright>Matthew Daly 2020</copyright>
@@ -482,7 +482,7 @@ ReactDOM.render(
             <link>https://matthewdaly.co.uk/blog/2018/10/16/adding-react-to-a-legacy-project/</link>
             <guid>https://matthewdaly.co.uk/blog/2018/10/16/adding-react-to-a-legacy-project/</guid>
             <pubDate>Tue, 16 Oct 2018 08:00:29 GMT</pubDate>
-            <description><![CDATA[<p>The project I’m currently working on is a textbook example of what happens when a project uses jQuery when it really ought to use a proper Javascript framework, or it starts out just using jQuery and grows out of all proportion. It’s also not helped by the fact that historically it’s just been worked on when new functionality needs to be added, meaning that rather than refactoring the code base, it’s been copied-and-pasted. As a result, there’s lots of repetitive code in desparate need of refactoring, and huge reams of horrible jQuery spaghetti code.</p>
+            <description><![CDATA[<p>The project I’m currently working on is a textbook example of what happens when a project uses jQuery when it really ought to use a proper Javascript framework, or it starts out just using jQuery and grows out of all proportion. It’s also not helped by the fact that historically it’s just been worked on when new functionality needs to be added, meaning that rather than refactoring the code base, it’s been copied-and-pasted. As a result, there’s lots of repetitive code in desperate need of refactoring, and huge reams of horrible jQuery spaghetti code.</p>
 <p>When I first took over responsibility for the project, I integrated Laravel Mix into it so that I had the means to refactor some of the common functionality into separate files and require them during the build process, as well as use ES6. However, this was only the first step, as it didn’t sort out the fundamental problem of repetitive boilerplate code being copied and pasted. What I needed was a refactor to use something more opinionated. As it happened, I was asked to add a couple of modals to the admin, and since the modals were one of the worst parts of the admin in terms of repetitive code, they were a strong candidate for implementing using a more suitable library.</p>
 <p>I looked at a few options:</p>
 <ul>
@@ -527,7 +527,7 @@ window.componentWrapper.setState({
 });
 </code></pre>
 <p>By extracting the duplicate functionality into a higher order component, I could easily wrap the new modals in that component and share that functionality between the modals. I could then render each component in a different target element, and assign it to a variable in the <code>window</code> namespace. The div with a ID of <code>modalTarget</code> needed to be added in the appropriate place, but otherwise the HTML didn’t need to be touched, since the required markup was in the React component instead.</p>
-<p>Then, when I needed to change a value int the statee of the component, I could just call <code>window.componentWrapper.setState({})</code>, passing through the values to set, and these would propogate down to the child components as usual. I could also render multiple different modal components on the page, and refer to each one separately in order to set the state.</p>
+<p>Then, when I needed to change a value int the state of the component, I could just call <code>window.componentWrapper.setState({})</code>, passing through the values to set, and these would propagate down to the child components as usual. I could also render multiple different modal components on the page, and refer to each one separately in order to set the state.</p>
 <p>This isn’t an approach I’d recommend on a greenfield project - state isn’t really something you should be setting from outside a component like this, and normally I wouldn’t do it. However, it seemed to be the easiest way for this particular use case. Over time I’ll port more and more of the UI over to React, and eventually it won’t be necessary as I’ll be storing the application state in something like Redux.</p>
 ]]></description>
         </item>
@@ -556,7 +556,7 @@ window.componentWrapper.setState({
 <li>Whether jQuery is sufficient, or you’d be better off using something like React, Vue or Angular</li>
 <li>If it is sufficient, whether it’s actually necessary</li>
 </ul>
-<p>In all honesty, I don’t think using it when it’s technically not necessary is as much of a big deal as the issue of using it when it’s not really sufficient. Yes, dowloading a library you technically don’t need for a page is a bad practice, and it does make your site slower and harder for users on slow mobile connections, but there are ways to mitigate that such as CDN’s, caching and minification. If you build a web app using jQuery alone when React, Vue or Angular would be more suitable, you’re probably going to have to write a lot more code that will be difficult to maintain, test and understand. Things like React were created to solve the problems that arose when developers built complex client-side applications with jQuery, and are therefore a good fit for bigger applications. The complex setup does mean they have a threshold below which it’s not worth the bother of using them, but past that threshold they result in better, more maintainable, more testable and more reusable code.</p>
+<p>In all honesty, I don’t think using it when it’s technically not necessary is as much of a big deal as the issue of using it when it’s not really sufficient. Yes, downloading a library you technically don’t need for a page is a bad practice, and it does make your site slower and harder for users on slow mobile connections, but there are ways to mitigate that such as CDN’s, caching and minification. If you build a web app using jQuery alone when React, Vue or Angular would be more suitable, you’re probably going to have to write a lot more code that will be difficult to maintain, test and understand. Things like React were created to solve the problems that arose when developers built complex client-side applications with jQuery, and are therefore a good fit for bigger applications. The complex setup does mean they have a threshold below which it’s not worth the bother of using them, but past that threshold they result in better, more maintainable, more testable and more reusable code.</p>
 <h2 id="now-react-is-cool-you-hate-jquery-you-hipster-">Now React is cool, you hate jQuery, you hipster…</h2>
 <p>Don’t be a prat. Bitter experience has taught me that for a lot of my own personal use cases, jQuery is insufficient. It doesn’t suck, it’s just insufficient. If for your use case, jQuery <em>is</em> sufficient, then that’s fine. All I’m saying is that when a web app becomes sufficiently complex, jQuery can begin to cause more problems than it solves, and that for a sufficiently complex web app you should consider other solutions.</p>
 <p>I currently maintain a legacy application that includes thousands of lines of Javascript. Most of it is done with jQuery and some plugins, and it’s resulted in some extremely repetitive jQuery callbacks that are hard to maintain and understand, and impossible to test. Recently I was asked to add a couple of modals to the admin interface, and rather than continuing to add them using jQuery and adding more spaghetti code, I instead opted to build them with React. During the process of building the first modal, I produced a number of components for different elements of the UI. Then, when I built the second one, I refactored those components to be more generic, and moved some common functionality into a higher-order component so that it could be reused. Now, if I need to add another modal, it will be trivial because I already have those components available, and I can just create a new component for the modal, import those components that I need, wrap it in the higher-order component if necessary, and that’s all. I can also easily test those components in isolation. In short, I’ve saved myself some work in the long run by writing it to use a library that was a better fit.</p>
@@ -1439,7 +1439,7 @@ class PetTransformer extends Fractal\TransformerAbstract
     }
 }
 </code></pre>
-<p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represemt relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p>
+<p>The <code>transform</code> method specifies how we want to represent our objects with our API. We can return only those attributes we want to expose, and amend the structure as we see fit. We could easily represent relations in whatever manner we see fit, whereas before we needed to amend our queries to return the data in the right format, which would potentially be cumbersome.</p>
 <p>Now let’s amend <code>PetController.php</code> to use this:</p>
 <pre><code class="lang-php">&lt;?php
 
@@ -3011,7 +3011,7 @@ angular.module(&#39;mynewanimalfriend.controllers&#39;, [
   };
 });
 </code></pre>
-<p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is alled, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p>
+<p>The <code>LoginCtrl</code> controller accepts the scope, location, and our two services. When <code>doLogin()</code> is called, it picks up the values in <code>$scope.credentials</code>, which we will set in our template later. It then makes a POST request to our endpoint including those credentials. Our API backend should return the new token in the response, and the token is stored using the <code>Auth</code> service. Otherwise, it raises an error.</p>
 <p>Check the test now passes before moving onto the logout functionality. Add this to <code>test/controllers.spec.js</code>:</p>
 <pre><code class="lang-javascript">  describe(&#39;Logout Controller&#39;, function () {
     var scope;
@@ -3232,7 +3232,7 @@ angular.module(&#39;mynewanimalfriend.services&#39;, [&#39;ngResource&#39;])
   };
 });
 </code></pre>
-<p>I’ll walk you through these. <code>sessionInjector</code> adds the authorization HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p>
+<p>I’ll walk you through these. <code>sessionInjector</code> adds the authorisation HTTP header to every request to the server if the user is logged in, so that it returns the right user’s details. <code>authInterceptor</code> catches any 400 errors, denoting that the user is not authenticated with a current JSON web token, and logs the user out. In this way we can handle the expiry of a user’s token.</p>
 <p>Now the logic of our app is in place, but that’s no use without some content…</p>
 <h2 id="angular-templating">Angular templating</h2>
 <p>We have one very basic HTML template, but that’s just a boilerplate for inserting the rest of our content. For the rest of the HTML we’ll need to load templates dynamically, and we’ll use Angular Material to help us build a nice UI quickly. Run the following commands to create the files:</p>
@@ -3390,7 +3390,7 @@ angular.module(&#39;mynewanimalfriend&#39;, [
 <li>Building a Phonegap app using Angular.js</li>
 <li>Testing and deploying it</li>
 </ul>
-<p>In the process we’ll cover issues like authentication, authorization, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p>
+<p>In the process we’ll cover issues like authentication, authorisation, real-time notifications and working with REST APIs. Note that we won’t cover the app submission process - you can find plenty of resources on that. We will, however, be using Phonegap Build to build the app.</p>
 <h2 id="the-brief">The brief</h2>
 <p>Let’s say our new client is an animal shelter. The brief for the app is as follows:</p>
 <blockquote>
@@ -3481,7 +3481,7 @@ abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
 <p>With that in place, we can start work on our API proper.</p>
 <h2 id="authenticating-our-api">Authenticating our API</h2>
 <p>We’re going to start out with a very limited subset of our API. First, we’ll implement the authentication for our app, then we’ll add the facility to view a list of pets or an individual pet. Other functionality will come later. This will be sufficient to get the app working.</p>
-<p>First, we need to create our user model. As we’ll be practicing TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p>
+<p>First, we need to create our user model. As we’ll be practising TDD throughout, we write a test for the user model first. Save the following as <code>tests/UserModelTest.php</code>:</p>
 <pre><code class="lang-php">&lt;?php
 
 use AnimalFriend\User;
@@ -4329,7 +4329,7 @@ Object.keys(window).forEach((key) =&gt; {
 <p>This sets up Chai and creates a dummy DOM for our tests. We also need to create the folder <code>js/</code> and the file <code>js/app.js</code>. You can leave that file empty for now.</p>
 <p>If you now run <code>npm start</code> and navigate to <a href="http://localhost:8080/webpack-dev-server/">http://localhost:8080/webpack-dev-server/</a>, you can see the current state of the application.</p>
 <h2 id="our-dashboard-component">Our dashboard component</h2>
-<p>Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralized data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we’re better off having each widget manage its own data internally, rather than have it be passed down from a single data store.</p>
+<p>Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralised data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we’re better off having each widget manage its own data internally, rather than have it be passed down from a single data store.</p>
 <p>Save the following as <code>test/components/dashboard.js</code>:</p>
 <pre><code class="lang-javascript">import TestUtils from &#39;react-addons-test-utils&#39;;
 import React from &#39;react&#39;;
@@ -4828,7 +4828,7 @@ export default React.createClass({
 });
 </code></pre>
 <p>This is by far the most complex component, so a little explanation is called for. We include jQuery as a dependency at the top of the file. Then we create a component for rendering an individual feed item, called <code>FeedItem</code>. This is very simple, consisting of an anchor tag wrapped around a list item. Note the use of the <code>const</code> keyword - in ES6 this denotes a constant.</p>
-<p>Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a <code>componentDidMount()</code> method that calls <code>getFeed()</code> and sets up an interval to call it again, based on the <code>delay</code> property. The <code>getFeed()</code> method fetches the URL in question and sets <code>this.state.feed</code> to an array of the most recent entries in the feed, with the size denoted by the <code>size</code> property passed through. We also clear that interval when the component is about to be umounted.</p>
+<p>Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a <code>componentDidMount()</code> method that calls <code>getFeed()</code> and sets up an interval to call it again, based on the <code>delay</code> property. The <code>getFeed()</code> method fetches the URL in question and sets <code>this.state.feed</code> to an array of the most recent entries in the feed, with the size denoted by the <code>size</code> property passed through. We also clear that interval when the component is about to be unmounted.</p>
 <p>Note that you may have problems with the <code>Access-Control-Allow-Origin</code> HTTP header. It’s possible to disable this in your web browser, so if you want to run this as a dashboard you’ll probably need to do so. On Chrome there’s a useful <a href="https://www.google.co.uk/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwiw9Mm4r8TOAhVNOMAKHUicCF4QFggcMAA&amp;url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fallow-control-allow-origi%2Fnlfbmbojpeacfghkpbjhddihlkkiljbi%3Fhl%3Den&amp;usg=AFQjCNHSUFqc6ylxfxfbWzmmFJ6L5QUvyg&amp;sig2=fJaf_HKgY8XDsd-JeY_PXg&amp;bvm=bv.129422649,d.d24">plugin</a> that allows you to disable this when needed.</p>
 <p>Because our <code>FeedWidget</code> has been created in a generic manner, we can then include multiple feed widgets easily, as in this example:</p>
 <pre><code class="lang-javascript">import React from &#39;react&#39;;
@@ -5225,7 +5225,7 @@ $(function() {
 <li>Add to the rating if it contains numbers.</li>
 </ul>
 <ul>
-<li>Add to the rating if it contains nonalphanumeric characters.</li>
+<li>Add to the rating if it contains non-alphanumeric characters.</li>
 </ul>
 <ul>
 <li>Finally, convert the result to a percentage score and return it as an integer.</li>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>wordpress | Matthew Daly&apos;s Blog</title>
-    <updated>2020-06-13T12:47:19Z</updated>
+    <updated>2020-07-18T22:30:57Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -114,13 +114,13 @@ fastcgi_param WP_DEBUG true;
 <p>Unfortunately, it’s also difficult to avoid. Over a quarter of all websites run Wordpress, and most developers will have to work with it at some point in their careers. However, there are ways that you can improve your experience when working with Wordpress somewhat. In this post I’m going to share some methods you can use to make Wordpress less painful to use.</p>
 <p>This isn’t a post about the obvious things like “Use the most recent version of PHP you can”, “Use SSL”, “Install this plugin”, “Use Vagrant/Lando” etc - I’m assuming you already know stuff like that for bog standard Wordpress development. Nor is it about actually developing Wordpress plugins or themes. Instead, this post is about bringing your Wordpress development workflow more into line with how you develop with MVC frameworks like Laravel, so that you have a better experience working with and maintaining Wordpress sites. We can’t solve the fundamental issues with Wordpress, but we can take some steps to make it easier to work with.</p>
 <h2 id="use-bedrock">Use Bedrock</h2>
-<p><a href="https://roots.io/bedrock/">Bedrock</a> is still Wordpress, but reorganized so that:</p>
+<p><a href="https://roots.io/bedrock/">Bedrock</a> is still Wordpress, but reorganised so that:</p>
 <ul>
 <li>The Wordpress core, plugins and themes can be managed with Composer for easier updates</li>
 <li>The configuration can be done with a <code>.env</code> file that can be kept out of version control, rather than putting it in <code>wp-config.php</code></li>
 <li>The web root is isolated to limit access to the files</li>
 </ul>
-<p>In short, it optimizes Wordpress for how modern developers work. Arguably that’s at the expense of site owners, since it makes it harder for non-developers to manage the site, however for any Wordpress site that’s sufficiently complex to need development work done that’s a trade-off worth making. I’ve been involved in projects where Wordpress got used alongside an MVC framework for some custom functionality, and in my experience it caused a world of problems when updating plugins and themes because version control would get out of sync, so moving that to use Composer to manage them instead would have been a huge win.</p>
+<p>In short, it optimized Wordpress for how modern developers work. Arguably that’s at the expense of site owners, since it makes it harder for non-developers to manage the site, however for any Wordpress site that’s sufficiently complex to need development work done that’s a trade-off worth making. I’ve been involved in projects where Wordpress got used alongside an MVC framework for some custom functionality, and in my experience it caused a world of problems when updating plugins and themes because version control would get out of sync, so moving that to use Composer to manage them instead would have been a huge win.</p>
 <p>Using Bedrock means that if you have a parent theme you use all the time, or custom plugins of your own, you can install them using Composer by adding the Git repositories to your <code>composer.json</code>, making it easier to re-use functionality you’ve already developed. It also makes recovery easier in the event of the site being compromised, because the files outside the vendor directory will be in version control, and you can delete the vendor directory and re-run <code>composer install</code> to replace the rest. By comparison, with a regular Wordpress install, if it’s compromised you can’t always be certain you’ve got all of the files that have been changed. Also, keeping Wordpress up to date becomes a simple matter of running <code>composer update</code> regularly, verifying it hasn’t broken anything, and then deploying it to production.</p>
 <p>Bedrock uses <a href="https://wpackagist.org/">WPackagist</a>, which regularly scans the Wordpress Subversion repository for plugins and themes, so at least for plugins and themes published on the Wordpress site, it’s easy to install them. Paid plugins may be more difficult - I’d be inclined to put those in a private Git repository and install them from there, although I’d be interested to know if anyone else uses another method for that.</p>
 <h2 id="if-you-can-t-use-bedrock-use-wp-cli">If you can’t use Bedrock, use WP CLI</h2>

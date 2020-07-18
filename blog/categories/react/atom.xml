@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>react | Matthew Daly&apos;s Blog</title>
-    <updated>2020-06-13T12:47:19Z</updated>
+    <updated>2020-07-18T22:30:57Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -548,7 +548,7 @@ Object.keys(window).forEach((key) =&gt; {
 <p>This sets up Chai and creates a dummy DOM for our tests. We also need to create the folder <code>js/</code> and the file <code>js/app.js</code>. You can leave that file empty for now.</p>
 <p>If you now run <code>npm start</code> and navigate to <a href="http://localhost:8080/webpack-dev-server/">http://localhost:8080/webpack-dev-server/</a>, you can see the current state of the application.</p>
 <h2 id="our-dashboard-component">Our dashboard component</h2>
-<p>Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralized data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we’re better off having each widget manage its own data internally, rather than have it be passed down from a single data store.</p>
+<p>Our first React component will be a wrapper for all the other ones. Each of the rest of the components will be a self-contained widget that will populate itself without the need for a centralised data store like Redux. I will mention that Redux is a very useful library, and for larger React applications it makes a lot of sense to use it, but here we’re better off having each widget manage its own data internally, rather than have it be passed down from a single data store.</p>
 <p>Save the following as <code>test/components/dashboard.js</code>:</p>
 <pre><code class="lang-javascript">import TestUtils from &#39;react-addons-test-utils&#39;;
 import React from &#39;react&#39;;
@@ -1047,7 +1047,7 @@ export default React.createClass({
 });
 </code></pre>
 <p>This is by far the most complex component, so a little explanation is called for. We include jQuery as a dependency at the top of the file. Then we create a component for rendering an individual feed item, called <code>FeedItem</code>. This is very simple, consisting of an anchor tag wrapped around a list item. Note the use of the <code>const</code> keyword - in ES6 this denotes a constant.</p>
-<p>Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a <code>componentDidMount()</code> method that calls <code>getFeed()</code> and sets up an interval to call it again, based on the <code>delay</code> property. The <code>getFeed()</code> method fetches the URL in question and sets <code>this.state.feed</code> to an array of the most recent entries in the feed, with the size denoted by the <code>size</code> property passed through. We also clear that interval when the component is about to be umounted.</p>
+<p>Next, we move onto the feed widget proper. We set the initial state of the feed to be an empty array. Then, we define a <code>componentDidMount()</code> method that calls <code>getFeed()</code> and sets up an interval to call it again, based on the <code>delay</code> property. The <code>getFeed()</code> method fetches the URL in question and sets <code>this.state.feed</code> to an array of the most recent entries in the feed, with the size denoted by the <code>size</code> property passed through. We also clear that interval when the component is about to be unmounted.</p>
 <p>Note that you may have problems with the <code>Access-Control-Allow-Origin</code> HTTP header. It’s possible to disable this in your web browser, so if you want to run this as a dashboard you’ll probably need to do so. On Chrome there’s a useful <a href="https://www.google.co.uk/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwiw9Mm4r8TOAhVNOMAKHUicCF4QFggcMAA&amp;url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fallow-control-allow-origi%2Fnlfbmbojpeacfghkpbjhddihlkkiljbi%3Fhl%3Den&amp;usg=AFQjCNHSUFqc6ylxfxfbWzmmFJ6L5QUvyg&amp;sig2=fJaf_HKgY8XDsd-JeY_PXg&amp;bvm=bv.129422649,d.d24">plugin</a> that allows you to disable this when needed.</p>
 <p>Because our <code>FeedWidget</code> has been created in a generic manner, we can then include multiple feed widgets easily, as in this example:</p>
 <pre><code class="lang-javascript">import React from &#39;react&#39;;

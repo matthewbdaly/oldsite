@@ -339,11 +339,11 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 <span class="hljs-bullet">-</span> <span class="hljs-string">"2.7"</span>
 <span class="hljs-attr">services:</span> <span class="hljs-string">memcached</span>
 <span class="hljs-attr">before_install:</span>
-    <span class="hljs-bullet">-</span> <span class="hljs-string">sudo</span> <span class="hljs-string">apt-get</span> <span class="hljs-string">install</span> <span class="hljs-string">-y</span> <span class="hljs-string">libmemcached-dev</span>
+<span class="hljs-bullet">    -</span> <span class="hljs-string">sudo</span> <span class="hljs-string">apt-get</span> <span class="hljs-string">install</span> <span class="hljs-bullet">-y</span> <span class="hljs-string">libmemcached-dev</span>
 <span class="hljs-comment"># command to install dependencies</span>
 <span class="hljs-attr">install:</span> <span class="hljs-string">"pip install -r requirements.txt"</span>
 <span class="hljs-comment"># command to run tests</span>
-<span class="hljs-attr">script:</span> <span class="hljs-string">coverage</span> <span class="hljs-string">run</span> <span class="hljs-string">--include="blogengine/*"</span> <span class="hljs-string">--omit="blogengine/migrations/*"</span> <span class="hljs-string">manage.py</span> <span class="hljs-string">test</span> <span class="hljs-string">blogengine</span>
+<span class="hljs-attr">script:</span> <span class="hljs-string">coverage</span> <span class="hljs-string">run</span> <span class="hljs-bullet">--include="blogengine/*"</span> <span class="hljs-bullet">--omit="blogengine/migrations/*"</span> <span class="hljs-string">manage.py</span> <span class="hljs-string">test</span> <span class="hljs-string">blogengine</span>
 <span class="hljs-attr">after_success:</span>
     <span class="hljs-string">coveralls</span>
 </code></pre><p>Time to commit:</p><pre><code class="hljs lang-bash">$ git add blogengine/ .travis.yml
@@ -1107,7 +1107,7 @@ $ git commit -m <span class="hljs-string">'Implemented category RSS feed'</span>
         <span class="hljs-keyword">except</span> Category.DoesNotExist:
             context[<span class="hljs-string">'category'</span>] = <span class="hljs-literal">None</span>
         <span class="hljs-keyword">return</span> context
-</code></pre><p>Note that we first of all change the template used by this view. Then, we override <code>get_context_data</code> to add in additional data. What we’re doing is getting the slug that was passed through, looking up any category for which it is the slug, and returning it as additional context data. Using this method, you can easily add additional data that you may wish to render in your Django templates.</p><p>Finally, we create our new template:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Note that we first of all change the template used by this view. Then, we override <code>get_context_data</code> to add in additional data. What we’re doing is getting the slug that was passed through, looking up any category for which it is the slug, and returning it as additional context data. Using this method, you can easily add additional data that you may wish to render in your Django templates.</p><p>Finally, we create our new template:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1147,7 +1147,7 @@ $ git commit -m <span class="hljs-string">'Implemented category RSS feed'</span>
 
         <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/feeds/posts/category/</span></span></span><span class="hljs-template-variable">{{ category.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>RSS feed for category </span><span class="hljs-template-variable">{{ category.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>Note that the category has been passed through to the template and is now accessible. If you run the tests, they should now pass:</p><pre><code class="hljs lang-bash">$ python manage.py jenkins
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .........................
@@ -1188,7 +1188,7 @@ $ git commit -m <span class="hljs-string">'Added link to RSS feed from category 
 
           <span class="hljs-comment"># Check other post is not in this feed</span>
           self.assertTrue(<span class="hljs-string">'This is my &lt;em&gt;second&lt;/em&gt; blog post'</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> response.content)
-</code></pre><p>This is virtually identical to the test for the categroy feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
+</code></pre><p>This is virtually identical to the test for the category feed, but we adjust it to work with the <code>Tag</code> attribute and change the URL. Let’s check that our test fails:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span> blogengine
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 .................F........
 ======================================================================
@@ -1264,7 +1264,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 </code></pre><p>Again, this inherits from <code>PostsFeed</code>, but the syntax for getting posts matching a tag is slightly different because they use a many-to-many relationship.</p><p>We also need a template for the tag pages. Add this to the end of the <code>test_tag_page</code> method:</p><pre><code class="hljs lang-python">
         <span class="hljs-comment"># Check the correct template was used</span>
         self.assertTemplateUsed(response, <span class="hljs-string">'blogengine/tag_post_list.html'</span>)
-</code></pre><p>Let’s create that template:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Let’s create that template:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1304,7 +1304,7 @@ urlpatterns = patterns(<span class="hljs-string">''</span>,
 
         <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"/feeds/posts/tag/</span></span></span><span class="hljs-template-variable">{{ tag.slug }}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">/"</span>&gt;</span>RSS feed for tag </span><span class="hljs-template-variable">{{ tag.name }}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>This is virtually identical to the category template. You’ll also need to apply this template in the view for the tag list, and pass the tag name through as context data:</p><pre><code class="hljs lang-python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TagListView</span><span class="hljs-params">(ListView)</span>:</span>
     template_name = <span class="hljs-string">'blogengine/tag_post_list.html'</span>
 
@@ -1387,7 +1387,7 @@ Ran 27 tests <span class="hljs-keyword">in</span> 6.919s
 
 FAILED (failures=1)
 Destroying <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
-</code></pre><p>With that done, we can add the search form to the header:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
+</code></pre><p>With that done, we can add the search form to the header:</p><pre><code class="hljs lang-django"><span class="xml"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
 <span class="hljs-comment">&lt;!--[if lt IE 7]&gt;      &lt;html class="no-js lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 7]&gt;         &lt;html class="no-js lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span>
 <span class="hljs-comment">&lt;!--[if IE 8]&gt;         &lt;html class="no-js lt-ie9"&gt; &lt;![endif]--&gt;</span>
@@ -1465,14 +1465,14 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
             </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
 
             <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
-                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
+                </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">block</span></span> content %}</span><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml">
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container footer"</span>&gt;</span>
             <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
                 <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"span12"</span>&gt;</span>
-                    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Copyright <span class="hljs-symbol">&amp;copy;</span> </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">now</span></span> "Y" %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Copyright &amp;copy; </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">now</span></span> "Y" %}</span><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
                 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
@@ -1533,7 +1533,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
 </code></pre><p>As this is the first time we’ve written a view without using generic views, a little explanation is called for. First we get the values of the <code>q</code> and <code>page</code> parameters passed to the view. <code>q</code> contains the query text and <code>page</code> contains the page number. Note also that our page defaults to 1 if not set.</p><p>We then use the Q object to perform a query. The Django ORM will <code>AND</code> together keyword argument queries, but that’s not the behaviour we want here. Instead we want to be able to search for content in the title or text, so we need to use a query with an <code>OR</code> statement, which necessitates using the <a href="https://docs.djangoproject.com/en/dev/topics/db/queries/#complex-lookups-with-q-objects">Q</a> object.</p><p>Next, we use the <code>Paginator</code> object to manually paginate the results, and if it raises an <code>EmptyPage</code> exception, to just show the last page instead. Finally we render the template <code>blogengine/search_post_list.html</code>, and pass through the parameters <code>page_obj</code> for the returned page, <code>object_list</code> for the objects, and <code>search</code> for the query.</p><p>We also need to add a route for our new view:</p><pre><code class="hljs lang-python">
     <span class="hljs-comment"># Search posts</span>
     url(<span class="hljs-string">r'^search'</span>, <span class="hljs-string">'blogengine.views.getSearchResults'</span>),
-</code></pre><p>Finally, let’s create a new template to show our results:</p><pre><code class="hljs lang-django"><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
+</code></pre><p>Finally, let’s create a new template to show our results:</p><pre><code class="hljs lang-django"><span class="xml"></span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">extends</span></span> "blogengine/includes/base.html" %}</span><span class="xml">
 
     </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">load</span></span> custom_markdown %}</span><span class="xml">
 
@@ -1571,7 +1571,7 @@ Destroying <span class="hljs-built_in">test</span> database <span class="hljs-ke
         </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endif</span></span> %}</span><span class="xml">
         <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
 
-    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span>
+    </span><span class="hljs-template-tag">{% <span class="hljs-name"><span class="hljs-name">endblock</span></span> %}</span><span class="xml"></span>
 </code></pre><p>Let’s run our tests:</p><pre><code class="hljs lang-bash">$ python manage.py <span class="hljs-built_in">test</span>
 Creating <span class="hljs-built_in">test</span> database <span class="hljs-keyword">for</span> <span class="hljs-built_in">alias</span> <span class="hljs-string">'default'</span>...
 ...........................
