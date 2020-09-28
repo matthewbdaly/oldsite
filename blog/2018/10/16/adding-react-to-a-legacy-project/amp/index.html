@@ -188,9 +188,9 @@
 <span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/App'</span>;
 
 ReactDOM.render(
-    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>,
-    document.getElementById('root')
-);</span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span></span>,
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+);
 </code></pre><p>However, that wasn’t an option here. The existing modals were using jQuery and Bootstrap, and the new modals had to work with them. I therefore needed to have only certain parts of the UI managed with React, and the rest wouldn’t be touched. Here’s an example of how I rendered the modal in the end:</p><pre><code class="hljs lang-javascript"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>;
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>;
 <span class="hljs-keyword">import</span> higherOrderComponent <span class="hljs-keyword">from</span> <span class="hljs-string">'./components/higherOrderComponent'</span>;
@@ -198,13 +198,13 @@ ReactDOM.render(
 
 <span class="hljs-keyword">const</span> Modal = higherOrderComponent(modalComponent);
 <span class="hljs-built_in">window</span>.componentWrapper = ReactDOM.render(
-  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Modal</span> /&gt;</span>,
-  document.getElementById('modalTarget')
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Modal</span> /&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'modalTarget'</span>)
 );
 
-window.componentWrapper.setState({
-  foo: 'bar'
-});</span>
+<span class="hljs-built_in">window</span>.componentWrapper.setState({
+  <span class="hljs-attr">foo</span>: <span class="hljs-string">'bar'</span>
+});
 </code></pre><p>By extracting the duplicate functionality into a higher order component, I could easily wrap the new modals in that component and share that functionality between the modals. I could then render each component in a different target element, and assign it to a variable in the <code>window</code> namespace. The div with a ID of <code>modalTarget</code> needed to be added in the appropriate place, but otherwise the HTML didn’t need to be touched, since the required markup was in the React component instead.</p><p>Then, when I needed to change a value int the state of the component, I could just call <code>window.componentWrapper.setState({})</code>, passing through the values to set, and these would propagate down to the child components as usual. I could also render multiple different modal components on the page, and refer to each one separately in order to set the state.</p><p>This isn’t an approach I’d recommend on a greenfield project - state isn’t really something you should be setting from outside a component like this, and normally I wouldn’t do it. However, it seemed to be the easiest way for this particular use case. Over time I’ll port more and more of the UI over to React, and eventually it won’t be necessary as I’ll be storing the application state in something like Redux.</p><section><ul class="categories"><li><a href="/blog/categories/reactjs/">reactjs</a></li><li><a href="/blog/categories/javascript/">javascript</a></li></ul></section><section><a class="commentlink" href="https://matthewdaly.co.uk/blog/2018/10/16/adding-react-to-a-legacy-project/">View the article with comments</a></section><section><a class="postlink" href="/blog/2018/10/20/simplify-your-tests-with-anonymous-classes/amp/">Simplify Your Tests With Anonymous Classes</a> <a class="postlink" href="/blog/2018/10/11/do-you-still-need-jquery/amp/">Do You Still Need Jquery?</a></section></article></div></div></div><amp-analytics type="googleanalytics" id="analytics1"><script type="application/json">{
 					"vars": {
 						"account": "UA-17043630-1"
