@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>laravel | Matthew Daly&apos;s Blog</title>
-    <updated>2020-09-28T14:52:41Z</updated>
+    <updated>2020-12-30T16:52:43Z</updated>
     <generator>grunt-blogbuilder https://github.com/matthewbdaly/grunt-blogbuilder</generator>
     <author>
         <name>Matthew Daly</name>
@@ -12,6 +12,404 @@
     <link rel="alternate" href="https://matthewdaly.co.uk/blog/categories/laravel/"/>
     <subtitle>laravel | I&apos;m a web developer in Norfolk. This is my blog...</subtitle>
     <rights>Matthew Daly 2020</rights>
+    <entry>
+        <title type="html"><![CDATA[Lightweight Laravel - deconstructing a full stack framework]]></title>
+        <id>https://matthewdaly.co.uk/blog/2020/12/30/lightweight-laravel-deconstructing-a-full-stack-framework/</id>
+        <link href="https://matthewdaly.co.uk/blog/2020/12/30/lightweight-laravel-deconstructing-a-full-stack-framework/">
+        </link>
+        <updated>2020-12-30T17:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>Back when I used to work with Django, I read the book <a href="https://www.oreilly.com/library/view/lightweight-django/9781491946275/">Lightweight Django</a>, and it completely changed the way I thought about building web applications. For years I’d heard the same lines parroted about how Django was too large and bloated, and something like Flask was a better bet for many applications, and this book completely blew this misconception away. By demonstrating how it was possible to break the framework apart, use just what you need, and leave out what you don’t, it showed how I could benefit from my familiarity with Django, while making it more suitable for smaller applications.</p>
+<p>Laravel, like Django, is a full stack framework, and is often subject to similar misconceptions about bloat. But just because the framework ships with all this stuff, doesn’t mean you’re obliged to use it all. If you know you aren’t going to need all of a framework’s functionality, there’s nothing stopping you getting rid of what you don’t need, or even replacing it with something else. In this article, I’ll show you how to apply the same methodology to a Laravel application to remove what you don’t need. As part of this, we’ll be building a simple placeholder image service. This was used in Lightweight Django as it’s a good example of an application that is completely stateless, and doesn’t need sessions or a database, so it’s often seen as a bad fit for a full stack framework. Since the same applies here, it’s a good example for us too.</p>
+<h2 id="getting-started">Getting started</h2>
+<p>Run the following command in the shell to create a new Laravel application:</p>
+<pre><code class="lang-bash">$ composer create-project --prefer-dist laravel/laravel lightweight-laravel
+</code></pre>
+<p>What this actually does is as follows:</p>
+<ul>
+<li>Resolve the latest release of the package <code>laravel/laravel</code> that will work on your system</li>
+<li>Copy it from the <a href="https://github.com/laravel/laravel">repository</a> to the specified location</li>
+<li>Carry out any post-install scripts specified, such as creating the <code>.env</code> file and generating a key</li>
+</ul>
+<p>However, that’s just a standardised boilerplate for Laravel applications. Most of the functionality of the framework is in the package <code>laravel/framework</code>, which is included as a dependency in your <code>composer.json</code>. This makes sense, because by keeping as much of the actual framework out of the starter boilerplate and in a separate repository, it minimises the work required to update the application to a new version. It also means you can strip that boilerplate down to remove references to things you don’t need, and even create your own custom boilerplates to save you work in future.</p>
+<h2 id="stripping-down-the-boilerplate">Stripping down the boilerplate</h2>
+<p>Let’s start stripping out the things we don’t need. Since our application is stateless, we have no need whatsoever of a database, so we can delete the <code>app/Models</code> and <code>database</code> folders. We’ll want to support Redis for the cache, so we can’t delete the file <code>config/database.php</code>, but we can remove any references to the database other than Redis from that file. We can delete some other files from the <code>config/</code> folder, namely <code>auth.php</code>, <code>broadcasting.php</code>, <code>filesystems.php</code>, <code>mail.php</code>, <code>queue.php</code>, <code>services.php</code> and <code>session.php</code>.</p>
+<p>We also don’t need a lot of the middleware that ships with Laravel. If you go into the file <code>app/Http/Kernel.php</code> you’ll see that it assigns some middleware as global, some to the <code>web</code> and <code>api</code> groups, and some as optional route middleware. In this file:</p>
+<ul>
+<li>We don’t need to make any POST requests to this application, so we can lose the <code>ValidatePostSize</code> middleware from the global middleware entirely</li>
+<li>The <code>web</code> group relates to cookies, sessions, CSRF, authentication and handling routing with substitute bindings. Since we don’t need any of that we can empty this group entirely</li>
+<li>The <code>auth</code>, <code>auth.basic</code>, <code>can</code>, <code>guest</code>, <code>password.confirm</code>, and <code>verified</code> route middleware is also surplus to requirements and can go</li>
+</ul>
+<p>As this change is a bit fiddly, here’s a patch, which may be easier to read:</p>
+<pre><code class="lang-patch">From 6bc87e9602e839d5635963b6d740279b2dbcf16b Mon Sep 17 00:00:00 2001
+From: Matthew Daly &lt;Matthew Daly 450801+matthewbdaly@users.noreply.github.com&gt;
+Date: Wed, 30 Dec 2020 11:54:56 +0000
+Subject: [PATCH] Removed unwanted middleware
+
+---
+ app/Http/Kernel.php | 14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/app/Http/Kernel.php b/app/Http/Kernel.php
+index 30020a5..10e150d 100644
+--- a/app/Http/Kernel.php
++++ b/app/Http/Kernel.php
+@@ -18,7 +18,6 @@ class Kernel extends HttpKernel
+         \App\Http\Middleware\TrustProxies::class,
+         \Fruitcake\Cors\HandleCors::class,
+         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
+-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+         \App\Http\Middleware\TrimStrings::class,
+         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+     ];
+@@ -30,13 +29,6 @@ class Kernel extends HttpKernel
+      */
+     protected $middlewareGroups = [
+         &#39;web&#39; =&gt; [
+-            \App\Http\Middleware\EncryptCookies::class,
+-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+-            \Illuminate\Session\Middleware\StartSession::class,
+-            // \Illuminate\Session\Middleware\AuthenticateSession::class,
+-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+-            \App\Http\Middleware\VerifyCsrfToken::class,
+-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+         ],
+
+         &#39;api&#39; =&gt; [
+@@ -53,14 +45,8 @@ class Kernel extends HttpKernel
+      * @var array
+      */
+     protected $routeMiddleware = [
+-        &#39;auth&#39; =&gt; \App\Http\Middleware\Authenticate::class,
+-        &#39;auth.basic&#39; =&gt; \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+         &#39;cache.headers&#39; =&gt; \Illuminate\Http\Middleware\SetCacheHeaders::class,
+-        &#39;can&#39; =&gt; \Illuminate\Auth\Middleware\Authorize::class,
+-        &#39;guest&#39; =&gt; \App\Http\Middleware\RedirectIfAuthenticated::class,
+-        &#39;password.confirm&#39; =&gt; \Illuminate\Auth\Middleware\RequirePassword::class,
+         &#39;signed&#39; =&gt; \Illuminate\Routing\Middleware\ValidateSignature::class,
+         &#39;throttle&#39; =&gt; \Illuminate\Routing\Middleware\ThrottleRequests::class,
+-        &#39;verified&#39; =&gt; \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+     ];
+ }
+-- 
+2.28.0
+
+</code></pre>
+<p>These changes also mean a lot of the service providers and facades are now redundant and can be removed from the application. If you go into <code>config/app.php</code> you can remove <code>AuthServiceProvider</code>, <code>BroadcastServiceProvider</code>, <code>CookieServiceProvider</code>, <code>MailServiceProvider</code>, <code>NotificationServiceProvider</code>, <code>PaginationServiceProvider</code>, <code>PasswordResetServiceProvider</code>, <code>SessionServiceProvider</code> and <code>TranslationServiceProvider</code> from the providers section, as well as the commented-out local <code>BroadcastServiceProvider</code>. You can also delete the facades for <code>Auth</code>, <code>Cookie</code>, <code>DB</code>, <code>Eloquent</code>, <code>Gate</code>, <code>Lang</code>, <code>Mail</code>, <code>Notification</code>, <code>Password</code>, <code>Queue</code>, <code>Schema</code>, <code>Session</code>, and <code>Storage</code>.</p>
+<p>Again, here’s a patch of the required changes:</p>
+<pre><code class="lang-patch">From 66be3b836706ef488b890cdae6e97d4fc6195dd6 Mon Sep 17 00:00:00 2001
+From: Matthew Daly &lt;Matthew Daly 450801+matthewbdaly@users.noreply.github.com&gt;
+Date: Wed, 30 Dec 2020 12:10:25 +0000
+Subject: [PATCH] Removed unused service providers and facades
+
+---
+ config/app.php | 26 --------------------------
+ 1 file changed, 26 deletions(-)
+
+diff --git a/config/app.php b/config/app.php
+index 2a2f0eb..b7a38c8 100644
+--- a/config/app.php
++++ b/config/app.php
+@@ -139,26 +139,17 @@ return [
+         /*
+          * Laravel Framework Service Providers...
+          */
+-        Illuminate\Auth\AuthServiceProvider::class,
+-        Illuminate\Broadcasting\BroadcastServiceProvider::class,
+         Illuminate\Bus\BusServiceProvider::class,
+         Illuminate\Cache\CacheServiceProvider::class,
+         Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
+-        Illuminate\Cookie\CookieServiceProvider::class,
+         Illuminate\Database\DatabaseServiceProvider::class,
+         Illuminate\Encryption\EncryptionServiceProvider::class,
+         Illuminate\Filesystem\FilesystemServiceProvider::class,
+         Illuminate\Foundation\Providers\FoundationServiceProvider::class,
+         Illuminate\Hashing\HashServiceProvider::class,
+-        Illuminate\Mail\MailServiceProvider::class,
+-        Illuminate\Notifications\NotificationServiceProvider::class,
+-        Illuminate\Pagination\PaginationServiceProvider::class,
+         Illuminate\Pipeline\PipelineServiceProvider::class,
+         Illuminate\Queue\QueueServiceProvider::class,
+         Illuminate\Redis\RedisServiceProvider::class,
+-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
+-        Illuminate\Session\SessionServiceProvider::class,
+-        Illuminate\Translation\TranslationServiceProvider::class,
+         Illuminate\Validation\ValidationServiceProvider::class,
+         Illuminate\View\ViewServiceProvider::class,
+
+@@ -170,9 +161,6 @@ return [
+          * Application Service Providers...
+          */
+         App\Providers\AppServiceProvider::class,
+-        App\Providers\AuthServiceProvider::class,
+-        // App\Providers\BroadcastServiceProvider::class,
+-        App\Providers\EventServiceProvider::class,
+         App\Providers\RouteServiceProvider::class,
+
+     ],
+@@ -193,35 +181,21 @@ return [
+         &#39;App&#39; =&gt; Illuminate\Support\Facades\App::class,
+         &#39;Arr&#39; =&gt; Illuminate\Support\Arr::class,
+         &#39;Artisan&#39; =&gt; Illuminate\Support\Facades\Artisan::class,
+-        &#39;Auth&#39; =&gt; Illuminate\Support\Facades\Auth::class,
+         &#39;Blade&#39; =&gt; Illuminate\Support\Facades\Blade::class,
+         &#39;Broadcast&#39; =&gt; Illuminate\Support\Facades\Broadcast::class,
+         &#39;Bus&#39; =&gt; Illuminate\Support\Facades\Bus::class,
+         &#39;Cache&#39; =&gt; Illuminate\Support\Facades\Cache::class,
+         &#39;Config&#39; =&gt; Illuminate\Support\Facades\Config::class,
+-        &#39;Cookie&#39; =&gt; Illuminate\Support\Facades\Cookie::class,
+         &#39;Crypt&#39; =&gt; Illuminate\Support\Facades\Crypt::class,
+-        &#39;DB&#39; =&gt; Illuminate\Support\Facades\DB::class,
+-        &#39;Eloquent&#39; =&gt; Illuminate\Database\Eloquent\Model::class,
+-        &#39;Event&#39; =&gt; Illuminate\Support\Facades\Event::class,
+         &#39;File&#39; =&gt; Illuminate\Support\Facades\File::class,
+-        &#39;Gate&#39; =&gt; Illuminate\Support\Facades\Gate::class,
+         &#39;Hash&#39; =&gt; Illuminate\Support\Facades\Hash::class,
+         &#39;Http&#39; =&gt; Illuminate\Support\Facades\Http::class,
+-        &#39;Lang&#39; =&gt; Illuminate\Support\Facades\Lang::class,
+         &#39;Log&#39; =&gt; Illuminate\Support\Facades\Log::class,
+-        &#39;Mail&#39; =&gt; Illuminate\Support\Facades\Mail::class,
+-        &#39;Notification&#39; =&gt; Illuminate\Support\Facades\Notification::class,
+-        &#39;Password&#39; =&gt; Illuminate\Support\Facades\Password::class,
+-        &#39;Queue&#39; =&gt; Illuminate\Support\Facades\Queue::class,
+         &#39;Redirect&#39; =&gt; Illuminate\Support\Facades\Redirect::class,
+         // &#39;Redis&#39; =&gt; Illuminate\Support\Facades\Redis::class,
+         &#39;Request&#39; =&gt; Illuminate\Support\Facades\Request::class,
+         &#39;Response&#39; =&gt; Illuminate\Support\Facades\Response::class,
+         &#39;Route&#39; =&gt; Illuminate\Support\Facades\Route::class,
+-        &#39;Schema&#39; =&gt; Illuminate\Support\Facades\Schema::class,
+-        &#39;Session&#39; =&gt; Illuminate\Support\Facades\Session::class,
+-        &#39;Storage&#39; =&gt; Illuminate\Support\Facades\Storage::class,
+         &#39;Str&#39; =&gt; Illuminate\Support\Str::class,
+         &#39;URL&#39; =&gt; Illuminate\Support\Facades\URL::class,
+         &#39;Validator&#39; =&gt; Illuminate\Support\Facades\Validator::class,
+-- 
+2.28.0
+
+</code></pre>
+<p>There are a few service providers that ideally we’d strip out but are tightly integrated into the framework. For instance, the database and queue service providers are both used by some Artisan commands, and it’s not very practical to disable only those commands, so removing them will stop Artisan from working. If you don’t mind running the development server manually, you can go ahead and remove these.</p>
+<h2 id="building-the-application">Building the application</h2>
+<p>Now, let’s set out how our application will work. We will have two routes:</p>
+<ul>
+<li>A route that accepts width and height parameters in the route itself, and responds with a PNG response sized accordingly</li>
+<li>A route that returns a simple HTML homepage</li>
+</ul>
+<p>You’ve no doubt seen various novelty placeholder sites like <a href="http://placekitten.com/">placekitten.com</a> for use in web projects, and this will be similar to that. We’ll use a simple black image with the dimensions in white text, but you should be able to use this as the basis of a more sophisticated placeholder service, such as if you wanted to use branded images for a particular client.</p>
+<p>Since the home page will be fairly straightforward, let’s do that first. Delete the existing <code>resources/views/welcome.blade.php</code> file and save this to <code>resources/views/home.blade.php</code>:</p>
+<pre><code class="lang-blade.php">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;Laravel Placeholder Images&lt;/title&gt;
+    &lt;link href=&quot;{{ mix(&#39;css/app.css&#39;) }}&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Laravel Placeholder Images&lt;/h1&gt;
+    &lt;p&gt;This server can be used for serving placeholder
+    images for any web page.&lt;/p&gt;
+    &lt;p&gt;To request a placeholder image of a given width and height
+    simply include an image with the source pointing to
+    &lt;b&gt;/image/&amp;lt;width&amp;gt;x&amp;lt;height&amp;gt;/&lt;/b&gt;
+    on this server such as:&lt;/p&gt;
+    &lt;pre&gt;
+        &amp;lt;img src=&quot;{{ $example }}&quot; &amp;gt;
+    &lt;/pre&gt;
+    &lt;h2&gt;Examples&lt;/h2&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;img src=&quot;{{{ route(&#39;placeholder&#39;, [&#39;width&#39; =&gt; 50, &#39;height&#39; =&gt; 50]) }}}&quot;&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src=&quot;{{{ route(&#39;placeholder&#39;, [&#39;width&#39; =&gt; 100, &#39;height&#39; =&gt; 50]) }}}&quot;&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src=&quot;{{{ route(&#39;placeholder&#39;, [&#39;width&#39; =&gt; 50, &#39;height&#39; =&gt; 100]) }}}&quot;&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Note we’re using the <code>route()</code> helper to add some example images, even though it’s not in place yet. Add this route to your <code>routes/web.php</code> as well:</p>
+<pre><code class="lang-php">Route::get(&#39;/&#39;, function () {
+    return view(&#39;home&#39;, [
+        &#39;example&#39; =&gt; route(&#39;placeholder&#39;, [&#39;width&#39; =&gt; 50, &#39;height&#39; =&gt; 50]),
+    ]);
+});
+</code></pre>
+<p>Again, note that we’re using the <code>route()</code> helper to get the URL for the placeholder image. Next, we need to create the outline of the route for getting the placeholders:</p>
+<pre><code class="lang-php">Route::get(&#39;/placeholder/{width}x{height}&#39;, function (int $width, int $height) {
+})-&gt;where([&#39;width&#39; =&gt; &#39;[0-9]+&#39;, &#39;height&#39; =&gt; &#39;[0-9]+&#39;])
+    -&gt;name(&#39;placeholder&#39;);
+</code></pre>
+<p>Due to the limited scope of this application, we won’t bother with full controllers, but you can add them if you wish. Note we’ve specified the name <code>placeholder</code> and set a regex to validate the <code>width</code> and <code>height</code> parameters.</p>
+<p>Now let’s populate the callback to generate a PNG file.</p>
+<pre><code class="lang-php">Route::get(&#39;/placeholder/{width}x{height}&#39;, function (int $width, int $height) {
+    if (!$img = imagecreatetruecolor($width, $height)) {
+        abort();
+    }
+    $textColour = imagecolorallocate($img, 255, 255, 255);
+    imagestring($img, 1, 5, 5, &quot;$width X $height&quot;, $textColour);
+    ob_start();
+    imagepng($img);
+    $file = ob_get_contents();
+    ob_end_clean();
+    return response()-&gt;make($file, 200, [
+        &#39;Content-type&#39; =&gt; &#39;image/png&#39;
+    ]);
+})-&gt;where([&#39;width&#39; =&gt; &#39;[0-9]+&#39;, &#39;height&#39; =&gt; &#39;[0-9]+&#39;])
+    -&gt;name(&#39;placeholder&#39;);
+</code></pre>
+<p>We’ll also add some very basic CSS to the provided CSS file:</p>
+<pre><code class="lang-css">body {
+    text-align: center;
+}
+
+ul {
+    list-type: none;
+}
+
+li {
+    display: inline-block;
+}
+</code></pre>
+<p>Don’t forget to build this with <code>npm install &amp;&amp; npm run production</code> too.</p>
+<p>If you now run <code>php artisan serve</code> you should be able to see that it works - the homepage renders, and the embedded images are pulled in OK. However, there are three potential issues:</p>
+<ul>
+<li>The images themselves are regenerated each time. Since they never change, it’s a no-brainer to cache them indefinitely for the best performance, and if we do need to change them in the future we can just flush the cache to resolve this</li>
+<li>Similarly, we should use ETags to allow the application to tell the browser when the image has changed</li>
+<li>There’s no limit on how large images can be, so a malicious user could request a huge image to break the system</li>
+</ul>
+<p>Let’s tackle these in order. First, let’s create some middleware to handle the caching:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+final class CacheImages
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        $key = sprintf(&quot;%d.%d&quot;, $request-&gt;width, $request-&gt;height);
+        return Cache::rememberForever($key, function () use ($next, $request) {
+            return $next($request);
+        });
+    }
+}
+</code></pre>
+<p>We construct a cache key from the request width and height, and use the <code>Cache::rememberForever()</code> method to cache the response. We then register this middleware as route middleware in <code>app\Http\Kernel.php</code>:</p>
+<pre><code class="lang-php">    protected $routeMiddleware = [
+        &#39;cache.headers&#39; =&gt; \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        &#39;signed&#39; =&gt; \Illuminate\Routing\Middleware\ValidateSignature::class,
+        &#39;throttle&#39; =&gt; \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        &#39;cache.images&#39; =&gt; \App\Http\Middleware\CacheImages::class,
+    ];
+</code></pre>
+<p>And apply it to the image route:</p>
+<pre><code class="lang-php">Route::get(&#39;/placeholder/{width}x{height}&#39;, function (int $width, int $height) {
+    if (!$img = imagecreatetruecolor($width, $height)) {
+        abort();
+    }
+    $textColour = imagecolorallocate($img, 255, 255, 255);
+    imagestring($img, 1, 5, 5, &quot;$width X $height&quot;, $textColour);
+    ob_start();
+    imagepng($img);
+    $file = ob_get_contents();
+    ob_end_clean();
+    return response()-&gt;make($file, 200, [
+        &#39;Content-type&#39; =&gt; &#39;image/png&#39;
+    ]);
+})-&gt;where([&#39;width&#39; =&gt; &#39;[0-9]+&#39;, &#39;height&#39; =&gt; &#39;[0-9]+&#39;])
+  -&gt;name(&#39;placeholder&#39;)
+  -&gt;middleware(&#39;cache.images&#39;);
+</code></pre>
+<p>Next, let’s set ETags on our images. Laravel comes with the <code>cache.headers</code> middleware, which we can easily wrap around our placeholder route:</p>
+<pre><code class="lang-php">Route::middleware(&#39;cache.headers:public;etag&#39;)-&gt;group(function () {
+    Route::get(&#39;/placeholder/{width}x{height}&#39;, function (int $width, int $height) {
+        if (!$img = imagecreatetruecolor($width, $height)) {
+            abort();
+        }
+        $textColour = imagecolorallocate($img, 255, 255, 255);
+        imagestring($img, 1, 5, 5, &quot;$width X $height&quot;, $textColour);
+        ob_start();
+        imagepng($img);
+        $file = ob_get_contents();
+        ob_end_clean();
+        return response()-&gt;make($file, 200, [
+            &#39;Content-type&#39; =&gt; &#39;image/png&#39;
+        ]);
+    })-&gt;where([&#39;width&#39; =&gt; &#39;[0-9]+&#39;, &#39;height&#39; =&gt; &#39;[0-9]+&#39;])
+      -&gt;name(&#39;placeholder&#39;)
+      -&gt;middleware(&#39;cache.images&#39;);
+});
+</code></pre>
+<p>Finally, let’s handle the dimensions issue. Again, this is something that is probably best handled in middleware since that way it can be rejected before the point it gets to the route handler. All we need to do is to check to see if the width and height parameters exceed the intended value, and throw an error in the middleware:</p>
+<pre><code class="lang-php">&lt;?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+final class ValidateImageDimensions
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        if ($request-&gt;width &gt; 2000 || $request-&gt;height &gt; 2000) {
+            abort(422, &#39;Height and width cannot exceed 2000 pixels&#39;);
+        }
+        return $next($request);
+    }
+}
+</code></pre>
+<p>Register this middleware in <code>app/Http/Kernel.php</code>:</p>
+<pre><code class="lang-php">    protected $routeMiddleware = [
+        &#39;cache.headers&#39; =&gt; \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        &#39;signed&#39; =&gt; \Illuminate\Routing\Middleware\ValidateSignature::class,
+        &#39;throttle&#39; =&gt; \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        &#39;cache.images&#39; =&gt; \App\Http\Middleware\CacheImages::class,
+        &#39;validate.images&#39; =&gt; \App\Http\Middleware\ValidateImageDimensions::class,
+    ];
+</code></pre>
+<p>And apply it to the image route:</p>
+<pre><code class="lang-php">Route::middleware(&#39;cache.headers:public;etag&#39;)-&gt;group(function () {
+    Route::get(&#39;/placeholder/{width}x{height}&#39;, function (int $width, int $height) {
+        if (!$img = imagecreatetruecolor($width, $height)) {
+            abort();
+        }
+        $textColour = imagecolorallocate($img, 255, 255, 255);
+        imagestring($img, 1, 5, 5, &quot;$width X $height&quot;, $textColour);
+        ob_start();
+        imagepng($img);
+        $file = ob_get_contents();
+        ob_end_clean();
+        return response()-&gt;make($file, 200, [
+            &#39;Content-type&#39; =&gt; &#39;image/png&#39;
+        ]);
+    })-&gt;where([&#39;width&#39; =&gt; &#39;[0-9]+&#39;, &#39;height&#39; =&gt; &#39;[0-9]+&#39;])
+      -&gt;name(&#39;placeholder&#39;)
+      -&gt;middleware([&#39;validate.images&#39;, &#39;cache.images&#39;]);
+});
+</code></pre>
+<p>And we’re done! We now have a basic, but functional, stateless Laravel application that’s been stripped of a lot of the unnecessary functionality. There are a few further changes that could be made to expand this if necessary, such as:</p>
+<ul>
+<li>Amend the project to allow requesting different image formats using an additional route parameter (hint - you’ll want to use something like <a href="http://image.intervention.io/">Intervention for this</a>)</li>
+<li>Serve different images, either by using one as a starting template so they are all branded the same, or specifying one from several options in the URL, such as with <a href="https://www.placecage.com/">PlaceCage</a></li>
+</ul>
+<p>However, I will leave these as an exercise for the reader. The code for this project is available on <a href="https://github.com/matthewbdaly/lightweight-laravel">Github</a> if you get stuck at any point.</p>
+<p>Hopefully, this article has given you some food for thought about how you can use Laravel for applications you might have previously considered too small to use it for. Don’t worry too much about removing something that you need to add later - version control means you can always retrieve it if it turns out you do need it later. I’d also add that potentially the same approach can be applied to other full stack PHP frameworks, though you’ll have to do some exploring on your own to determine this.</p>
+]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Caching the Laravel user provider with a decorator]]></title>
         <id>https://matthewdaly.co.uk/blog/2020/03/11/caching-the-laravel-user-provider-with-a-decorator/</id>
